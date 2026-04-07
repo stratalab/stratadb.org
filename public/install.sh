@@ -3,7 +3,7 @@
 # Usage: curl -fsSL https://stratadb.org/install.sh | sh
 set -eu
 
-REPO="strata-ai-labs/strata-core"
+REPO="stratalab/strata-core"
 INSTALL_DIR="${STRATA_INSTALL_DIR:-${HOME}/.strata/bin}"
 BINARY_NAME="strata"
 
@@ -253,16 +253,9 @@ print_success() {
     if [ -n "${UPDATED_CONFIG:-}" ]; then
         printf '%b\n' "  ${DIM}Restart your shell or run:${RESET}  source ${UPDATED_CONFIG}"
         printf '%b\n' ""
-        printf '%b\n' "  ${DIM}Then try:${RESET}"
-    else
-        printf '%b\n' "  ${DIM}Try:${RESET}"
     fi
 
-    printf '%b\n' ""
-    printf '%b\n' "    ${CYAN}strata${RESET}                             Open the interactive REPL"
-    printf '%b\n' "    ${CYAN}strata kv put greeting \"hello world\"${RESET}  Store your first key-value pair"
-    printf '%b\n' "    ${CYAN}strata kv get greeting${RESET}              Read it back"
-    printf '%b\n' "    ${CYAN}strata ai${RESET}                          Start the AI agent ${DIM}(requires ANTHROPIC_API_KEY)${RESET}"
+    printf '%b\n' "  ${DIM}Run ${CYAN}strata init${RESET}${DIM} to set up your first database.${RESET}"
     printf '%b\n' ""
     printf '%b\n' "  ${DIM}Docs: https://stratadb.org/docs${RESET}"
     printf '%b\n' ""
