@@ -118,7 +118,12 @@ path to real interaction.
 
 **v2 (2026-06-12, Ani): the section is scrub #2 — fork → modify → diff → merge.**
 Eyebrow `BRANCH`; H2 **"Try anything. Keep what works."**; intro: "A branch is a
-complete database — fork it in O(1), change it, diff it, merge it back."
+complete database — fork it, change it, diff it, merge it back. Forking copies
+nothing, so it's instant at any size." *(2026-06-12, Ani: "People don't understand
+O(1)" — the human-facing copy states the fact in plain terms; O(1) survives only on
+agent surfaces (llms.txt, for-agents) and in the architecture deep-dives, where the
+reader speaks it natively. Same fix in the scrub's Fork caption: "The whole
+portfolio, forked instantly. Nothing copied.")*
 
 **Set-piece: the branch story, v4 (2026-06-12) — finance domain, session panel, stage
 lights.** The document is `json · portfolio` from the seed world —
