@@ -69,15 +69,20 @@ stratahub) · **For agents** (`llms.txt`, For AI agents, MCP reference). Meta ro
 1px gradient line + `--horizon-glow` behind the terminal. Parallax site #1: glow 0.85×,
 terminal 1.0×, stat strip 1.04×.
 
-**Copy** (final; simple — the hero describes nothing; the demo does).
+**Copy** (v3, 2026-06-12 — the hero is the acquisition surface).
 - Badge: `Research preview · v{version}` → `/changelog`
-- H1 (`display-xl`): **"An embedded database."** — **CONFIRMED (Ani, 2026-06-11).**
-  Maximal understatement over an impossible demo; the gap is the entire effect.
-  Rationale in the approver's words: *"We are so unbothered by marketing that we
-  literally call ourselves an embedded database and that's it."* Era-framings rejected
-  (saturated, unverifiable, collapse the understatement).
-- CTAs: **"Get Started"** → `/docs/getting-started` · copyable mono chip
-  `curl -fsSL stratadb.org/install.sh | sh`
+- H1 (`display-xl`): **"Strata is the embedded database with git-like powers"** —
+  Ani's wording verbatim (2026-06-12), superseding "An embedded database." The
+  understatement experiment served its month; with the river artwork behind it, the
+  fuller claim carries. *(Noted, not normalized: uses the family name "Strata" and
+  "the" — both deliberate in Ani's phrasing; 02 §2 naming table records the exception.)*
+- **The acquisition control** (replaces all hero CTAs — no "Get Started"; docs live in
+  the nav): one joined group — copyable `curl -fsSL stratadb.org/install.sh | sh` ·
+  divider · **"⬇ Download Foundry"** (R1 interim: → strata-foundry repo; auto-upgrades
+  to release artifacts). Beneath it, the agent door, in the hero:
+  `for your agent → stratadb.org/llms.txt`.
+- Funnel note: the hero now carries **Feel + Act in one screen** — claim, get-the-product
+  (human CLI · human GUI · agent URL), proof below.
 - Stat strip (Commit Mono, footnote markers → conditions in docs):
   `250K ops/s · <1 ms fork · 5 primitives · 0 servers · Apache-2.0`
 
