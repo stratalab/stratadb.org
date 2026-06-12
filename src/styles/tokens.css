@@ -29,18 +29,21 @@
   --color-line: rgba(245, 240, 235, 0.08);
   --color-line-hover: rgba(245, 240, 235, 0.14);
 
-  /* ---- terracotta ramp (02 §4.1) ---- */
-  --color-terracotta-50: #fdf3ef;
-  --color-terracotta-100: #fae4dc;
-  --color-terracotta-200: #f4c8b8;
-  --color-terracotta-300: #eda98f;
-  --color-terracotta-400: #e78f73;
-  --color-terracotta-500: #e07a5f;
-  --color-terracotta-600: #c75f45;
-  --color-terracotta-700: #a84a34;
-  --color-terracotta-800: #873a28;
-  --color-terracotta-900: #6e2f21;
-  --color-terracotta-950: #3b1812;
+  /* ---- terracotta ramp (02 §4.1; EMBER recalibration 2026-06-12) ----
+     Clay → ember: same family, luminous instead of muted — the palette
+     emits light rather than absorbing it (Ani: the clay read "too serious").
+     Ramp rebalanced around the new 500. */
+  --color-terracotta-50: #fff1ec;
+  --color-terracotta-100: #ffe0d4;
+  --color-terracotta-200: #ffc4ae;
+  --color-terracotta-300: #ffb191;
+  --color-terracotta-400: #ff9670;
+  --color-terracotta-500: #ff7a52;
+  --color-terracotta-600: #e85f3a;
+  --color-terracotta-700: #c44a28;
+  --color-terracotta-800: #9c3a1f;
+  --color-terracotta-900: #7d2f1a;
+  --color-terracotta-950: #431711;
 
   /* ---- sediment ramp (02 §4.2) ---- */
   --color-sediment-50: #faf8f6;
@@ -55,18 +58,18 @@
   --color-sediment-900: #1a1817;
   --color-sediment-950: #0a0908;
 
-  /* ---- the five primitives, on-dark anchors (02 §4.3) ----
+  /* ---- the five primitives, on-dark anchors (02 §4.3; ember-luminous) ----
      branch is NOT a primitive — the branch model wears terracotta (brand). */
-  --color-strata-kv: #6b9fff;
-  --color-strata-event: #4fc596;
-  --color-strata-json: #e5b566;
-  --color-strata-vector: #e87bb4;
-  --color-strata-graph: #a88bfa;
+  --color-strata-kv: #7caaff;
+  --color-strata-event: #4fe0a6;
+  --color-strata-json: #ffc66e;
+  --color-strata-vector: #ff8cc6;
+  --color-strata-graph: #b89cff;
 
-  /* ---- functional, on-dark (02 §4.4) ---- */
-  --color-ok: #4fc596;
-  --color-warn: #e5b566;
-  --color-err: #e5635c;
+  /* ---- functional, on-dark (02 §4.4; ember-luminous) ---- */
+  --color-ok: #3fe3a4;
+  --color-warn: #ffc66e;
+  --color-err: #ff6f64;
 
   /* ---- type (02 §5, §11) ---- */
   --font-sans: 'General Sans', system-ui, sans-serif;
@@ -136,8 +139,8 @@
   --dur-4: 480ms;
   --dur-5: 800ms;
 
-  /* the ONE glow (02 §10) — used only by HorizonGlow */
-  --horizon-glow: rgba(224, 122, 95, 0.13);
+  /* the ONE glow (02 §10) — used only by HorizonGlow; ember presence */
+  --horizon-glow: rgba(255, 122, 82, 0.24);
 
   /* floating set-piece shadow (02 §12) */
   --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,

@@ -13,8 +13,8 @@ const html = `<!doctype html><html><head><style>
 @font-face{font-family:CM;src:url(data:font/woff2;base64,${mono}) format('woff2')}
 *{margin:0;box-sizing:border-box}
 body{width:1200px;height:630px;background:#0a0908;font-family:GS;display:flex;flex-direction:column;justify-content:center;padding:80px;position:relative;overflow:hidden}
-.horizon{position:absolute;left:0;right:0;bottom:0;height:300px;background:radial-gradient(60% 100% at 50% 100%,rgba(224,122,95,.16),transparent 70%)}
-.line{position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#e07a5f 35%,#eda98f 50%,#e07a5f 65%,transparent)}
+.horizon{position:absolute;left:0;right:0;bottom:0;height:300px;background:radial-gradient(60% 100% at 50% 100%,rgba(255,122,82,.26),transparent 70%)}
+.line{position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#ff7a52 35%,#ffb191 50%,#ff7a52 65%,transparent)}
 .brand{display:flex;align-items:center;gap:14px;margin-bottom:48px}
 .brand span{color:#f5f0eb;font-size:28px;font-weight:600}
 h1{color:#f5f0eb;font-size:96px;font-weight:600;letter-spacing:-.035em;line-height:.98}
@@ -23,7 +23,7 @@ h1{color:#f5f0eb;font-size:96px;font-weight:600;letter-spacing:-.035em;line-heig
 </style></head><body>
 <div class="horizon"></div><div class="line"></div>
 <div class="brand">
-<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e07a5f" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff7a52" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>
 <span>StrataDB</span></div>
 <h1>An embedded database.</h1>
 <div class="badge">Research preview · v${release.version}</div>

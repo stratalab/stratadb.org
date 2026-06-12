@@ -76,9 +76,15 @@ verification per pairing is an implementation gate, not re-litigation.)
 ### 4.1 Terracotta — the signature
 
 ```
-50 #FDF3EF · 100 #FAE4DC · 200 #F4C8B8 · 300 #EDA98F · 400 #E78F73
-500 #E07A5F   ← the brand anchor
-600 #C75F45 · 700 #A84A34 · 800 #873A28 · 900 #6E2F21 · 950 #3B1812
+50 #FFF1EC · 100 #FFE0D4 · 200 #FFC4AE · 300 #FFB191 · 400 #FF9670
+500 #FF7A52   ← the brand anchor (EMBER, 2026-06-12)
+600 #E85F3A · 700 #C44A28 · 800 #9C3A1F · 900 #7D2F1A · 950 #431711
+
+**Ember recalibration (2026-06-12, Ani):** the original clay anchor (#E07A5F) read
+muted-somber — "too serious." Same hue family, shifted luminous: the palette *emits*
+light. Clay is the material; ember is the material alive. Every contrast pairing
+improved (500-on-void: 6.74 → 7.73). Primitive and functional hues brightened to match
+(§4.3/§4.4); the horizon glow gained presence (0.13 → 0.24).
 ```
 
 **Usage discipline (cross-product):** terracotta marks *identity*, never *function*. It
@@ -104,13 +110,13 @@ Each primitive has one hue with an on-light and on-dark anchor. These appear **o
 where primitives are actually meant: badges, syntax/data coloring, the site's strata
 column, Foundry's view accents, Hub's primitive filter chips. Never as decoration.
 
-| Primitive | On light | On dark | Mnemonic |
+| Primitive | On light | On dark (ember-luminous, 2026-06-12) | Mnemonic |
 |---|---|---|---|
-| `kv` | #2563EB | #6B9FFF | deep-ocean sediment |
-| `event` | #0F9D6B | #4FC596 | ancient forest |
-| `json` | #B97E18 | #E5B566 | sandstone |
-| `vector` | #D6479B | #E87BB4 | rare mineral |
-| `graph` | #7C5CE0 | #A88BFA | volcanic rock |
+| `kv` | #2563EB | #7CAAFF | deep-ocean sediment |
+| `event` | #0F9D6B | #4FE0A6 | ancient forest |
+| `json` | #B97E18 | #FFC66E | sandstone |
+| `vector` | #D6479B | #FF8CC6 | rare mineral |
+| `graph` | #7C5CE0 | #B89CFF | volcanic rock |
 
 **Branch is not a primitive (corrected 2026-06-12).** The five primitives are kv, event,
 json, vector, graph. Branching is the *model* the primitives live inside — every branch
@@ -208,7 +214,7 @@ Derived from sediment-900/950 with two intermediate surfaces:
 --bg-inset:   #060605  (terminal wells)
 --border:        rgba(245,240,235,0.08)
 --border-hover:  rgba(245,240,235,0.14)
---border-focus:  #E07A5F (terracotta-500)
+--border-focus:  #FF7A52 (terracotta-500, ember)
 --horizon-glow:  rgba(224,122,95,0.13)   ← the ONE glow (two uses/page: hero, final CTA)
 ```
 
@@ -287,7 +293,7 @@ phases, each shippable alone:
 | Phase | Change | Today → Target |
 |---|---|---|
 | B1. Neutrals + primitives | Warm the grays; adopt §4.3 for view accents/badges | `--bg-alt #f6f7f9` → sediment-100 `#F1EEEA` · `--text #1a1d23` → sediment-950-ink · `--text-dim #6b7280` → sediment-500 `#8A847C` · `--bg-sidebar #1e2129` → sediment-900 `#1A1817` |
-| B2. Accent swap | Indigo → brand | `--accent #4f6bed` → terracotta-600 `#C75F45` · `--accent-soft #eaeefc` → terracotta-100 `#FAE4DC` · `--green/--error` → §4.4 functional |
+| B2. Accent swap | Indigo → brand | `--accent #4f6bed` → terracotta-600 `#E85F3A` (ember) · `--accent-soft #eaeefc` → terracotta-100 `#FFE0D4` · `--green/--error` → §4.4 functional |
 | B3. **Dark theme** | Second `:root` set from Part II's canvas tokens | Makes the site's dark "product photography" (Doc 04) an honest preview |
 
 System fonts stay (§5). The wordmark lockup (§7) replaces the plain-text brand string.
