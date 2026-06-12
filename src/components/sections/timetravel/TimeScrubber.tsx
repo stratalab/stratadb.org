@@ -4,11 +4,14 @@
 // scroll-scrub count drops to one (branch); this is a Tier-1 user-driven
 // control, alive under reduced motion (it only moves when the user moves).
 //
-// The artifact: a terminal card running `kv get config.theme --as-of <t>`.
-// A draggable playhead rides a ruled timeline of the seed world's three
-// days; the command's timestamp and the answer update live. Scrub before
-// the first write and the key honestly does not exist yet. SSR renders the
-// playhead at "now" (completed state).
+// The artifact: a terminal card running `kv get portfolio.value --as-of <t>`
+// (domain v2.1, Ani: "dark, dusk, midnight doesn't pop" — the finance
+// thread continues from the branch story: the value dips on 06-10, then
+// the merged aggressive strategy pays off on 06-11). A draggable playhead
+// rides a ruled timeline of the seed world's three days; the command's
+// timestamp and the answer update live. Scrub before the first write and
+// the key honestly does not exist yet. SSR renders the playhead at "now"
+// (completed state).
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { SEED } from '../../../data/seed';
@@ -16,26 +19,20 @@ import { SEED } from '../../../data/seed';
 const EASE = [0.16, 1, 0.3, 1] as const;
 const EMBER = (a: number) => `rgba(255, 122, 82, ${a})`;
 
-const HISTORY = (SEED.kv['config.theme'].history ?? []).map((h) => ({
+const HISTORY = (SEED.kv['portfolio.value'].history ?? []).map((h) => ({
   version: h.version,
-  value: String(h.value),
+  value: Number(h.value),
   at: h.at,
   ts: Date.parse(h.at),
 }));
+
+const usd = (n: number) => `$${Math.abs(n).toLocaleString('en-US')}`;
 
 // The visible span: the day before the first write → "now" (the seed
 // world's present, 2026-06-12).
 const T0 = Date.parse('2026-06-09T00:00:00Z');
 const T1 = Date.parse('2026-06-12T00:00:00Z');
 const pos = (ts: number) => (ts - T0) / (T1 - T0);
-
-// Theme swatches from EXISTING tokens — the value, visible: raised gray is
-// "dark", the warm 950 is "dusk", the branch-story navy is "midnight".
-const SWATCH: Record<string, string> = {
-  dark: 'var(--color-raised)',
-  dusk: 'var(--color-terracotta-950)',
-  midnight: 'var(--color-branch-main-well)',
-};
 
 const fmt = (ts: number) => new Date(ts).toISOString().slice(0, 16).replace('T', ' ');
 const fmtFull = (ts: number) => new Date(ts).toISOString().slice(0, 19).replace('T', ' ');
@@ -116,7 +113,7 @@ export default function TimeScrubber() {
         <div className="[overflow-wrap:anywhere]">
           <span className="text-ink-low">strata:main </span>
           <span className="text-terracotta-500">›</span>
-          <span className="text-ink-hi"> kv get config.theme --as-of </span>
+          <span className="text-ink-hi"> kv get portfolio.value --as-of </span>
           <span className="text-terracotta-300 tabular-nums">"{fmt(ts)}"</span>
         </div>
 
@@ -133,18 +130,25 @@ export default function TimeScrubber() {
             >
               {cur ? (
                 <>
-                  <span
-                    className="h-12 w-12 shrink-0 rounded-(--radius-card) border md:h-14 md:w-14"
-                    style={{ background: SWATCH[cur.value] ?? 'var(--color-raised)', borderColor: EMBER(0.35) }}
-                    aria-hidden="true"
-                  />
-                  <span className="text-stat text-ink-hi">"{cur.value}"</span>
+                  <span className="text-stat text-ink-hi tabular-nums">{usd(cur.value)}</span>
                   <span className="flex flex-col gap-1 pt-1">
-                    <span
-                      className="self-start rounded px-1.5 font-mono text-mono-sm"
-                      style={{ background: EMBER(0.16), color: 'var(--color-terracotta-300)' }}
-                    >
-                      v{cur.version}
+                    <span className="flex items-baseline gap-2.5">
+                      <span
+                        className="rounded px-1.5 font-mono text-mono-sm"
+                        style={{ background: EMBER(0.16), color: 'var(--color-terracotta-300)' }}
+                      >
+                        v{cur.version}
+                      </span>
+                      {idx > 0 && (
+                        <span
+                          className={`font-mono text-mono-sm tabular-nums ${
+                            cur.value >= HISTORY[idx - 1].value ? 'text-ok' : 'text-err'
+                          }`}
+                        >
+                          {cur.value >= HISTORY[idx - 1].value ? '▲' : '▼'}{' '}
+                          {usd(cur.value - HISTORY[idx - 1].value)}
+                        </span>
+                      )}
                     </span>
                     <span className="font-mono text-mono-sm text-ink-low max-sm:hidden">written {fmtFull(cur.ts)}</span>
                   </span>
@@ -163,11 +167,11 @@ export default function TimeScrubber() {
           ref={trackRef}
           role="slider"
           tabIndex={0}
-          aria-label="Time travel playhead — read config.theme as of any moment"
+          aria-label="Time travel playhead — read portfolio.value as of any moment"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(t * 100)}
-          aria-valuetext={cur ? `${fmt(ts)} — v${cur.version} "${cur.value}"` : `${fmt(ts)} — before the first write`}
+          aria-valuetext={cur ? `${fmt(ts)} — v${cur.version}, ${usd(cur.value)}` : `${fmt(ts)} — before the first write`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}

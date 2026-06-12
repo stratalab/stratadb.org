@@ -23,6 +23,18 @@ export const SEED: SeedWorld = {
     },
     'user:1': { value: { name: 'Alice', role: 'engineer' } },
     greeting: { value: 'hello' },
+    // The finance thread, part 2 (time travel, 2026-06-12): the portfolio's
+    // VALUE over the three days. It dips on 06-10, then the aggressive
+    // strategy — merged in the branch story on 06-11 — pays off. Scrubbing
+    // the timeline tells that story in dollars.
+    'portfolio.value': {
+      value: 111080,
+      history: [
+        { value: 98400, version: 1, at: '2026-06-09T14:02:11Z' },
+        { value: 91750, version: 2, at: '2026-06-10T09:31:47Z' },
+        { value: 111080, version: 3, at: '2026-06-11T16:55:03Z' },
+      ],
+    },
   },
   events: {
     deploys: [

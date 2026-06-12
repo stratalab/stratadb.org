@@ -265,14 +265,19 @@ manipulation**: the visitor owns a playhead.
 
 **The artifact — TimeScrubber.** A terminal card (primitives material: ember border,
 bloom, dot-grid body, ruled mono footer) running the live read
-`kv get config.theme --as-of "<timestamp>"`. A draggable ember playhead rides a ruled
-timeline spanning the seed world's three days (2026-06-09 → now); the command's
-timestamp and the answer update as you drag. The answer row: theme swatch (existing
-tokens: raised="dark", terracotta-950="dusk", branch-main-well="midnight"), the value
-at stat scale, version chip, written-at. **Scrub before the first write and the key
-honestly does not exist yet** ("∅ nothing here yet"). Write markers light ember as the
-playhead passes them; the elapsed span tints. Footer: "drag the playhead — every read
-accepts --as-of" · "3 versions · 0 overwrites".
+`kv get portfolio.value --as-of "<timestamp>"`. *(Domain v2.1, same day — Ani: "dark,
+dusk, midnight doesn't pop." The FINANCE THREAD continues from the branch story:
+`portfolio.value` is $98,400 on 06-09, DIPS to $91,750 on 06-10, then the aggressive
+strategy merged in section 2 pays off — $111,080 on 06-11. Scrubbing tells that story
+in dollars; `config.theme` remains the ops thread for hero/inference.)* A draggable
+ember playhead rides a ruled timeline spanning the seed world's three days
+(2026-06-09 → now); the command's timestamp and the answer update as you drag. The
+answer row: the dollar value at stat scale (tabular nums), version chip, signed delta
+vs the previous write (▲ ok-green / ▼ err-red — functional colors as data), written-at.
+**Scrub before the first write and the key honestly does not exist yet** ("∅ nothing
+here yet"). Write markers light ember as the playhead passes them; the elapsed span
+tints. Footer: "drag the playhead — every read accepts --as-of" · "3 versions ·
+0 overwrites".
 
 **Copy.** H2 **"Go back to any moment."** (eyebrow lives in the section rule); intro:
 "Every write is a version. Nothing is overwritten — drag the playhead and read the
