@@ -46,46 +46,50 @@ import benchmarks from '../../data/benchmarks.json';
 </section>
 
 <style>
+  /* Perceptibility fix (2026-06-12): the first cut moved ~0.5%/s — technically
+     animated, perceptually static. Now: 11–18s periods, wider travel, and
+     opacity breathing (the eye catches luminosity change fastest). Still
+     transform/opacity only; still off under reduced motion. */
   .hero-light {
     position: absolute;
     border-radius: 50%;
-    will-change: transform;
+    will-change: transform, opacity;
   }
   .hero-light-ember {
-    width: 55%;
-    height: 75%;
-    left: 8%;
-    top: 5%;
+    width: 58%;
+    height: 80%;
+    left: 4%;
+    top: 0%;
     background: radial-gradient(circle, var(--backdrop-ember), transparent 62%);
-    animation: hero-drift-a 28s ease-in-out infinite alternate;
+    animation: hero-drift-a 14s ease-in-out infinite alternate;
   }
   .hero-light-cool {
-    width: 48%;
-    height: 65%;
-    right: 2%;
-    top: 12%;
+    width: 50%;
+    height: 70%;
+    right: -4%;
+    top: 8%;
     background: radial-gradient(circle, var(--backdrop-cool), transparent 60%);
-    animation: hero-drift-b 36s ease-in-out infinite alternate;
+    animation: hero-drift-b 18s ease-in-out infinite alternate;
   }
   .hero-light-deep {
-    width: 42%;
-    height: 50%;
-    left: 30%;
-    bottom: -10%;
+    width: 46%;
+    height: 56%;
+    left: 26%;
+    bottom: -14%;
     background: radial-gradient(circle, var(--backdrop-ember-deep), transparent 65%);
-    animation: hero-drift-c 22s ease-in-out infinite alternate;
+    animation: hero-drift-c 11s ease-in-out infinite alternate;
   }
   @keyframes hero-drift-a {
-    from { transform: translate3d(-5%, -4%, 0) scale(1); }
-    to { transform: translate3d(9%, 7%, 0) scale(1.18); }
+    from { transform: translate3d(-10%, -7%, 0) scale(0.94); opacity: 0.55; }
+    to { transform: translate3d(14%, 10%, 0) scale(1.28); opacity: 1; }
   }
   @keyframes hero-drift-b {
-    from { transform: translate3d(6%, 5%, 0) scale(1.1); }
-    to { transform: translate3d(-8%, -6%, 0) scale(0.95); }
+    from { transform: translate3d(10%, 8%, 0) scale(1.18); opacity: 1; }
+    to { transform: translate3d(-13%, -9%, 0) scale(0.88); opacity: 0.5; }
   }
   @keyframes hero-drift-c {
-    from { transform: translate3d(-4%, 3%, 0) scale(0.96); }
-    to { transform: translate3d(6%, -5%, 0) scale(1.12); }
+    from { transform: translate3d(-8%, 5%, 0) scale(0.9); opacity: 0.6; }
+    to { transform: translate3d(10%, -8%, 0) scale(1.22); opacity: 1; }
   }
   html[data-motion='reduced'] .hero-light {
     animation: none;
