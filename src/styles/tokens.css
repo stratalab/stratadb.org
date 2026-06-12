@@ -10,27 +10,27 @@
 /* `static` — the contract emits ALL tokens regardless of utility usage:
    inline styles, JS islands, and future consumers read these vars directly. */
 @theme static {
-  /* ---- canvas: MIDNIGHT (moonlight + ember theme, 2026-06-12) ----
-     The radical pass (Ani): no greyish colors anywhere — every neutral is
-     either moonlight (sapphire-blue) or ember (warm). The canvas is the
-     night sky; the sediment ramp now serves LIGHT surfaces only (Foundry/
-     Hub light themes). */
-  --color-void: #0a1021;
-  --color-panel: #111a33;
-  --color-raised: #1b2747;
-  --color-inset: #070c1a;
+  /* ---- canvas: THE NEUTRAL STAGE (Neon-macro, 2026-06-12) ----
+     Decided in pixels after the full tour (clay → ember → sapphire →
+     midnight → daylight → aurora): a strictly NEUTRAL macro — true black,
+     pure white, crisp grays — so ember is the only temperature on the
+     page. Tinted canvases made the accent compete with ambient tint;
+     the neutral stage makes it electric. (Honest reversal of the same-day
+     "no greyish colors" rule: crisp neutral is a stage, not mud.) */
+  --color-void: #000000;
+  --color-panel: #0e0f10;
+  --color-raised: #17181a;
+  --color-inset: #070708;
 
-  /* ---- ink: candlelight + moonlight ----
-     ink-hi stays warm cream (the candle); secondary inks are saturated
-     moonlight, NOT grey-blue. Measured: ink-mid ≥7.7:1 and ink-low ≥5.0:1
-     on every surface. */
-  --color-ink-hi: #f5f0eb;
-  --color-ink-mid: #a9bbea;
-  --color-ink-low: #7e95d6;
+  /* ---- ink: pure white + neutral grays ----
+     Measured: ink-mid ≥6.48:1, ink-low ≥4.56:1 on every surface. */
+  --color-ink-hi: #ffffff;
+  --color-ink-mid: #9a9ca3;
+  --color-ink-low: #7e8189;
 
-  /* ---- lines: silvered moonbeams ---- */
-  --color-line: rgba(146, 172, 255, 0.14);
-  --color-line-hover: rgba(146, 172, 255, 0.24);
+  /* ---- lines: neutral hairlines ---- */
+  --color-line: rgba(255, 255, 255, 0.09);
+  --color-line-hover: rgba(255, 255, 255, 0.16);
 
   /* ---- terracotta ramp (02 §4.1; EMBER recalibration 2026-06-12) ----
      Clay → ember: same family, luminous instead of muted — the palette
@@ -145,11 +145,12 @@
   /* the ONE glow (02 §10) — used only by HorizonGlow; ember presence */
   --horizon-glow: rgba(255, 122, 82, 0.24);
 
-  /* canvas atmosphere (moonlight + ember theme): the moon's bloom and the
-     ember's bleed at the top of the page. Canvas treatment, not an effect —
-     distinct from the horizon-glow two-instance rule (02 §10). */
-  --moon-glow: rgba(106, 136, 215, 0.32);
-  --ember-bleed: rgba(255, 122, 82, 0.07);
+  /* hero backdrop lights (the living background, 2026-06-12): three slow-
+     breathing fields on the neutral stage — ember dominant, one cool
+     counterpoint. Consumed only by the Hero backdrop. */
+  --backdrop-ember: rgba(255, 122, 82, 0.15);
+  --backdrop-ember-deep: rgba(232, 95, 58, 0.11);
+  --backdrop-cool: rgba(124, 170, 255, 0.09);
 
   /* floating set-piece shadow (02 §12) */
   --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,

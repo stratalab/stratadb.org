@@ -13,6 +13,14 @@ import benchmarks from '../../data/benchmarks.json';
 ---
 
 <section class="relative overflow-hidden">
+  <!-- The living backdrop (2026-06-12): three light fields breathing on the
+       neutral stage. Transform-only, GPU-composited, 22–36s periods —
+       sanctioned infinite animation #2 (03 §5 amendment). -->
+  <div class="hero-backdrop pointer-events-none absolute inset-0" aria-hidden="true">
+    <div class="hero-light hero-light-ember"></div>
+    <div class="hero-light hero-light-cool"></div>
+    <div class="hero-light hero-light-deep"></div>
+  </div>
   <div data-parallax="0.85" class="absolute inset-0 will-change-transform">
     <HorizonGlow />
   </div>
@@ -36,6 +44,53 @@ import benchmarks from '../../data/benchmarks.json';
     </div>
   </div>
 </section>
+
+<style>
+  .hero-light {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+  }
+  .hero-light-ember {
+    width: 55%;
+    height: 75%;
+    left: 8%;
+    top: 5%;
+    background: radial-gradient(circle, var(--backdrop-ember), transparent 62%);
+    animation: hero-drift-a 28s ease-in-out infinite alternate;
+  }
+  .hero-light-cool {
+    width: 48%;
+    height: 65%;
+    right: 2%;
+    top: 12%;
+    background: radial-gradient(circle, var(--backdrop-cool), transparent 60%);
+    animation: hero-drift-b 36s ease-in-out infinite alternate;
+  }
+  .hero-light-deep {
+    width: 42%;
+    height: 50%;
+    left: 30%;
+    bottom: -10%;
+    background: radial-gradient(circle, var(--backdrop-ember-deep), transparent 65%);
+    animation: hero-drift-c 22s ease-in-out infinite alternate;
+  }
+  @keyframes hero-drift-a {
+    from { transform: translate3d(-5%, -4%, 0) scale(1); }
+    to { transform: translate3d(9%, 7%, 0) scale(1.18); }
+  }
+  @keyframes hero-drift-b {
+    from { transform: translate3d(6%, 5%, 0) scale(1.1); }
+    to { transform: translate3d(-8%, -6%, 0) scale(0.95); }
+  }
+  @keyframes hero-drift-c {
+    from { transform: translate3d(-4%, 3%, 0) scale(0.96); }
+    to { transform: translate3d(6%, -5%, 0) scale(1.12); }
+  }
+  html[data-motion='reduced'] .hero-light {
+    animation: none;
+  }
+</style>
 
 <script>
   // Hero parallax: one rAF sampler, transform-only, off for touch + reduced motion,

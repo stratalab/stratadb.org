@@ -137,8 +137,10 @@ the engine.
 - Nothing runs longer than `--dur-5` except user-scrubbed interpolation and the
   executor-driven set-piece sequences (which are beat-by-beat, each beat ≤ `--dur-5`).
 - No looping decorative animation. Set-piece loops complete a full cycle + ≥4s hold.
-- Max 2 scrub pieces, max 2 parallax sites, 1 infinite animation (cursor). These caps are
-  review gates, not guidelines.
+- Max 2 scrub pieces, max 2 parallax sites, **2 infinite animations** — the cursor, and
+  (amendment 2026-06-12, Ani: "the hero shouldn't be static") the hero's breathing
+  backdrop: three light fields, transform-only, 22–36s periods, off under reduced
+  motion. These caps are review gates, not guidelines.
 
 ## 6. Reduced motion — full parity
 

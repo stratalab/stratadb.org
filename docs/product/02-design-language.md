@@ -206,7 +206,19 @@ wallpaper, never a background texture.
 The site is the brand's cinematic surface: **dark-only, typographic, one light source.**
 (Absorbs DESIGN.md §2–6; DESIGN.md retires when Docs 03–04 land.)
 
-## 10. Canvas tokens — MIDNIGHT (moonlight + ember, 2026-06-12)
+## 10. Canvas tokens — THE NEUTRAL STAGE (Neon-macro, 2026-06-12 final)
+
+**Final canvas decision after the full same-day tour** (clay → ember → sapphire night →
+midnight → daylight → aurora → Neon-macro test, all decided in pixels): the macro layer
+is **strictly neutral** — true black `#000000`, pure white ink `#FFFFFF`, crisp neutral
+grays (`#9A9CA3` / `#7E8189`, ≥4.56:1 everywhere), neutral hairlines. **Ember is the only
+temperature on the page** — tinted canvases made the accent compete with ambient tint;
+the neutral stage makes it electric. The hero gains a living backdrop (three breathing
+light fields — ember ×2 + one cool counterpoint; 03 §5 amendment). This honestly
+reverses the same-day "no greyish colors" rule: *crisp neutral is a stage, not mud* —
+and supersedes both the warm-sediment and MIDNIGHT canvases below (kept for history).
+
+Superseded: ## MIDNIGHT (moonlight + ember, 2026-06-12)
 
 The canvas is the night sky the ember glows against — sapphire-saturated, zero grey.
 Replaced the sediment-derived warm darks (decision log: Ani, "remove any greyish

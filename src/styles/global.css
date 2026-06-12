@@ -34,13 +34,9 @@
   }
 
   body {
-    /* The night sky: moon bloom + ember bleed over the midnight void
-       (moonlight + ember theme, 2026-06-12). */
-    background:
-      radial-gradient(120% 60% at 50% -10%, var(--moon-glow), transparent 60%),
-      radial-gradient(80% 40% at 50% 0%, var(--ember-bleed), transparent 55%),
-      var(--color-void);
-    background-attachment: fixed, fixed, scroll;
+    /* The neutral stage (Neon-macro, 2026-06-12): flat true black —
+       all atmosphere lives in the hero's animated backdrop. */
+    background-color: var(--color-void);
     color: var(--color-ink-hi);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;

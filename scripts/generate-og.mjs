@@ -12,17 +12,17 @@ const html = `<!doctype html><html><head><style>
 @font-face{font-family:GS;src:url(data:font/woff2;base64,${font}) format('woff2');font-weight:200 700}
 @font-face{font-family:CM;src:url(data:font/woff2;base64,${mono}) format('woff2')}
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#0a1021;font-family:GS;display:flex;flex-direction:column;justify-content:center;padding:80px;position:relative;overflow:hidden}
+body{width:1200px;height:630px;background:#000000;font-family:GS;display:flex;flex-direction:column;justify-content:center;padding:80px;position:relative;overflow:hidden}
 .horizon{position:absolute;left:0;right:0;bottom:0;height:300px;background:radial-gradient(60% 100% at 50% 100%,rgba(255,122,82,.22),transparent 70%)}
 .moon{position:absolute;left:0;right:0;top:0;height:340px;background:radial-gradient(120% 100% at 50% 0%,rgba(106,136,215,.30),transparent 65%)}
 .line{position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#ff7a52 35%,#ffb191 50%,#ff7a52 65%,transparent)}
 .brand{display:flex;align-items:center;gap:14px;margin-bottom:48px}
 .brand span{color:#f5f0eb;font-size:28px;font-weight:600}
 h1{color:#f5f0eb;font-size:96px;font-weight:600;letter-spacing:-.035em;line-height:.98}
-.badge{margin-top:28px;color:#a9bbea;font-family:CM;font-size:22px}
-.stats{position:absolute;bottom:64px;left:80px;color:#7e95d6;font-family:CM;font-size:20px}
+.badge{margin-top:28px;color:#9a9ca3;font-family:CM;font-size:22px}
+.stats{position:absolute;bottom:64px;left:80px;color:#7e8189;font-family:CM;font-size:20px}
 </style></head><body>
-<div class="moon"></div><div class="horizon"></div><div class="line"></div>
+<div class="horizon"></div><div class="line"></div>
 <div class="brand">
 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff7a52" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>
 <span>StrataDB</span></div>
