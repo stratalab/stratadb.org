@@ -1,20 +1,10 @@
 ---
+// The landing page, v2 (Doc 04). Sections arrive by build phase:
+// Phase 2: hero · Phase 3: branching, primitives, time travel · Phase 4: the rest.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/landing/Hero.astro';
-import WhySection from '../components/landing/WhySection.astro';
-import PrimitivesShowcase from '../components/landing/PrimitivesShowcase.astro';
-import CodeComparison from '../components/landing/CodeComparison.astro';
-import PerformanceSection from '../components/landing/PerformanceSection.astro';
-import InstallSection from '../components/landing/InstallSection.astro';
-import CTABanner from '../components/landing/CTABanner.astro';
+import Hero from '../components/sections/Hero.astro';
 ---
 
-<BaseLayout title="StrataDB - Memory Infrastructure for AI Agents">
+<BaseLayout>
   <Hero />
-  <WhySection />
-  <PrimitivesShowcase />
-  <CodeComparison />
-  <PerformanceSection />
-  <InstallSection />
-  <CTABanner />
 </BaseLayout>

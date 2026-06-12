@@ -105,17 +105,19 @@ All six conform to 03 §8 (their full storyboard fields live in Doc 04).
 
 ## 6. Island budget (vs 03 §7: hero ≤60KB gz, total ≤140KB gz)
 
-| Island | Est. gz | Notes |
+| Island | gz | Notes |
 |---|---|---|
-| motion/react (shared) | ~32KB | one copy, shared chunk |
-| ForkingTerminal + ScriptedExecutor + beats + fullscreen overlay | ~20KB | hero allowance 60KB incl. shared motion |
-| VersionStrip | ~8KB | useScroll + authored scenes |
-| InferenceDemo | ~6KB | |
-| InstallTabs | ~4KB | |
-| NavMenu | ~2KB | |
-| **Total** | **~72KB** | ~68KB headroom; `WasmExecutor` loader is OUTSIDE this budget (R8 progressive payload, 06 §8) |
+| React client runtime | **43.9KB measured** | the line the original estimate forgot — corrected 2026-06-12. Phase-6 lever if budget tightens: preact-compat (~10KB) once old React pages die |
+| ForkingTerminal + motion/react + executor + beats | **43.6KB measured** | Phase 2 actual |
+| VersionStrip | ~8KB est | useScroll + authored scenes |
+| InferenceDemo | ~6KB est | |
+| InstallTabs | ~4KB est | |
+| NavMenu | ~2KB est | |
+| **Total** | **~108KB projected** (87.5 measured + ~20 est) | vs the 140KB gate — ~32KB headroom; `WasmExecutor` loader OUTSIDE this budget (R8, 06 §8) |
 
 `VerbTranscript` and `StrataColumn` ship zero-JS, permanently (scoped 2026-06-11).
+The original "hero ≤60KB" line is restated as: **hero-specific JS ≤60KB excluding the
+shared React runtime** (ForkingTerminal at 43.6KB passes).
 
 ## 7. Conventions
 

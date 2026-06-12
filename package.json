@@ -8,7 +8,8 @@
     "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "prebuild": "node scripts/fetch-release.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -22,6 +23,7 @@
     "astro": "^5.1.1",
     "framer-motion": "^11.13.1",
     "lucide-react": "^0.468.0",
+    "motion": "^12.40.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "shiki": "^1.24.0",

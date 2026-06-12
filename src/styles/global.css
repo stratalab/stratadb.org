@@ -77,4 +77,23 @@
     transform: none;
     transition: opacity var(--dur-2) linear;
   }
+
+  /* The ONLY infinite animation on the site (03 §2): the terminal cursor. */
+  .term-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: var(--color-terracotta-500);
+    animation: cursor-blink 1.06s steps(2, start) infinite;
+  }
+  html[data-motion='reduced'] .term-cursor {
+    animation: none;
+  }
+  @keyframes cursor-blink {
+    to {
+      visibility: hidden;
+    }
+  }
 }
