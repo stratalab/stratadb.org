@@ -287,7 +287,15 @@ Interaction: pointer drag + click-to-jump (pointer capture, touch-none) · keybo
 real slider (role=slider, aria-valuetext speaks the moment + version; arrows snap
 between span start / writes / now; Home/End) · value swaps animate 220ms in a
 fixed-height row (CLS-zero) · reduced motion: fully alive — it only moves when the
-user moves it · SSR = playhead at "now" (completed state). Head in the prose column,
+user moves it · SSR = playhead at "now" (completed state).
+
+**Discoverability (same day, Ani: "how would the user know to scroll it"): invite by
+demonstration.** On first view (≥50% visible) the instrument plays itself ONCE — the
+playhead glides back to the 06-10 dip (the red delta blooms), holds a beat, returns;
+three beats at the `--dur-5` cap, handle swollen while it moves. Any pointer/keyboard
+interaction cancels it instantly and it never replays. A **"← drag →" pill rides the
+playhead** (clamped off the card edges) until the first real interaction, then fades.
+Under reduced motion the demo is skipped; the pill is not — the label still teaches. Head in the prose column,
 instrument on the 80rem stage with one quiet ember field.
 
 *(v1 — the 1.5vh sticky version strip — retired 2026-06-12; its "choreographed

@@ -12,7 +12,7 @@
 // timestamp and the answer update live. Scrub before the first write and
 // the key honestly does not exist yet. SSR renders the playhead at "now"
 // (completed state).
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { SEED } from '../../../data/seed';
 
@@ -44,6 +44,72 @@ export default function TimeScrubber() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(1); // playhead, normalized; init = now
   const [dragging, setDragging] = useState(false);
+  const [interacted, setInteracted] = useState(false);
+  const [demoing, setDemoing] = useState(false);
+  const interactedRef = useRef(false);
+
+  const markInteracted = () => {
+    interactedRef.current = true;
+    setInteracted(true);
+  };
+
+  // Invite by demonstration: on first view the instrument plays itself once —
+  // the playhead glides back to the 06-10 dip, holds, returns. Beats at the
+  // --dur-5 cap; any interaction cancels it instantly and it never replays.
+  // Reduced motion skips the demo; the "← drag →" label still teaches.
+  useEffect(() => {
+    if (document.documentElement.dataset.motion === 'reduced') return;
+    const el = trackRef.current;
+    if (!el) return;
+    let raf = 0;
+    let cancelled = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        if (interactedRef.current) return;
+        const easeInOut = (k: number) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+        const PHASES = [
+          { from: 1, to: 0.5, dur: 800, delay: 600 },
+          { from: 0.5, to: 0.5, dur: 600, delay: 0 },
+          { from: 0.5, to: 1, dur: 800, delay: 0 },
+        ];
+        let pi = 0;
+        let start: number | null = null;
+        setDemoing(true);
+        const step = (now: number) => {
+          if (cancelled || interactedRef.current) {
+            setDemoing(false);
+            return;
+          }
+          const ph = PHASES[pi];
+          if (start === null) start = now + ph.delay;
+          const elapsed = now - start;
+          if (elapsed >= 0) {
+            const k = Math.min(1, elapsed / ph.dur);
+            setT(ph.from + (ph.to - ph.from) * easeInOut(k));
+            if (k >= 1) {
+              pi += 1;
+              start = null;
+              if (pi >= PHASES.length) {
+                setDemoing(false);
+                return;
+              }
+            }
+          }
+          raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => {
+      cancelled = true;
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   const ts = T0 + t * (T1 - T0);
   let idx = -1;
@@ -57,6 +123,7 @@ export default function TimeScrubber() {
   };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    markInteracted();
     e.currentTarget.setPointerCapture(e.pointerId);
     setDragging(true);
     seek(e.clientX);
@@ -76,6 +143,7 @@ export default function TimeScrubber() {
     else if (e.key === 'End') next = 1;
     if (next === null) return;
     e.preventDefault();
+    markInteracted();
     setT(next);
   };
 
@@ -238,10 +306,21 @@ export default function TimeScrubber() {
             <motion.span
               className="absolute -top-1 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full border-2"
               style={{ background: 'var(--color-terracotta-500)', borderColor: 'var(--color-ink-hi)' }}
-              animate={{ scale: dragging ? 1.25 : 1 }}
+              animate={{ scale: dragging || demoing ? 1.25 : 1 }}
               transition={{ duration: 0.15, ease: EASE }}
             />
           </div>
+          {/* the invitation: rides the playhead until the first real touch */}
+          <motion.span
+            className="pointer-events-none absolute -top-3 -translate-y-full whitespace-nowrap rounded-full border border-line bg-raised px-2.5 py-1 font-mono text-mono-sm text-ink-mid"
+            style={{ left: `clamp(3.5rem, ${t * 100}%, calc(100% - 3.5rem))`, x: '-50%' }}
+            initial={false}
+            animate={{ opacity: interacted ? 0 : 1 }}
+            transition={{ duration: 0.3 }}
+            aria-hidden="true"
+          >
+            ← drag →
+          </motion.span>
         </div>
 
         {/* the ruled footer, drafting voice */}
