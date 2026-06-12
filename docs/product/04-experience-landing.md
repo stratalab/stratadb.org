@@ -81,8 +81,12 @@ terminal 1.0×, stat strip 1.04×.
   a filled ember **button, "Get the desktop app"** (app-window icon; R1 interim →
   strata-foundry repo; label flips to "Download…" when artifacts exist; the Foundry
   *name* is taught later, in the install tab) beside the quiet mono **curl chip**.
-  Beneath them, the agent door in a hairline pill:
-  `for your agent → stratadb.org/llms.txt`. A content scrim quiets the river artwork
+  Beneath them, **the agent door as an action** (v2, 2026-06-12; pattern: mem0.ai's
+  "Set up for agents"): a pill button — "Set up with your agent" — that copies a
+  ready-to-paste instruction pointing at the for-agents recipe's `.md` mirror, with
+  report-back included; feedback teaches the flow ("✓ copied — paste it to your
+  agent"). The human is the courier between the page and their agent. llms.txt remains
+  the discovery door (footer, install tab). A content scrim quiets the river artwork
   behind the entire center column.
 - Funnel note: the hero now carries **Feel + Act in one screen** — claim, get-the-product
   (human CLI · human GUI · agent URL), proof below.

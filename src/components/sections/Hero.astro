@@ -78,11 +78,25 @@ import benchmarks from '../../data/benchmarks.json';
           class="!bg-raised [&_.copy-chip-label]:!text-ink-hi"
         />
       </div>
+      <!-- The agent door as an ACTION (2026-06-12, pattern: mem0.ai): copies a
+           ready-to-paste instruction for the visitor's agent, pointing at the
+           for-agents recipe's markdown mirror. The human is the courier. -->
       <p class="mt-4">
-        <span class="inline-flex items-center gap-2 rounded-full border border-line bg-panel/90 px-4 py-1.5 font-mono text-mono-sm text-ink-mid">
-          for your agent →
-          <a href="/llms.txt" class="text-ink-hi underline decoration-line-hover underline-offset-4 transition-colors duration-200 hover:decoration-terracotta-400">stratadb.org/llms.txt</a>
-        </span>
+        <button
+          type="button"
+          class="copy-chip group inline-flex items-center gap-2.5 rounded-full border border-line bg-panel/90 px-4 py-1.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
+          data-copy="Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/getting-started/for-agents.md — report the verification output when done."
+          aria-label="Copy setup instructions for your AI agent"
+        >
+          <span>Set up with your agent</span>
+          <span class="copy-chip-icon text-ink-low transition-colors duration-200 group-hover:text-ink-mid" aria-hidden="true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+              <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+            </svg>
+          </span>
+          <span class="copy-chip-done hidden text-ok" aria-hidden="true">✓ copied — paste it to your agent</span>
+        </button>
       </p>
     </div>
 
