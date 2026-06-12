@@ -35,8 +35,15 @@ export const SEED: SeedWorld = {
     profile: { user: { name: 'Alice', role: 'engineer', prefs: { theme: 'midnight' } } },
     // The branch-story document (section 2): intuitive to anyone, and it locks
     // the page narrative — the hero, the branch story, and the time-travel
-    // strip all tell the SAME change: trying "midnight" on a branch.
-    config: { theme: 'dark', font_size: 14, language: 'en' },
+    // strip all tell the SAME lead change: trying "midnight" on a branch.
+    config: {
+      theme: 'dark',
+      font_size: 14,
+      language: 'en',
+      notifications: true,
+      sidebar: 'left',
+      autosave: false,
+    },
   },
   vectors: {
     collection: 'docs',

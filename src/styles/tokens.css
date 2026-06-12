@@ -152,6 +152,14 @@
   --backdrop-ember-deep: rgba(232, 95, 58, 0.11);
   --backdrop-cool: rgba(124, 170, 255, 0.09);
 
+  /* branch-story card surfaces (2026-06-12): the only tinted surfaces on the
+     neutral stage — main is cool slate (stable), risky is ember-warm
+     (experimental); the merge dissolves warm into cool. */
+  --color-branch-main-surface: #101a36;
+  --color-branch-main-well: #0b1226;
+  --color-branch-risky-surface: #2a150b;
+  --color-branch-risky-well: #1d0e06;
+
   /* floating set-piece shadow (02 §12) */
   --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,
     0 24px 64px -32px rgba(0, 0, 0, 0.7);
