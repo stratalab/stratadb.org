@@ -305,27 +305,39 @@ option.)*
 
 ## 6. Section 5 — Native inference
 
-**First-class section (2026-06-11):** the story is bigger than search — embedding,
-retrieval, and generation are built into the engine, pointed at any OpenAI-compatible
-endpoint (local Ollama included), with model management in the CLI and Foundry.
+**v2 (2026-06-12, Ani): the UNIFIED INFERENCE LAYER.** "This section is a bit unique
+because databases usually don't have this. It is a unified inference layer that lets
+you run inference on any model from HF as well as OpenAI, Anthropic, and Google. So
+you get a built-in primitive that you can quickly query and get embeddings, generate
+tokens, etc. Super useful if you're building an app that needs LLMs but will be
+deployed in a bunch of places." The story upgrades from "ask your data" to **one
+inference primitive, any model, travels with the file** — the portability pitch is
+the headline value.
 
-**Layout.** 5/7 split (demo right). The demo: a search field types (Tier-1 cadence) the
-H2's own question; ranked results surface with primitive-colored edge ticks — an
-`event` (deploy log), a `kv` version (config change), a `vector` hit (doc chunk).
+**Copy.** H2 **"Inference is built in."** (eyebrow `NATIVE INFERENCE` lives in the
+section rule). Intro: "Databases don't usually do this. Strata ships a unified
+inference layer — embeddings, generation, and search through one primitive, with
+models from Hugging Face or hosted ones from OpenAI, Anthropic, and Google. Wire it
+once; it runs wherever the file does." Provider chips beneath (mono pills): Hugging
+Face · OpenAI · Anthropic · Google. *(v1 H2 "Just ask." retired with the reframe;
+the plain-language ask now lives inside the demo's generate beat.)*
 
-**Copy.** Eyebrow `INFERENCE`; H2 **"Just ask."** *(alternate held: the query-as-headline
-"“What changed before the deploy failed?”" — strongest alternate on the page; the
-question now lives entirely in the demo, which types it in full)*. Body: "Ask in plain
-language. One flag embeds every write as it lands; hybrid retrieval searches every
-primitive at once. Point it at any OpenAI-compatible endpoint — or run models locally." Code chip beneath
-(`mono-sm`): `db.configure_model(endpoint="http://localhost:11434/v1")` ·
-`auto_embed=True`.
+**Layout.** The escalation pattern: head in the prose column, demo card (`infer`,
+shared TermCard material) on the 80rem stage with one quiet ember field.
 
-Motion: trigger ≥50%, plays once · typing Tier-1, results 40ms stagger · reduced-motion
-= completed query + results · mobile = stack. *(Choreographed permanently — scoped
-2026-06-11; the demo's query/results are authored against the seed dataset, so the
-answer shown is the answer the real engine gives — truth rule holds via the transcript
-verifier.)*
+**The demo — three beats, all one primitive (typed per 03 §2, plays once ≥35%):**
+1. `infer embed "why did the deploy fail?"` → `[ 0.0182, −0.0441, 0.0976, … ] ·
+   384 dims · bge-small-en (local)` — a Hugging Face model, locally.
+2. `infer generate "What changed before the deploy failed?" --model anthropic/claude`
+   → the answer STREAMS in word chunks (token rhythm; height reserved, CLS-zero):
+   "config.theme changed to 'dusk' at 09:30:02 — ninety seconds before deploy v2.3
+   failed its healthcheck." — seed-true, data-aware generation.
+3. `infer use openai/gpt-4o` → `OK — same call, new model` — the unified-layer
+   punchline; closing caption "wire it once — inference runs wherever the file does".
+Ruled mono footer under the card: "one layer · embed, generate, search" ·
+"hugging face · openai · anthropic · google". Reduced motion = completed transcript;
+SSR = completed state; the generate answer remains authored against the seed dataset
+(truth rule via the transcript verifier at cutover).
 
 ## 7. Section 6 — Resources
 

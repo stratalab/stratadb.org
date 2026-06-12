@@ -1,112 +1,113 @@
-// Section 5 demo (04 §6): the H2's question, typed and answered. Plays once.
-// Choreographed permanently (scoped 2026-06-11); authored against the seed world,
-// so the answer shown is the answer the engine gives (transcript-verified at cutover).
+// Section 5 demo (04 §6 v2, 2026-06-12): the unified inference layer,
+// demonstrated. Ani: databases usually don't have this — one built-in
+// primitive for embeddings and generation, models from Hugging Face or
+// OpenAI / Anthropic / Google, useful because an app that needs LLMs gets
+// deployed in a bunch of places and the layer travels with the file.
+// Three beats: embed (local HF model) → generate (data-aware, streamed
+// from the seed world's deploy story) → switch provider, same call.
+// Plays once per view; SSR renders the completed state; reduced motion
+// shows final frames.
 import { useEffect, useRef, useState } from 'react';
-import { useInView } from 'motion/react';
+import { Cmd, Line, T, TermCard, useBeats } from '../../shared/term';
 
-const QUERY = 'What changed before the deploy failed?';
+const C1 = 'infer embed "why did the deploy fail?"';
+const C2 = 'infer generate "What changed before the deploy failed?" --model anthropic/claude';
+const C3 = 'infer use openai/gpt-4o';
 
-// Each result is true in src/data/seed.ts — the deploy-failure narrative.
-// Ticks wear the page's one temperature (five-hue coding retired
-// 2026-06-12); the primitive NAME does the differentiating.
-const RESULTS = [
-  {
-    primitive: 'event',
-    color: 'var(--color-terracotta-400)',
-    title: 'deploys · config.update',
-    body: 'config.theme → "dusk" · 2026-06-10 09:30:02 — 90s before deploy.fail',
-  },
-  {
-    primitive: 'kv',
-    color: 'var(--color-terracotta-400)',
-    title: 'config.theme · v2',
-    body: '"dusk" — written 2026-06-10 09:31:47, the last write before the failure',
-  },
-  {
-    primitive: 'vector',
-    color: 'var(--color-terracotta-400)',
-    title: 'docs · d1 (0.91)',
-    body: 'Deploys read config.theme at startup; invalid values fail the healthcheck.',
-  },
-];
+// Seed-true: config.update at 09:30:02, deploy.fail v2.3 healthcheck —
+// the generation reads the world it lives in.
+const GEN =
+  'config.theme changed to "dusk" at 09:30:02 — ninety seconds before deploy v2.3 failed its healthcheck.';
+const GEN_WORDS = GEN.split(' ');
 
-const KEY_MIN = 24;
-const KEY_JITTER = 16;
+// LLM output streams in word chunks — output printing (03 §2), at token
+// rhythm. Height reserved: nothing below shifts while it streams.
+function Stream({ on, live }: { on: boolean; live: boolean }) {
+  const [n, setN] = useState(() => (live ? 0 : GEN_WORDS.length));
+  useEffect(() => {
+    if (!live) {
+      setN(GEN_WORDS.length);
+      return;
+    }
+    if (!on) {
+      setN(0);
+      return;
+    }
+    setN(0);
+    let i = 0;
+    let t: number;
+    const tick = () => {
+      i += 1;
+      setN(i);
+      if (i < GEN_WORDS.length) t = window.setTimeout(tick, 40 + Math.random() * 55);
+    };
+    t = window.setTimeout(tick, 260);
+    return () => window.clearTimeout(t);
+  }, [live, on]);
+  const streaming = live && on && n < GEN_WORDS.length;
+  return (
+    <div className={`min-h-[4.5rem] text-ink-mid ${on ? '' : 'invisible'}`}>
+      {GEN_WORDS.slice(0, n).join(' ')}
+      {streaming && (
+        <span className="ml-1 inline-block h-[1.05em] w-[0.55ch] translate-y-[3px] bg-ink-mid/70" aria-hidden="true" />
+      )}
+    </div>
+  );
+}
 
 export default function InferenceDemo() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.5 });
-  const [typed, setTyped] = useState(QUERY); // SSR first frame: completed
-  const [shown, setShown] = useState(RESULTS.length);
-  const started = useRef(false);
+  const [reduced, setReduced] = useState(false);
+  const [seen, setSeen] = useState(false);
 
   useEffect(() => {
-    if (!inView || started.current) return;
-    if (document.documentElement.dataset.motion === 'reduced') return; // stay completed
-    started.current = true;
-    let cancelled = false;
-    (async () => {
-      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      setTyped('');
-      setShown(0);
-      await sleep(400);
-      for (let i = 1; i <= QUERY.length; i++) {
-        if (cancelled) return;
-        setTyped(QUERY.slice(0, i));
-        await sleep(KEY_MIN + Math.random() * KEY_JITTER);
-      }
-      await sleep(300);
-      for (let i = 1; i <= RESULTS.length; i++) {
-        if (cancelled) return;
-        setShown(i);
-        await sleep(120);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [inView]);
+    setReduced(document.documentElement.dataset.motion === 'reduced');
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setSeen(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 }
+    );
+    if (ref.current) io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+
+  const live = seen && !reduced;
+  const beat = useBeats([350, T(C1), 650, T(C2), 1900, T(C3)], live);
 
   return (
     <div ref={ref}>
-      <div
-        className="overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
-        style={{ boxShadow: 'var(--shadow-float)' }}
-      >
-        <div className="flex h-10 items-center gap-2 border-b border-line px-4">
-          <span className="flex gap-1.5" aria-hidden="true">
-            <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
-            <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
-            <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
-          </span>
-          <span className="ml-2 font-mono text-mono-sm text-ink-low">db.search</span>
+      <TermCard title="infer" bodyClassName="min-h-[24rem]">
+        <Cmd cmd={C1} on={beat >= 1} live={live} />
+        <Line on={beat >= 2} className="[overflow-wrap:anywhere]">
+          <span className="text-ink-hi">[ 0.0182, −0.0441, 0.0976, … ]</span>
+          <span className="text-ink-mid"> · 384 dims · </span>
+          <span className="text-terracotta-300">bge-small-en</span>
+          <span className="text-ink-low"> (local)</span>
+        </Line>
+        <div className="mt-4">
+          <Cmd cmd={C2} on={beat >= 3} live={live} />
         </div>
-        <div className="bg-inset p-4">
-          <div className="flex items-center gap-2 rounded-(--radius-control) border border-line bg-panel px-3 py-2.5">
-            <svg className="h-4 w-4 shrink-0 text-ink-low" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m21 21-4.3-4.3" strokeLinecap="round" />
-            </svg>
-            <span className="font-mono text-mono-sm text-ink-hi">
-              {typed}
-              {typed.length < QUERY.length && <span className="term-cursor" aria-hidden="true" />}
-            </span>
-          </div>
-          <ul className="mt-3 space-y-2" role="list" aria-live="polite">
-            {RESULTS.slice(0, shown).map((r) => (
-              <li
-                key={r.primitive}
-                className="rounded-(--radius-control) border border-line bg-panel p-3"
-                style={{ borderLeft: `2px solid ${r.color}` }}
-              >
-                <p className="font-mono text-mono-sm text-ink-hi">
-                  <span className="text-ink-low">{r.primitive}</span> · {r.title}
-                </p>
-                <p className="mt-1 text-small text-ink-mid">{r.body}</p>
-              </li>
-            ))}
-          </ul>
+        <Stream on={beat >= 4} live={live} />
+        <div className="mt-4">
+          <Cmd cmd={C3} on={beat >= 5} live={live} />
         </div>
+        <Line on={beat >= 6} className="text-ok">
+          OK — same call, new model
+        </Line>
+        <Line on={beat >= 6} className="mt-4 text-mono-sm text-ink-low">
+          wire it once — inference runs wherever the file does
+        </Line>
+      </TermCard>
+      {/* the ruled footer, drafting voice */}
+      <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-3 font-mono text-mono-sm text-ink-low">
+        <span>
+          <span className="text-terracotta-400">one layer</span> · embed, generate, search
+        </span>
+        <span>hugging face · openai · anthropic · google</span>
       </div>
     </div>
   );

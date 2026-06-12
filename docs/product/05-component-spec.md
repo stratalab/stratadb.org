@@ -98,7 +98,7 @@ type ScriptEvent =
 | `BranchScrub` | Branching | Scrub #2 (04 §3 v4–v5): pinned 340vh fork→modify→diff→merge story + session terminal + branch river; reduced = steppers; mobile = snap carousel. *(Supersedes `VerbTranscript`'s "zero JS permanently" — reversed 2026-06-12 when the section became the page's second set-piece.)* | acts 1–4 · stepper · carousel |
 | `PrimitiveTabs` | Multi-primitive | Tabs + content (04 §4 v2): vertical rail = the strata column motif; five seed-true beat demos, replay per activation; roving-tabindex tablist; reduced = final frames; mobile = horizontal rail. *(Supersedes the v1 "CSS-only, not an island" rule — reversed 2026-06-12, Ani: each primitive a tab with an animation.)* | per-tab · playing · complete |
 | `TimeScrubber` | Time travel | Direct-manipulation playhead (04 §5 v2, 2026-06-12 — replaces `VersionStrip`'s scroll-scrub): drag/click/keyboard slider over the seed timeline, live `--as-of` read, CLS-zero value swaps; alive under reduced motion (user-driven) | scrubbing · before-first-write · at-now |
-| `InferenceDemo` | Inference | Search field types the query (Tier-1); results stagger with primitive ticks. Choreographed permanently; authored against the seed dataset | idle · typing · results |
+| `InferenceDemo` | Inference | v2 (04 §6, 2026-06-12): the unified-layer transcript — embed (local HF model) → generate (streamed, seed-true) → provider swap, same call; built on the shared `term.tsx` kit (TermCard/Cmd/Line/useBeats, extracted same day — PrimitiveTabs consumes it too) | idle · playing · complete |
 | `NavMenu` | Nav | Mobile sheet; focus-trapped; closes on route/Escape | open/closed |
 
 All six conform to 03 §8 (their full storyboard fields live in Doc 04).
