@@ -25,7 +25,7 @@ const CHANGES: Record<string, string | number> = {
 const FIELDS = Object.keys(DOC);
 
 const ACTS = [
-  { verb: 'Fork', line: 'The whole portfolio, forked instantly. Nothing copied.' },
+  { verb: 'Fork', line: 'The whole database, forked instantly. Nothing copied.' },
   { verb: 'Modify', line: 'Four writes land on the branch. main is untouched.' },
   { verb: 'Diff', line: 'Every change, exactly — before real money moves.' },
   { verb: 'Merge', line: 'Keep the strategy that works.' },

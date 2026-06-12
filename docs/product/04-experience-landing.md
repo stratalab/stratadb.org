@@ -123,7 +123,8 @@ nothing, so it's instant at any size." *(2026-06-12, Ani: "People don't understa
 O(1)" — the human-facing copy states the fact in plain terms; O(1) survives only on
 agent surfaces (llms.txt, for-agents) and in the architecture deep-dives, where the
 reader speaks it natively. Same fix in the scrub's Fork caption: "The whole
-portfolio, forked instantly. Nothing copied.")*
+database, forked instantly. Nothing copied." — "database", not "portfolio": the verb
+acts on the database term, the portfolio is just the data inside it.)*
 
 **Set-piece: the branch story, v4 (2026-06-12) — finance domain, session panel, stage
 lights.** The document is `json · portfolio` from the seed world —
