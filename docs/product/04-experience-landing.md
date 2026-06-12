@@ -371,14 +371,19 @@ SSR = completed state; the generate answer remains authored against the seed dat
 
 ## 7. Section 6 — Resources
 
-Three quiet cards, no imagery, hairline-bordered. **Render only what exists** (truth
-rule). Eyebrow `RESOURCES`; H2 (small, `title` scale): **"Go deeper."**
+**v2 (2026-06-12): the indexed catalog.** The three cards become three numbered
+hairline ROWS in the drafting voice (the supermemory-derived ruling system applied to
+content): mono numeral `01`–`03` · heading-scale title · body · mono metadata line ·
+arrow. Hover: ember numeral + arrow slide + faint raised wash. Still quiet — it is a
+junction, not a show — but structured like the rest of the document. **Render only
+what exists** (truth rule). H2 (small, `title` scale): **"Go deeper."** (eyebrow in
+the section rule).
 
-| Card | Copy | → |
-|---|---|---|
-| **Documentation** | "Concepts, guides, and the full reference." | `/docs` |
-| **Examples & quickstarts** | "First database in thirty seconds; real patterns after that." | `/docs/getting-started` + cookbook |
-| **Whitepapers** | "The internals, written down: storage engine, concurrency model, durability and recovery." | `/architecture` |
+| Row | Copy | Meta | → |
+|---|---|---|---|
+| **01 Documentation** | "Concepts, guides, and the full reference." | concepts · guides · reference | `/docs` |
+| **02 Examples & quickstarts** | "First database in thirty seconds; real patterns after that." | quickstarts · cookbook | `/docs/getting-started` |
+| **03 Whitepapers** | "The internals, written down: storage engine, concurrency model, durability and recovery." | storage · concurrency · recovery | `/architecture` |
 
 Standard reveal. (Decided 2026-06-11: **the architecture deep-dives ARE the whitepaper
 collection** — long-form, technical, argued; the label is honest today. Future standalone
@@ -390,8 +395,16 @@ may lean into paper-style presentation accordingly.)
 **The act section: five surfaces, one product** — humans and agents install in the same
 place. Horizon glow, second and final use (60% hero opacity).
 
-**Copy.** Eyebrow `INSTALL`; H2 **"Start in thirty seconds."** *(same testable claim,
-imperative form; alternate held: "Thirty seconds to first write.")*
+**v2 (2026-06-12): the act surface acts.** The tabs card wears the page's material
+(ember border, bloom, ember tab-row wash, graph-paper wells) — and **every command
+line carries its own copy button** (hover/focus reveal, ✓ feedback; `$` stripped on
+copy). The MCP tab gets a copy-config button for the whole JSON block. The Foundry
+tab's copy now points back at the set-piece: "It is the window in section 03, the
+one the primitives live in."
+
+**Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
+*(same testable claim, imperative form; alternate held: "Thirty seconds to first
+write.")*
 
 Tabs (each renders only if its path works — truth rule):
 

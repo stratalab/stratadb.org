@@ -118,7 +118,10 @@ function KvView({ live }: { live: boolean }) {
                   <span className={i === 0 ? 'text-terracotta-300' : 'text-ink-low'}>v{h.version}</span>
                   <span className="tabular-nums">{Number(h.value).toLocaleString('en-US')}</span>
                 </span>
-                <span className="text-ink-low max-sm:hidden">{h.at.slice(0, 16).replace('T', ' ')}</span>
+                {/* ink-mid on the selected row — the ember wash eats ink-low's margin */}
+                <span className={`${i === 0 ? 'text-ink-mid' : 'text-ink-low'} max-sm:hidden`}>
+                  {h.at.slice(0, 16).replace('T', ' ')}
+                </span>
               </SelectableRow>
             ))}
           </div>
