@@ -100,9 +100,15 @@ you've used too many.
 500 #8A847C · 600 #6B665F · 700 #4F4B45 · 800 #33302C · 900 #1A1817 · 950 #0A0908
 ```
 
-Light surfaces (Foundry, Hub light mode) live in 50–300 with 800–950 ink; dark surfaces
-(site, future dark modes) live in 900–950 with 50–400 ink. The warmth is the family
-resemblance — even when surfaces differ, nothing is ever default-gray.
+Light surfaces (Foundry, Hub light mode) live in 50–300 with 800–950 ink.
+
+**Amendment (2026-06-12, the moonlight + ember theme):** dark surfaces no longer draw
+from sediment — the site's canvas is the **MIDNIGHT family** (§10): saturated sapphire
+night, moonlight inks, ember accents. Ani's directive: *no greyish colors anywhere* —
+every neutral is either moonlight (cool, chromatic) or ember (warm, chromatic). The
+original "warm neutrals" rule was written for the clay era; with ember emitting light,
+the canvas became the night it glows against. Sediment remains the brand's light-surface
+ramp — nothing is ever default-gray, in either direction.
 
 ### 4.3 The five primitives — shared family asset
 
@@ -200,7 +206,29 @@ wallpaper, never a background texture.
 The site is the brand's cinematic surface: **dark-only, typographic, one light source.**
 (Absorbs DESIGN.md §2–6; DESIGN.md retires when Docs 03–04 land.)
 
-## 10. Canvas tokens
+## 10. Canvas tokens — MIDNIGHT (moonlight + ember, 2026-06-12)
+
+The canvas is the night sky the ember glows against — sapphire-saturated, zero grey.
+Replaced the sediment-derived warm darks (decision log: Ani, "remove any greyish
+colors"). Values:
+
+```
+--color-void:   #0A1021   (the night)      --color-ink-hi:  #F5F0EB (candle cream — warm)
+--color-panel:  #111A33                    --color-ink-mid: #A9BBEA (moonlight, ≥7.7:1)
+--color-raised: #1B2747                    --color-ink-low: #7E95D6 (moonlight, ≥5.0:1)
+--color-inset:  #070C1A   (terminal wells)
+--color-line:        rgba(146,172,255,0.14)   (silvered moonbeams)
+--color-line-hover:  rgba(146,172,255,0.24)
+--moon-glow:  rgba(106,136,215,0.32)  +  --ember-bleed: rgba(255,122,82,0.07)
+   → the page's atmosphere: two fixed radials at the top of the body. Canvas
+     treatment, NOT an effect — the horizon-glow two-instance rule is separate.
+```
+
+The composition law: **moonlight is the light of information** (secondary text, lines,
+chrome); **ember is the light of identity and action** (brand, CTAs, prompts, branch);
+**candle-cream is the light of the headline**. Nothing on the dark canvas is grey.
+
+Superseded section follows for history:
 
 Derived from sediment-900/950 with two intermediate surfaces:
 

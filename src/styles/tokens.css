@@ -10,24 +10,27 @@
 /* `static` — the contract emits ALL tokens regardless of utility usage:
    inline styles, JS islands, and future consumers read these vars directly. */
 @theme static {
-  /* ---- canvas (02 §10) ---- */
-  --color-void: #0a0908;
-  --color-panel: #121110;
-  --color-raised: #1a1817;
-  --color-inset: #060605;
+  /* ---- canvas: MIDNIGHT (moonlight + ember theme, 2026-06-12) ----
+     The radical pass (Ani): no greyish colors anywhere — every neutral is
+     either moonlight (sapphire-blue) or ember (warm). The canvas is the
+     night sky; the sediment ramp now serves LIGHT surfaces only (Foundry/
+     Hub light themes). */
+  --color-void: #0a1021;
+  --color-panel: #111a33;
+  --color-raised: #1b2747;
+  --color-inset: #070c1a;
 
-  /* ---- ink ---- */
+  /* ---- ink: candlelight + moonlight ----
+     ink-hi stays warm cream (the candle); secondary inks are saturated
+     moonlight, NOT grey-blue. Measured: ink-mid ≥7.7:1 and ink-low ≥5.0:1
+     on every surface. */
   --color-ink-hi: #f5f0eb;
-  --color-ink-mid: #a8a29b;
-  /* ink-low corrected 2026-06-12 (Phase 6 a11y audit, twice): the original
-     sediment-600 measured 3.50:1 on void; the first fix (#827c74) still failed
-     on raised (4.28:1). Final: sediment-500 — ≥4.78:1 on every surface
-     (void 5.6, panel 5.09, raised 4.78, inset 5.48). Doc 02 §10 amended. */
-  --color-ink-low: #8a847c;
+  --color-ink-mid: #a9bbea;
+  --color-ink-low: #7e95d6;
 
-  /* ---- lines ---- */
-  --color-line: rgba(245, 240, 235, 0.08);
-  --color-line-hover: rgba(245, 240, 235, 0.14);
+  /* ---- lines: silvered moonbeams ---- */
+  --color-line: rgba(146, 172, 255, 0.14);
+  --color-line-hover: rgba(146, 172, 255, 0.24);
 
   /* ---- terracotta ramp (02 §4.1; EMBER recalibration 2026-06-12) ----
      Clay → ember: same family, luminous instead of muted — the palette
@@ -141,6 +144,12 @@
 
   /* the ONE glow (02 §10) — used only by HorizonGlow; ember presence */
   --horizon-glow: rgba(255, 122, 82, 0.24);
+
+  /* canvas atmosphere (moonlight + ember theme): the moon's bloom and the
+     ember's bleed at the top of the page. Canvas treatment, not an effect —
+     distinct from the horizon-glow two-instance rule (02 §10). */
+  --moon-glow: rgba(106, 136, 215, 0.32);
+  --ember-bleed: rgba(255, 122, 82, 0.07);
 
   /* floating set-piece shadow (02 §12) */
   --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,
