@@ -73,7 +73,9 @@ input — no scroll-jacking, no synthetic smoothing, no momentum overrides. Scro
 - Touch devices: parallax off entirely (jank risk + no hover-class hardware).
 
 ### 3.2 Scrub set-pieces (max two per page)
-The Foundry showcase and the time-travel strip (per 01 §5). Mechanics:
+The **branch story** (fork → modify → diff → merge; added 2026-06-12 — the slot freed
+when the Foundry scrub was cut in the seven-section restructure) and the **time-travel
+strip**. At the cap. Mechanics:
 
 - Sticky container; scroll ownership ≤ 2.5 viewport-heights per piece.
 - Scenes occupy progress bands; transitions crossfade/transform over a 12% progress

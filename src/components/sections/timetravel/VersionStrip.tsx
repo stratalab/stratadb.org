@@ -1,4 +1,4 @@
-// Set-piece B (04 §4): the page's ONLY scroll-scrub (03 §3.2). Scroll position
+// Set-piece B (04 §4): one of the page's two scroll-scrubs (03 §3.2, at the cap). Scroll position
 // drives values — never hijacked; scenes crossfade over soft 12% bands.
 // Reduced motion: static scenes with Prev/Next steppers (03 §6).
 // Authored against the seed world — every value shown is true in src/data/seed.ts.

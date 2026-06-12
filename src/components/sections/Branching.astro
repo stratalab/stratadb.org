@@ -1,37 +1,18 @@
 ---
-// Section 2 (04 §3): the completeness argument. Zero JS, permanently (05 §5).
+// Section 2 (04 §3, v2 2026-06-12): fork → modify → diff → merge as the
+// page's second scroll-scrub. The diagram is backlog I2's first claim
+// artifact; the verbs are the head enacted.
 import SectionShell from '../foundation/SectionShell.astro';
 import Heading from '../foundation/Heading.astro';
-import TerminalFrame from '../chrome/TerminalFrame.astro';
-import TermLine from '../chrome/TermLine.astro';
+import BranchScrub from './branch/BranchScrub.tsx';
 ---
 
 <SectionShell id="branch" eyebrow="BRANCH">
-  <div class="grid items-center gap-12 lg:grid-cols-12">
-    <div class="reveal lg:col-span-6">
-      <Heading size="display">Try anything. Keep what works.</Heading>
-      <p class="mt-6 max-w-[34rem] text-body-lg text-ink-mid">
-        Forking is O(1) — nothing is copied, at any size. A branch is a complete database:
-        diff it, merge it, cherry-pick a single change across.
-        <code class="font-mono text-mono-sm text-ink-hi">main</code> is untouched until you
-        say so.
-      </p>
-    </div>
-    <div class="reveal lg:col-span-6">
-      <TerminalFrame title="strata — the whole verb set">
-        <TermLine cmd>branch create risky</TermLine>
-        <TermLine>OK</TermLine>
-        <TermLine cmd branch="risky">kv put config.retries 5</TermLine>
-        <TermLine>(version) 1</TermLine>
-        <TermLine cmd>branch diff risky</TermLine>
-        <TermLine tone="ok">+1 key · config.retries</TermLine>
-        <TermLine cmd>branch cherry-pick risky config.retries</TermLine>
-        <TermLine>OK</TermLine>
-        <TermLine cmd>branch delete risky</TermLine>
-        <TermLine>OK</TermLine>
-        <TermLine cmd>kv get config.retries</TermLine>
-        <TermLine>5</TermLine>
-      </TerminalFrame>
-    </div>
+  <div class="reveal mb-4 max-w-[42rem]">
+    <Heading size="display">Try anything. Keep what works.</Heading>
+    <p class="mt-6 text-body-lg text-ink-mid">
+      A branch is a complete database — fork it in O(1), change it, diff it, merge it back.
+    </p>
   </div>
+  <BranchScrub client:visible />
 </SectionShell>

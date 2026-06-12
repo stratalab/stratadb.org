@@ -116,16 +116,28 @@ path to real interaction.
 
 ## 3. Section 2 — Branching
 
-**Layout.** 7/5 split (text left). **Copy.** Eyebrow `BRANCH`; H2 **"Try anything.
-Keep what works."** *(section-head register per claude.com reference, 2026-06-11 —
-verb-led, second person; alternate held: "A branch is a database.")*; body: "Forking is
-O(1) — nothing is copied, at any size. A branch is a complete database: diff it, merge
-it, cherry-pick a single change across. `main` is untouched until you say so."
-*(the old head survives as the body's conceptual anchor)* **Right:** terminal (chrome 02
-§12), completed transcript of the **full verb set**: fork → write → `branch diff` →
-`branch cherry-pick` → `branch delete` — main intact. Fork-only "branching" products
-can't screenshot this. Standard reveal; live-capable (executor). Mobile: stack,
-terminal first.
+**v2 (2026-06-12, Ani): the section is scrub #2 — fork → modify → diff → merge.**
+Eyebrow `BRANCH`; H2 **"Try anything. Keep what works."**; intro: "A branch is a
+complete database — fork it in O(1), change it, diff it, merge it back."
+
+**Set-piece: the branch story** (also backlog I2's first claim artifact). Pinned stage,
+340vh (≈2.4 viewport-heights ownership, cap 2.5): a 5/7 grid — caption rail (four verbs,
+each with its real command and one line; active verb lit with an ember tick) beside a
+**living branch diagram** that builds with scroll:
+
+| Band | Act | Diagram |
+|---|---|---|
+| 0–0.28 | Fork | the ember `risky` line springs off `main` (pathLength 0.02–0.24); glow-understroke + bright core, same language as the river |
+| 0.28–0.55 | Modify | a write-dot lands on risky (`config.retries = 5` floats above); main stays clean |
+| 0.55–0.80 | Diff | a dashed bridge + `+1 key` card spans the two lines (0.57–0.68) |
+| 0.80–1 | Merge | risky curves home into main (0.82–0.96), the landing dot arrives, risky dims to 35% (0.94–1) |
+
+Conformance: tier-2 scrub, spring-scrub smoothing, band 0 clamped · props
+transform/opacity/pathLength · reduced motion = four static scenes + Prev/Next steppers ·
+mobile = swipeable carousel with static diagram states · captions are real DOM text ·
+no scroll hijacking. *(The old static verb-set transcript is retired; `cherry-pick`
+remains taught in the one-liner, llms.txt, and the for-agents recipe — a fifth scene is
+a recorded option if it earns its scroll.)*
 
 ## 4. Section 3 — Multi-primitive: The Strata Column
 
