@@ -1,0 +1,37 @@
+---
+// Section 2 (04 §3): the completeness argument. Zero JS, permanently (05 §5).
+import SectionShell from '../foundation/SectionShell.astro';
+import Heading from '../foundation/Heading.astro';
+import TerminalFrame from '../chrome/TerminalFrame.astro';
+import TermLine from '../chrome/TermLine.astro';
+---
+
+<SectionShell id="branch" eyebrow="BRANCH">
+  <div class="grid items-center gap-12 lg:grid-cols-12">
+    <div class="reveal lg:col-span-6">
+      <Heading size="display">Try anything. Keep what works.</Heading>
+      <p class="mt-6 max-w-[34rem] text-body-lg text-ink-mid">
+        Forking is O(1) — nothing is copied, at any size. A branch is a complete database:
+        diff it, merge it, cherry-pick a single change across.
+        <code class="font-mono text-mono-sm text-ink-hi">main</code> is untouched until you
+        say so.
+      </p>
+    </div>
+    <div class="reveal lg:col-span-6">
+      <TerminalFrame title="strata — the whole verb set">
+        <TermLine cmd>branch create risky</TermLine>
+        <TermLine>OK</TermLine>
+        <TermLine cmd branch="risky">kv put config.retries 5</TermLine>
+        <TermLine>(version) 1</TermLine>
+        <TermLine cmd>branch diff risky</TermLine>
+        <TermLine tone="ok">+1 key · config.retries</TermLine>
+        <TermLine cmd>branch cherry-pick risky config.retries</TermLine>
+        <TermLine>OK</TermLine>
+        <TermLine cmd>branch delete risky</TermLine>
+        <TermLine>OK</TermLine>
+        <TermLine cmd>kv get config.retries</TermLine>
+        <TermLine>5</TermLine>
+      </TerminalFrame>
+    </div>
+  </div>
+</SectionShell>

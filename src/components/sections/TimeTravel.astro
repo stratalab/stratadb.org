@@ -1,0 +1,13 @@
+---
+// Section 4 (04 §4): "Go back to any moment." — the only scroll-scrub on the page.
+import SectionShell from '../foundation/SectionShell.astro';
+import Heading from '../foundation/Heading.astro';
+import VersionStrip from './timetravel/VersionStrip.tsx';
+---
+
+<SectionShell id="time-travel" eyebrow="TIME TRAVEL">
+  <div class="reveal mb-4 max-w-[42rem]">
+    <Heading size="display">Go back to any moment.</Heading>
+  </div>
+  <VersionStrip client:visible />
+</SectionShell>
