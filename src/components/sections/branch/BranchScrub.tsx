@@ -169,7 +169,7 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
       : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g));
 
   return (
-    <div className="relative flex h-[36rem] items-center justify-center">
+    <div className="relative flex h-[28rem] items-center justify-center">
       {/* risky card (peels off main) */}
       <motion.div className="absolute z-10" style={{ x: riskyX, opacity: riskyOpacity }}>
         <JsonCard label="risky" labelColor="var(--color-terracotta-500)" swapped={riskySwap} highlight={riskyFlash} />
@@ -189,20 +189,20 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
 function CommandStrip({ active }: { active: number }) {
   const act = ACTS[active];
   return (
-    <div className="mx-auto mb-2 flex max-w-[44rem] flex-col items-center gap-1.5 text-center">
-      <p className="font-mono text-mono-body">
+    <div className="mx-auto mb-10 flex max-w-[56rem] flex-col items-center gap-3 text-center">
+      <p className="font-mono text-[1.625rem] leading-tight max-lg:text-[1.25rem]">
         <span className="text-ink-low">strata:{act.branch} </span>
         <span className="text-terracotta-500">›</span>
         <span className="text-ink-hi"> {act.cmd}</span>
       </p>
-      <p className="text-small text-ink-mid">
-        <span className="font-medium text-ink-hi">{act.verb}</span> — {act.line}
+      <p className="text-body-lg text-ink-mid">
+        <span className="text-heading font-semibold text-ink-hi">{act.verb}</span> — {act.line}
       </p>
-      <div className="mt-1 flex gap-2" aria-hidden="true">
+      <div className="mt-2 flex gap-2.5" aria-hidden="true">
         {ACTS.map((_, i) => (
           <span
             key={i}
-            className={`h-1 w-6 rounded-full transition-colors duration-300 ${i <= active ? 'bg-terracotta-500' : 'bg-raised'}`}
+            className={`h-1.5 w-9 rounded-full transition-colors duration-300 ${i <= active ? 'bg-terracotta-500' : 'bg-raised'}`}
           />
         ))}
       </div>
