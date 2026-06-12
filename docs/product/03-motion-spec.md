@@ -139,9 +139,12 @@ the engine.
 - Nothing runs longer than `--dur-5` except user-scrubbed interpolation and the
   executor-driven set-piece sequences (which are beat-by-beat, each beat ≤ `--dur-5`).
 - No looping decorative animation. Set-piece loops complete a full cycle + ≥4s hold.
-- Max 2 scrub pieces (census 2026-06-12: ONE in use — branch; the time-travel scrub
-  converted to a direct-manipulation slider, a Tier-1 user-driven control, freeing a
-  slot), max 2 parallax sites, **3 infinite animations** — the cursor;
+- Max 2 scrub pieces (census 2026-06-12, twice-revised: branch + the PRIMITIVES PIN —
+  the slot freed by the time-travel slider conversion was reclaimed same day by the
+  Foundry-window tab tour, Ani: "make it so the scroll doesn't just blow past it";
+  the pin steps the five views, and clicking a view JUMPS the scroll to its band so
+  pointer and pin never fight), max 2 parallax sites, **3 infinite animations** — the
+  cursor;
   (amendment 2026-06-12, Ani: "the hero shouldn't be static") the hero's breathing
   backdrop: three light fields, transform-only, 22–36s periods, off under reduced
   motion; and (amendment 2026-06-12, Ani: the branch section "needs more color and

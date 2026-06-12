@@ -19,7 +19,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useScroll } from 'motion/react';
 import { SEED } from '../../../data/seed';
 import { COOL, EASE, EMBER, Line, useBeats } from '../../shared/term';
 
@@ -458,12 +458,24 @@ const VIEWS: Record<PrimId, ComponentType<{ live: boolean }>> = {
 };
 
 // ---- the Foundry window ----------------------------------------------------
+// v6 (2026-06-12, Ani): "make it so the scroll doesn't just blow past it" —
+// the window PINS (scrub #2 of 2; the slot freed by the time-travel
+// conversion) and continued scrolling walks the five views, one band each.
+// Clicking a view never fights the scroll: it JUMPS the scroll position to
+// that view's band, so pointer and pin always agree. Desktop only; reduced
+// motion and mobile keep the unpinned manual window.
+const PIN_VH = 260; // 100vh screen + 5 bands of dwell
+
+const isPinned = () => window.matchMedia('(min-width: 1024px)').matches;
+
 export default function PrimitiveTabs() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [selected, setSelected] = useState<PrimId>('kv');
   const [reduced, setReduced] = useState(false);
   const [seen, setSeen] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     setReduced(document.documentElement.dataset.motion === 'reduced');
@@ -480,6 +492,32 @@ export default function PrimitiveTabs() {
     return () => io.disconnect();
   }, []);
 
+  // While pinned, scroll position drives the active view (band-stepped).
+  const { scrollYProgress } = useScroll({ target: pinRef, offset: ['start start', 'end end'] });
+  useEffect(
+    () =>
+      scrollYProgress.on('change', (v) => {
+        if (reduced || !isPinned()) return;
+        const i = Math.min(PRIMS.length - 1, Math.max(0, Math.floor(v * PRIMS.length)));
+        setSelected(PRIMS[i].id);
+      }),
+    [scrollYProgress, reduced]
+  );
+
+  // Clicking a view jumps the scroll to its band — pointer and pin agree.
+  const goTo = (i: number) => {
+    setTouched(true);
+    const el = pinRef.current;
+    if (el && !reduced && isPinned()) {
+      const scrollable = el.offsetHeight - window.innerHeight;
+      if (scrollable > 0) {
+        const top = window.scrollY + el.getBoundingClientRect().top;
+        window.scrollTo({ top: Math.round(top + (scrollable * (i + 0.5)) / PRIMS.length), behavior: 'auto' });
+      }
+    }
+    setSelected(PRIMS[i].id);
+  };
+
   const live = seen && !reduced;
   const ActiveView = VIEWS[selected];
   const activeIdx = PRIMS.findIndex((p) => p.id === selected);
@@ -494,22 +532,23 @@ export default function PrimitiveTabs() {
     else if (e.key === 'End') next = PRIMS.length - 1;
     else return;
     e.preventDefault();
-    setSelected(PRIMS[next].id);
+    goTo(next);
     tabRefs.current[next]?.focus();
   };
 
   return (
-    <div ref={rootRef} className="relative">
-      {/* stage lights: the page's one pair */}
-      <div
-        className="pointer-events-none absolute -inset-x-20 -inset-y-16"
-        aria-hidden="true"
-        style={{
-          background: `radial-gradient(44% 58% at 60% 40%, ${EMBER(0.11)}, transparent 70%), radial-gradient(30% 44% at 10% 80%, ${COOL(0.07)}, transparent 72%)`,
-        }}
-      />
+    <div ref={pinRef} className={reduced ? '' : 'lg:h-[260vh]'}>
+      <div ref={rootRef} className={`relative ${reduced ? '' : 'lg:sticky lg:top-24'}`}>
+        {/* stage lights: the page's one pair */}
+        <div
+          className="pointer-events-none absolute -inset-x-20 -inset-y-16"
+          aria-hidden="true"
+          style={{
+            background: `radial-gradient(44% 58% at 60% 40%, ${EMBER(0.11)}, transparent 70%), radial-gradient(30% 44% at 10% 80%, ${COOL(0.07)}, transparent 72%)`,
+          }}
+        />
 
-      <div className="relative">
+        <div className="relative" onPointerDownCapture={() => setTouched(true)}>
         {/* the window */}
         <div
           className="overflow-hidden rounded-(--radius-frame)"
@@ -534,6 +573,21 @@ export default function PrimitiveTabs() {
               <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
               portfolio.strata
             </span>
+            {/* the invitation — fades on first touch */}
+            <motion.span
+              className="rounded-full px-2.5 py-0.5 font-mono text-mono-sm max-[560px]:hidden"
+              style={{ background: EMBER(0.14), color: 'var(--color-terracotta-300)' }}
+              initial={false}
+              animate={
+                touched
+                  ? { opacity: 0, visibility: 'hidden' }
+                  : { opacity: [1, 0.55, 1, 0.55, 1], visibility: 'visible' }
+              }
+              transition={touched ? { duration: 0.3 } : { duration: 3.2, ease: 'easeInOut' }}
+              aria-hidden={touched}
+            >
+              interactive — click around
+            </motion.span>
             <span className="ml-auto flex items-center gap-2 font-mono text-mono-sm text-ink-low max-sm:hidden">
               <span className="rounded-(--radius-control) border border-line px-2 py-0.5">⎇ main</span>
               <span className="rounded-(--radius-control) border border-line px-2 py-0.5 max-md:hidden">space: default</span>
@@ -564,7 +618,7 @@ export default function PrimitiveTabs() {
                     aria-selected={isActive}
                     aria-controls="prim-panel"
                     tabIndex={isActive ? 0 : -1}
-                    onClick={() => setSelected(p.id)}
+                    onClick={() => goTo(i)}
                     className={`flex shrink-0 items-center gap-2.5 rounded-(--radius-control) px-3 py-2 text-left text-small outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-terracotta-500 ${
                       isActive ? 'text-ink-hi' : 'text-ink-mid hover:bg-raised'
                     }`}
@@ -624,6 +678,7 @@ export default function PrimitiveTabs() {
           >
             Read the {active.id} guide →
           </a>
+        </div>
         </div>
       </div>
     </div>

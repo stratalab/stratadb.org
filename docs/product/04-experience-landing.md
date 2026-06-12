@@ -261,6 +261,17 @@ of Foundry's redesign in the shared design language (02 §B):
 - The 88rem stage, lighting, ruled mono footer (0n / 05) and guide links survive
   unchanged.
 
+**v6 (2026-06-12, Ani: "make it so the scroll doesn't just blow past it… visitors
+need a way to know the component is interactive"): the pin + the invitation.**
+The window pins for 260vh (scrub #2 of 2 — the slot the time-travel conversion
+freed) and continued scrolling walks the five views, one band each — the tour
+itself demonstrates that the sidebar is live. Clicking a view never fights the
+pin: it JUMPS the scroll to that view's band, so pointer and scroll always agree
+(keyboard arrows do the same). An ember **"interactive — click around" pill** in
+the titlebar pulses twice on arrival and fades permanently on first touch
+(opacity+visibility — the a11y rule). Desktop only; reduced motion and mobile
+keep the unpinned manual window.
+
 **v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
 down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens
 +8px, surfaces the API line in `mono-sm`. *(Branch is not a layer — branching is the
