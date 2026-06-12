@@ -357,6 +357,18 @@ canonical mock of the redesign** — sidebar, titlebar chips (database tab, bran
 space), master–detail views, ember selection language. Foundry work happens in the
 strata-foundry repo; this site's /specimen page remains the verification reference.
 
+**Project decisions (2026-06-12, Ani, at kickoff):** (1) **Typography = General Sans
++ Commit Mono** — supersedes this doc's earlier "system fonts stay (§5)" line for
+Foundry; the woff2 assets ship from the site's `public/fonts` to Foundry's bundle;
+one product, one face. (2) **Dark only** — the redesign ships the neutral-stage dark
+theme exclusively; the light theme retires (pre-release, no users to migrate) and
+may return later as a theme built on the same tokens. B3 ("dark theme" as an
+addition) is thereby inverted: dark IS the theme. (3) Primitive hues remain
+sanctioned in Foundry as functional view accents (§4.3) — data-type coloring in the
+JSON tree, graph node fills — distinct from the landing's one-temperature rule.
+(4) The redesign plan lives in strata-foundry/docs/redesign-spec.md; this appendix
+stays the brand law it builds against.
+
 ## Appendix C — Shared asset deliverables
 
 | Asset | Format | Consumed by | Status |
