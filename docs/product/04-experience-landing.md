@@ -76,11 +76,14 @@ terminal 1.0×, stat strip 1.04×.
   understatement experiment served its month; with the river artwork behind it, the
   fuller claim carries. *(Noted, not normalized: uses the family name "Strata" and
   "the" — both deliberate in Ani's phrasing; 02 §2 naming table records the exception.)*
-- **The acquisition control** (replaces all hero CTAs — no "Get Started"; docs live in
-  the nav): one joined group — copyable `curl -fsSL stratadb.org/install.sh | sh` ·
-  divider · **"⬇ Download Foundry"** (R1 interim: → strata-foundry repo; auto-upgrades
-  to release artifacts). Beneath it, the agent door, in the hero:
-  `for your agent → stratadb.org/llms.txt`.
+- **The acquisition pair** (v2 of the control, 2026-06-12 — the joined group read as one
+  copy-widget and "Foundry" assumed name-knowledge): two visibly different species —
+  a filled ember **button, "Get the desktop app"** (app-window icon; R1 interim →
+  strata-foundry repo; label flips to "Download…" when artifacts exist; the Foundry
+  *name* is taught later, in the install tab) beside the quiet mono **curl chip**.
+  Beneath them, the agent door in a hairline pill:
+  `for your agent → stratadb.org/llms.txt`. A content scrim quiets the river artwork
+  behind the entire center column.
 - Funnel note: the hero now carries **Feel + Act in one screen** — claim, get-the-product
   (human CLI · human GUI · agent URL), proof below.
 - Stat strip (Commit Mono, footnote markers → conditions in docs):
