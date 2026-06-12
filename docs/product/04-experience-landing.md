@@ -120,24 +120,28 @@ path to real interaction.
 Eyebrow `BRANCH`; H2 **"Try anything. Keep what works."**; intro: "A branch is a
 complete database — fork it in O(1), change it, diff it, merge it back."
 
-**Set-piece: the branch story** (also backlog I2's first claim artifact). Pinned stage,
-340vh (≈2.4 viewport-heights ownership, cap 2.5): a 5/7 grid — caption rail (four verbs,
-each with its real command and one line; active verb lit with an ember tick) beside a
-**living branch diagram** that builds with scroll:
+**Set-piece: the branch story, v3 (2026-06-12, Ani: "show how it works in a database,
+with an actual JSON… intuitive to anyone") — the DATA is the protagonist.** Full-stage
+pin, 340vh (≈2.4 viewport-heights ownership, cap 2.5): a slim command strip on top
+(real prompt + command + one caption line + act-progress bars), and beneath it the cards
+own the viewport. The document is `json · config` from the seed world —
+`{ "theme": "dark", "font_size": 14, "language": "en" }` — settings anyone understands,
+and the SAME change the hero and time-travel sections tell: trying `"midnight"`.
 
-| Band | Act | Diagram |
+| Band | Act | Stage |
 |---|---|---|
-| 0–0.28 | Fork | the ember `risky` line springs off `main` (pathLength 0.02–0.24); glow-understroke + bright core, same language as the river |
-| 0.28–0.55 | Modify | a write-dot lands on risky (`config.retries = 5` floats above); main stays clean |
-| 0.55–0.80 | Diff | a dashed bridge + `+1 key` card spans the two lines (0.57–0.68) |
-| 0.80–1 | Merge | risky curves home into main (0.82–0.96), the landing dot arrives, risky dims to 35% (0.94–1) |
+| 0–0.28 | Fork (`branch create risky`) | one card center-stage peels into two identical cards spreading from center (±54%) — the zero-copy fork shown as the document itself forking |
+| 0.28–0.55 | Modify (`json set config $.theme "midnight"`) | on the risky card, `"dark"` slides out and `"midnight"` slides in (ember line-flash); main visibly unchanged |
+| 0.55–0.80 | Diff (`branch diff risky`) | a true unified-diff card rises center-stage between them: `- "theme": "dark"` / `+ "theme": "midnight"` · `1 key` |
+| 0.80–1 | Merge (`branch merge risky`) | the cards converge home; risky fades as it merges; main's value swaps to `"midnight"` with a `merged` chip — full circle |
 
 Conformance: tier-2 scrub, spring-scrub smoothing, band 0 clamped · props
-transform/opacity/pathLength · reduced motion = four static scenes + Prev/Next steppers ·
-mobile = swipeable carousel with static diagram states · captions are real DOM text ·
-no scroll hijacking. *(The old static verb-set transcript is retired; `cherry-pick`
-remains taught in the one-liner, llms.txt, and the for-agents recipe — a fifth scene is
-a recorded option if it earns its scroll.)*
+transform/opacity only · reduced motion = four static end-states + Prev/Next steppers ·
+mobile = swipeable acts showing each act's key artifact · command strip is real DOM
+text · no scroll hijacking. *(History: v2 was an abstract fork/merge line diagram —
+superseded same day; "everyone understands the concept of a branch," the point is the
+data. The old static verb-set transcript retired with v2; cherry-pick remains taught in
+the one-liner, llms.txt, and the for-agents recipe.)*
 
 ## 4. Section 3 — Multi-primitive: The Strata Column
 

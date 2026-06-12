@@ -1,172 +1,212 @@
-// Scrub #2 of 2 (03 §3.2 — at the cap): fork → modify → diff → merge as a
-// scroll-driven branch diagram. Also backlog I2's first claim artifact.
-// Same rules as VersionStrip: scroll drives values, never hijacked; band 0
-// clamped; reduced motion = static scenes + steppers; mobile = carousel.
+// Scrub #2 of 2 (03 §3.2) — v2 (2026-06-12): the DATA is the protagonist.
+// A real JSON document (from the seed world) lives on main; the fork peels an
+// identical card off it; the value mutates on the branch; a true unified diff
+// rises between the cards; the merge converges them — main absorbs the change.
+// Full-stage: the cards own the viewport; commands ride a slim strip above.
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react';
+import { SEED } from '../../../data/seed';
 
 const SCRUB = { stiffness: 120, damping: 28, mass: 1.1 };
 const BANDS = [0, 0.28, 0.55, 0.8];
 
-const SCENES = [
-  {
-    verb: 'Fork',
-    cmd: 'branch create risky',
-    line: 'O(1). Nothing is copied, at any size.',
-  },
-  {
-    verb: 'Modify',
-    cmd: 'kv put config.retries 5',
-    line: 'Writes land on the branch. main is untouched.',
-  },
-  {
-    verb: 'Diff',
-    cmd: 'branch diff risky',
-    line: 'See exactly what changed — before you commit to it.',
-  },
-  {
-    verb: 'Merge',
-    cmd: 'branch merge risky',
-    line: 'Keep what works. The branch did its job.',
-  },
+const DOC = SEED.json.config as { theme: string; font_size: number; language: string };
+const NEW_THEME = 'midnight';
+
+const ACTS = [
+  { verb: 'Fork', branch: 'main', cmd: 'branch create risky', line: 'A branch is a complete database. Nothing copied.' },
+  { verb: 'Modify', branch: 'risky', cmd: 'json set config $.theme "midnight"', line: 'Writes land on the branch. main is untouched.' },
+  { verb: 'Diff', branch: 'main', cmd: 'branch diff risky', line: 'The change, exactly — before you commit to it.' },
+  { verb: 'Merge', branch: 'main', cmd: 'branch merge risky', line: 'Keep what works.' },
 ];
 
-// progress → 0..1 within [a, b]
-function seg(p: MotionValue<number>, a: number, b: number) {
-  return useTransform(p, [a, b], [0, 1], { clamp: true });
-}
+const clamp = { clamp: true };
 
-function Diagram({ p, staticScene }: { p?: MotionValue<number>; staticScene?: number }) {
-  // When staticScene is set (reduced motion / mobile), render that scene's end
-  // state; otherwise drive everything from scroll progress.
-  const mv = p!;
-  const useSeg = (a: number, b: number, fallback: (s: number) => number) =>
-    staticScene !== undefined ? fallback(staticScene) : seg(mv, a, b);
+// ---------- building blocks ----------
 
-  const forkDraw = useSeg(0.02, 0.24, (s) => (s >= 0 ? 1 : 0));
-  const writeIn = useSeg(0.3, 0.4, (s) => (s >= 1 ? 1 : 0));
-  const diffIn = useSeg(0.57, 0.68, (s) => (s === 2 ? 1 : 0));
-  const mergeDraw = useSeg(0.82, 0.96, (s) => (s >= 3 ? 1 : 0));
-  const riskyDim = useSeg(0.94, 1, (s) => (s >= 3 ? 1 : 0));
-
-  const riskyOpacity =
-    staticScene !== undefined
-      ? staticScene >= 3
-        ? 0.35
-        : 1
-      : useTransform(riskyDim as MotionValue<number>, [0, 1], [1, 0.35]);
-
+function ValueSwap({ from, to, swapped }: { from: string; to: string; swapped: MotionValue<number> | number }) {
+  const n = typeof swapped === 'number';
+  const oldOpacity = n ? 1 - (swapped as number) : useTransform(swapped as MotionValue<number>, (v) => 1 - v);
+  const oldY = n ? -(swapped as number) * 10 : useTransform(swapped as MotionValue<number>, (v) => -v * 10);
+  const newOpacity = swapped;
+  const newY = n ? (1 - (swapped as number)) * 10 : useTransform(swapped as MotionValue<number>, (v) => (1 - v) * 10);
   return (
-    <svg viewBox="0 0 800 340" fill="none" className="w-full" aria-hidden="true">
-      {/* main line — always present */}
-      <line x1="32" y1="230" x2="768" y2="230" stroke="var(--color-ink-low)" strokeWidth="1.5" opacity="0.7" />
-      <text x="36" y="254" fill="var(--color-ink-low)" fontSize="13" fontFamily="var(--font-mono)">main</text>
-
-      {/* the fork: springs off main */}
-      <motion.g style={{ opacity: riskyOpacity }}>
-        <motion.path
-          d="M 180 230 C 230 230 250 110 320 104 L 656 104"
-          stroke="var(--color-terracotta-700)"
-          strokeWidth="6"
-          strokeLinecap="round"
-          opacity="0.3"
-          style={{ pathLength: forkDraw }}
-        />
-        <motion.path
-          d="M 180 230 C 230 230 250 110 320 104 L 656 104"
-          stroke="var(--color-terracotta-400)"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-          style={{ pathLength: forkDraw }}
-        />
-        <motion.text
-          x="324"
-          y="86"
-          fill="var(--color-terracotta-400)"
-          fontSize="13"
-          fontFamily="var(--font-mono)"
-          style={{ opacity: forkDraw }}
-        >
-          risky
-        </motion.text>
-
-        {/* the write: a dot lands on the branch */}
-        <motion.circle
-          cx="430"
-          cy="104"
-          r="7"
-          fill="var(--color-terracotta-500)"
-          style={{ scale: writeIn, opacity: writeIn, transformOrigin: '430px 104px' }}
-        />
-        <motion.text
-          x="430"
-          y="76"
-          textAnchor="middle"
-          fill="var(--color-ink-mid)"
-          fontSize="12"
-          fontFamily="var(--font-mono)"
-          style={{ opacity: writeIn }}
-        >
-          config.retries = 5
-        </motion.text>
-      </motion.g>
-
-      {/* the diff: a bridge between the lines */}
-      <motion.g style={{ opacity: diffIn }}>
-        <line x1="530" y1="112" x2="530" y2="222" stroke="var(--color-ink-low)" strokeWidth="1" strokeDasharray="4 5" />
-        <rect x="468" y="148" width="124" height="34" rx="8" fill="var(--color-raised)" stroke="var(--color-line-hover)" />
-        <text x="530" y="170" textAnchor="middle" fill="var(--color-ok)" fontSize="13" fontFamily="var(--font-mono)">
-          +1 key
-        </text>
-      </motion.g>
-
-      {/* the merge: home again */}
-      <motion.path
-        d="M 656 104 C 700 108 700 222 744 229"
-        stroke="var(--color-terracotta-700)"
-        strokeWidth="6"
-        strokeLinecap="round"
-        opacity="0.3"
-        style={{ pathLength: mergeDraw }}
-      />
-      <motion.path
-        d="M 656 104 C 700 108 700 222 744 229"
-        stroke="var(--color-terracotta-400)"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        style={{ pathLength: mergeDraw }}
-      />
-      <motion.circle
-        cx="744"
-        cy="230"
-        r="7"
-        fill="var(--color-terracotta-500)"
-        style={{ scale: mergeDraw, opacity: mergeDraw, transformOrigin: '744px 230px' }}
-      />
-    </svg>
+    <span className="relative inline-grid">
+      <motion.span className="col-start-1 row-start-1" style={{ opacity: oldOpacity, y: oldY }}>
+        {from}
+      </motion.span>
+      <motion.span className="col-start-1 row-start-1 text-terracotta-300" style={{ opacity: newOpacity, y: newY }}>
+        {to}
+      </motion.span>
+    </span>
   );
 }
 
-function CaptionRail({ active }: { active: number }) {
+function JsonCard({
+  label,
+  labelColor,
+  swapped,
+  highlight,
+  chip,
+}: {
+  label: string;
+  labelColor: string;
+  swapped: MotionValue<number> | number;
+  highlight?: MotionValue<number> | number;
+  chip?: MotionValue<number> | number;
+}) {
   return (
-    <ol className="space-y-6">
-      {SCENES.map((s, i) => (
-        <li key={s.verb} className={`transition-opacity duration-300 ${i === active ? 'opacity-100' : 'opacity-35'}`}>
-          <p className="flex items-center gap-3">
-            <span
-              className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${i === active ? 'bg-terracotta-500' : 'bg-ink-low'}`}
+    <div
+      className="w-[24rem] max-w-[92vw] overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
+      style={{ boxShadow: 'var(--shadow-float)' }}
+    >
+      <div className="flex h-10 items-center gap-2 border-b border-line px-4">
+        <span className="h-2 w-2 rounded-full" style={{ background: labelColor }} aria-hidden="true" />
+        <span className="font-mono text-mono-sm text-ink-mid">{label}</span>
+        <span className="ml-auto font-mono text-mono-sm text-ink-low">json · config</span>
+        {chip !== undefined && (
+          <motion.span
+            className="ml-2 rounded-full border border-line px-2 py-0.5 font-mono text-[11px] text-ok"
+            style={{ opacity: chip }}
+          >
+            merged
+          </motion.span>
+        )}
+      </div>
+      <div className="bg-inset p-5 font-mono text-mono-body leading-7 text-ink-mid">
+        <div>{'{'}</div>
+        <div className="relative">
+          {highlight !== undefined && (
+            <motion.span
+              className="absolute -inset-x-2 inset-y-0 rounded bg-terracotta-500/15"
+              style={{ opacity: highlight }}
               aria-hidden="true"
             />
-            <span className="text-heading text-ink-hi">{s.verb}</span>
-          </p>
-          <p className="mt-1.5 pl-[18px] font-mono text-mono-sm text-terracotta-300">
-            <span className="text-ink-low">strata:main › </span>
-            {s.cmd}
-          </p>
-          <p className="mt-1 pl-[18px] text-small text-ink-mid">{s.line}</p>
-        </li>
-      ))}
-    </ol>
+          )}
+          <span className="relative">
+            {'  '}
+            <span className="text-strata-json">"theme"</span>:{' '}
+            <ValueSwap from={`"${DOC.theme}",`} to={`"${NEW_THEME}",`} swapped={swapped} />
+          </span>
+        </div>
+        <div>
+          {'  '}
+          <span className="text-strata-json">"font_size"</span>: <span className="text-ink-hi">{DOC.font_size}</span>,
+        </div>
+        <div>
+          {'  '}
+          <span className="text-strata-json">"language"</span>: <span className="text-ink-hi">"{DOC.language}"</span>
+        </div>
+        <div>{'}'}</div>
+      </div>
+    </div>
+  );
+}
+
+function DiffCard({ visible }: { visible: MotionValue<number> | number }) {
+  return (
+    <motion.div
+      className="w-[22rem] max-w-[88vw] overflow-hidden rounded-(--radius-frame) border border-line-hover bg-raised"
+      style={{
+        opacity: visible,
+        scale: typeof visible === 'number' ? 0.94 + visible * 0.06 : useTransform(visible as MotionValue<number>, (v) => 0.94 + v * 0.06),
+        boxShadow: 'var(--shadow-float)',
+      }}
+    >
+      <div className="flex h-10 items-center gap-2 border-b border-line px-4">
+        <span className="font-mono text-mono-sm text-ink-mid">branch diff risky</span>
+        <span className="ml-auto font-mono text-mono-sm text-ok">1 key</span>
+      </div>
+      <div className="bg-inset p-5 font-mono text-mono-sm leading-7">
+        <div className="text-err">- {'"theme": "dark",'}</div>
+        <div className="text-ok">+ {'"theme": "midnight",'}</div>
+        <div className="text-ink-low"> {'  "font_size": 14,'}</div>
+        <div className="text-ink-low"> {'  "language": "en"'}</div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ---------- the stage ----------
+
+function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: number }) {
+  const mv = p!;
+  const drive = (a: number, b: number, fallback: (s: number) => number) =>
+    staticScene !== undefined ? fallback(staticScene) : useTransform(mv, [a, b], [0, 1], clamp);
+
+  // act drivers
+  const spread = drive(0.04, 0.2, (s) => (s < 3 ? 1 : 0)); // cards apart (acts 0–2), together (act 3)
+  const riskySwap = drive(0.32, 0.42, (s) => (s >= 1 ? 1 : 0));
+  const riskyFlash = drive(0.3, 0.36, (s) => (s === 1 ? 1 : 0));
+  const diffIn =
+    staticScene !== undefined
+      ? staticScene === 2
+        ? 1
+        : 0
+      : useTransform(mv, [0.57, 0.65, 0.76, 0.82], [0, 1, 1, 0], clamp);
+  const converge = drive(0.82, 0.94, (s) => (s >= 3 ? 1 : 0));
+  const riskyGone = drive(0.88, 0.97, (s) => (s >= 3 ? 1 : 0));
+  const mainSwap = drive(0.84, 0.9, (s) => (s >= 3 ? 1 : 0));
+  const mergedChip = drive(0.92, 1, (s) => (s >= 3 ? 1 : 0));
+
+  // positions: cards spread from center, converge home
+  const sep = (v: number, c: number) => v * (1 - c);
+  const mainX =
+    staticScene !== undefined
+      ? `${-54 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
+      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${-54 * sep(s, c)}%`);
+  const riskyX =
+    staticScene !== undefined
+      ? `${54 * sep(staticScene >= 0 && staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
+      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${54 * sep(s, c)}%`);
+  const riskyOpacity =
+    staticScene !== undefined
+      ? staticScene >= 3
+        ? 0
+        : staticScene >= 0
+          ? 1
+          : 0
+      : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g));
+
+  return (
+    <div className="relative flex h-[30rem] items-center justify-center">
+      {/* risky card (peels off main) */}
+      <motion.div className="absolute z-10" style={{ x: riskyX, opacity: riskyOpacity }}>
+        <JsonCard label="risky" labelColor="var(--color-terracotta-500)" swapped={riskySwap} highlight={riskyFlash} />
+      </motion.div>
+      {/* main card */}
+      <motion.div className="absolute z-10" style={{ x: mainX }}>
+        <JsonCard label="main" labelColor="var(--color-ink-low)" swapped={mainSwap} chip={mergedChip} />
+      </motion.div>
+      {/* the diff, center stage above both */}
+      <div className="absolute z-20">
+        <DiffCard visible={diffIn} />
+      </div>
+    </div>
+  );
+}
+
+function CommandStrip({ active }: { active: number }) {
+  const act = ACTS[active];
+  return (
+    <div className="mx-auto mb-2 flex max-w-[44rem] flex-col items-center gap-1.5 text-center">
+      <p className="font-mono text-mono-body">
+        <span className="text-ink-low">strata:{act.branch} </span>
+        <span className="text-terracotta-500">›</span>
+        <span className="text-ink-hi"> {act.cmd}</span>
+      </p>
+      <p className="text-small text-ink-mid">
+        <span className="font-medium text-ink-hi">{act.verb}</span> — {act.line}
+      </p>
+      <div className="mt-1 flex gap-2" aria-hidden="true">
+        {ACTS.map((_, i) => (
+          <span
+            key={i}
+            className={`h-1 w-6 rounded-full transition-colors duration-300 ${i <= active ? 'bg-terracotta-500' : 'bg-raised'}`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -196,31 +236,25 @@ export default function BranchScrub() {
   if (reduced) {
     return (
       <div>
-        <div className="grid items-center gap-10 md:grid-cols-12">
-          <div className="md:col-span-5">
-            <CaptionRail active={step} />
-            <div className="mt-8 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setStep((s) => Math.max(0, s - 1))}
-                disabled={step === 0}
-                className="rounded-(--radius-control) border border-line px-4 py-2 text-small text-ink-mid disabled:opacity-40"
-              >
-                ← Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep((s) => Math.min(3, s + 1))}
-                disabled={step === 3}
-                className="rounded-(--radius-control) border border-line px-4 py-2 text-small text-ink-mid disabled:opacity-40"
-              >
-                Next →
-              </button>
-            </div>
-          </div>
-          <div className="md:col-span-7">
-            <Diagram staticScene={step} />
-          </div>
+        <CommandStrip active={step} />
+        <Stage staticScene={step} />
+        <div className="mt-4 flex justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            disabled={step === 0}
+            className="rounded-(--radius-control) border border-line px-4 py-2 text-small text-ink-mid disabled:opacity-40"
+          >
+            ← Prev
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep((s) => Math.min(3, s + 1))}
+            disabled={step === 3}
+            className="rounded-(--radius-control) border border-line px-4 py-2 text-small text-ink-mid disabled:opacity-40"
+          >
+            Next →
+          </button>
         </div>
       </div>
     );
@@ -228,28 +262,37 @@ export default function BranchScrub() {
 
   return (
     <>
-      {/* desktop scrub: ~2.4 viewport-heights of ownership (03 cap: ≤2.5) */}
+      {/* desktop: full-stage pin, ~2.4 viewport-heights of ownership */}
       <div ref={ref} className="relative hidden md:block" style={{ height: '340vh' }}>
-        <div className="sticky top-0 flex h-screen items-center">
-          <div className="grid w-full items-center gap-10 md:grid-cols-12">
-            <div className="md:col-span-5">
-              <CaptionRail active={active} />
-            </div>
-            <div className="md:col-span-7">
-              <Diagram p={progress} />
-            </div>
-          </div>
+        <div className="sticky top-0 flex h-screen flex-col justify-center">
+          <CommandStrip active={active} />
+          <Stage p={progress} />
         </div>
       </div>
 
-      {/* mobile: swipeable scenes, static diagram states */}
+      {/* mobile: swipeable acts, static end-states */}
       <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:hidden">
-        {SCENES.map((s, i) => (
-          <div key={s.verb} className="w-[85vw] shrink-0 snap-center">
-            <p className="text-heading text-ink-hi">{s.verb}</p>
-            <p className="mt-1 font-mono text-mono-sm text-terracotta-300">{s.cmd}</p>
-            <p className="mb-4 mt-1 text-small text-ink-mid">{s.line}</p>
-            <Diagram staticScene={i} />
+        {ACTS.map((act, i) => (
+          <div key={act.verb} className="w-[92vw] shrink-0 snap-center">
+            <p className="font-mono text-mono-sm text-terracotta-300">
+              <span className="text-ink-low">strata:{act.branch} › </span>
+              {act.cmd}
+            </p>
+            <p className="mb-4 mt-1 text-small text-ink-mid">
+              <span className="font-medium text-ink-hi">{act.verb}</span> — {act.line}
+            </p>
+            <div className="flex flex-col items-center gap-4">
+              {i === 2 ? (
+                <DiffCard visible={1} />
+              ) : i === 3 ? (
+                <JsonCard label="main" labelColor="var(--color-ink-low)" swapped={1} chip={1} />
+              ) : (
+                <>
+                  <JsonCard label="main" labelColor="var(--color-ink-low)" swapped={0} />
+                  <JsonCard label="risky" labelColor="var(--color-terracotta-500)" swapped={i >= 1 ? 1 : 0} />
+                </>
+              )}
+            </div>
           </div>
         ))}
       </div>
