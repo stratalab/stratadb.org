@@ -3,8 +3,10 @@ interface Props {
   href?: string;
   variant?: 'primary' | 'quiet';
   class?: string;
+  target?: string;
+  rel?: string;
 }
-const { href, variant = 'primary', class: className = '' } = Astro.props;
+const { href, variant = 'primary', class: className = '', target, rel } = Astro.props;
 const Tag = href ? 'a' : 'button';
 const base =
   'inline-flex items-center justify-center gap-2 rounded-(--radius-control) px-5 py-2.5 ' +
@@ -17,6 +19,6 @@ const variants = {
 };
 ---
 
-<Tag href={href} class={`${base} ${variants[variant]} ${className}`}>
+<Tag href={href} target={target} rel={rel} class={`${base} ${variants[variant]} ${className}`}>
   <slot />
 </Tag>
