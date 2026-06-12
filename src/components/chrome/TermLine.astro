@@ -1,0 +1,31 @@
+---
+// One transcript line. `cmd` lines render the prompt: strata:{branch} › (› terracotta).
+interface Props {
+  cmd?: boolean;
+  branch?: string;
+  tone?: 'default' | 'ok' | 'nil' | 'err';
+}
+const { cmd = false, branch = 'main', tone = 'default' } = Astro.props;
+const toneClass = {
+  default: 'text-ink-mid',
+  ok: 'text-ok',
+  nil: 'text-ink-low',
+  err: 'text-err',
+}[tone];
+---
+
+<div class="whitespace-pre-wrap">
+  {
+    cmd ? (
+      <span>
+        <span class="text-ink-low">strata:{branch} </span>
+        <span class="text-terracotta-500">›</span>
+        <span class="text-ink-hi"> <slot /></span>
+      </span>
+    ) : (
+      <span class={toneClass}>
+        <slot />
+      </span>
+    )
+  }
+</div>

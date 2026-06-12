@@ -1,0 +1,19 @@
+---
+// Quiet measured-numbers row (04 §2). Values must come from data files, never prose.
+interface Props {
+  items: { value: string; note?: string }[];
+  class?: string;
+}
+const { items, class: className = '' } = Astro.props;
+---
+
+<ul class={`flex flex-wrap items-center justify-center font-mono text-mono-sm text-ink-mid ${className}`}>
+  {
+    items.map((item, i) => (
+      <li class="flex items-center">
+        {i > 0 && <span class="mx-4 h-4 w-px bg-line" aria-hidden="true" />}
+        <span title={item.note}>{item.value}</span>
+      </li>
+    ))
+  }
+</ul>

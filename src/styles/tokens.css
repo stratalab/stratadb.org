@@ -1,0 +1,141 @@
+/*
+ * Strata design tokens — THE 02 §13 contract. The only file allowed to contain
+ * raw color/size/duration values. CI fails the build on literals elsewhere.
+ *
+ * Naming note: Doc 02 ink tokens (--text-hi/mid/low) collide with Tailwind v4's
+ * font-size namespace (--text-*), so ink colors map to --color-ink-* here
+ * (class form: text-ink-hi). All other names match the doc verbatim.
+ */
+
+/* `static` — the contract emits ALL tokens regardless of utility usage:
+   inline styles, JS islands, and future consumers read these vars directly. */
+@theme static {
+  /* ---- canvas (02 §10) ---- */
+  --color-void: #0a0908;
+  --color-panel: #121110;
+  --color-raised: #1a1817;
+  --color-inset: #060605;
+
+  /* ---- ink ---- */
+  --color-ink-hi: #f5f0eb;
+  --color-ink-mid: #a8a29b;
+  --color-ink-low: #6b665f;
+
+  /* ---- lines ---- */
+  --color-line: rgba(245, 240, 235, 0.08);
+  --color-line-hover: rgba(245, 240, 235, 0.14);
+
+  /* ---- terracotta ramp (02 §4.1) ---- */
+  --color-terracotta-50: #fdf3ef;
+  --color-terracotta-100: #fae4dc;
+  --color-terracotta-200: #f4c8b8;
+  --color-terracotta-300: #eda98f;
+  --color-terracotta-400: #e78f73;
+  --color-terracotta-500: #e07a5f;
+  --color-terracotta-600: #c75f45;
+  --color-terracotta-700: #a84a34;
+  --color-terracotta-800: #873a28;
+  --color-terracotta-900: #6e2f21;
+  --color-terracotta-950: #3b1812;
+
+  /* ---- sediment ramp (02 §4.2) ---- */
+  --color-sediment-50: #faf8f6;
+  --color-sediment-100: #f1eeea;
+  --color-sediment-200: #e2ddd6;
+  --color-sediment-300: #c9c2b9;
+  --color-sediment-400: #a8a29b;
+  --color-sediment-500: #8a847c;
+  --color-sediment-600: #6b665f;
+  --color-sediment-700: #4f4b45;
+  --color-sediment-800: #33302c;
+  --color-sediment-900: #1a1817;
+  --color-sediment-950: #0a0908;
+
+  /* ---- the five primitives, on-dark anchors (02 §4.3) ----
+     branch is NOT a primitive — the branch model wears terracotta (brand). */
+  --color-strata-kv: #6b9fff;
+  --color-strata-event: #4fc596;
+  --color-strata-json: #e5b566;
+  --color-strata-vector: #e87bb4;
+  --color-strata-graph: #a88bfa;
+
+  /* ---- functional, on-dark (02 §4.4) ---- */
+  --color-ok: #4fc596;
+  --color-warn: #e5b566;
+  --color-err: #e5635c;
+
+  /* ---- type (02 §5, §11) ---- */
+  --font-sans: 'General Sans', system-ui, sans-serif;
+  --font-mono: 'Commit Mono', ui-monospace, monospace;
+
+  --text-display-xl: clamp(2.75rem, 1.4rem + 5.2vw, 5.75rem);
+  --text-display-xl--line-height: 0.98;
+  --text-display-xl--letter-spacing: -0.035em;
+  --text-display-xl--font-weight: 600;
+
+  --text-display: clamp(2.25rem, 1.4rem + 3.2vw, 4rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.025em;
+  --text-display--font-weight: 600;
+
+  --text-title: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.015em;
+  --text-title--font-weight: 600;
+
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.25;
+  --text-heading--letter-spacing: -0.01em;
+  --text-heading--font-weight: 600;
+
+  --text-body-lg: 1.1875rem;
+  --text-body-lg--line-height: 1.55;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+
+  --text-eyebrow: 0.8125rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.06em;
+  --text-eyebrow--font-weight: 500;
+
+  --text-mono-body: 0.9375rem;
+  --text-mono-body--line-height: 1.7;
+
+  --text-mono-sm: 0.8125rem;
+  --text-mono-sm--line-height: 1.7;
+
+  --text-stat: 3.5rem;
+  --text-stat--line-height: 1;
+  --text-stat--letter-spacing: -0.02em;
+  --text-stat--font-weight: 500;
+
+  /* ---- radii (02 §12) ---- */
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --radius-frame: 14px;
+
+  /* ---- motion easings (03 §1) ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Non-Tailwind tokens: consumed as plain CSS vars / by JS islands */
+:root {
+  /* durations (03 §1) */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 480ms;
+  --dur-5: 800ms;
+
+  /* the ONE glow (02 §10) — used only by HorizonGlow */
+  --horizon-glow: rgba(224, 122, 95, 0.13);
+
+  /* floating set-piece shadow (02 §12) */
+  --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,
+    0 24px 64px -32px rgba(0, 0, 0, 0.7);
+}

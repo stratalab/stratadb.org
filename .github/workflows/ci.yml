@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [redesign/v2]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      # Truth rule (06 §5.3 / 02 §13): no raw hex colors outside tokens.css.
+      - name: Literal-drift check
+        run: |
+          MATCHES=$(grep -rEn '#[0-9a-fA-F]{6}\b' src/components src/layouts src/pages/specimen.astro --include='*.astro' --include='*.tsx' || true)
+          if [ -n "$MATCHES" ]; then
+            echo "Raw hex literals found outside tokens.css:"; echo "$MATCHES"; exit 1
+          fi
+
+      - run: npm run build
+
+      # Internal link check matures in Phase 5 (agent surface lands then).
+      - name: Link check (advisory until Phase 5)
+        continue-on-error: true
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --include-fragments dist
+          fail: true
