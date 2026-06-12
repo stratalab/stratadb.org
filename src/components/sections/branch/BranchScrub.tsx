@@ -57,16 +57,25 @@ const SESSION: { act: number; cmd?: string; out?: string; branch?: string }[] = 
 
 type Driver = MotionValue<number> | number;
 const inv = (d: Driver) => (typeof d === 'number' ? 1 - d : useTransform(d, (v) => 1 - v));
+// Faded-out text must ALSO leave the a11y tree — opacity 0 alone keeps it
+// "visible" to checkers as unreadable text (the session-panel lesson,
+// applied stage-wide).
+const visOf = (d: Driver) =>
+  typeof d === 'number' ? (d <= 0.01 ? 'hidden' : 'visible') : useTransform(d, (v) => (v <= 0.01 ? 'hidden' : 'visible'));
 
 function ValueSwap({ from, to, swapped }: { from: string; to: string; swapped: Driver }) {
   const oldY = typeof swapped === 'number' ? -swapped * 10 : useTransform(swapped, (v) => -v * 10);
   const newY = typeof swapped === 'number' ? (1 - swapped) * 10 : useTransform(swapped, (v) => (1 - v) * 10);
+  const gone = inv(swapped);
   return (
     <span className="relative inline-grid">
-      <motion.span className="col-start-1 row-start-1" style={{ opacity: inv(swapped), y: oldY }}>
+      <motion.span className="col-start-1 row-start-1" style={{ opacity: gone, y: oldY, visibility: visOf(gone) }}>
         {from}
       </motion.span>
-      <motion.span className="col-start-1 row-start-1 text-terracotta-300" style={{ opacity: swapped, y: newY }}>
+      <motion.span
+        className="col-start-1 row-start-1 text-terracotta-300"
+        style={{ opacity: swapped, y: newY, visibility: visOf(swapped) }}
+      >
         {to}
       </motion.span>
     </span>
@@ -108,7 +117,7 @@ function JsonCard({
         {chip !== undefined && (
           <motion.span
             className="ml-2 rounded-full border border-line px-2.5 py-0.5 font-mono text-mono-sm text-ok"
-            style={{ opacity: chip }}
+            style={{ opacity: chip, visibility: visOf(chip) }}
           >
             merged
           </motion.span>
@@ -157,7 +166,7 @@ function DiffCard({ visible }: { visible: Driver }) {
   return (
     <motion.div
       className="w-[26rem] max-w-[90vw] overflow-hidden rounded-(--radius-frame) border border-line-hover bg-raised"
-      style={{ opacity: visible, scale, boxShadow: 'var(--shadow-float)' }}
+      style={{ opacity: visible, scale, visibility: visOf(visible), boxShadow: 'var(--shadow-float)' }}
     >
       <div className="flex h-11 items-center gap-2.5 border-b border-line px-5">
         <span className="font-mono text-mono-body text-ink-mid">branch diff risky</span>
@@ -306,7 +315,7 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
         }}
         aria-hidden="true"
       />
-      <motion.div className="absolute z-10" style={{ x: riskyX, opacity: riskyOpacity }}>
+      <motion.div className="absolute z-10" style={{ x: riskyX, opacity: riskyOpacity, visibility: visOf(riskyOpacity) }}>
         <JsonCard kind="risky" swaps={riskySwaps} flash={flash} />
       </motion.div>
       <motion.div className="absolute z-10" style={{ x: mainX }}>

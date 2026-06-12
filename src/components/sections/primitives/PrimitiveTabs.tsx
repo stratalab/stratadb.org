@@ -1,15 +1,16 @@
-// Section 3 (04 §4 v4, 2026-06-12): the lit stage, one temperature. Tabs +
-// content per the claude.com pattern; the tab rail is VERTICAL, stacked
-// like the strata column itself, so the motif's load-bearing appearance
-// survives. v3 added the craft pass (stage lighting, card material, typed
-// commands per 03 §2, count-up scores, traveling traversal); v4 resolves
-// Ani's original five-hue reservation — "the 5 primitives with 5 colors is
-// a bit jarring" — by restyling to the page's law: ember is the only
-// temperature, cool slate the one counterpoint. The hue tokens live on in
-// tokens.css for the specimen and future data-viz; this section is
-// monochrome + ember. All animation is triggered per activation — no new
-// infinite loops (03 §5 cap stays at 3); SSR renders the completed state;
-// reduced motion shows final frames instantly.
+// Section 3 (04 §4 v5, 2026-06-12): the Foundry window. Ani: "I don't
+// think it's a good idea to overuse the CLI animation. It is in every
+// section now. We want to show some stuff from Foundry — that would be
+// much more beautiful." So this section now shows the desktop app itself:
+// ONE Foundry window whose real sidebar (Key–Value · Events · JSON ·
+// Vectors · Graph, with the app's other views dimmed below) is the tab
+// rail, and whose content area renders each primitive's actual view —
+// master–detail key browser with history, the event stream, the JSON
+// tree, vector search, the graph canvas. Structure is faithful to
+// strata-foundry/src (Sidebar, KvView, JsonTree, GraphCanvas …); the skin
+// is the shared design language Foundry adopts in Doc 02 §B. GUI
+// choreography per activation — no typed commands here. SSR renders
+// completed states; reduced motion shows final frames.
 import {
   useEffect,
   useRef,
@@ -20,221 +21,234 @@ import {
 } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { SEED } from '../../../data/seed';
-import { Cmd, COOL, EASE, EMBER, Line, T, TermCard, useBeats } from '../../shared/term';
+import { COOL, EASE, EMBER, Line, useBeats } from '../../shared/term';
 
 const PRIMS = [
-  {
-    id: 'kv',
-    role: 'Versioned key-value. History included.',
-    guide: '/docs/guides/kv-store',
-    icon: 'M5 7h14M5 12h14M5 17h8',
-  },
-  {
-    id: 'event',
-    role: 'Append-only streams. Replay anything.',
-    guide: '/docs/guides/event-log',
-    icon: 'M4 12h16m-5-5l5 5-5 5',
-  },
-  {
-    id: 'json',
-    role: 'Documents with path-level writes.',
-    guide: '/docs/guides/json-store',
-    icon: 'M8 4c-2 0-2 2-2 4s0 4-2 4c2 0 2 2 2 4s0 4 2 4M16 4c2 0 2 2 2 4s0 4 2 4c-2 0-2 2-2 4s0 4-2 4',
-  },
-  {
-    id: 'vector',
-    role: 'Embeddings with HNSW search.',
-    guide: '/docs/guides/vector-store',
-    icon: 'M5 19L19 5m0 0h-7m7 0v7',
-  },
-  {
-    id: 'graph',
-    role: 'Nodes, edges, typed links. Traverse anything.',
-    guide: '/docs/guides/search',
-    icon: 'M6 7a2 2 0 100-4 2 2 0 000 4zm12 4a2 2 0 100-4 2 2 0 000 4zM9 19a2 2 0 100-4 2 2 0 000 4zM7.5 8.5L16 10m-6.5 7L16 11',
-  },
+  { id: 'kv', label: 'Key–Value', role: 'Versioned key-value. History included.', guide: '/docs/guides/kv-store' },
+  { id: 'event', label: 'Events', role: 'Append-only streams. Replay anything.', guide: '/docs/guides/event-log' },
+  { id: 'json', label: 'JSON', role: 'Documents with path-level writes.', guide: '/docs/guides/json-store' },
+  { id: 'vector', label: 'Vectors', role: 'Embeddings with HNSW search.', guide: '/docs/guides/vector-store' },
+  { id: 'graph', label: 'Graph', role: 'Nodes, edges, typed links. Traverse anything.', guide: '/docs/guides/search' },
 ] as const;
+
+// The rest of the real app's nav — present and dimmed: Foundry is bigger
+// than five views, and the other stories live in other sections.
+const MORE_NAV = ['Branches', 'Generate', 'Models', 'Inference', 'Search'];
 
 type PrimId = (typeof PRIMS)[number]['id'];
 
-// Terminal chrome via the shared kit; min-h = the tallest demo (json),
-// measured — tab switches never move the page below.
-function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
-  return (
-    <TermCard title={id} bodyClassName="min-h-[27rem] md:min-h-[30rem]">
-      {children}
-    </TermCard>
-  );
-}
+// ---- shared GUI bits -------------------------------------------------------
 
-// ---- kv: the history demo -------------------------------------------------
-const KV_C1 = 'kv put config.theme "midnight"';
-const KV_C2 = 'kv history config.theme';
-
-function KvDemo({ live }: { live: boolean }) {
-  const beat = useBeats([350, T(KV_C1), 650, T(KV_C2), 380, 380], live);
-  const history = SEED.kv['config.theme'].history!;
+function SelectableRow({
+  on,
+  selected,
+  children,
+  mono = true,
+}: {
+  on: boolean;
+  selected?: boolean;
+  children: ReactNode;
+  mono?: boolean;
+}) {
   return (
-    <Demo id="kv">
-      <Cmd cmd={KV_C1} on={beat >= 1} live={live} />
-      <Line on={beat >= 2} className="text-ok">
-        v3
-      </Line>
-      <div className="mt-4">
-        <Cmd cmd={KV_C2} on={beat >= 3} live={live} />
+    <Line on={on}>
+      <div
+        className={`flex items-baseline justify-between gap-3 rounded-(--radius-control) px-2.5 py-1.5 ${mono ? 'font-mono text-mono-sm' : 'text-small'} ${
+          selected ? 'text-ink-hi' : 'text-ink-mid'
+        }`}
+        style={selected ? { background: EMBER(0.13), boxShadow: `inset 2px 0 0 var(--color-terracotta-500)` } : undefined}
+      >
+        {children}
       </div>
-      {history.map((h, i) => {
-        const latest = i === history.length - 1;
-        return (
-          <Line key={h.version} on={beat >= 4 + i} className="flex items-baseline gap-4">
-            <motion.span
-              className="rounded px-1.5 font-mono text-mono-sm"
-              style={
-                latest
-                  ? { background: EMBER(0.16), color: 'var(--color-terracotta-300)' }
-                  : { color: 'var(--color-ink-low)' }
-              }
-              initial={false}
-              animate={latest && beat >= 6 ? { scale: [1, 1.12, 1] } : {}}
-              transition={{ duration: 0.45, ease: EASE }}
-            >
-              v{h.version}
-            </motion.span>
-            <span className={latest ? 'text-ink-hi' : 'text-ink-mid'}>"{String(h.value)}"</span>
-            <span className="ml-auto text-mono-sm text-ink-low max-sm:hidden">{h.at.slice(0, 16).replace('T', ' ')}</span>
-          </Line>
-        );
-      })}
-      <Line on={beat >= 6} className="mt-4 text-mono-sm text-ink-low">
-        every write keeps its past — no extra table, no triggers
-      </Line>
-    </Demo>
+    </Line>
   );
 }
 
-// ---- event: append + replay ------------------------------------------------
-const EV_C1 = 'event append deploys { "action": "deploy.fail", … }';
-const EV_C2 = 'event list deploys';
+function PanelLabel({ children }: { children: ReactNode }) {
+  return <p className="font-mono text-eyebrow uppercase text-ink-low">{children}</p>;
+}
 
-function EventDemo({ live }: { live: boolean }) {
-  const beat = useBeats([350, T(EV_C1), 650, T(EV_C2), 380, 380], live);
+function Chip({ children, tone = 'ember' }: { children: ReactNode; tone?: 'ember' | 'dim' }) {
+  return (
+    <span
+      className="rounded px-1.5 py-0.5 font-mono text-mono-sm"
+      style={
+        tone === 'ember'
+          ? { background: EMBER(0.16), color: 'var(--color-terracotta-300)' }
+          : { background: 'rgba(255, 255, 255, 0.06)', color: 'var(--color-ink-mid)' }
+      }
+    >
+      {children}
+    </span>
+  );
+}
+
+// ---- Key–Value: the master–detail browser, history open -------------------
+function KvView({ live }: { live: boolean }) {
+  const beat = useBeats([300, 250, 250, 350, 400, 300, 300, 300], live);
+  const keys = ['config.theme', 'greeting', 'portfolio.value', 'user:1'];
+  const history = (SEED.kv['portfolio.value'].history ?? []).slice().reverse();
+  return (
+    <div className="flex h-full max-md:flex-col">
+      <div className="w-56 shrink-0 border-r border-line p-3 max-md:w-full max-md:border-b max-md:border-r-0">
+        <div className="mb-2 rounded-(--radius-control) border border-line bg-panel px-2.5 py-1.5 font-mono text-mono-sm text-ink-low">
+          filter keys…
+        </div>
+        {keys.map((k, i) => (
+          <SelectableRow key={k} on={beat >= 1 + i} selected={k === 'portfolio.value' && beat >= 4}>
+            <span className="truncate">{k}</span>
+          </SelectableRow>
+        ))}
+      </div>
+      <div className="min-w-0 flex-1 p-5">
+        <Line on={beat >= 5} className="flex flex-wrap items-center gap-3">
+          <span className="font-mono text-mono-body text-ink-hi">portfolio.value</span>
+          <Chip>v3</Chip>
+          <Chip tone="dim">int</Chip>
+        </Line>
+        <Line on={beat >= 5} className="mt-3 rounded-(--radius-card) border border-line bg-inset p-4">
+          <span className="font-mono text-[1.4rem] text-ink-hi tabular-nums">111080</span>
+        </Line>
+        <div className="mt-5">
+          <PanelLabel>History</PanelLabel>
+          <div className="mt-2 space-y-1">
+            {history.map((h, i) => (
+              <SelectableRow key={h.version} on={beat >= 6 + i} selected={i === 0 && beat >= 8}>
+                <span className="flex items-baseline gap-3">
+                  <span className={i === 0 ? 'text-terracotta-300' : 'text-ink-low'}>v{h.version}</span>
+                  <span className="tabular-nums">{Number(h.value).toLocaleString('en-US')}</span>
+                </span>
+                <span className="text-ink-low max-sm:hidden">{h.at.slice(0, 16).replace('T', ' ')}</span>
+              </SelectableRow>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- Events: the append-only stream ----------------------------------------
+function EventsView({ live }: { live: boolean }) {
+  const beat = useBeats([350, 400, 400, 400, 350], live);
   const rows = SEED.events.deploys.map((e) => ({
     t: e.at.slice(11, 19),
     action: String(e.payload.action),
     detail:
       e.payload.action === 'config.update'
-        ? `${e.payload.key} → ${e.payload.to}`
+        ? `${e.payload.key} → "${e.payload.to}"`
         : e.payload.action === 'deploy.start'
           ? String(e.payload.version)
           : String(e.payload.reason),
   }));
   return (
-    <Demo id="event">
-      <Cmd cmd={EV_C1} on={beat >= 1} live={live} />
-      <Line on={beat >= 2} className="text-ok">
-        #3 · 09:33:12
+    <div className="flex h-full flex-col p-5">
+      <Line on={beat >= 1} className="flex items-center gap-3">
+        <span className="font-mono text-mono-body text-ink-hi">deploys</span>
+        <Chip tone="dim">stream</Chip>
+        <span className="ml-auto font-mono text-mono-sm text-ink-low">append-only</span>
       </Line>
-      <div className="mt-4">
-        <Cmd cmd={EV_C2} on={beat >= 3} live={live} />
+      <div className="mt-3 overflow-hidden rounded-(--radius-card) border border-line">
+        <div className="grid grid-cols-[6rem_1fr_1.2fr] gap-3 border-b border-line bg-panel px-4 py-2 font-mono text-eyebrow uppercase text-ink-low max-sm:grid-cols-[6rem_1fr]">
+          <span>time</span>
+          <span>action</span>
+          <span className="max-sm:hidden">payload</span>
+        </div>
+        {rows.map((r, i) => (
+          <Line key={r.t} on={beat >= 2 + i}>
+            <div
+              className={`grid grid-cols-[6rem_1fr_1.2fr] gap-3 px-4 py-2.5 font-mono text-mono-sm max-sm:grid-cols-[6rem_1fr] ${i < rows.length - 1 ? 'border-b border-line' : ''}`}
+              style={i === rows.length - 1 && beat >= 4 ? { background: EMBER(0.07) } : undefined}
+            >
+              <span className="text-ink-low tabular-nums">{r.t}</span>
+              <span className={r.action === 'deploy.fail' ? 'text-err' : 'text-ink-hi'}>{r.action}</span>
+              <span className="text-ink-mid max-sm:hidden">{r.detail}</span>
+            </div>
+          </Line>
+        ))}
       </div>
-      {rows.map((r, i) => (
-        <Line key={r.t} on={beat >= 4 + i} className="flex items-baseline gap-4">
-          <span className="text-mono-sm text-ink-low">{r.t}</span>
-          <span className={r.action === 'deploy.fail' ? 'text-err' : 'text-ink-hi'}>{r.action}</span>
-          <span className="ml-auto text-mono-sm text-ink-mid max-sm:hidden">{r.detail}</span>
-        </Line>
-      ))}
-      <Line on={beat >= 6} className="mt-4 text-mono-sm text-ink-low">
-        nothing is overwritten — the stream is the record
+      <Line on={beat >= 5} className="mt-3 font-mono text-mono-sm text-ink-low">
+        3 events · nothing is overwritten — the stream is the record
       </Line>
-    </Demo>
+    </div>
   );
 }
 
-// ---- json: the path-level write ---------------------------------------------
-const JS_C1 = 'json get profile';
-const JS_C2 = 'json set profile $.user.role "admin"';
-
-function JsonDemo({ live }: { live: boolean }) {
-  const beat = useBeats([350, T(JS_C1), 800, T(JS_C2), 450], live);
-  const wrote = beat >= 4;
+// ---- JSON: the document tree ------------------------------------------------
+function TreeRow({
+  on,
+  depth,
+  caret,
+  k,
+  v,
+  hot,
+}: {
+  on: boolean;
+  depth: number;
+  caret?: boolean;
+  k: string;
+  v?: string;
+  hot?: boolean;
+}) {
   return (
-    <Demo id="json">
-      <Cmd cmd={JS_C1} on={beat >= 1} live={live} />
-      <Line on={beat >= 2} className="whitespace-pre text-ink-mid">
-        <div>{'{'}</div>
-        <div>
-          {'  '}
-          <span className="text-strata-json">"user"</span>: {'{'}
-        </div>
-        <div>
-          {'    '}
-          <span className="text-strata-json">"name"</span>: <span className="text-ink-hi">"Alice"</span>,
-        </div>
-        <div className="relative">
-          {wrote && (
-            <motion.span
-              className="absolute -inset-x-2 inset-y-0 rounded bg-terracotta-500/15"
-              initial={live ? { opacity: 0 } : false}
-              animate={{ opacity: [0, 1, 0.6] }}
-              transition={{ duration: 0.6, ease: EASE }}
-              aria-hidden="true"
-            />
-          )}
-          <span className="relative">
-            {'    '}
-            <span className="text-strata-json">"role"</span>:{' '}
-            <span className="relative inline-grid">
-              <motion.span
-                className="col-start-1 row-start-1 text-ink-hi"
-                initial={false}
-                animate={{ opacity: wrote ? 0 : 1, y: wrote ? -10 : 0 }}
-                transition={{ duration: 0.32, ease: EASE }}
-              >
-                "engineer",
-              </motion.span>
-              <motion.span
-                className="col-start-1 row-start-1 text-strata-json"
-                initial={false}
-                animate={{ opacity: wrote ? 1 : 0, y: wrote ? 0 : 10 }}
-                transition={{ duration: 0.32, ease: EASE }}
-              >
-                "admin",
-              </motion.span>
-            </span>
+    <Line on={on}>
+      <div
+        className="relative flex items-baseline gap-2 rounded px-2 py-1 font-mono text-mono-sm"
+        style={{ paddingLeft: `${depth * 1.25 + 0.5}rem`, background: hot ? EMBER(0.12) : undefined }}
+      >
+        {caret !== undefined && (
+          <span className="text-ink-low" aria-hidden="true">
+            {caret ? '▾' : '▸'}
           </span>
-        </div>
-        <div>
-          {'    '}
-          <span className="text-strata-json">"prefs"</span>: {'{ '}
-          <span className="text-strata-json">"theme"</span>: <span className="text-ink-hi">"midnight"</span>
-          {' }'}
-        </div>
-        <div>{'  }'}</div>
-        <div>{'}'}</div>
-      </Line>
-      <div className="mt-4">
-        <Cmd cmd={JS_C2} on={beat >= 3} live={live} />
+        )}
+        <span className="text-strata-json">{k}</span>
+        {v !== undefined && (
+          <>
+            <span className="text-ink-low">:</span>
+            <span className={hot ? 'text-terracotta-300' : 'text-ink-hi'}>{v}</span>
+          </>
+        )}
       </div>
-      <Line on={beat >= 5} className="text-ok">
-        OK
-      </Line>
-      <Line on={beat >= 5} className="mt-4 text-mono-sm text-ink-low">
-        one path written — the rest of the document untouched
-      </Line>
-    </Demo>
+    </Line>
   );
 }
 
-// ---- vector: the search demo -------------------------------------------------
-const VEC_C = 'vector search docs "why did the deploy fail?" -k 2';
-const HITS = [
-  { id: 'd1', score: 0.91, text: SEED.vectors.docs[0].text },
-  { id: 'd2', score: 0.84, text: SEED.vectors.docs[1].text },
-];
+function JsonView({ live }: { live: boolean }) {
+  const beat = useBeats([300, 250, 250, 400, 250, 250, 300, 250, 450], live);
+  const docs = ['config', 'portfolio', 'profile'];
+  return (
+    <div className="flex h-full max-md:flex-col">
+      <div className="w-56 shrink-0 border-r border-line p-3 max-md:w-full max-md:border-b max-md:border-r-0">
+        <PanelLabel>Documents</PanelLabel>
+        <div className="mt-2">
+          {docs.map((d, i) => (
+            <SelectableRow key={d} on={beat >= 1 + i} selected={d === 'profile' && beat >= 4}>
+              <span>{d}</span>
+            </SelectableRow>
+          ))}
+        </div>
+      </div>
+      <div className="min-w-0 flex-1 p-5">
+        <Line on={beat >= 4} className="flex items-center gap-3">
+          <span className="font-mono text-mono-body text-ink-hi">profile</span>
+          <Chip tone="dim">2 levels</Chip>
+        </Line>
+        <div className="mt-3 rounded-(--radius-card) border border-line bg-inset py-2">
+          <TreeRow on={beat >= 5} depth={0} caret k="user" />
+          <TreeRow on={beat >= 6} depth={1} k="name" v={'"Alice"'} />
+          <TreeRow on={beat >= 7} depth={1} k="role" v={'"admin"'} hot={beat >= 9} />
+          <TreeRow on={beat >= 8} depth={1} caret k="prefs" />
+          <TreeRow on={beat >= 8} depth={2} k="theme" v={'"midnight"'} />
+        </div>
+        <Line on={beat >= 9} className="mt-3 font-mono text-mono-sm text-ink-low">
+          $.user.role written in place — the rest untouched
+        </Line>
+      </div>
+    </div>
+  );
+}
 
-// Scores count up while their bars fill — numbers that move read as
-// computation, not decoration.
+// ---- Vectors: search, scored ------------------------------------------------
 function CountUp({ to, on, live }: { to: number; on: boolean; live: boolean }) {
   const [v, setV] = useState(() => (live ? 0 : to));
   useEffect(() => {
@@ -255,70 +269,93 @@ function CountUp({ to, on, live }: { to: number; on: boolean; live: boolean }) {
   return <>{v.toFixed(2)}</>;
 }
 
-function VectorDemo({ live }: { live: boolean }) {
-  const beat = useBeats([350, T(VEC_C), 750, 650, 550], live);
+const HITS = [
+  { id: 'd1', score: 0.91, text: SEED.vectors.docs[0].text },
+  { id: 'd2', score: 0.84, text: SEED.vectors.docs[1].text },
+];
+
+function VectorView({ live }: { live: boolean }) {
+  const beat = useBeats([350, 500, 450, 450, 350], live);
   return (
-    <Demo id="vector">
-      <Cmd cmd={VEC_C} on={beat >= 1} live={live} />
-      <Line on={beat >= 2} className="text-mono-sm text-ink-low">
-        searching 384-dim HNSW index…
+    <div className="flex h-full flex-col p-5">
+      <Line on={beat >= 1} className="flex items-center gap-3">
+        <span className="font-mono text-mono-body text-ink-hi">docs</span>
+        <Chip tone="dim">384 dims · HNSW</Chip>
       </Line>
-      {HITS.map((hit, i) => (
-        <Line key={hit.id} on={beat >= 3 + i} className="mt-3">
-          <div className="flex items-baseline gap-4">
-            <span className="text-terracotta-400">{hit.id}</span>
-            <span className="text-ink-hi tabular-nums">
-              <CountUp to={hit.score} on={beat >= 3 + i} live={live} />
-            </span>
-            <span className="relative h-2 w-36 self-center overflow-hidden rounded-full bg-raised md:w-56" aria-hidden="true">
-              <motion.span
-                className="absolute inset-y-0 left-0 rounded-full"
-                style={{
-                  background: `linear-gradient(90deg, ${EMBER(0.45)}, var(--color-terracotta-400))`,
-                  boxShadow: `0 0 12px ${EMBER(0.5)}`,
-                }}
-                initial={false}
-                animate={{ width: beat >= 3 + i ? `${hit.score * 100}%` : '0%' }}
-                transition={{ duration: 0.6, ease: EASE }}
-              />
-            </span>
-          </div>
-          <div className="text-mono-sm leading-6 text-ink-mid">“{hit.text}”</div>
-        </Line>
-      ))}
-      <Line on={beat >= 5} className="mt-4 text-mono-sm text-ink-low">
+      <Line on={beat >= 2} className="mt-3">
+        <div className="flex items-center gap-2.5 rounded-(--radius-control) border border-line bg-panel px-3 py-2.5">
+          <svg className="h-4 w-4 shrink-0 text-ink-low" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" strokeLinecap="round" />
+          </svg>
+          <span className="font-mono text-mono-sm text-ink-hi">why did the deploy fail?</span>
+          <span className="ml-auto rounded bg-terracotta-500/15 px-2 py-0.5 font-mono text-mono-sm text-terracotta-300">
+            k = 2
+          </span>
+        </div>
+      </Line>
+      <div className="mt-3 space-y-2">
+        {HITS.map((hit, i) => (
+          <Line key={hit.id} on={beat >= 3 + i}>
+            <div className="rounded-(--radius-card) border border-line bg-panel p-3.5">
+              <div className="flex items-baseline gap-4">
+                <span className="font-mono text-mono-sm text-terracotta-400">{hit.id}</span>
+                <span className="font-mono text-mono-sm text-ink-hi tabular-nums">
+                  <CountUp to={hit.score} on={beat >= 3 + i} live={live} />
+                </span>
+                <span className="relative h-1.5 w-40 self-center overflow-hidden rounded-full bg-raised" aria-hidden="true">
+                  <motion.span
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    style={{ background: `linear-gradient(90deg, ${EMBER(0.45)}, var(--color-terracotta-400))` }}
+                    initial={false}
+                    animate={{ width: beat >= 3 + i ? `${hit.score * 100}%` : '0%' }}
+                    transition={{ duration: 0.6, ease: EASE }}
+                  />
+                </span>
+              </div>
+              <p className="mt-1.5 text-small text-ink-mid">“{hit.text}”</p>
+            </div>
+          </Line>
+        ))}
+      </div>
+      <Line on={beat >= 5} className="mt-3 font-mono text-mono-sm text-ink-low">
         embedded on write — search was ready before you asked
       </Line>
-    </Demo>
+    </div>
   );
 }
 
-// ---- graph: draw the world, then walk it ---------------------------------------
-const GR_C = 'graph bfs alice --depth 1';
+// ---- Graph: the canvas -------------------------------------------------------
 const NODES = [
-  { id: 'alice', x: 70, y: 64, type: 'user' },
-  { id: 'bob', x: 268, y: 52, type: 'user' },
-  { id: 'deploy-v2.3', x: 196, y: 156, type: 'deploy' },
+  { id: 'alice', x: 70, y: 64 },
+  { id: 'bob', x: 268, y: 52 },
+  { id: 'deploy-v2.3', x: 196, y: 156 },
 ];
 const EDGES = [
   { from: NODES[0], rel: 'knows', to: NODES[1] },
   { from: NODES[0], rel: 'triggered', to: NODES[2] },
 ];
 
-function GraphDemo({ live }: { live: boolean }) {
-  const beat = useBeats([350, T(GR_C), 550, 420, 650, 600], live);
-  // beats: 1 cmd types · 2 nodes pop · 3 edges draw · 4 alice lights ·
-  // 5 traversal travels · 6 result
+function GraphView({ live }: { live: boolean }) {
+  const beat = useBeats([350, 450, 450, 500, 650, 400], live);
   return (
-    <Demo id="graph">
-      <Cmd cmd={GR_C} on={beat >= 1} live={live} />
-      <div className="mt-2 flex justify-center">
-        <svg
-          viewBox="0 0 340 200"
-          className="h-[12.5rem] w-full max-w-[24rem] md:h-[15rem] md:max-w-[28rem]"
-          fill="none"
-          aria-hidden="true"
-        >
+    <div className="flex h-full flex-col p-5">
+      <Line on={beat >= 1} className="flex flex-wrap items-center gap-3">
+        <span className="font-mono text-mono-body text-ink-hi">graph</span>
+        <Chip tone="dim">3 nodes · 2 edges</Chip>
+        <span className="ml-auto flex items-center gap-2 font-mono text-mono-sm text-ink-low">
+          bfs from <Chip>alice</Chip> depth <Chip tone="dim">1</Chip>
+        </span>
+      </Line>
+      <div
+        className="mt-3 flex flex-1 items-center justify-center rounded-(--radius-card) border border-line"
+        style={{
+          backgroundColor: 'var(--color-inset)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 1.6px)',
+          backgroundSize: '22px 22px',
+        }}
+      >
+        <svg viewBox="0 0 340 200" className="h-[13rem] w-full max-w-[26rem]" fill="none" aria-hidden="true">
           {EDGES.map((e) => (
             <g key={e.rel}>
               <motion.line
@@ -329,7 +366,7 @@ function GraphDemo({ live }: { live: boolean }) {
                 stroke="var(--color-line-hover)"
                 strokeWidth="1.5"
                 initial={false}
-                animate={{ pathLength: beat >= 3 ? 1 : 0, opacity: beat >= 3 ? 1 : 0 }}
+                animate={{ pathLength: beat >= 2 ? 1 : 0, opacity: beat >= 2 ? 1 : 0 }}
                 transition={{ duration: 0.5, ease: EASE }}
               />
               <motion.line
@@ -340,11 +377,10 @@ function GraphDemo({ live }: { live: boolean }) {
                 stroke="var(--color-terracotta-400)"
                 strokeWidth="2"
                 initial={false}
-                animate={{ pathLength: beat >= 5 ? 1 : 0, opacity: beat >= 5 ? 0.9 : 0 }}
+                animate={{ pathLength: beat >= 4 ? 1 : 0, opacity: beat >= 4 ? 0.9 : 0 }}
                 transition={{ duration: 0.55, ease: EASE }}
               />
-              {/* the traversal itself: a pulse travels the edge */}
-              {live && beat >= 5 && (
+              {live && beat >= 4 && (
                 <motion.circle
                   r="4"
                   fill="var(--color-terracotta-400)"
@@ -362,7 +398,7 @@ function GraphDemo({ live }: { live: boolean }) {
                 fontSize="11"
                 fill="var(--color-ink-low)"
                 initial={false}
-                animate={{ opacity: beat >= 3 ? 1 : 0 }}
+                animate={{ opacity: beat >= 2 ? 1 : 0 }}
                 transition={{ duration: 0.32 }}
               >
                 {e.rel}
@@ -370,12 +406,12 @@ function GraphDemo({ live }: { live: boolean }) {
             </g>
           ))}
           {NODES.map((n, i) => {
-            const lit = beat >= 5 || (n.id === 'alice' && beat >= 4);
+            const lit = beat >= 4 || (n.id === 'alice' && beat >= 3);
             return (
               <motion.g
                 key={n.id}
                 initial={false}
-                animate={{ opacity: beat >= 2 ? 1 : 0, scale: beat >= 2 ? 1 : 0.6 }}
+                animate={{ opacity: beat >= 1 ? 1 : 0, scale: beat >= 1 ? 1 : 0.6 }}
                 transition={{ duration: 0.4, ease: EASE, delay: live ? i * 0.12 : 0 }}
                 style={{ transformOrigin: `${n.x}px ${n.y}px` }}
               >
@@ -403,25 +439,22 @@ function GraphDemo({ live }: { live: boolean }) {
           })}
         </svg>
       </div>
-      <Line on={beat >= 6} className="text-ok">
-        2 nodes reachable
+      <Line on={beat >= 5} className="mt-3 font-mono text-mono-sm text-ink-low">
+        2 nodes reachable · typed edges, real traversal
       </Line>
-      <Line on={beat >= 6} className="mt-2 text-mono-sm text-ink-low">
-        typed edges, real traversal — not a join table in disguise
-      </Line>
-    </Demo>
+    </div>
   );
 }
 
-const DEMOS: Record<PrimId, ComponentType<{ live: boolean }>> = {
-  kv: KvDemo,
-  event: EventDemo,
-  json: JsonDemo,
-  vector: VectorDemo,
-  graph: GraphDemo,
+const VIEWS: Record<PrimId, ComponentType<{ live: boolean }>> = {
+  kv: KvView,
+  event: EventsView,
+  json: JsonView,
+  vector: VectorView,
+  graph: GraphView,
 };
 
-// ---- the section ----------------------------------------------------------------
+// ---- the Foundry window ----------------------------------------------------
 export default function PrimitiveTabs() {
   const rootRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -445,7 +478,7 @@ export default function PrimitiveTabs() {
   }, []);
 
   const live = seen && !reduced;
-  const ActiveDemo = DEMOS[selected];
+  const ActiveView = VIEWS[selected];
   const activeIdx = PRIMS.findIndex((p) => p.id === selected);
   const active = PRIMS[activeIdx];
 
@@ -464,115 +497,130 @@ export default function PrimitiveTabs() {
 
   return (
     <div ref={rootRef} className="relative">
-      {/* The stage lights: the page's one pair — ember over the demo, cool
-          counterpoint low on the rail side (the same lighting language as
-          the hero backdrop and the branch stage). Static fields. */}
+      {/* stage lights: the page's one pair */}
       <div
         className="pointer-events-none absolute -inset-x-20 -inset-y-16"
         aria-hidden="true"
         style={{
-          background: `radial-gradient(44% 58% at 66% 40%, ${EMBER(0.11)}, transparent 70%), radial-gradient(30% 44% at 12% 78%, ${COOL(0.07)}, transparent 72%)`,
+          background: `radial-gradient(44% 58% at 60% 40%, ${EMBER(0.11)}, transparent 70%), radial-gradient(30% 44% at 10% 80%, ${COOL(0.07)}, transparent 72%)`,
         }}
       />
 
-      <div className="relative grid gap-10 lg:grid-cols-12">
-        {/* The rail IS the strata column: five layers under one frame,
-            hairline-divided like a core sample — monochrome, the active
-            layer lit by the page's ember (Ani's five-hue reservation,
-            resolved 2026-06-12: hue-coding read as jarring). */}
+      <div className="relative">
+        {/* the window */}
         <div
-          role="tablist"
-          aria-label="Primitives"
-          aria-orientation="vertical"
-          onKeyDown={onKeys}
-          className="flex gap-1 overflow-x-auto max-lg:-mx-6 max-lg:px-6 lg:col-span-4 lg:flex-col lg:gap-0 lg:divide-y lg:divide-line lg:self-start lg:overflow-visible lg:rounded-(--radius-frame) lg:border lg:border-line lg:shadow-[var(--shadow-float)]"
+          className="overflow-hidden rounded-(--radius-frame)"
+          style={{
+            background: 'var(--color-panel)',
+            border: `1px solid ${EMBER(0.22)}`,
+            boxShadow: `var(--shadow-float), 0 0 110px -28px ${EMBER(0.35)}`,
+          }}
         >
-          {PRIMS.map((p, i) => {
-            const isActive = p.id === selected;
-            return (
-              <button
-                key={p.id}
-                ref={(el) => {
-                  tabRefs.current[i] = el;
-                }}
-                type="button"
-                role="tab"
-                id={`prim-tab-${p.id}`}
-                aria-selected={isActive}
-                aria-controls="prim-panel"
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => setSelected(p.id)}
-                className={`shrink-0 border-l-2 px-6 py-5 text-left outline-none transition-colors duration-200 focus-visible:bg-raised max-lg:rounded-(--radius-card) max-lg:border-b-2 max-lg:border-l-0 max-lg:px-4 max-lg:py-3 ${
-                  isActive ? '' : 'bg-panel hover:bg-raised/70'
-                }`}
-                style={{
-                  borderColor: isActive ? 'var(--color-terracotta-500)' : 'var(--color-line)',
-                  background: isActive
-                    ? `linear-gradient(90deg, ${EMBER(0.12)}, ${EMBER(0.025)} 55%, transparent), var(--color-raised)`
-                    : undefined,
-                }}
-              >
-                <span className="flex items-center gap-3">
-                  <span
-                    className={`font-mono text-mono-sm ${isActive ? 'text-terracotta-400' : 'text-ink-low'} max-lg:hidden`}
-                    aria-hidden="true"
+          {/* titlebar */}
+          <div
+            className="flex h-12 items-center gap-3 px-4"
+            style={{ borderBottom: `1px solid ${EMBER(0.14)}`, background: EMBER(0.04) }}
+          >
+            <span className="flex gap-1.5" aria-hidden="true">
+              <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+              <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+              <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+            </span>
+            <span className="font-mono text-mono-sm text-ink-low">Strata Foundry</span>
+            <span className="flex items-center gap-2 rounded-(--radius-control) border border-line bg-raised px-2.5 py-1 font-mono text-mono-sm text-ink-hi">
+              <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
+              portfolio.strata
+            </span>
+            <span className="ml-auto flex items-center gap-2 font-mono text-mono-sm text-ink-low max-sm:hidden">
+              <span className="rounded-(--radius-control) border border-line px-2 py-0.5">⎇ main</span>
+              <span className="rounded-(--radius-control) border border-line px-2 py-0.5 max-md:hidden">space: default</span>
+            </span>
+          </div>
+
+          <div className="flex min-h-[32rem] max-md:flex-col">
+            {/* the sidebar IS the strata column: five numbered layers, the
+                active one lit by ember — plus the app's other views, dimmed */}
+            <div
+              role="tablist"
+              aria-label="Foundry views — the five primitives"
+              aria-orientation="vertical"
+              onKeyDown={onKeys}
+              className="flex w-56 shrink-0 flex-col gap-0.5 border-r border-line bg-raised/40 p-3 max-md:w-full max-md:flex-row max-md:overflow-x-auto max-md:border-b max-md:border-r-0"
+            >
+              {PRIMS.map((p, i) => {
+                const isActive = p.id === selected;
+                return (
+                  <button
+                    key={p.id}
+                    ref={(el) => {
+                      tabRefs.current[i] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    id={`prim-tab-${p.id}`}
+                    aria-selected={isActive}
+                    aria-controls="prim-panel"
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => setSelected(p.id)}
+                    className={`flex shrink-0 items-center gap-2.5 rounded-(--radius-control) px-3 py-2 text-left text-small outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-terracotta-500 ${
+                      isActive ? 'text-ink-hi' : 'text-ink-mid hover:bg-raised'
+                    }`}
+                    style={
+                      isActive
+                        ? { background: `linear-gradient(90deg, ${EMBER(0.16)}, ${EMBER(0.05)})`, boxShadow: `inset 2px 0 0 var(--color-terracotta-500)` }
+                        : undefined
+                    }
                   >
-                    0{i + 1}
+                    <span
+                      className={`font-mono text-mono-sm ${isActive ? 'text-terracotta-400' : 'text-ink-low'}`}
+                      aria-hidden="true"
+                    >
+                      0{i + 1}
+                    </span>
+                    {p.label}
+                  </button>
+                );
+              })}
+              <div className="my-2 border-t border-line max-md:hidden" aria-hidden="true" />
+              <div className="flex flex-col gap-0.5 max-md:hidden" aria-hidden="true">
+                {MORE_NAV.map((label) => (
+                  <span key={label} className="px-3 py-1.5 text-small text-ink-low">
+                    {label}
                   </span>
-                  <svg
-                    className="h-5 w-5 shrink-0 lg:h-6 lg:w-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={isActive ? 'var(--color-terracotta-400)' : 'var(--color-ink-low)'}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d={p.icon} />
-                  </svg>
-                  <span
-                    className={`font-mono text-mono-body lg:text-[1.0625rem] ${isActive ? 'text-ink-hi' : 'text-ink-mid'}`}
-                  >
-                    {p.id}
-                  </span>
-                </span>
-                <span
-                  className={`mt-1.5 block text-body ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden lg:pl-10`}
+                ))}
+              </div>
+            </div>
+
+            {/* the content view */}
+            <div id="prim-panel" role="tabpanel" aria-labelledby={`prim-tab-${selected}`} className="min-w-0 flex-1 bg-void/40">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={selected}
+                  className="h-full"
+                  initial={reduced ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduced ? undefined : { opacity: 0, y: -6 }}
+                  transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
                 >
-                  {p.role}
-                </span>
-              </button>
-            );
-          })}
+                  <ActiveView live={live} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
 
-        <div id="prim-panel" role="tabpanel" aria-labelledby={`prim-tab-${selected}`} className="lg:col-span-8">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={selected}
-              initial={reduced ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -6 }}
-              transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
-            >
-              <ActiveDemo live={live} />
-              {/* the ruled footer: step label left, guide right — the same
-                  drafting voice as the section rules */}
-              <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3">
-                <p className="font-mono text-mono-sm text-ink-low">
-                  <span className="text-terracotta-400">0{activeIdx + 1}</span> / 05 · {active.id} —{' '}
-                  <span className="max-sm:hidden">{active.role.toLowerCase().replace(/\.$/, '')}</span>
-                </p>
-                <a
-                  href={active.guide}
-                  className="shrink-0 text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
-                >
-                  Read the {active.id} guide →
-                </a>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+        {/* the ruled footer, drafting voice */}
+        <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3">
+          <p className="font-mono text-mono-sm text-ink-low">
+            <span className="text-terracotta-400">0{activeIdx + 1}</span> / 05 · {active.id} —{' '}
+            <span className="max-sm:hidden">{active.role.toLowerCase().replace(/\.$/, '')}</span>
+          </p>
+          <a
+            href={active.guide}
+            className="shrink-0 text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
+          >
+            Read the {active.id} guide →
+          </a>
         </div>
       </div>
     </div>

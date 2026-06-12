@@ -347,6 +347,16 @@ phases, each shippable alone:
 
 System fonts stay (§5). The wordmark lockup (§7) replaces the plain-text brand string.
 
+**ESCALATED (2026-06-12, Ani): "We definitely want to redo Foundry with this new
+visual language. The current one is a v0.1."** The adoption path upgrades from a
+token swap to a REDESIGN: the B1–B3 phases remain the mechanical floor, but the
+target is the full shared language — neutral stage canvases, ember as the one
+temperature, the drafting voice (mono microtype, hairline structure), General Sans +
+Commit Mono. **The landing page's section-3 Foundry window (04 §4 v5) is the
+canonical mock of the redesign** — sidebar, titlebar chips (database tab, branch ⎇,
+space), master–detail views, ember selection language. Foundry work happens in the
+strata-foundry repo; this site's /specimen page remains the verification reference.
+
 ## Appendix C — Shared asset deliverables
 
 | Asset | Format | Consumed by | Status |

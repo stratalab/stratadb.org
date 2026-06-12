@@ -233,6 +233,34 @@ with only the active layer lit. Inference ticks follow. Syntax amber on json key
 survives as syntax. Differentiation now comes from the demo content itself, not from
 color-coding.
 
+**v5 (2026-06-12, Ani): THE FOUNDRY WINDOW.** "I don't think it's a good idea to
+overuse the CLI animation. It is in every section now. We want to show some stuff
+from Foundry. In fact that would be much more beautiful." And, same day: "We
+definitely want to redo Foundry with this new visual language. The current one is a
+v0.1." So the section becomes ONE Foundry window — and it is the canonical preview
+of Foundry's redesign in the shared design language (02 §B):
+
+- **Structure faithful to strata-foundry/src**: titlebar (traffic dots, app name,
+  database tab `portfolio.strata` with ok-dot, `⎇ main` + `space: default` chips —
+  the real BranchSwitcher/SpaceSwitcher), the real Sidebar nav as the tab rail —
+  the five primitive views numbered 01–05 (the strata-column motif now lives in the
+  sidebar's stacked, numbered layers; active = ember pill + inset edge), with the
+  app's other real views (Branches · Generate · Models · Inference · Search) present
+  and DIMMED below a hairline: Foundry is bigger than five views.
+- **Per-view content = the app's actual screens, seed-true**: kv = master–detail
+  key browser (filter, key list, value well, History panel with v1–v3 of
+  portfolio.value); event = the deploys stream table (deploy.fail in err, last row
+  ember-washed as the append); json = document list + JsonTree (profile; $.user.role
+  ember-flashed); vector = search bar ("why did the deploy fail?", k=2) + scored
+  results with count-up bars; graph = the GraphCanvas on dot-grid with bfs toolbar
+  and traveling traversal.
+- **GUI choreography replaces typed commands** — rows populate, selections light,
+  panels fill; no CLI in this section at all. The page's CLI census after v5:
+  hero (the live terminal, sacred) · branch session panel · time-travel command
+  readout · inference transcript.
+- The 88rem stage, lighting, ruled mono footer (0n / 05) and guide links survive
+  unchanged.
+
 **v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
 down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens
 +8px, surfaces the API line in `mono-sm`. *(Branch is not a layer — branching is the
