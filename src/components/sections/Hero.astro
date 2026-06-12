@@ -20,6 +20,25 @@ import benchmarks from '../../data/benchmarks.json';
     <div class="hero-light hero-light-ember"></div>
     <div class="hero-light hero-light-cool"></div>
     <div class="hero-light hero-light-deep"></div>
+    <!-- The branching river (2026-06-12): the product thesis as artwork — a
+         trunk forks, strands diverge, one merges back. Energy flows along the
+         lines via dashoffset; each strand = wide glow stroke + bright core. -->
+    <svg class="hero-river absolute inset-0 h-full w-full" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
+      {
+        [
+          { d: 'M -40 430 C 280 430 360 430 520 360 C 700 280 900 250 1480 230', cls: 'river-ember', dur: '7s' },
+          { d: 'M -40 430 C 300 430 420 440 560 500 C 760 590 980 620 1480 600', cls: 'river-ember', dur: '9s' },
+          { d: 'M -40 430 C 320 432 480 420 640 420 C 880 420 1100 430 1480 425', cls: 'river-cool', dur: '11s' },
+          { d: 'M 520 360 C 640 320 760 360 880 420 C 1000 480 1100 430 1180 428', cls: 'river-ember-dim', dur: '8s' },
+          { d: 'M -40 470 C 240 470 400 520 540 560 C 720 610 900 560 1480 660', cls: 'river-ember-dim', dur: '13s' },
+        ].map((p) => (
+          <>
+            <path d={p.d} class={`river-glow ${p.cls}`} style={`--dur: ${p.dur}`} />
+            <path d={p.d} class={`river-core ${p.cls}`} style={`--dur: ${p.dur}`} />
+          </>
+        ))
+      }
+    </svg>
   </div>
   <div data-parallax="0.85" class="absolute inset-0 will-change-transform">
     <HorizonGlow />
@@ -93,6 +112,58 @@ import benchmarks from '../../data/benchmarks.json';
   }
   html[data-motion='reduced'] .hero-light {
     animation: none;
+  }
+
+  /* ---- the branching river ---- */
+  .hero-river {
+    opacity: 0.85;
+  }
+  .river-glow,
+  .river-core {
+    stroke-linecap: round;
+    fill: none;
+  }
+  .river-glow {
+    stroke-width: 7;
+    opacity: 0.25;
+  }
+  .river-core {
+    stroke-width: 1.75;
+    opacity: 0.9;
+    stroke-dasharray: 90 160;
+    animation: river-flow var(--dur, 9s) linear infinite;
+  }
+  .river-core.river-ember {
+    stroke: var(--color-terracotta-400);
+  }
+  .river-glow.river-ember {
+    stroke: var(--color-terracotta-600);
+  }
+  .river-core.river-ember-dim {
+    stroke: var(--color-terracotta-600);
+    opacity: 0.6;
+  }
+  .river-glow.river-ember-dim {
+    stroke: var(--color-terracotta-800);
+    opacity: 0.18;
+  }
+  .river-core.river-cool {
+    stroke: #7caaff;
+    opacity: 0.55;
+  }
+  .river-glow.river-cool {
+    stroke: #7caaff;
+    opacity: 0.12;
+  }
+  @keyframes river-flow {
+    to {
+      stroke-dashoffset: -250;
+    }
+  }
+  html[data-motion='reduced'] .river-core {
+    animation: none;
+    stroke-dasharray: none;
+    opacity: 0.5;
   }
 </style>
 

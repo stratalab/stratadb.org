@@ -27,6 +27,11 @@ the SAME idea: the terminals sit on a crafted stage (deliberate lighting, a more
 beautiful branch arc, weightier split physics), the typing feels physical, the loop has
 presence. This is where every visitor spends their first five seconds.
 
+**Progress 2026-06-12:** the stage exists — the neutral-stage canvas, breathing light
+fields, and **the branching river** (full-bleed SVG artwork: strands fork/merge with
+energy flowing via dashoffset — the thesis drawn in light; Neon-presence, our language).
+Remaining in I1: the branch arc between panels, split physics weight, typing physicality.
+
 ### I2 — Every claim gets a crafted artifact
 - **"Forking is O(1) — nothing is copied"** deserves a *diagram* (refs vs copied pages —
   our copy-on-write story, drawn properly). Today it's body text.
