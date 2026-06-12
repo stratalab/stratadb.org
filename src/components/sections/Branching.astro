@@ -1,18 +1,19 @@
 ---
-// Section 2 (04 §3, v2 2026-06-12): fork → modify → diff → merge as the
-// page's second scroll-scrub. The diagram is backlog I2's first claim
-// artifact; the verbs are the head enacted.
+// Section 2 (04 §3 v4): the head lives in the rhythm container; the pinned
+// scene breaks out to full bleed — cinema doesn't fit in a prose column.
 import SectionShell from '../foundation/SectionShell.astro';
 import Heading from '../foundation/Heading.astro';
 import BranchScrub from './branch/BranchScrub.tsx';
 ---
 
-<SectionShell id="branch" eyebrow="BRANCH">
-  <div class="reveal mb-4 max-w-[42rem]">
+<SectionShell id="branch" eyebrow="BRANCH" class="!pb-0">
+  <div class="reveal max-w-[42rem]">
     <Heading size="display">Try anything. Keep what works.</Heading>
     <p class="mt-6 text-body-lg text-ink-mid">
       A branch is a complete database — fork it in O(1), change it, diff it, merge it back.
     </p>
   </div>
-  <BranchScrub client:visible />
 </SectionShell>
+<div class="w-full">
+  <BranchScrub client:visible />
+</div>

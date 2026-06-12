@@ -78,7 +78,7 @@ function JsonCard({
   const cool = kind === 'main';
   return (
     <div
-      className="w-[26rem] max-w-[94vw] overflow-hidden rounded-(--radius-frame)"
+      className="w-[28rem] max-w-[94vw] overflow-hidden rounded-(--radius-frame)"
       style={{
         background: cool ? 'var(--color-branch-main-surface)' : 'var(--color-branch-risky-surface)',
         border: `1px solid ${cool ? 'rgba(124, 170, 255, 0.28)' : 'rgba(255, 122, 82, 0.32)'}`,
@@ -191,7 +191,7 @@ function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
         </span>
         <span className="ml-2 font-mono text-mono-sm text-ink-low">strata — session</span>
       </div>
-      <div className="min-h-[16rem] bg-inset p-4 font-mono text-mono-sm leading-7">
+      <div className="min-h-[20rem] bg-inset p-4 font-mono text-mono-sm leading-7">
         {SESSION.map((entry, i) => {
           if (entry.act > active) return null;
           const current = entry.act === active;
@@ -247,12 +247,12 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
   const sep = (s: number, c: number) => s * (1 - c);
   const mainX =
     staticScene !== undefined
-      ? `${-40 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
-      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${-40 * sep(s, c)}%`);
+      ? `${-50 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
+      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${-50 * sep(s, c)}%`);
   const riskyX =
     staticScene !== undefined
-      ? `${40 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
-      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${40 * sep(s, c)}%`);
+      ? `${62 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
+      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${62 * sep(s, c)}%`);
   const riskyOpacity =
     staticScene !== undefined
       ? staticScene >= 3
@@ -261,7 +261,7 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
       : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g));
 
   return (
-    <div className="relative flex h-[30rem] items-center justify-center">
+    <div className="relative flex h-full min-h-[34rem] items-center justify-center">
       {/* stage light: cool constant behind main's side; ember follows the branch's life */}
       <div
         className="pointer-events-none absolute -inset-x-16 inset-y-0"
@@ -376,15 +376,15 @@ export default function BranchScrub() {
   return (
     <>
       <div ref={ref} className="relative hidden md:block" style={{ height: '340vh' }}>
-        <div className="sticky top-0 flex h-screen items-center">
-          <div className="grid w-full items-center gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-4">
+        <div className="sticky top-0 h-screen">
+          <div className="mx-auto grid h-full w-full max-w-[96rem] items-center gap-16 px-12 py-12 lg:grid-cols-12">
+            <div className="flex flex-col justify-center lg:col-span-4">
               <ActHeader active={active} />
-              <div className="mt-8">
+              <div className="mt-10">
                 <SessionPanel active={active} lineIn={lineIn} />
               </div>
             </div>
-            <div className="lg:col-span-8">
+            <div className="h-full min-h-[34rem] lg:col-span-8">
               <Stage p={progress} />
             </div>
           </div>
