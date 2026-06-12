@@ -91,7 +91,7 @@ export default function InstallTabs() {
 
   return (
     <div className="overflow-hidden rounded-(--radius-frame) border border-line bg-panel" style={{ boxShadow: 'var(--shadow-float)' }}>
-      <div role="tablist" aria-label="Install" className="flex border-b border-line" onKeyDown={onKey}>
+      <div role="tablist" aria-label="Install" className="flex overflow-x-auto border-b border-line" onKeyDown={onKey}>
         {TABS.map((t) => (
           <button
             key={t.id}

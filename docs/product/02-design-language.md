@@ -201,7 +201,10 @@ Derived from sediment-900/950 with two intermediate surfaces:
 ```
 --bg-void:    #0A0908  (page)          --text-hi:  #F5F0EB  (sediment-50, warmed)
 --bg-panel:   #121110  (cards)         --text-mid: #A8A29B  (sediment-400)
---bg-raised:  #1A1817  (chrome/hover)  --text-low: #6B665F  (sediment-600)
+--bg-raised:  #1A1817  (chrome/hover)  --text-low: #8A847C  (= sediment-500; a11y
+                                       correction 2026-06-12 — sediment-600 measured
+                                       3.50:1 on void, AA fail; sediment-500 clears
+                                       ≥4.78:1 on every surface incl. raised)
 --bg-inset:   #060605  (terminal wells)
 --border:        rgba(245,240,235,0.08)
 --border-hover:  rgba(245,240,235,0.14)

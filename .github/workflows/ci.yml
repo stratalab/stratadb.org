@@ -19,17 +19,54 @@ jobs:
       # Truth rule (06 §5.3 / 02 §13): no raw hex colors outside tokens.css.
       - name: Literal-drift check
         run: |
-          MATCHES=$(grep -rEn '#[0-9a-fA-F]{6}\b' src/components src/layouts src/pages/specimen.astro --include='*.astro' --include='*.tsx' || true)
+          MATCHES=$(grep -rEn '#[0-9a-fA-F]{6}\b' src/components src/layouts src/pages --include='*.astro' --include='*.tsx' | grep -v 'scripts/generate-og' || true)
           if [ -n "$MATCHES" ]; then
             echo "Raw hex literals found outside tokens.css:"; echo "$MATCHES"; exit 1
           fi
 
+      # Claims policy (PRD §5): forbidden marketing language fails the build.
+      - name: Claims lint
+        run: |
+          MATCHES=$(grep -riEn 'production-ready|battle-tested|blazingly|enterprise-grade|next-generation' src --include='*.astro' --include='*.tsx' --include='*.ts' || true)
+          if [ -n "$MATCHES" ]; then
+            echo "Forbidden claim language found (PRD §5):"; echo "$MATCHES"; exit 1
+          fi
+
+      # Version drift (06 §4): no semver literals outside src/data/.
+      - name: Version-drift check
+        run: |
+          MATCHES=$(grep -rEn 'v?0\.(6|12)\.[0-9]+' src/components src/pages src/layouts --include='*.astro' --include='*.tsx' || true)
+          if [ -n "$MATCHES" ]; then
+            echo "Hardcoded version strings found (must come from release.json):"; echo "$MATCHES"; exit 1
+          fi
+
       - run: npm run build
 
-      # Internal link check matures in Phase 5 (agent surface lands then).
-      - name: Link check (advisory until Phase 5)
+      # Internal link check matures at cutover (external links blocked on
+      # cross-repo org fixes; see decision log).
+      - name: Link check (advisory until Phase 7)
         continue-on-error: true
         uses: lycheeverse/lychee-action@v2
         with:
           args: --offline --include-fragments dist
           fail: true
+
+  # ⛔ cutover gate (06 §5.2): demos must match the real CLI. Heavy job —
+  # cargo-cached, advisory until Phase 7 flips continue-on-error to false.
+  transcripts:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry
+          key: strata-cli-${{ runner.os }}
+      - name: Install strata CLI
+        run: command -v strata || cargo install strata-cli --locked
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/verify-transcripts.mjs

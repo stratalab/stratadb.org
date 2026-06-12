@@ -50,8 +50,15 @@ const SCENES = [
 function sceneOpacity(progress: MotionValue<number>, i: number) {
   const start = BANDS[i];
   const end = i < BANDS.length - 1 ? BANDS[i + 1] : 1.01;
-  // 12% crossfade windows at band edges
-  return useTransform(progress, [start - 0.06, start + 0.06, end - 0.06, end + 0.06], [0, 1, 1, i === BANDS.length - 1 ? 1 : 0]);
+  // 12% crossfade windows at band edges. Band 0 is clamped fully visible at
+  // progress 0 (a Phase-6 fix: an unclamped window left scene 1 half-faded
+  // before any scroll — visual bug + AA contrast fail).
+  const fadeIn = i === 0 ? [0, 0] : [start - 0.06, start + 0.06];
+  return useTransform(
+    progress,
+    [...fadeIn, end - 0.06, end + 0.06],
+    [i === 0 ? 1 : 0, 1, 1, i === BANDS.length - 1 ? 1 : 0]
+  );
 }
 
 function CodePanel({ scene }: { scene: (typeof SCENES)[number] }) {

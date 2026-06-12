@@ -70,7 +70,9 @@ function Panel({
         {status && <span className="ml-auto font-mono text-mono-sm text-ink-low">{status}</span>}
       </div>
       <div
-        className="min-h-56 bg-inset p-4 font-mono text-mono-body text-ink-mid"
+        // FIXED height (03 §7: space always reserved) — lines append inside a
+        // constant box so the loop never shifts layout below the set-piece.
+        className="h-[21.5rem] overflow-hidden bg-inset p-4 font-mono text-mono-body text-ink-mid"
         role="log"
         aria-live="polite"
       >
@@ -194,14 +196,22 @@ export default function ForkingTerminal() {
     typing?.panel === panel ? { typed: typing.text, cursorBranch: typing.branch } : {};
 
   return (
-    <div ref={rootRef} className="relative">
+    // Reserved heights (CLS gate): desktop rows are constant; on mobile the
+    // fork mounts below inside pre-reserved space, so nothing beneath moves.
+    <div ref={rootRef} className="relative md:min-h-[24rem] max-md:min-h-[47rem]">
       <motion.div
-        layout
         animate={{ opacity: fading ? 0 : 1 }}
         transition={{ duration: 0.32 }}
-        className={`grid items-start gap-6 ${showFork ? 'md:grid-cols-2' : 'grid-cols-1'}`}
+        className="grid items-start gap-6 md:grid-cols-2"
       >
-        <motion.div layout transition={springSettle}>
+        {/* CLS-zero choreography (04 §2 amendment): the grid never re-templates.
+            Main is half-width always; pre-split it is CENTERED via transform and
+            translates into its column on fork. Transform/opacity only. */}
+        <motion.div
+          animate={{ x: showFork ? '0%' : '54%' }}
+          transition={springSettle}
+          className="max-md:!transform-none"
+        >
           <Panel
             title="strata"
             status="engine: scripted replay"
@@ -209,19 +219,19 @@ export default function ForkingTerminal() {
             {...typedFor('main')}
           />
         </motion.div>
-        <AnimatePresence>
-          {showFork && (
-            <motion.div
-              layout
-              initial={{ opacity: 0, x: 24, scale: 0.98 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 24, scale: 0.98 }}
-              transition={springSettle}
-            >
-              <Panel title="experiment" lines={state.fork} {...typedFor('fork')} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <motion.div
+          initial={false}
+          animate={{
+            opacity: showFork ? 1 : 0,
+            x: showFork ? 0 : 24,
+            scale: showFork ? 1 : 0.98,
+          }}
+          transition={springSettle}
+          style={{ pointerEvents: showFork ? 'auto' : 'none' }}
+          aria-hidden={!showFork}
+        >
+          <Panel title="experiment" lines={state.fork} {...typedFor('fork')} />
+        </motion.div>
       </motion.div>
 
       {/* branch line: spans the gap while forked (desktop) */}

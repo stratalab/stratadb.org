@@ -9,6 +9,7 @@ import TimeTravel from '../components/sections/TimeTravel.astro';
 import Inference from '../components/sections/Inference.astro';
 import Resources from '../components/sections/Resources.astro';
 import InstallClose from '../components/sections/InstallClose.astro';
+import release from '../data/release.json';
 ---
 
 <BaseLayout>
@@ -19,4 +20,20 @@ import InstallClose from '../components/sections/InstallClose.astro';
   <Inference />
   <Resources />
   <InstallClose />
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'StrataDB',
+      description:
+        'An embedded database with the whole git model: zero-copy O(1) branches, diff, merge, cherry-pick, time travel, and search — across five primitives. One file, no server.',
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'macOS, Linux, Windows',
+      license: 'https://www.apache.org/licenses/LICENSE-2.0',
+      softwareVersion: release.version,
+      url: 'https://stratadb.org',
+    })}
+  />
 </BaseLayout>

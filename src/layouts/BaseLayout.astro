@@ -36,7 +36,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL('/og/default.png', Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={new URL('/og/default.png', Astro.site)} />
 
     <script is:inline>
       // Reduced-motion source of truth, set pre-paint (03 §6).

@@ -19,7 +19,11 @@
   /* ---- ink ---- */
   --color-ink-hi: #f5f0eb;
   --color-ink-mid: #a8a29b;
-  --color-ink-low: #6b665f;
+  /* ink-low corrected 2026-06-12 (Phase 6 a11y audit, twice): the original
+     sediment-600 measured 3.50:1 on void; the first fix (#827c74) still failed
+     on raised (4.28:1). Final: sediment-500 — ≥4.78:1 on every surface
+     (void 5.6, panel 5.09, raised 4.78, inset 5.48). Doc 02 §10 amended. */
+  --color-ink-low: #8a847c;
 
   /* ---- lines ---- */
   --color-line: rgba(245, 240, 235, 0.08);

@@ -77,10 +77,14 @@
     --tw-prose-bullets: var(--color-ink-low);
     --tw-prose-counters: var(--color-ink-low);
   }
+  /* Shiki blocks keep their theme background — its token colors are contrast-
+     tuned for it (forcing inset under them failed AA in the Phase-6 audit). */
   .prose-docs :where(pre) {
-    background-color: var(--color-inset);
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
+  }
+  .prose-docs :where(pre):not(.astro-code) {
+    background-color: var(--color-inset);
   }
   .prose-docs :where(code):not(:where(pre code)) {
     background-color: var(--color-raised);

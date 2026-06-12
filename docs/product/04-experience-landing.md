@@ -88,7 +88,7 @@ loop + 4s hold. First frame (SSR'd): completed `strata:main › kv put greeting 
 | Beat | Executor events | Choreography |
 |---|---|---|
 | 1 | `cmd: branch create experiment` → `OK` | Tier-1 typing; 300ms beat |
-| 2 | `split` | Panels fork on `spring-settle`; 1px branch line arcs; right title `experiment`, prompt `strata:experiment ›` |
+| 2 | `split` | Fork on `spring-settle`: main sits half-width centered pre-split and **translates left** while the fork panel slides in — transform-only by construction *(amended 2026-06-12: the original full-width→half "slide apart" was a layout animation and leaked CLS; end state identical)*. 1px branch line arcs; right title `experiment`, prompt `strata:experiment ›` |
 | 3 | right: `cmd: kv put config.theme "midnight"` → `(version) 1` | Typing in right panel |
 | 4 | left: `cmd: kv get config.theme` → `(nil)` | **Isolation beat** — `(nil)` in `--text-low` |
 | 5 | left: `cmd: branch diff experiment` → `+1 key · config.theme` | **Verb beat** — the full model, not fork-and-pray |
