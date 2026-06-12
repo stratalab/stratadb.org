@@ -178,7 +178,11 @@ function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
       <div
         className="min-h-[27rem] p-6 font-mono text-mono-body leading-8 md:min-h-[30rem] md:p-8 md:text-[1.0625rem] md:leading-9"
         style={{
-          background: `linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%), var(--color-inset)`,
+          backgroundColor: 'var(--color-inset)',
+          // graph paper under the terminal: a barely-there dot grid + the
+          // ember top tint
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%)`,
+          backgroundSize: '22px 22px, 100% 100%',
         }}
       >
         {children}
@@ -633,6 +637,12 @@ export default function PrimitiveTabs() {
                 }}
               >
                 <span className="flex items-center gap-3">
+                  <span
+                    className={`font-mono text-mono-sm ${isActive ? 'text-terracotta-400' : 'text-ink-low'} max-lg:hidden`}
+                    aria-hidden="true"
+                  >
+                    0{i + 1}
+                  </span>
                   <svg
                     className="h-5 w-5 shrink-0 lg:h-6 lg:w-6"
                     viewBox="0 0 24 24"
@@ -651,7 +661,9 @@ export default function PrimitiveTabs() {
                     {p.id}
                   </span>
                 </span>
-                <span className={`mt-1.5 block text-body ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden`}>
+                <span
+                  className={`mt-1.5 block text-body ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden lg:pl-10`}
+                >
                   {p.role}
                 </span>
               </button>
@@ -669,11 +681,16 @@ export default function PrimitiveTabs() {
               transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
             >
               <ActiveDemo live={live} />
-              <div className="mt-4 flex items-baseline justify-between gap-4">
-                <p className="text-small text-ink-mid max-lg:hidden">{active.role}</p>
+              {/* the ruled footer: step label left, guide right — the same
+                  drafting voice as the section rules */}
+              <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3">
+                <p className="font-mono text-mono-sm text-ink-low">
+                  <span className="text-terracotta-400">0{activeIdx + 1}</span> / 05 · {active.id} —{' '}
+                  <span className="max-sm:hidden">{active.role.toLowerCase().replace(/\.$/, '')}</span>
+                </p>
                 <a
                   href={active.guide}
-                  className="text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
+                  className="shrink-0 text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
                 >
                   Read the {active.id} guide →
                 </a>

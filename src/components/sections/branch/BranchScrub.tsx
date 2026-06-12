@@ -32,9 +32,9 @@ const ACTS = [
   { verb: 'Merge', line: 'Keep the strategy that works.' },
 ];
 
-// The section head lives inside the island (04 §3 v5) so it can ride the pin.
+// The section head lives inside the island (04 §3 v5) so it can ride the
+// pin. The eyebrow moved to the SectionRule band (04 §1 v2).
 const HEAD = {
-  eyebrow: 'BRANCH',
   h2: 'Try anything. Keep what works.',
   intro:
     "A branch is a complete database — fork it, change it, diff it, merge it back. Forking copies nothing, so it's instant at any size.",
@@ -323,8 +323,7 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
 function FlowHead() {
   return (
     <div className="max-w-[42rem]">
-      <p className="text-eyebrow font-medium uppercase text-ink-low">{HEAD.eyebrow}</p>
-      <h2 className="mt-4 text-display text-balance text-ink-hi">{HEAD.h2}</h2>
+      <h2 className="text-display text-balance text-ink-hi">{HEAD.h2}</h2>
       <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
     </div>
   );
@@ -487,11 +486,10 @@ export default function BranchScrub() {
             top (visible for the full scrub), session + stage filling the rest. */}
         <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
           <BranchRiver />
-          {/* pt clears the fixed nav so the eyebrow stays readable while pinned */}
+          {/* pt clears the fixed nav so the head stays readable while pinned */}
           <div className="relative z-10 mx-auto w-full max-w-[96rem] px-12 pt-24">
-            <p className="text-eyebrow font-medium uppercase text-ink-low">{HEAD.eyebrow}</p>
             {/* second h2 lives in the mobile branch — only one is ever displayed */}
-            <h2 className="mt-4 text-display text-balance text-ink-hi">{HEAD.h2}</h2>
+            <h2 className="text-display text-balance text-ink-hi">{HEAD.h2}</h2>
             <p className="mt-5 max-w-[44rem] text-body-lg text-ink-mid">{HEAD.intro}</p>
           </div>
           <div className="relative z-10 mx-auto grid w-full max-w-[96rem] flex-1 items-center gap-16 px-12 pb-8 lg:grid-cols-12">

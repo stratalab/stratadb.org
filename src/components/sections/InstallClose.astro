@@ -3,6 +3,7 @@
 // second and final permitted use (60% of hero opacity). No slogan — the
 // command is the copy.
 import SectionShell from '../foundation/SectionShell.astro';
+import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import HorizonGlow from '../foundation/HorizonGlow.astro';
 import InstallTabs from './install/InstallTabs.tsx';
@@ -10,9 +11,10 @@ import release from '../../data/release.json';
 ---
 
 <section id="install" class="relative overflow-hidden">
+  <SectionRule label="INSTALL" index="07" />
   <HorizonGlow dim />
   <div class="relative">
-    <SectionShell eyebrow="INSTALL">
+    <SectionShell>
       <div class="reveal mb-10 max-w-[42rem]">
         <Heading size="display">Start in thirty seconds.</Heading>
       </div>

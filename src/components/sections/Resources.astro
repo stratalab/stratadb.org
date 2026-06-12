@@ -1,6 +1,7 @@
 ---
 // Section 6 (04 §7): three quiet cards. Render only what exists (truth rule).
 import SectionShell from '../foundation/SectionShell.astro';
+import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import Card from '../foundation/Card.astro';
 
@@ -23,7 +24,8 @@ const cards = [
 ];
 ---
 
-<SectionShell id="resources" eyebrow="RESOURCES">
+<SectionRule label="RESOURCES" index="06" />
+<SectionShell id="resources">
   <div class="reveal mb-10">
     <Heading size="title">Go deeper.</Heading>
   </div>

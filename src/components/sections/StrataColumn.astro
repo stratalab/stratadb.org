@@ -5,11 +5,13 @@
 // it IS the strata column, five hued layers stacked. (Supersedes the
 // CSS-only rule of 05 §5 — this section is now an island.)
 import SectionShell from '../foundation/SectionShell.astro';
+import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import PrimitiveTabs from './primitives/PrimitiveTabs.tsx';
 ---
 
-<SectionShell id="primitives" eyebrow="PRIMITIVES" class="!pb-0">
+<SectionRule label="PRIMITIVES" index="03" />
+<SectionShell id="primitives" class="!pb-0">
   <div class="reveal max-w-[42rem]">
     <Heading size="display">Every kind of data. One file.</Heading>
     <p class="mt-6 text-body-lg text-ink-mid">

@@ -61,6 +61,22 @@ Guides, Cookbook, Reference) · **Internals** (Architecture, strata-core, strata
 stratahub) · **For agents** (`llms.txt`, For AI agents, MCP reference). Meta row:
 `© {year} StrataDB · Apache-2.0 · Research preview` + GitHub. Nothing else.
 
+### Section rules — the drafting system (v2, 2026-06-12)
+
+*(Ani: "still doesn't look world class — look at supermemory.ai. A bit busy, but the
+polish is genuinely impressive." The transferable thing under the busy-ness is its
+RULING SYSTEM — the page reads as one engineered document. Ours, quieter:)*
+
+Every section after the hero opens with a **SectionRule** band: a full-bleed hairline,
+and inside the 70rem column `+ ⟩ EYEBROW` (mono, registration mark, ember chevron) on
+the left and `[ NN / 07 ]` (current index in ember) on the right. The in-flow eyebrows
+are RETIRED — the label lives in the rule. Running order: 01 hero (unruled cover) ·
+02 BRANCH · 03 PRIMITIVES · 04 TIME TRAVEL · 05 NATIVE INFERENCE · 06 RESOURCES ·
+07 INSTALL. The same drafting voice recurs inside set-pieces: the primitives rail
+numbers its layers (`01`–`05` mono), demo bodies sit on a barely-there dot grid
+(graph paper, rgba(255,255,255,0.04) at 22px), and the tabpanel closes with a ruled
+mono footer (`03 / 05 · json — documents with path-level writes`).
+
 ---
 
 ## 2. Section 1 — Hero + Set-piece A: "The Forking Terminal"
