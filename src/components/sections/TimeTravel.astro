@@ -1,15 +1,34 @@
 ---
-// Section 4 (04 §4): "Go back to any moment." — the only scroll-scrub on the page.
+// Section 4 (04 §5 v2): "Go back to any moment." — time travel as direct
+// manipulation. The scroll-scrub is gone (Ani, 2026-06-12: "the user can
+// scrub back and forth... not another parallax scroll"); the artifact is a
+// draggable timeline the visitor owns. Head in the prose column, the
+// instrument on the 80rem stage (the established escalation pattern).
 import SectionShell from '../foundation/SectionShell.astro';
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
-import VersionStrip from './timetravel/VersionStrip.tsx';
+import TimeScrubber from './timetravel/TimeScrubber.tsx';
 ---
 
 <SectionRule label="TIME TRAVEL" index="04" />
-<SectionShell id="time-travel">
-  <div class="reveal mb-4 max-w-[42rem]">
+<SectionShell id="time-travel" class="!pb-0">
+  <div class="reveal max-w-[42rem]">
     <Heading size="display">Go back to any moment.</Heading>
+    <p class="mt-6 text-body-lg text-ink-mid">
+      Every write is a version. Nothing is overwritten — drag the playhead and read the past.
+    </p>
   </div>
-  <VersionStrip client:visible />
 </SectionShell>
+
+<div class="relative mx-auto w-full max-w-[80rem] overflow-x-clip px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4">
+  <!-- one quiet stage light, the page's temperature -->
+  <div
+    class="pointer-events-none absolute -inset-x-16 -inset-y-10"
+    style="background: radial-gradient(46% 60% at 50% 45%, rgba(255, 122, 82, 0.09), transparent 70%);"
+    aria-hidden="true"
+  >
+  </div>
+  <div class="relative">
+    <TimeScrubber client:visible />
+  </div>
+</div>

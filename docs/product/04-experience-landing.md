@@ -256,23 +256,39 @@ Motion: layers reveal bottom-up (geology accretes), 60ms stagger ≤800ms · ent
 drift, thicken→border-bright · mobile: tap-to-expand accordion · keyboard traversable.
 *(No live counts — scoped 2026-06-11; the column is CSS-only, see 05.)*
 
-## 5. Section 4 — Time travel · Set-piece B (the only scrub)
+## 5. Section 4 — Time travel · the instrument (v2, 2026-06-12)
 
-**Layout.** Sticky scrub, 1.5 viewport-heights. Horizontal **version strip**: versions
-of `config` accrete left→right as timestamped sediment cells; playhead tracks scroll;
-left code panel updates per scene.
+**v2 (Ani): "an interactive component that the user can scrub back and forth and see
+how the value changes. We should not have another parallax scroll."** The scroll-scrub
+is RETIRED (the page's scrub count drops to one — branch). Time travel is now **direct
+manipulation**: the visitor owns a playhead.
 
-**Copy.** Eyebrow `TIME TRAVEL`; H2 **"Go back to any moment."** *(alternate held:
-"Yesterday is a query.")*; caption rail:
-1. "Every write is a version. Nothing is overwritten." — `kv history config`
-2. "Open the database as it was." — `db.at(yesterday)` → `snapshot.kv.get("config")`
-3. "Diff then against now." — old vs new, changed field highlighted
+**The artifact — TimeScrubber.** A terminal card (primitives material: ember border,
+bloom, dot-grid body, ruled mono footer) running the live read
+`kv get config.theme --as-of "<timestamp>"`. A draggable ember playhead rides a ruled
+timeline spanning the seed world's three days (2026-06-09 → now); the command's
+timestamp and the answer update as you drag. The answer row: theme swatch (existing
+tokens: raised="dark", terracotta-950="dusk", branch-main-well="midnight"), the value
+at stat scale, version chip, written-at. **Scrub before the first write and the key
+honestly does not exist yet** ("∅ nothing here yet"). Write markers light ember as the
+playhead passes them; the elapsed span tints. Footer: "drag the playhead — every read
+accepts --as-of" · "3 versions · 0 overwrites".
 
-Motion: bands 0–35–70, 12% crossfades, `spring-scrub` · reduced-motion = static scenes
-+ Prev/Next steppers · mobile = swipeable carousel · captions are real DOM text.
+**Copy.** H2 **"Go back to any moment."** (eyebrow lives in the section rule); intro:
+"Every write is a version. Nothing is overwritten — drag the playhead and read the
+past."
 
-*(Choreographed permanently — scoped 2026-06-11. The live variant — the strip showing
-the visitor's own hero writes — is recorded as a future option in §0.)*
+Interaction: pointer drag + click-to-jump (pointer capture, touch-none) · keyboard =
+real slider (role=slider, aria-valuetext speaks the moment + version; arrows snap
+between span start / writes / now; Home/End) · value swaps animate 220ms in a
+fixed-height row (CLS-zero) · reduced motion: fully alive — it only moves when the
+user moves it · SSR = playhead at "now" (completed state). Head in the prose column,
+instrument on the 80rem stage with one quiet ember field.
+
+*(v1 — the 1.5vh sticky version strip — retired 2026-06-12; its "choreographed
+permanently" scoping is superseded by this direct-manipulation form. The live variant
+— the instrument reading the visitor's own hero writes — remains the R8 future
+option.)*
 
 ## 6. Section 5 — Native inference
 
