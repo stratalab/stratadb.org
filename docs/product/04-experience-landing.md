@@ -117,6 +117,17 @@ path to real interaction.
 ## 3. Section 2 — Branching
 
 **v2 (2026-06-12, Ani): the section is scrub #2 — fork → modify → diff → merge.**
+
+**v5 (2026-06-12, Ani): the head rides the pin + the branch river.** The
+eyebrow/H2/intro no longer sit in a SectionShell above the scrub (they scrolled away
+the moment the pin engaged) — they render INSIDE the pinned screen as its top row
+(H2 left, intro right, baseline-aligned), visible for the whole 340vh. And behind
+the scene: the **branch river** — a 3-strand echo of the hero backdrop. A trunk
+forks left of center; the ember strand rises toward risky's side, the cool strand
+holds toward main's, and a dim ember strand bends back down to meet it — fork and
+merge as ambient artwork. Slower than the hero (9–14s), desktop pin only (Doc 03 §5
+cap amended to 3 infinite animations). On mobile/reduced the head renders in flow.
+
 Eyebrow `BRANCH`; H2 **"Try anything. Keep what works."**; intro: "A branch is a
 complete database — fork it, change it, diff it, merge it back. Forking copies
 nothing, so it's instant at any size." *(2026-06-12, Ani: "People don't understand

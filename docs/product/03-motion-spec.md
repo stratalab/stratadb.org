@@ -139,10 +139,13 @@ the engine.
 - Nothing runs longer than `--dur-5` except user-scrubbed interpolation and the
   executor-driven set-piece sequences (which are beat-by-beat, each beat ≤ `--dur-5`).
 - No looping decorative animation. Set-piece loops complete a full cycle + ≥4s hold.
-- Max 2 scrub pieces, max 2 parallax sites, **2 infinite animations** — the cursor, and
+- Max 2 scrub pieces, max 2 parallax sites, **3 infinite animations** — the cursor;
   (amendment 2026-06-12, Ani: "the hero shouldn't be static") the hero's breathing
   backdrop: three light fields, transform-only, 22–36s periods, off under reduced
-  motion. These caps are review gates, not guidelines.
+  motion; and (amendment 2026-06-12, Ani: the branch section "needs more color and
+  liveliness — maybe a smaller version of the animation from the hero") the branch
+  pin's river: three strands echoing the hero's, slower (9–14s), desktop pin only,
+  never rendered under reduced motion. These caps are review gates, not guidelines.
 
 ## 6. Reduced motion — full parity
 

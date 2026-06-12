@@ -1,10 +1,11 @@
-// Scrub #2 of 2 (03 §3.2) — v4 (2026-06-12): finance domain + session panel.
+// Scrub #2 of 2 (03 §3.2) — v5 (2026-06-12): the head rides the pin.
 // A portfolio document forks into two color-coded worlds (main = cool slate,
 // risky = ember-warm); the aggressive allocation lands as four cascading
 // writes; a true diff rises; the merge dissolves warm into cool. Commands
 // accumulate in a session terminal on the left like a real CLI transcript;
-// scroll-driven light fields color the stage (no new infinite animations).
-import { useEffect, useRef, useState } from 'react';
+// scroll-driven light fields color the stage, and the branch river flows
+// behind it (03 §5 infinite animation #3, sanctioned 2026-06-12).
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { motion, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react';
 import { SEED } from '../../../data/seed';
 
@@ -30,6 +31,14 @@ const ACTS = [
   { verb: 'Diff', line: 'Every change, exactly — before real money moves.' },
   { verb: 'Merge', line: 'Keep the strategy that works.' },
 ];
+
+// The section head lives inside the island (04 §3 v5) so it can ride the pin.
+const HEAD = {
+  eyebrow: 'BRANCH',
+  h2: 'Try anything. Keep what works.',
+  intro:
+    "A branch is a complete database — fork it, change it, diff it, merge it back. Forking copies nothing, so it's instant at any size.",
+};
 
 // The accumulated session (left terminal). Lines flash in with their act,
 // then dim into history.
@@ -261,7 +270,7 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
       : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g));
 
   return (
-    <div className="relative flex h-full min-h-[34rem] items-center justify-center">
+    <div className="relative flex h-full min-h-[30rem] items-center justify-center">
       {/* stage light: cool constant behind main's side; ember follows the branch's life */}
       <div
         className="pointer-events-none absolute -inset-x-16 inset-y-0"
@@ -286,6 +295,80 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
         <DiffCard visible={diffIn} />
       </div>
     </div>
+  );
+}
+
+// Stacked head for in-flow layouts (mobile, reduced motion).
+function FlowHead() {
+  return (
+    <div className="max-w-[42rem]">
+      <p className="text-eyebrow font-medium uppercase text-ink-low">{HEAD.eyebrow}</p>
+      <h2 className="mt-4 text-display text-balance text-ink-hi">{HEAD.h2}</h2>
+      <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
+    </div>
+  );
+}
+
+// The branch river (04 §3 v5; 03 §5 infinite animation #3): a 3-strand echo of
+// the hero backdrop, slower. Routed to FRAME the scene, not hide behind it:
+// the ember strand sweeps the bottom band and rises through the empty
+// top-right corner toward risky's side; the cool strand holds the bottom
+// (main's ground); a dim ember strand peels off and bends back down to meet
+// it — fork and merge as ambient artwork. Desktop pin only; the
+// reduced-motion variant never renders it.
+const RIVER = [
+  {
+    d: 'M -40 820 C 300 815 560 800 800 730 C 1060 655 1300 480 1480 260',
+    tone: 'ember',
+    dur: '9s',
+  },
+  {
+    d: 'M -40 860 C 360 856 760 848 1480 826',
+    tone: 'cool',
+    dur: '12s',
+  },
+  {
+    d: 'M 800 730 C 960 690 1100 705 1230 770 C 1320 815 1400 838 1480 842',
+    tone: 'dim',
+    dur: '14s',
+  },
+];
+
+function BranchRiver() {
+  return (
+    <>
+      <svg
+        className="branch-river pointer-events-none absolute inset-0 h-full w-full"
+        viewBox="0 0 1440 900"
+        fill="none"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        {RIVER.map((p) => (
+          <g key={p.tone}>
+            <path d={p.d} className={`br-glow br-${p.tone}`} style={{ '--dur': p.dur } as CSSProperties} />
+            <path d={p.d} className={`br-core br-${p.tone}`} style={{ '--dur': p.dur } as CSSProperties} />
+          </g>
+        ))}
+      </svg>
+      <style>{`
+        .branch-river { opacity: 0.85; }
+        .br-glow, .br-core { stroke-linecap: round; fill: none; }
+        .br-glow { stroke-width: 7; opacity: 0.25; }
+        .br-core {
+          stroke-width: 1.75;
+          stroke-dasharray: 90 160;
+          animation: branch-river-flow var(--dur, 12s) linear infinite;
+        }
+        .br-core.br-ember { stroke: var(--color-terracotta-400); opacity: 0.85; }
+        .br-glow.br-ember { stroke: var(--color-terracotta-600); }
+        .br-core.br-cool { stroke: var(--color-strata-kv); opacity: 0.5; }
+        .br-glow.br-cool { stroke: var(--color-strata-kv); opacity: 0.1; }
+        .br-core.br-dim { stroke: var(--color-terracotta-600); opacity: 0.55; }
+        .br-glow.br-dim { stroke: var(--color-terracotta-800); opacity: 0.14; }
+        @keyframes branch-river-flow { to { stroke-dashoffset: -250; } }
+      `}</style>
+    </>
   );
 }
 
@@ -339,7 +422,10 @@ export default function BranchScrub() {
 
   if (reduced) {
     return (
-      <div>
+      <div className="mx-auto w-full max-w-[80rem] px-6 py-32 max-md:py-20">
+        <div className="mb-12">
+          <FlowHead />
+        </div>
         <div className="mb-8 grid gap-8 md:grid-cols-12">
           <div className="md:col-span-4">
             <ActHeader active={step} />
@@ -376,22 +462,36 @@ export default function BranchScrub() {
   return (
     <>
       <div ref={ref} className="relative hidden md:block" style={{ height: '340vh' }}>
-        <div className="sticky top-0 h-screen">
-          <div className="mx-auto grid h-full w-full max-w-[96rem] items-center gap-16 px-12 py-12 lg:grid-cols-12">
+        {/* The pinned screen owns the whole composition: river behind, head on
+            top (visible for the full scrub), session + stage filling the rest. */}
+        <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
+          <BranchRiver />
+          {/* pt clears the fixed nav so the eyebrow stays readable while pinned */}
+          <div className="relative z-10 mx-auto w-full max-w-[96rem] px-12 pt-24">
+            <p className="text-eyebrow font-medium uppercase text-ink-low">{HEAD.eyebrow}</p>
+            {/* second h2 lives in the mobile branch — only one is ever displayed */}
+            <h2 className="mt-4 text-display text-balance text-ink-hi">{HEAD.h2}</h2>
+            <p className="mt-5 max-w-[44rem] text-body-lg text-ink-mid">{HEAD.intro}</p>
+          </div>
+          <div className="relative z-10 mx-auto grid w-full max-w-[96rem] flex-1 items-center gap-16 px-12 pb-8 lg:grid-cols-12">
             <div className="flex flex-col justify-center lg:col-span-4">
               <ActHeader active={active} />
               <div className="mt-10">
                 <SessionPanel active={active} lineIn={lineIn} />
               </div>
             </div>
-            <div className="h-full min-h-[34rem] lg:col-span-8">
+            <div className="h-full min-h-[30rem] lg:col-span-8">
               <Stage p={progress} />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 md:hidden">
+      <div className="md:hidden">
+        <div className="mx-auto w-full max-w-[70rem] px-6 pt-20 max-[480px]:px-4">
+          <FlowHead />
+        </div>
+        <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-20">
         {ACTS.map((act, i) => (
           <div key={act.verb} className="w-[92vw] shrink-0 snap-center">
             <p className="text-heading font-semibold text-ink-hi">{act.verb}</p>
@@ -416,6 +516,7 @@ export default function BranchScrub() {
             </div>
           </div>
         ))}
+        </div>
       </div>
     </>
   );
