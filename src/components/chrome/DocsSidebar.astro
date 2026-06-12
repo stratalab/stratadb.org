@@ -1,0 +1,39 @@
+---
+import type { NavSection } from '../../lib/docsNav';
+
+interface Props {
+  sections: NavSection[];
+  currentPath: string;
+}
+const { sections, currentPath } = Astro.props;
+const isActive = (href: string) => currentPath === href || currentPath === `${href}/`;
+---
+
+<nav class="hidden w-60 shrink-0 lg:block" aria-label="Documentation">
+  <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4">
+    {
+      sections.map((section) => (
+        <div class="mb-7">
+          <h3 class="mb-2.5 text-eyebrow font-medium uppercase text-ink-low">{section.title}</h3>
+          <ul class="space-y-px border-l border-line">
+            {section.items.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class:list={[
+                    '-ml-px block border-l-2 py-1.5 pl-4 text-small transition-colors duration-200',
+                    isActive(item.href)
+                      ? 'border-terracotta-500 text-ink-hi'
+                      : 'border-transparent text-ink-mid hover:border-line-hover hover:text-ink-hi',
+                  ]}
+                >
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</nav>

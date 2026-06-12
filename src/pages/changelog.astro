@@ -1,130 +1,83 @@
 ---
+// Generated from real release data (PRD §7.2) — the sibling-path read with the
+// stale hardcoded fallback is dead. Build-time fetch; committed release.json
+// is the single-entry floor if the API is unreachable.
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionShell from '../components/foundation/SectionShell.astro';
+import Heading from '../components/foundation/Heading.astro';
+import release from '../data/release.json';
 
-// Read changelog from the main repo
-import fs from 'node:fs';
-import path from 'node:path';
-
-let changelogContent = '';
-try {
-  const changelogPath = path.resolve('../CHANGELOG.md');
-  changelogContent = fs.readFileSync(changelogPath, 'utf-8');
-} catch {
-  changelogContent = `# Changelog
-
-## v0.6.0 (Latest)
-
-### Features
-- Redis-inspired CLI with REPL interface
-- Six built-in primitives: KV, Events, State, JSON, Vectors, Branches
-- Git-like branching for data isolation
-- Three durability modes: sync, async, cache
-
-### Improvements
-- Improved error messages
-- Better CLI help output
-- Performance optimizations
-
-## v0.5.0
-
-### Features
-- Initial public release
-- Core storage engine
-- Basic primitives
-
----
-
-See the [full changelog on GitHub](https://github.com/stratadb-labs/strata-core/blob/main/CHANGELOG.md).
-`;
+interface Release {
+  tag: string;
+  name: string;
+  date: string;
+  body: string;
 }
 
-// Parse the changelog for display
-const releases = changelogContent
-  .split(/^## /m)
-  .filter(Boolean)
-  .map(section => {
-    const lines = section.trim().split('\n');
-    const title = lines[0];
-    const content = lines.slice(1).join('\n');
-    return { title, content };
+let releases: Release[] = [];
+try {
+  const res = await fetch('https://api.github.com/repos/stratalab/strata-core/releases?per_page=20', {
+    headers: { Accept: 'application/vnd.github+json' },
   });
+  if (res.ok) {
+    const data = await res.json();
+    releases = data.map((r: any) => ({
+      tag: r.tag_name,
+      name: r.name || r.tag_name,
+      date: (r.published_at ?? '').slice(0, 10),
+      body: r.body ?? '',
+    }));
+  }
+} catch {
+  /* fall through to floor */
+}
+if (!releases.length) {
+  releases = [
+    {
+      tag: `v${release.version}`,
+      name: `v${release.version}`,
+      date: release.fetched_at,
+      body: 'Release notes on GitHub.',
+    },
+  ];
+}
 ---
 
-<BaseLayout title="Changelog - StrataDB" description="Release notes and version history for StrataDB">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h1 class="text-4xl font-bold text-text-primary mb-4">Changelog</h1>
-    <p class="text-xl text-text-secondary mb-12">
-      Release notes and version history. Subscribe to
-      <a href="https://github.com/stratadb-labs/strata-core/releases" class="link">GitHub releases</a>
-      to be notified of new versions.
-    </p>
+<BaseLayout title="Changelog — StrataDB" description="StrataDB release history, generated from GitHub releases.">
+  <SectionShell eyebrow="CHANGELOG">
+    <div class="mb-12 max-w-[42rem]">
+      <Heading level={1} size="display">Every version. Here too.</Heading>
+      <p class="mt-6 text-body-lg text-ink-mid">
+        Generated from <a
+          href="https://github.com/stratalab/strata-core/releases"
+          class="text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+          target="_blank"
+          rel="noopener noreferrer">GitHub releases</a
+        > at build time.
+      </p>
+    </div>
 
-    <div class="space-y-12">
-      {releases.map((release, index) => {
-        const isLatest = index === 0;
-        const versionMatch = release.title.match(/v?(\d+\.\d+\.\d+)/);
-        const version = versionMatch ? versionMatch[1] : release.title;
-
-        return (
-          <article class="relative pl-8 border-l-2 border-border" id={`v${version}`}>
-            {/* Version marker */}
-            <div class="absolute -left-3 top-0 w-6 h-6 rounded-full bg-background border-2 border-terracotta flex items-center justify-center">
-              <div class="w-2 h-2 rounded-full bg-terracotta" />
-            </div>
-
-            {/* Header */}
-            <div class="flex items-center gap-3 mb-4">
-              <h2 class="text-2xl font-bold text-text-primary">
-                <a href={`#v${version}`} class="hover:text-terracotta transition-colors">
-                  v{version}
+    <div class="max-w-[46rem] space-y-10">
+      {
+        releases.map((r, i) => (
+          <article id={r.tag} class="border-l-2 border-line pl-6">
+            <div class="flex items-baseline gap-3">
+              <h2 class="font-mono text-heading text-ink-hi">
+                <a href={`#${r.tag}`} class="transition-colors duration-200 hover:text-terracotta-400">
+                  {r.tag}
                 </a>
               </h2>
-              {isLatest && (
-                <span class="px-2 py-1 text-xs font-medium bg-terracotta/10 text-terracotta rounded">
-                  Latest
+              {i === 0 && (
+                <span class="rounded-full border border-line px-2.5 py-0.5 font-mono text-mono-sm text-terracotta-500">
+                  latest
                 </span>
               )}
+              <span class="font-mono text-mono-sm text-ink-low">{r.date}</span>
             </div>
-
-            {/* Content */}
-            <div class="prose-docs prose-sm">
-              <Fragment set:html={release.content
-                .replace(/### /g, '<h3 class="text-lg font-semibold text-text-primary mt-4 mb-2">')
-                .replace(/\n- /g, '\n<li>')
-                .replace(/<li>/g, '</h3><ul class="list-disc pl-5 space-y-1 text-text-secondary"><li>')
-                .replace(/<\/li>\n<h3/g, '</li></ul>\n<h3')
-              } />
-            </div>
+            {r.body && <pre class="mt-4 whitespace-pre-wrap font-sans text-small leading-6 text-ink-mid">{r.body}</pre>}
           </article>
-        );
-      })}
+        ))
+      }
     </div>
-
-    <div class="mt-16 p-6 bg-background-muted rounded-xl border border-border">
-      <h3 class="font-semibold text-text-primary mb-2">Stay Updated</h3>
-      <p class="text-text-secondary mb-4">
-        Get notified when new versions are released.
-      </p>
-      <div class="flex gap-4">
-        <a
-          href="https://github.com/stratadb-labs/strata-core/releases.atom"
-          class="btn-secondary text-sm"
-        >
-          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248S0 22.546 0 20.752s1.456-3.248 3.252-3.248 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046 19.152 8.594 19.183 19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z"/>
-          </svg>
-          RSS Feed
-        </a>
-        <a
-          href="https://github.com/stratadb-labs/strata-core/subscription"
-          class="btn-secondary text-sm"
-        >
-          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-          </svg>
-          Watch on GitHub
-        </a>
-      </div>
-    </div>
-  </div>
+  </SectionShell>
 </BaseLayout>

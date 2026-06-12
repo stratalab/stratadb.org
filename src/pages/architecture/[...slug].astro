@@ -1,119 +1,29 @@
 ---
+// Whitepaper pages, re-skinned (Phase 5). Content untouched.
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Sidebar from '../../components/layout/Sidebar.astro';
 
 export async function getStaticPaths() {
   const architecture = await getCollection('architecture');
-  return architecture.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { entry },
-  }));
+  return architecture
+    .filter((entry) => entry.slug !== 'index')
+    .map((entry) => ({ params: { slug: entry.slug }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const currentPath = Astro.url.pathname;
-
-// Architecture sidebar structure
-const sidebarItems = [
-  { title: 'Overview', href: '/architecture' },
-  {
-    title: 'System Design',
-    href: '/architecture/crate-structure',
-    items: [
-      { title: 'Crate Structure', href: '/architecture/crate-structure' },
-      { title: 'Storage Engine', href: '/architecture/storage-engine' },
-      { title: 'Durability & Recovery', href: '/architecture/durability-and-recovery' },
-      { title: 'Durability Modes', href: '/architecture/durability-modes' },
-    ],
-  },
-  {
-    title: 'Concurrency',
-    href: '/architecture/concurrency-model',
-    items: [
-      { title: 'Concurrency Model', href: '/architecture/concurrency-model' },
-      { title: 'Concurrency Invariants', href: '/architecture/concurrency-invariants' },
-      { title: 'Session & Transaction', href: '/architecture/session-transaction-completeness' },
-    ],
-  },
-  {
-    title: 'Primitives',
-    href: '/architecture/branch-primitive',
-    items: [
-      { title: 'Branch Primitive', href: '/architecture/branch-primitive' },
-      { title: 'KV Primitive', href: '/architecture/kv-primitive' },
-      { title: 'Event Primitive', href: '/architecture/event-primitive' },
-      { title: 'State Primitive', href: '/architecture/state-primitive' },
-      { title: 'JSON Primitive', href: '/architecture/json-primitive' },
-      { title: 'Vector Primitive', href: '/architecture/vector-primitive' },
-    ],
-  },
-  {
-    title: 'Other',
-    href: '/architecture/error-propagation',
-    items: [
-      { title: 'Error Propagation', href: '/architecture/error-propagation' },
-      { title: 'Boundary Conditions', href: '/architecture/boundary-conditions' },
-      { title: 'Version Semantics', href: '/architecture/version-semantics' },
-    ],
-  },
-];
 ---
 
-<BaseLayout title={`${entry.data.title} - Architecture`} description={entry.data.description}>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex gap-8">
-      <!-- Sidebar -->
-      <Sidebar items={sidebarItems} currentPath={currentPath} />
-
-      <!-- Main content -->
-      <article class="flex-1 min-w-0">
-        <div class="prose-docs">
-          <Content />
-        </div>
-      </article>
-
-      <!-- Table of contents -->
-      <aside class="w-56 flex-shrink-0 hidden xl:block">
-        <div class="sticky top-24">
-          <h4 class="text-sm font-semibold text-text-primary mb-4">On this page</h4>
-          <div id="toc" class="text-sm text-text-secondary space-y-2">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-      </aside>
-    </div>
+<BaseLayout title={`${entry.data.title} — StrataDB Whitepapers`} description={entry.data.description}>
+  <div class="mx-auto w-full max-w-[46rem] px-6 py-16 max-[480px]:px-4">
+    <p class="mb-3 text-eyebrow font-medium uppercase text-ink-low">
+      <a href="/architecture" class="transition-colors duration-200 hover:text-ink-mid">Whitepapers</a>
+    </p>
+    <article class="prose-docs">
+      <Content />
+    </article>
+    <p class="mt-16 border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
+      agents: this page as markdown → <a href={`/architecture/${entry.slug}.md`} class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">/architecture/{entry.slug}.md</a>
+    </p>
   </div>
 </BaseLayout>
-
-<script>
-  // Generate table of contents
-  const article = document.querySelector('article');
-  const toc = document.getElementById('toc');
-
-  if (article && toc) {
-    const headings = article.querySelectorAll('h2, h3');
-    const tocList = document.createElement('ul');
-    tocList.className = 'space-y-2';
-
-    headings.forEach((heading) => {
-      if (!heading.id) {
-        heading.id = heading.textContent?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
-      }
-
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = `#${heading.id}`;
-      a.textContent = heading.textContent;
-      a.className = heading.tagName === 'H3'
-        ? 'block pl-4 hover:text-terracotta transition-colors'
-        : 'block hover:text-terracotta transition-colors font-medium';
-
-      li.appendChild(a);
-      tocList.appendChild(li);
-    });
-
-    toc.appendChild(tocList);
-  }
-</script>

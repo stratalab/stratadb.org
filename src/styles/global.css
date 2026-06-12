@@ -61,6 +61,45 @@
 }
 
 @layer components {
+  /* Docs prose: typography plugin mapped onto the token system (Phase 5) */
+  .prose-docs {
+    @apply prose prose-invert max-w-none;
+    --tw-prose-body: var(--color-ink-mid);
+    --tw-prose-headings: var(--color-ink-hi);
+    --tw-prose-links: var(--color-terracotta-500);
+    --tw-prose-bold: var(--color-ink-hi);
+    --tw-prose-code: var(--color-ink-hi);
+    --tw-prose-quotes: var(--color-ink-mid);
+    --tw-prose-quote-borders: var(--color-terracotta-700);
+    --tw-prose-hr: var(--color-line);
+    --tw-prose-th-borders: var(--color-line);
+    --tw-prose-td-borders: var(--color-line);
+    --tw-prose-bullets: var(--color-ink-low);
+    --tw-prose-counters: var(--color-ink-low);
+  }
+  .prose-docs :where(pre) {
+    background-color: var(--color-inset);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+  .prose-docs :where(code):not(:where(pre code)) {
+    background-color: var(--color-raised);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-control);
+    font-weight: 400;
+  }
+  .prose-docs :where(code)::before,
+  .prose-docs :where(code)::after {
+    content: '';
+  }
+  .prose-docs :where(a) {
+    text-decoration: none;
+  }
+  .prose-docs :where(a):hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   /* Reveal recipe (03 §2) — applied via IntersectionObserver adding .is-revealed */
   .reveal {
     opacity: 0;
