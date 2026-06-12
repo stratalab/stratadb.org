@@ -20,6 +20,8 @@ import PrimitiveTabs from './primitives/PrimitiveTabs.tsx';
 
 <!-- The tabs + content stage breaks out of the prose column (same move as
      the branch scene): the rail and demo card take the wide stage. -->
-<div class="mx-auto w-full max-w-[88rem] px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4">
+<!-- overflow-x-clip: the stage lights bleed past the container on purpose;
+     clip them at the viewport without cutting vertical glow. -->
+<div class="relative mx-auto w-full max-w-[88rem] overflow-x-clip px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4">
   <PrimitiveTabs client:visible />
 </div>

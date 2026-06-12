@@ -1,10 +1,14 @@
-// Section 3 (04 §5 v2, 2026-06-12): tabs + content per the claude.com
-// "How you can use Claude" pattern — but the tab rail is VERTICAL, stacked
-// like the strata column itself, so the motif's load-bearing appearance
-// survives the redesign: five layers, each wearing its hue, the active one
-// lit. Every demo tells the seed world's story (one world, Doc 04).
-// Beats play once per tab activation (no infinite animation); SSR renders
-// the completed state; reduced motion shows final frames instantly.
+// Section 3 (04 §4 v3, 2026-06-12): the lit stage. Tabs + content per the
+// claude.com pattern; the tab rail is VERTICAL, stacked like the strata
+// column itself, so the motif's load-bearing appearance survives. v3 adds
+// the craft pass: the active primitive's hue lights the stage (radial
+// fields crossfade on tab switch), the demo card wears that hue as
+// material (tinted border, bloom, wash), commands are TYPED with a cursor
+// (03 §2: commands typed, output printed), vector scores count up, the
+// graph traversal travels. Every demo tells the seed world's story.
+// All animation is triggered per activation — no new infinite loops
+// (03 §5 cap stays at 3); SSR renders the completed state; reduced
+// motion shows final frames instantly.
 import {
   useEffect,
   useRef,
@@ -53,6 +57,20 @@ const PRIMS = [
 
 type PrimId = (typeof PRIMS)[number]['id'];
 
+// The five hues as rgb triplets — the only way to alpha-ramp a hue without
+// a hex literal (tokens.css owns the hex; CI enforces it).
+const HUE: Record<PrimId, string> = {
+  kv: '124, 170, 255',
+  event: '79, 224, 166',
+  json: '255, 198, 110',
+  vector: '255, 140, 198',
+  graph: '184, 156, 255',
+};
+const rgba = (id: PrimId, a: number) => `rgba(${HUE[id]}, ${a})`;
+
+// Typing time for a command (03 §2: 24–40ms jittered) + a settle beat.
+const T = (cmd: string) => Math.round(cmd.length * 30) + 500;
+
 // ---- beats: a per-demo step clock ----------------------------------------
 // live=false (SSR, reduced motion, out of view) pins the final frame; when
 // live flips true the sequence replays from zero. Panels remount per tab
@@ -76,12 +94,56 @@ function useBeats(delays: number[], live: boolean) {
   return beat;
 }
 
-// One enter treatment for every demo line: flash in, settle.
+// ---- typed commands (03 §2: commands are typed, output is printed) --------
+function useTyped(text: string, live: boolean, start: boolean) {
+  const [n, setN] = useState(() => (live ? 0 : text.length));
+  useEffect(() => {
+    if (!live) {
+      setN(text.length);
+      return;
+    }
+    if (!start) {
+      setN(0);
+      return;
+    }
+    setN(0);
+    let i = 0;
+    let t: number;
+    const tick = () => {
+      i += 1;
+      setN(i);
+      if (i < text.length) t = window.setTimeout(tick, 24 + Math.random() * 16);
+    };
+    t = window.setTimeout(tick, 120);
+    return () => window.clearTimeout(t);
+  }, [live, start]);
+  return n;
+}
+
+function Cmd({ branch = 'main', cmd, on, live }: { branch?: string; cmd: string; on: boolean; live: boolean }) {
+  const n = useTyped(cmd, live, on);
+  const typing = live && on && n < cmd.length;
+  return (
+    // invisible (not display:none) — the line reserves its height, so
+    // nothing below shifts when it lands; hidden lines stay out of the
+    // a11y tree.
+    <div className={on ? '' : 'invisible'}>
+      <span className="text-ink-low">strata:{branch} </span>
+      <span className="text-terracotta-500">›</span>
+      <span className="text-ink-hi"> {cmd.slice(0, n)}</span>
+      {typing && (
+        <span className="ml-px inline-block h-[1.05em] w-[0.55ch] translate-y-[3px] bg-ink-hi/80" aria-hidden="true" />
+      )}
+    </div>
+  );
+}
+
+// One enter treatment for every OUTPUT line: flash in, settle.
 function Line({ on, children, className = '' }: { on: boolean; children: ReactNode; className?: string }) {
   return (
     <motion.div
       initial={false}
-      animate={{ opacity: on ? 1 : 0, y: on ? 0 : 6 }}
+      animate={{ opacity: on ? 1 : 0, y: on ? 0 : 6, visibility: on ? 'visible' : 'hidden' }}
       transition={{ duration: 0.32, ease: EASE }}
       className={className}
     >
@@ -90,32 +152,39 @@ function Line({ on, children, className = '' }: { on: boolean; children: ReactNo
   );
 }
 
-function Prompt({ branch = 'main', cmd }: { branch?: string; cmd: string }) {
-  return (
-    <>
-      <span className="text-ink-low">strata:{branch} </span>
-      <span className="text-terracotta-500">›</span>
-      <span className="text-ink-hi"> {cmd}</span>
-    </>
-  );
-}
-
-// Terminal chrome shared by all five demos; fixed body height so switching
-// tabs never moves layout.
+// Terminal chrome shared by all five demos: the card wears the active hue
+// as material — tinted border, header wash, a faint body tint, and a bloom
+// behind it. Fixed body height so switching tabs never moves layout.
 function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
   return (
     <div
-      className="overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
-      style={{ boxShadow: 'var(--shadow-float)' }}
+      className="overflow-hidden rounded-(--radius-frame)"
+      style={{
+        background: 'var(--color-panel)',
+        border: `1px solid ${rgba(id, 0.28)}`,
+        boxShadow: `var(--shadow-float), 0 0 110px -28px ${rgba(id, 0.45)}`,
+      }}
     >
-      <div className="flex h-11 items-center gap-2.5 border-b border-line px-5">
-        <span className="h-2.5 w-2.5 rounded-full" style={{ background: `var(--color-strata-${id})` }} aria-hidden="true" />
+      <div
+        className="flex h-12 items-center gap-2.5 px-5"
+        style={{ borderBottom: `1px solid ${rgba(id, 0.16)}`, background: rgba(id, 0.05) }}
+      >
+        <span
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ background: `var(--color-strata-${id})`, boxShadow: `0 0 10px ${rgba(id, 0.8)}` }}
+          aria-hidden="true"
+        />
         <span className="font-mono text-mono-body text-ink-hi">{id}</span>
         <span className="ml-auto font-mono text-mono-sm text-ink-low">strata · main</span>
       </div>
       {/* min-h = the tallest demo (json), measured — tab switches never move
           the page below */}
-      <div className="min-h-[27rem] bg-inset p-6 font-mono text-mono-body leading-8 md:min-h-[30rem] md:p-8 md:text-[1.0625rem] md:leading-9">
+      <div
+        className="min-h-[27rem] p-6 font-mono text-mono-body leading-8 md:min-h-[30rem] md:p-8 md:text-[1.0625rem] md:leading-9"
+        style={{
+          background: `linear-gradient(180deg, ${rgba(id, 0.045)}, transparent 38%), var(--color-inset)`,
+        }}
+      >
         {children}
       </div>
     </div>
@@ -123,36 +192,43 @@ function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
 }
 
 // ---- kv: the history demo -------------------------------------------------
+const KV_C1 = 'kv put config.theme "midnight"';
+const KV_C2 = 'kv history config.theme';
+
 function KvDemo({ live }: { live: boolean }) {
-  const beat = useBeats([400, 500, 700, 450, 450, 450], live);
+  const beat = useBeats([350, T(KV_C1), 650, T(KV_C2), 380, 380], live);
   const history = SEED.kv['config.theme'].history!;
   return (
     <Demo id="kv">
-      <Line on={beat >= 1}>
-        <Prompt cmd='kv put config.theme "midnight"' />
-      </Line>
+      <Cmd cmd={KV_C1} on={beat >= 1} live={live} />
       <Line on={beat >= 2} className="text-ok">
         v3
       </Line>
-      <Line on={beat >= 3} className="mt-4">
-        <Prompt cmd="kv history config.theme" />
-      </Line>
-      {history.map((h, i) => (
-        <Line key={h.version} on={beat >= 4 + i} className="flex items-baseline gap-4">
-          <span
-            className="rounded px-1.5 font-mono text-mono-sm"
-            style={
-              i === history.length - 1
-                ? { background: 'rgba(124, 170, 255, 0.16)', color: 'var(--color-strata-kv)' }
-                : { color: 'var(--color-ink-low)' }
-            }
-          >
-            v{h.version}
-          </span>
-          <span className={i === history.length - 1 ? 'text-ink-hi' : 'text-ink-mid'}>"{String(h.value)}"</span>
-          <span className="ml-auto text-mono-sm text-ink-low max-sm:hidden">{h.at.slice(0, 16).replace('T', ' ')}</span>
-        </Line>
-      ))}
+      <div className="mt-4">
+        <Cmd cmd={KV_C2} on={beat >= 3} live={live} />
+      </div>
+      {history.map((h, i) => {
+        const latest = i === history.length - 1;
+        return (
+          <Line key={h.version} on={beat >= 4 + i} className="flex items-baseline gap-4">
+            <motion.span
+              className="rounded px-1.5 font-mono text-mono-sm"
+              style={
+                latest
+                  ? { background: rgba('kv', 0.16), color: 'var(--color-strata-kv)' }
+                  : { color: 'var(--color-ink-low)' }
+              }
+              initial={false}
+              animate={latest && beat >= 6 ? { scale: [1, 1.12, 1] } : {}}
+              transition={{ duration: 0.45, ease: EASE }}
+            >
+              v{h.version}
+            </motion.span>
+            <span className={latest ? 'text-ink-hi' : 'text-ink-mid'}>"{String(h.value)}"</span>
+            <span className="ml-auto text-mono-sm text-ink-low max-sm:hidden">{h.at.slice(0, 16).replace('T', ' ')}</span>
+          </Line>
+        );
+      })}
       <Line on={beat >= 6} className="mt-4 text-mono-sm text-ink-low">
         every write keeps its past — no extra table, no triggers
       </Line>
@@ -161,8 +237,11 @@ function KvDemo({ live }: { live: boolean }) {
 }
 
 // ---- event: append + replay ------------------------------------------------
+const EV_C1 = 'event append deploys { "action": "deploy.fail", … }';
+const EV_C2 = 'event list deploys';
+
 function EventDemo({ live }: { live: boolean }) {
-  const beat = useBeats([400, 500, 700, 450, 450, 450], live);
+  const beat = useBeats([350, T(EV_C1), 650, T(EV_C2), 380, 380], live);
   const rows = SEED.events.deploys.map((e) => ({
     t: e.at.slice(11, 19),
     action: String(e.payload.action),
@@ -175,15 +254,13 @@ function EventDemo({ live }: { live: boolean }) {
   }));
   return (
     <Demo id="event">
-      <Line on={beat >= 1}>
-        <Prompt cmd='event append deploys { "action": "deploy.fail", … }' />
-      </Line>
+      <Cmd cmd={EV_C1} on={beat >= 1} live={live} />
       <Line on={beat >= 2} className="text-ok">
         #3 · 09:33:12
       </Line>
-      <Line on={beat >= 3} className="mt-4">
-        <Prompt cmd="event list deploys" />
-      </Line>
+      <div className="mt-4">
+        <Cmd cmd={EV_C2} on={beat >= 3} live={live} />
+      </div>
       {rows.map((r, i) => (
         <Line key={r.t} on={beat >= 4 + i} className="flex items-baseline gap-4">
           <span className="text-mono-sm text-ink-low">{r.t}</span>
@@ -199,14 +276,15 @@ function EventDemo({ live }: { live: boolean }) {
 }
 
 // ---- json: the path-level write ---------------------------------------------
+const JS_C1 = 'json get profile';
+const JS_C2 = 'json set profile $.user.role "admin"';
+
 function JsonDemo({ live }: { live: boolean }) {
-  const beat = useBeats([400, 600, 800, 500], live);
-  const wrote = beat >= 3;
+  const beat = useBeats([350, T(JS_C1), 800, T(JS_C2), 450], live);
+  const wrote = beat >= 4;
   return (
     <Demo id="json">
-      <Line on={beat >= 1}>
-        <Prompt cmd="json get profile" />
-      </Line>
+      <Cmd cmd={JS_C1} on={beat >= 1} live={live} />
       <Line on={beat >= 2} className="whitespace-pre text-ink-mid">
         <div>{'{'}</div>
         <div>
@@ -221,7 +299,7 @@ function JsonDemo({ live }: { live: boolean }) {
           {wrote && (
             <motion.span
               className="absolute -inset-x-2 inset-y-0 rounded"
-              style={{ background: 'rgba(255, 198, 110, 0.14)' }}
+              style={{ background: rgba('json', 0.14) }}
               initial={live ? { opacity: 0 } : false}
               animate={{ opacity: [0, 1, 0.6] }}
               transition={{ duration: 0.6, ease: EASE }}
@@ -260,13 +338,13 @@ function JsonDemo({ live }: { live: boolean }) {
         <div>{'  }'}</div>
         <div>{'}'}</div>
       </Line>
-      <Line on={beat >= 3} className="mt-4">
-        <Prompt cmd='json set profile $.user.role "admin"' />
-      </Line>
-      <Line on={beat >= 4} className="text-ok">
+      <div className="mt-4">
+        <Cmd cmd={JS_C2} on={beat >= 3} live={live} />
+      </div>
+      <Line on={beat >= 5} className="text-ok">
         OK
       </Line>
-      <Line on={beat >= 4} className="mt-4 text-mono-sm text-ink-low">
+      <Line on={beat >= 5} className="mt-4 text-mono-sm text-ink-low">
         one path written — the rest of the document untouched
       </Line>
     </Demo>
@@ -274,18 +352,39 @@ function JsonDemo({ live }: { live: boolean }) {
 }
 
 // ---- vector: the search demo -------------------------------------------------
+const VEC_C = 'vector search docs "why did the deploy fail?" -k 2';
 const HITS = [
   { id: 'd1', score: 0.91, text: SEED.vectors.docs[0].text },
   { id: 'd2', score: 0.84, text: SEED.vectors.docs[1].text },
 ];
 
+// Scores count up while their bars fill — numbers that move read as
+// computation, not decoration.
+function CountUp({ to, on, live }: { to: number; on: boolean; live: boolean }) {
+  const [v, setV] = useState(() => (live ? 0 : to));
+  useEffect(() => {
+    if (!live || !on) {
+      setV(!live ? to : 0);
+      return;
+    }
+    let raf: number;
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const k = Math.min(1, (t - t0) / 600);
+      setV(to * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [on, live]);
+  return <>{v.toFixed(2)}</>;
+}
+
 function VectorDemo({ live }: { live: boolean }) {
-  const beat = useBeats([400, 700, 600, 600], live);
+  const beat = useBeats([350, T(VEC_C), 750, 650, 550], live);
   return (
     <Demo id="vector">
-      <Line on={beat >= 1}>
-        <Prompt cmd='vector search docs "why did the deploy fail?" -k 2' />
-      </Line>
+      <Cmd cmd={VEC_C} on={beat >= 1} live={live} />
       <Line on={beat >= 2} className="text-mono-sm text-ink-low">
         searching 384-dim HNSW index…
       </Line>
@@ -293,11 +392,16 @@ function VectorDemo({ live }: { live: boolean }) {
         <Line key={hit.id} on={beat >= 3 + i} className="mt-3">
           <div className="flex items-baseline gap-4">
             <span style={{ color: 'var(--color-strata-vector)' }}>{hit.id}</span>
-            <span className="text-ink-hi">{hit.score.toFixed(2)}</span>
+            <span className="text-ink-hi tabular-nums">
+              <CountUp to={hit.score} on={beat >= 3 + i} live={live} />
+            </span>
             <span className="relative h-2 w-36 self-center overflow-hidden rounded-full bg-raised md:w-56" aria-hidden="true">
               <motion.span
                 className="absolute inset-y-0 left-0 rounded-full"
-                style={{ background: 'var(--color-strata-vector)', opacity: 0.8 }}
+                style={{
+                  background: `linear-gradient(90deg, ${rgba('vector', 0.45)}, var(--color-strata-vector))`,
+                  boxShadow: `0 0 12px ${rgba('vector', 0.5)}`,
+                }}
                 initial={false}
                 animate={{ width: beat >= 3 + i ? `${hit.score * 100}%` : '0%' }}
                 transition={{ duration: 0.6, ease: EASE }}
@@ -307,7 +411,7 @@ function VectorDemo({ live }: { live: boolean }) {
           <div className="text-mono-sm leading-6 text-ink-mid">“{hit.text}”</div>
         </Line>
       ))}
-      <Line on={beat >= 4} className="mt-4 text-mono-sm text-ink-low">
+      <Line on={beat >= 5} className="mt-4 text-mono-sm text-ink-low">
         embedded on write — search was ready before you asked
       </Line>
     </Demo>
@@ -315,6 +419,7 @@ function VectorDemo({ live }: { live: boolean }) {
 }
 
 // ---- graph: draw the world, then walk it ---------------------------------------
+const GR_C = 'graph bfs alice --depth 1';
 const NODES = [
   { id: 'alice', x: 70, y: 64, type: 'user' },
   { id: 'bob', x: 268, y: 52, type: 'user' },
@@ -326,15 +431,19 @@ const EDGES = [
 ];
 
 function GraphDemo({ live }: { live: boolean }) {
-  const beat = useBeats([400, 500, 400, 500, 700, 500], live);
-  // beats: 1 cmd · 2 nodes · 3 edges · 4 bfs cmd · 5 traversal lights · 6 result
+  const beat = useBeats([350, T(GR_C), 550, 420, 650, 600], live);
+  // beats: 1 cmd types · 2 nodes pop · 3 edges draw · 4 alice lights ·
+  // 5 traversal travels · 6 result
   return (
     <Demo id="graph">
-      <Line on={beat >= 1}>
-        <Prompt cmd="graph bfs alice --depth 1" />
-      </Line>
+      <Cmd cmd={GR_C} on={beat >= 1} live={live} />
       <div className="mt-2 flex justify-center">
-        <svg viewBox="0 0 340 200" className="h-[12.5rem] w-full max-w-[24rem] md:h-[15rem] md:max-w-[28rem]" fill="none" aria-hidden="true">
+        <svg
+          viewBox="0 0 340 200"
+          className="h-[12.5rem] w-full max-w-[24rem] md:h-[15rem] md:max-w-[28rem]"
+          fill="none"
+          aria-hidden="true"
+        >
           {EDGES.map((e) => (
             <g key={e.rel}>
               <motion.line
@@ -359,6 +468,17 @@ function GraphDemo({ live }: { live: boolean }) {
                 animate={{ pathLength: beat >= 5 ? 1 : 0, opacity: beat >= 5 ? 0.9 : 0 }}
                 transition={{ duration: 0.55, ease: EASE }}
               />
+              {/* the traversal itself: a pulse travels the edge */}
+              {live && beat >= 5 && (
+                <motion.circle
+                  r="4"
+                  fill="var(--color-strata-graph)"
+                  style={{ filter: `drop-shadow(0 0 6px ${rgba('graph', 0.9)})` }}
+                  initial={{ cx: e.from.x, cy: e.from.y, opacity: 0 }}
+                  animate={{ cx: e.to.x, cy: e.to.y, opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 0.6, ease: 'easeInOut' }}
+                />
+              )}
               <motion.text
                 x={(e.from.x + e.to.x) / 2}
                 y={(e.from.y + e.to.y) / 2 - 8}
@@ -391,6 +511,7 @@ function GraphDemo({ live }: { live: boolean }) {
                   fill={lit ? 'var(--color-strata-graph)' : 'var(--color-raised)'}
                   stroke="var(--color-strata-graph)"
                   strokeWidth="1.5"
+                  style={lit ? { filter: `drop-shadow(0 0 8px ${rgba('graph', 0.7)})` } : undefined}
                 />
                 <text
                   x={n.x}
@@ -467,89 +588,110 @@ export default function PrimitiveTabs() {
   };
 
   return (
-    <div ref={rootRef} className="grid gap-10 lg:grid-cols-12">
-      {/* The rail IS the strata column: five layers, stacked, each wearing
-          its hue on the left edge — the active layer lit. */}
-      <div
-        role="tablist"
-        aria-label="Primitives"
-        aria-orientation="vertical"
-        onKeyDown={onKeys}
-        className="flex gap-1 overflow-x-auto max-lg:-mx-6 max-lg:px-6 lg:col-span-4 lg:flex-col lg:gap-0 lg:overflow-visible"
-      >
-        {PRIMS.map((p, i) => {
-          const isActive = p.id === selected;
-          return (
-            <button
-              key={p.id}
-              ref={(el) => {
-                tabRefs.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`prim-tab-${p.id}`}
-              aria-selected={isActive}
-              aria-controls="prim-panel"
-              tabIndex={isActive ? 0 : -1}
-              onClick={() => setSelected(p.id)}
-              className={`shrink-0 border-l-2 px-6 py-5 text-left outline-none transition-colors duration-200 focus-visible:bg-raised max-lg:rounded-(--radius-card) max-lg:border-l-0 max-lg:border-b-2 max-lg:px-4 max-lg:py-3 lg:first:rounded-t-(--radius-card) lg:last:rounded-b-(--radius-card) ${
-                isActive ? 'bg-raised' : 'bg-panel hover:bg-raised/70'
-              }`}
-              style={{ borderColor: `var(--color-strata-${p.id})` }}
-            >
-              <span className="flex items-center gap-3">
-                <svg
-                  className="h-5 w-5 shrink-0 lg:h-6 lg:w-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={`var(--color-strata-${p.id})`}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d={p.icon} />
-                </svg>
-                <span
-                  className={`font-mono text-mono-body lg:text-[1.0625rem] ${isActive ? 'text-ink-hi' : 'text-ink-mid'}`}
-                >
-                  {p.id}
-                </span>
-              </span>
-              <span className={`mt-1.5 block text-body ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden`}>
-                {p.role}
-              </span>
-            </button>
-          );
-        })}
+    <div ref={rootRef} className="relative">
+      {/* The stage lights: the active primitive's hue owns the room. One
+          field per hue, crossfaded on tab switch — triggered transitions,
+          not loops. */}
+      <div className="pointer-events-none absolute -inset-x-20 -inset-y-16" aria-hidden="true">
+        {PRIMS.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute inset-0"
+            initial={false}
+            animate={{ opacity: p.id === selected ? 1 : 0 }}
+            transition={{ duration: reduced ? 0 : 0.7, ease: EASE }}
+            style={{
+              background: `radial-gradient(44% 58% at 66% 40%, ${rgba(p.id, 0.13)}, transparent 70%), radial-gradient(30% 44% at 12% 78%, ${rgba(p.id, 0.07)}, transparent 72%)`,
+            }}
+          />
+        ))}
       </div>
 
-      <div
-        id="prim-panel"
-        role="tabpanel"
-        aria-labelledby={`prim-tab-${selected}`}
-        className="lg:col-span-8"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={selected}
-            initial={reduced ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduced ? undefined : { opacity: 0, y: -6 }}
-            transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
-          >
-            <ActiveDemo live={live} />
-            <div className="mt-4 flex items-baseline justify-between gap-4">
-              <p className="text-small text-ink-mid max-lg:hidden">{active.role}</p>
-              <a
-                href={active.guide}
-                className="text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
+      <div className="relative grid gap-10 lg:grid-cols-12">
+        {/* The rail IS the strata column: five layers under one frame,
+            hairline-divided like a core sample, each wearing its hue on the
+            left edge — the active layer lit by its own hue wash. */}
+        <div
+          role="tablist"
+          aria-label="Primitives"
+          aria-orientation="vertical"
+          onKeyDown={onKeys}
+          className="flex gap-1 overflow-x-auto max-lg:-mx-6 max-lg:px-6 lg:col-span-4 lg:flex-col lg:gap-0 lg:divide-y lg:divide-line lg:self-start lg:overflow-visible lg:rounded-(--radius-frame) lg:border lg:border-line lg:shadow-[var(--shadow-float)]"
+        >
+          {PRIMS.map((p, i) => {
+            const isActive = p.id === selected;
+            return (
+              <button
+                key={p.id}
+                ref={(el) => {
+                  tabRefs.current[i] = el;
+                }}
+                type="button"
+                role="tab"
+                id={`prim-tab-${p.id}`}
+                aria-selected={isActive}
+                aria-controls="prim-panel"
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => setSelected(p.id)}
+                className={`shrink-0 border-l-2 px-6 py-5 text-left outline-none transition-colors duration-200 focus-visible:bg-raised max-lg:rounded-(--radius-card) max-lg:border-b-2 max-lg:border-l-0 max-lg:px-4 max-lg:py-3 ${
+                  isActive ? '' : 'bg-panel hover:bg-raised/70'
+                }`}
+                style={{
+                  borderColor: `var(--color-strata-${p.id})`,
+                  background: isActive
+                    ? `linear-gradient(90deg, ${rgba(p.id, 0.12)}, ${rgba(p.id, 0.025)} 55%, transparent), var(--color-raised)`
+                    : undefined,
+                }}
               >
-                Read the {active.id} guide →
-              </a>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+                <span className="flex items-center gap-3">
+                  <svg
+                    className="h-5 w-5 shrink-0 lg:h-6 lg:w-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={`var(--color-strata-${p.id})`}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d={p.icon} />
+                  </svg>
+                  <span
+                    className={`font-mono text-mono-body lg:text-[1.0625rem] ${isActive ? 'text-ink-hi' : 'text-ink-mid'}`}
+                  >
+                    {p.id}
+                  </span>
+                </span>
+                <span className={`mt-1.5 block text-body ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden`}>
+                  {p.role}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div id="prim-panel" role="tabpanel" aria-labelledby={`prim-tab-${selected}`} className="lg:col-span-8">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={selected}
+              initial={reduced ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduced ? undefined : { opacity: 0, y: -6 }}
+              transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
+            >
+              <ActiveDemo live={live} />
+              <div className="mt-4 flex items-baseline justify-between gap-4">
+                <p className="text-small text-ink-mid max-lg:hidden">{active.role}</p>
+                <a
+                  href={active.guide}
+                  className="text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
+                >
+                  Read the {active.id} guide →
+                </a>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

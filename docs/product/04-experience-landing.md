@@ -193,6 +193,20 @@ amendment, Ani: "too much whitespace around the content" — the head stays in t
 70rem prose column; the rail + demo break out to an 88rem stage, demo type up to
 17px/36 with p-8, rail tabs roomier.)*
 
+**v3 (2026-06-12, Ani: "good but not yet world class — animations, color scheme,
+lighting, background can be 10x better"): the lit stage.** The active primitive's
+hue owns the room: per-hue radial light fields behind the whole grid crossfade on
+tab switch (triggered, not looping — the 03 §5 cap stays at 3 infinite animations).
+The demo card wears the hue as material — tinted border (`rgba(hue, .28)`), header
+wash, faint body tint, and a bloom shadow behind the card. The rail becomes one
+framed column, hairline-divided like a core sample; the active layer is lit by its
+own hue wash bleeding from the left edge. Demo physicality: **commands are typed**
+(03 §2 law: 24–40ms jittered, block cursor while typing, output prints) — beat
+clocks sized to typing time; vector scores **count up** while gradient bars fill
+with glow; the graph traversal **travels** (a pulse rides each edge, lit nodes get
+drop-shadow); kv's v3 chip stamps with a scale pulse. Stage lights bleed past the
+container under `overflow-x-clip`.
+
 **v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
 down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens
 +8px, surfaces the API line in `mono-sm`. *(Branch is not a layer — branching is the
