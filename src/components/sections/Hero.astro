@@ -42,6 +42,14 @@ import benchmarks from '../../data/benchmarks.json';
   <div data-parallax="0.85" class="absolute inset-0 will-change-transform">
     <HorizonGlow />
   </div>
+  <!-- Content scrim (2026-06-12): quiets the river exactly where the words
+       sit — the artwork stays, legibility wins. -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    style="background: radial-gradient(ellipse 58% 46% at 50% 36%, rgba(0,0,0,0.78), rgba(0,0,0,0.35) 55%, transparent 72%);"
+    aria-hidden="true"
+  >
+  </div>
 
   <div class="relative mx-auto w-full max-w-[70rem] px-6 pb-24 pt-20 max-[480px]:px-4 md:pt-28">
     <div class="mb-14 text-center">
@@ -50,14 +58,20 @@ import benchmarks from '../../data/benchmarks.json';
 
       <!-- The acquisition control (2026-06-12): the hero IS the act surface.
            No Get Started — get the product: CLI via curl, or the studio. -->
-      <div class="mt-10 inline-flex flex-wrap items-stretch justify-center overflow-hidden rounded-(--radius-control) border border-line bg-panel">
-        <CopyChip value="curl -fsSL stratadb.org/install.sh | sh" class="!rounded-none !border-0 !bg-transparent" />
-        <span class="w-px self-stretch bg-line max-[560px]:hidden" aria-hidden="true"></span>
+      <div
+        class="mt-10 inline-flex flex-wrap items-stretch justify-center overflow-hidden rounded-(--radius-control) border border-line-hover bg-raised"
+        style="box-shadow: var(--shadow-float);"
+      >
+        <CopyChip
+          value="curl -fsSL stratadb.org/install.sh | sh"
+          class="!rounded-none !border-0 !bg-transparent [&_.copy-chip-label]:!text-ink-hi"
+        />
+        <span class="w-px self-stretch bg-line-hover max-[560px]:hidden" aria-hidden="true"></span>
         <a
           href="https://github.com/stratalab/strata-foundry"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-2 px-4 py-2.5 font-mono text-mono-sm text-terracotta-400 transition-colors duration-200 hover:bg-raised hover:text-terracotta-300"
+          class="flex items-center gap-2 px-4 py-2.5 font-mono text-mono-sm text-terracotta-300 transition-colors duration-200 hover:bg-panel hover:text-terracotta-200"
         >
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"></path>
@@ -65,8 +79,11 @@ import benchmarks from '../../data/benchmarks.json';
           Download Foundry
         </a>
       </div>
-      <p class="mt-4 font-mono text-mono-sm text-ink-low">
-        for your agent → <a href="/llms.txt" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">stratadb.org/llms.txt</a>
+      <p class="mt-4">
+        <span class="inline-flex items-center gap-2 rounded-full border border-line bg-panel/90 px-4 py-1.5 font-mono text-mono-sm text-ink-mid">
+          for your agent →
+          <a href="/llms.txt" class="text-ink-hi underline decoration-line-hover underline-offset-4 transition-colors duration-200 hover:decoration-terracotta-400">stratadb.org/llms.txt</a>
+        </span>
       </p>
     </div>
 
