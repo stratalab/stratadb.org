@@ -1,14 +1,12 @@
 ---
-// Launch nav (01 §4, 04 §1 — amended 2026-06-12, Ani): Docs · Architecture ·
-// Changelog + "Star on GitHub" as the primary CTA (Get Started lives in Docs
-// and the mobile sheet; the star is the launch-phase ask).
+// Launch nav (01 §4, 04 §1 — amended 2026-06-12, Ani): Docs + "Star on
+// GitHub" as the primary CTA. Architecture and Changelog links removed for
+// now (the pages remain — reachable from the footer, resources, and the
+// hero badge); Get Started lives in Docs and the mobile sheet; the star is
+// the launch-phase ask.
 import Button from '../foundation/Button.astro';
 
-const navItems = [
-  { label: 'Docs', href: '/docs' },
-  { label: 'Architecture', href: '/architecture' },
-  { label: 'Changelog', href: '/changelog' },
-];
+const navItems = [{ label: 'Docs', href: '/docs' }];
 const currentPath = Astro.url.pathname;
 
 // Star count: build-time cached, fails quiet (06 §4 pattern; live hydration later).
