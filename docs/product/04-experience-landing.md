@@ -188,7 +188,10 @@ you asked", "not a join table in disguise". Beats play once per tab activation
 (manual tabs, no auto-rotate — no new infinite animation); SSR = completed state;
 reduced motion = final frames, instant tab swap; mobile = horizontal scrollable
 rail. Supersedes the v1 hover-rows + accordion (and 05's CSS-only rule for this
-section — it is now an island). Guides linked per tab below the demo.
+section — it is now an island). Guides linked per tab below the demo. *(Same-day
+amendment, Ani: "too much whitespace around the content" — the head stays in the
+70rem prose column; the rail + demo break out to an 88rem stage, demo type up to
+17px/36 with p-8, rail tabs roomier.)*
 
 **v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
 down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens

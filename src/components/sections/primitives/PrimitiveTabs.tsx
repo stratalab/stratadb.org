@@ -113,7 +113,11 @@ function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
         <span className="font-mono text-mono-body text-ink-hi">{id}</span>
         <span className="ml-auto font-mono text-mono-sm text-ink-low">strata · main</span>
       </div>
-      <div className="min-h-[23rem] bg-inset p-6 font-mono text-mono-body leading-8">{children}</div>
+      {/* min-h = the tallest demo (json), measured — tab switches never move
+          the page below */}
+      <div className="min-h-[27rem] bg-inset p-6 font-mono text-mono-body leading-8 md:min-h-[30rem] md:p-8 md:text-[1.0625rem] md:leading-9">
+        {children}
+      </div>
     </div>
   );
 }
@@ -290,7 +294,7 @@ function VectorDemo({ live }: { live: boolean }) {
           <div className="flex items-baseline gap-4">
             <span style={{ color: 'var(--color-strata-vector)' }}>{hit.id}</span>
             <span className="text-ink-hi">{hit.score.toFixed(2)}</span>
-            <span className="relative h-2 w-36 self-center overflow-hidden rounded-full bg-raised" aria-hidden="true">
+            <span className="relative h-2 w-36 self-center overflow-hidden rounded-full bg-raised md:w-56" aria-hidden="true">
               <motion.span
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{ background: 'var(--color-strata-vector)', opacity: 0.8 }}
@@ -330,7 +334,7 @@ function GraphDemo({ live }: { live: boolean }) {
         <Prompt cmd="graph bfs alice --depth 1" />
       </Line>
       <div className="mt-2 flex justify-center">
-        <svg viewBox="0 0 340 200" className="h-[12.5rem] w-full max-w-[24rem]" fill="none" aria-hidden="true">
+        <svg viewBox="0 0 340 200" className="h-[12.5rem] w-full max-w-[24rem] md:h-[15rem] md:max-w-[28rem]" fill="none" aria-hidden="true">
           {EDGES.map((e) => (
             <g key={e.rel}>
               <motion.line
@@ -488,14 +492,14 @@ export default function PrimitiveTabs() {
               aria-controls="prim-panel"
               tabIndex={isActive ? 0 : -1}
               onClick={() => setSelected(p.id)}
-              className={`shrink-0 border-l-2 px-5 py-4 text-left outline-none transition-colors duration-200 focus-visible:bg-raised max-lg:rounded-(--radius-card) max-lg:border-l-0 max-lg:border-b-2 max-lg:px-4 max-lg:py-3 lg:first:rounded-t-(--radius-card) lg:last:rounded-b-(--radius-card) ${
+              className={`shrink-0 border-l-2 px-6 py-5 text-left outline-none transition-colors duration-200 focus-visible:bg-raised max-lg:rounded-(--radius-card) max-lg:border-l-0 max-lg:border-b-2 max-lg:px-4 max-lg:py-3 lg:first:rounded-t-(--radius-card) lg:last:rounded-b-(--radius-card) ${
                 isActive ? 'bg-raised' : 'bg-panel hover:bg-raised/70'
               }`}
               style={{ borderColor: `var(--color-strata-${p.id})` }}
             >
               <span className="flex items-center gap-3">
                 <svg
-                  className="h-5 w-5 shrink-0"
+                  className="h-5 w-5 shrink-0 lg:h-6 lg:w-6"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke={`var(--color-strata-${p.id})`}
@@ -506,9 +510,13 @@ export default function PrimitiveTabs() {
                 >
                   <path d={p.icon} />
                 </svg>
-                <span className={`font-mono text-mono-body ${isActive ? 'text-ink-hi' : 'text-ink-mid'}`}>{p.id}</span>
+                <span
+                  className={`font-mono text-mono-body lg:text-[1.0625rem] ${isActive ? 'text-ink-hi' : 'text-ink-mid'}`}
+                >
+                  {p.id}
+                </span>
               </span>
-              <span className={`mt-1 block text-small ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden`}>
+              <span className={`mt-1.5 block text-body ${isActive ? 'text-ink-mid' : 'text-ink-low'} max-lg:hidden`}>
                 {p.role}
               </span>
             </button>
