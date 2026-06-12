@@ -420,7 +420,11 @@ stratadb" copy-chip and the small print beneath it (one-file line, fuzzing line,
 version/changelog, Get Started / Star links) are REMOVED — the quickstart window is
 the close; the footer already carries version, changelog, and GitHub. The original
 "the command is the copy" close concept is superseded: the command now lives inside
-the quickstart, where it runs.
+the quickstart, where it runs. **Same day: the hero stat strip is removed too**
+(250K ops/s · <1 ms fork · 5 primitives · 0 servers · Apache-2.0) — benchmark
+numbers leave the landing page entirely, which also unblocks the benchmarks
+re-measurement cutover gate; `benchmarks.json` + StatStrip remain for the specimen
+and docs. Hero parallax census: glow 0.85× · terminal 1.0×.
 
 **Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
 *(same testable claim, imperative form; alternate held: "Thirty seconds to first
