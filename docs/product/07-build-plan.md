@@ -75,8 +75,9 @@ test · keyboard-only pass clean · zero new JS for sections 2–3.
 
 `InferenceDemo` (typed query, staggered results) → Resources cards → `InstallTabs`
 (five surfaces; MCP tab = config + llms.txt pointer + recipe link) → `CommandClose` +
-second horizon glow. Harden pipelines: release/benchmarks fetch with cached fallback;
-**transcript-verifier CI goes live** (the real CLI runs every demo string).
+second horizon glow. Harden pipelines: release/benchmarks fetch with cached fallback.
+*(Deferral, 2026-06-12: the transcript-verifier CI moved to Phase 6 — building the strata
+CLI in CI needs caching design; it remains a ⛔ cutover gate, unchanged.)*
 
 **Done when:** the full landing page exists end-to-end · transcript verifier green ·
 install tabs render only working paths · page ends on the command.

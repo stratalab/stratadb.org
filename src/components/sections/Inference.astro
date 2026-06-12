@@ -1,0 +1,29 @@
+---
+// Section 5 (04 §6): "Just ask." — embedding, retrieval, generation in the engine.
+import SectionShell from '../foundation/SectionShell.astro';
+import Heading from '../foundation/Heading.astro';
+import InferenceDemo from './inference/InferenceDemo.tsx';
+---
+
+<SectionShell id="inference" eyebrow="INFERENCE">
+  <div class="grid items-center gap-12 lg:grid-cols-12">
+    <div class="reveal lg:col-span-5">
+      <Heading size="display">Just ask.</Heading>
+      <p class="mt-6 max-w-[30rem] text-body-lg text-ink-mid">
+        Ask in plain language. One flag embeds every write as it lands; hybrid retrieval
+        searches every primitive at once. Point it at any OpenAI-compatible endpoint — or
+        run models locally.
+      </p>
+      <div class="mt-6 space-y-2 font-mono text-mono-sm text-ink-low">
+        <p>db.configure_model(endpoint="http://localhost:11434/v1")</p>
+        <p>auto_embed=True</p>
+      </div>
+      <p class="mt-6 text-small text-ink-low">
+        runs local with Ollama · any OpenAI-compatible endpoint
+      </p>
+    </div>
+    <div class="reveal lg:col-span-7">
+      <InferenceDemo client:visible />
+    </div>
+  </div>
+</SectionShell>

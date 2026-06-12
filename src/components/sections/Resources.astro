@@ -1,0 +1,42 @@
+---
+// Section 6 (04 §7): three quiet cards. Render only what exists (truth rule).
+import SectionShell from '../foundation/SectionShell.astro';
+import Heading from '../foundation/Heading.astro';
+import Card from '../foundation/Card.astro';
+
+const cards = [
+  {
+    title: 'Documentation',
+    body: 'Concepts, guides, and the full reference.',
+    href: '/docs',
+  },
+  {
+    title: 'Examples & quickstarts',
+    body: 'First database in thirty seconds; real patterns after that.',
+    href: '/docs/getting-started',
+  },
+  {
+    title: 'Whitepapers',
+    body: 'The internals, written down: storage engine, concurrency model, durability and recovery.',
+    href: '/architecture',
+  },
+];
+---
+
+<SectionShell id="resources" eyebrow="RESOURCES">
+  <div class="reveal mb-10">
+    <Heading size="title">Go deeper.</Heading>
+  </div>
+  <div class="grid gap-4 md:grid-cols-3">
+    {
+      cards.map((card, i) => (
+        <div class="reveal" style={`transition-delay: ${i * 60}ms`}>
+          <Card href={card.href} class="h-full">
+            <h3 class="mb-2 text-heading text-ink-hi">{card.title}</h3>
+            <p class="text-small text-ink-mid">{card.body}</p>
+          </Card>
+        </div>
+      ))
+    }
+  </div>
+</SectionShell>
