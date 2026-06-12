@@ -16,7 +16,8 @@ are blocked until their upstream is signed off by Ani.
 | 05 | [Component spec](05-component-spec.md) | Design-system inventory: anatomy, states, tokens per component; the EngineProvider contract | **Signed off** (2026-06-12) |
 | 06 | [Engineering spec](06-engineering-spec.md) | Stack, data pipelines, truth-verification CI, agent surface, analytics, Cloudflare migration, wasm plan | **Signed off** (2026-06-12) |
 | 07 | [Build plan](07-build-plan.md) | Sequencing + done-criteria + checkpoint protocol per phase; no design content | **In review** (skim-and-go gate) |
-| 08+ | Docs / changelog experience specs | Deeper specs for the rest of the site, if Phase 5 needs them | Later |
+| 08 | [Iteration backlog](08-iteration-backlog.md) | v1 → world-class: ranked craft-density gaps (hero stage, claim artifacts, lighting system, icons, micro-interactions, live hero), method, references studied | **Living** |
+| 09+ | Docs / changelog experience specs | Deeper specs for the rest of the site, if needed | Later |
 
 ## Workflow
 
