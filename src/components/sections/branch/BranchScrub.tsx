@@ -57,10 +57,10 @@ function JsonCard({
 }) {
   return (
     <div
-      className="w-[24rem] max-w-[92vw] overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
+      className="w-[34rem] max-w-[94vw] overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
       style={{ boxShadow: 'var(--shadow-float)' }}
     >
-      <div className="flex h-10 items-center gap-2 border-b border-line px-4">
+      <div className="flex h-12 items-center gap-2.5 border-b border-line px-5">
         <span className="h-2 w-2 rounded-full" style={{ background: labelColor }} aria-hidden="true" />
         <span className="font-mono text-mono-sm text-ink-mid">{label}</span>
         <span className="ml-auto font-mono text-mono-sm text-ink-low">json · config</span>
@@ -73,7 +73,7 @@ function JsonCard({
           </motion.span>
         )}
       </div>
-      <div className="bg-inset p-5 font-mono text-mono-body leading-7 text-ink-mid">
+      <div className="bg-inset p-7 font-mono text-[1.0625rem] leading-9 text-ink-mid">
         <div>{'{'}</div>
         <div className="relative">
           {highlight !== undefined && (
@@ -106,18 +106,18 @@ function JsonCard({
 function DiffCard({ visible }: { visible: MotionValue<number> | number }) {
   return (
     <motion.div
-      className="w-[22rem] max-w-[88vw] overflow-hidden rounded-(--radius-frame) border border-line-hover bg-raised"
+      className="w-[30rem] max-w-[90vw] overflow-hidden rounded-(--radius-frame) border border-line-hover bg-raised"
       style={{
         opacity: visible,
         scale: typeof visible === 'number' ? 0.94 + visible * 0.06 : useTransform(visible as MotionValue<number>, (v) => 0.94 + v * 0.06),
         boxShadow: 'var(--shadow-float)',
       }}
     >
-      <div className="flex h-10 items-center gap-2 border-b border-line px-4">
+      <div className="flex h-12 items-center gap-2.5 border-b border-line px-5">
         <span className="font-mono text-mono-sm text-ink-mid">branch diff risky</span>
         <span className="ml-auto font-mono text-mono-sm text-ok">1 key</span>
       </div>
-      <div className="bg-inset p-5 font-mono text-mono-sm leading-7">
+      <div className="bg-inset p-7 font-mono text-mono-body leading-8">
         <div className="text-err">- {'"theme": "dark",'}</div>
         <div className="text-ok">+ {'"theme": "midnight",'}</div>
         <div className="text-ink-low"> {'  "font_size": 14,'}</div>
@@ -169,7 +169,7 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
       : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g));
 
   return (
-    <div className="relative flex h-[30rem] items-center justify-center">
+    <div className="relative flex h-[36rem] items-center justify-center">
       {/* risky card (peels off main) */}
       <motion.div className="absolute z-10" style={{ x: riskyX, opacity: riskyOpacity }}>
         <JsonCard label="risky" labelColor="var(--color-terracotta-500)" swapped={riskySwap} highlight={riskyFlash} />
