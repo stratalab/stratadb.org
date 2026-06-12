@@ -402,6 +402,19 @@ copy). The MCP tab gets a copy-config button for the whole JSON block. The Found
 tab's copy now points back at the set-piece: "It is the window in section 03, the
 one the primitives live in."
 
+**v3 (2026-06-12, Ani: "steal the install section from mem0.ai").** Two structural
+steals, our skin: (1) **integration modes first** — the outer tabs become a
+segmented control of HOW you want in (Library · CLI · Desktop app · For agents),
+with language pills (Python | Node.js) tucked INSIDE the window chrome, mem0-style;
+(2) **the code is a complete numbered quickstart** — line numbers, step comments
+("# Step 1 — install (run in your terminal…)", "# Step 2 — save as quickstart.py
+and run…"), tokenized highlighting (comments ink-low, keywords terracotta-300,
+strings syntax-amber, calls ink-hi), a script you paste and run, telling the
+portfolio story (put → put → get → history). Copy-script button in the chrome.
+The For-agents mode gains the hero's agent-instruction pattern: "copy agent
+instructions" → the for-agents.md one-liner. CLI/Foundry panes carry over from v2.
+Window title tracks the mode (quickstart.py / terminal / Strata Foundry / mcp.json).
+
 **Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
 *(same testable claim, imperative form; alternate held: "Thirty seconds to first
 write.")*
