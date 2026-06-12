@@ -7,22 +7,24 @@ import { useInView } from 'motion/react';
 const QUERY = 'What changed before the deploy failed?';
 
 // Each result is true in src/data/seed.ts — the deploy-failure narrative.
+// Ticks wear the page's one temperature (five-hue coding retired
+// 2026-06-12); the primitive NAME does the differentiating.
 const RESULTS = [
   {
     primitive: 'event',
-    color: 'var(--color-strata-event)',
+    color: 'var(--color-terracotta-400)',
     title: 'deploys · config.update',
     body: 'config.theme → "dusk" · 2026-06-10 09:30:02 — 90s before deploy.fail',
   },
   {
     primitive: 'kv',
-    color: 'var(--color-strata-kv)',
+    color: 'var(--color-terracotta-400)',
     title: 'config.theme · v2',
     body: '"dusk" — written 2026-06-10 09:31:47, the last write before the failure',
   },
   {
     primitive: 'vector',
-    color: 'var(--color-strata-vector)',
+    color: 'var(--color-terracotta-400)',
     title: 'docs · d1 (0.91)',
     body: 'Deploys read config.theme at startup; invalid values fail the healthcheck.',
   },

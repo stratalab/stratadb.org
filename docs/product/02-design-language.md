@@ -135,6 +135,15 @@ ontology feature set all along.)
 > ⚠ Ani's standing reservation (2026-06-12): five distinct primitive hues may read
 > rainbow-y. Judged at the Phase-3 checkpoint with the strata column live; the fallback
 > is monochrome layers + icons with hue only on hover/focus.
+>
+> **VERDICT (2026-06-12, the lit-stage iteration): the reservation was right.** Ani:
+> "the 5 primitives with 5 colors is a bit jarring." Hue-coding is RETIRED from the
+> landing page's primitive surfaces — the strata-column rail, demo cards, and the
+> inference ticks now wear monochrome + ember (the page's one temperature, cool slate
+> as the lone counterpoint). The five hue tokens stay in tokens.css and this table as
+> the shared family asset — the specimen page, Foundry view accents, Hub filter chips,
+> and data-viz contexts may still use them. Syntax amber (`json` keys in terminal
+> cards) survives as syntax coloring, not primitive coding.
 
 ### 4.4 Functional colors
 

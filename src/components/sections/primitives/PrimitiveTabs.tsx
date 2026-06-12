@@ -1,14 +1,15 @@
-// Section 3 (04 §4 v3, 2026-06-12): the lit stage. Tabs + content per the
-// claude.com pattern; the tab rail is VERTICAL, stacked like the strata
-// column itself, so the motif's load-bearing appearance survives. v3 adds
-// the craft pass: the active primitive's hue lights the stage (radial
-// fields crossfade on tab switch), the demo card wears that hue as
-// material (tinted border, bloom, wash), commands are TYPED with a cursor
-// (03 §2: commands typed, output printed), vector scores count up, the
-// graph traversal travels. Every demo tells the seed world's story.
-// All animation is triggered per activation — no new infinite loops
-// (03 §5 cap stays at 3); SSR renders the completed state; reduced
-// motion shows final frames instantly.
+// Section 3 (04 §4 v4, 2026-06-12): the lit stage, one temperature. Tabs +
+// content per the claude.com pattern; the tab rail is VERTICAL, stacked
+// like the strata column itself, so the motif's load-bearing appearance
+// survives. v3 added the craft pass (stage lighting, card material, typed
+// commands per 03 §2, count-up scores, traveling traversal); v4 resolves
+// Ani's original five-hue reservation — "the 5 primitives with 5 colors is
+// a bit jarring" — by restyling to the page's law: ember is the only
+// temperature, cool slate the one counterpoint. The hue tokens live on in
+// tokens.css for the specimen and future data-viz; this section is
+// monochrome + ember. All animation is triggered per activation — no new
+// infinite loops (03 §5 cap stays at 3); SSR renders the completed state;
+// reduced motion shows final frames instantly.
 import {
   useEffect,
   useRef,
@@ -57,16 +58,11 @@ const PRIMS = [
 
 type PrimId = (typeof PRIMS)[number]['id'];
 
-// The five hues as rgb triplets — the only way to alpha-ramp a hue without
-// a hex literal (tokens.css owns the hex; CI enforces it).
-const HUE: Record<PrimId, string> = {
-  kv: '124, 170, 255',
-  event: '79, 224, 166',
-  json: '255, 198, 110',
-  vector: '255, 140, 198',
-  graph: '184, 156, 255',
-};
-const rgba = (id: PrimId, a: number) => `rgba(${HUE[id]}, ${a})`;
+// The page's two lights as alpha ramps (rgb triplets — tokens.css owns the
+// hex; CI enforces it): ember is the only temperature, cool slate the one
+// counterpoint (same pair as the hero backdrop and the branch stage).
+const EMBER = (a: number) => `rgba(255, 122, 82, ${a})`;
+const COOL = (a: number) => `rgba(124, 170, 255, ${a})`;
 
 // Typing time for a command (03 §2: 24–40ms jittered) + a settle beat.
 const T = (cmd: string) => Math.round(cmd.length * 30) + 500;
@@ -152,26 +148,26 @@ function Line({ on, children, className = '' }: { on: boolean; children: ReactNo
   );
 }
 
-// Terminal chrome shared by all five demos: the card wears the active hue
-// as material — tinted border, header wash, a faint body tint, and a bloom
-// behind it. Fixed body height so switching tabs never moves layout.
+// Terminal chrome shared by all five demos: neutral panel material with the
+// page's one temperature — ember dot, ember header wash, ember bloom behind
+// the card. Fixed body height so switching tabs never moves layout.
 function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
   return (
     <div
       className="overflow-hidden rounded-(--radius-frame)"
       style={{
         background: 'var(--color-panel)',
-        border: `1px solid ${rgba(id, 0.28)}`,
-        boxShadow: `var(--shadow-float), 0 0 110px -28px ${rgba(id, 0.45)}`,
+        border: `1px solid ${EMBER(0.22)}`,
+        boxShadow: `var(--shadow-float), 0 0 110px -28px ${EMBER(0.35)}`,
       }}
     >
       <div
         className="flex h-12 items-center gap-2.5 px-5"
-        style={{ borderBottom: `1px solid ${rgba(id, 0.16)}`, background: rgba(id, 0.05) }}
+        style={{ borderBottom: `1px solid ${EMBER(0.14)}`, background: EMBER(0.04) }}
       >
         <span
           className="h-2.5 w-2.5 rounded-full"
-          style={{ background: `var(--color-strata-${id})`, boxShadow: `0 0 10px ${rgba(id, 0.8)}` }}
+          style={{ background: 'var(--color-terracotta-500)', boxShadow: `0 0 10px ${EMBER(0.8)}` }}
           aria-hidden="true"
         />
         <span className="font-mono text-mono-body text-ink-hi">{id}</span>
@@ -182,7 +178,7 @@ function Demo({ id, children }: { id: PrimId; children: ReactNode }) {
       <div
         className="min-h-[27rem] p-6 font-mono text-mono-body leading-8 md:min-h-[30rem] md:p-8 md:text-[1.0625rem] md:leading-9"
         style={{
-          background: `linear-gradient(180deg, ${rgba(id, 0.045)}, transparent 38%), var(--color-inset)`,
+          background: `linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%), var(--color-inset)`,
         }}
       >
         {children}
@@ -215,7 +211,7 @@ function KvDemo({ live }: { live: boolean }) {
               className="rounded px-1.5 font-mono text-mono-sm"
               style={
                 latest
-                  ? { background: rgba('kv', 0.16), color: 'var(--color-strata-kv)' }
+                  ? { background: EMBER(0.16), color: 'var(--color-terracotta-300)' }
                   : { color: 'var(--color-ink-low)' }
               }
               initial={false}
@@ -298,8 +294,7 @@ function JsonDemo({ live }: { live: boolean }) {
         <div className="relative">
           {wrote && (
             <motion.span
-              className="absolute -inset-x-2 inset-y-0 rounded"
-              style={{ background: rgba('json', 0.14) }}
+              className="absolute -inset-x-2 inset-y-0 rounded bg-terracotta-500/15"
               initial={live ? { opacity: 0 } : false}
               animate={{ opacity: [0, 1, 0.6] }}
               transition={{ duration: 0.6, ease: EASE }}
@@ -391,7 +386,7 @@ function VectorDemo({ live }: { live: boolean }) {
       {HITS.map((hit, i) => (
         <Line key={hit.id} on={beat >= 3 + i} className="mt-3">
           <div className="flex items-baseline gap-4">
-            <span style={{ color: 'var(--color-strata-vector)' }}>{hit.id}</span>
+            <span className="text-terracotta-400">{hit.id}</span>
             <span className="text-ink-hi tabular-nums">
               <CountUp to={hit.score} on={beat >= 3 + i} live={live} />
             </span>
@@ -399,8 +394,8 @@ function VectorDemo({ live }: { live: boolean }) {
               <motion.span
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{
-                  background: `linear-gradient(90deg, ${rgba('vector', 0.45)}, var(--color-strata-vector))`,
-                  boxShadow: `0 0 12px ${rgba('vector', 0.5)}`,
+                  background: `linear-gradient(90deg, ${EMBER(0.45)}, var(--color-terracotta-400))`,
+                  boxShadow: `0 0 12px ${EMBER(0.5)}`,
                 }}
                 initial={false}
                 animate={{ width: beat >= 3 + i ? `${hit.score * 100}%` : '0%' }}
@@ -462,7 +457,7 @@ function GraphDemo({ live }: { live: boolean }) {
                 y1={e.from.y}
                 x2={e.to.x}
                 y2={e.to.y}
-                stroke="var(--color-strata-graph)"
+                stroke="var(--color-terracotta-400)"
                 strokeWidth="2"
                 initial={false}
                 animate={{ pathLength: beat >= 5 ? 1 : 0, opacity: beat >= 5 ? 0.9 : 0 }}
@@ -472,8 +467,8 @@ function GraphDemo({ live }: { live: boolean }) {
               {live && beat >= 5 && (
                 <motion.circle
                   r="4"
-                  fill="var(--color-strata-graph)"
-                  style={{ filter: `drop-shadow(0 0 6px ${rgba('graph', 0.9)})` }}
+                  fill="var(--color-terracotta-400)"
+                  style={{ filter: `drop-shadow(0 0 6px ${EMBER(0.9)})` }}
                   initial={{ cx: e.from.x, cy: e.from.y, opacity: 0 }}
                   animate={{ cx: e.to.x, cy: e.to.y, opacity: [0, 1, 1, 0] }}
                   transition={{ duration: 0.6, ease: 'easeInOut' }}
@@ -508,10 +503,10 @@ function GraphDemo({ live }: { live: boolean }) {
                   cx={n.x}
                   cy={n.y}
                   r="7"
-                  fill={lit ? 'var(--color-strata-graph)' : 'var(--color-raised)'}
-                  stroke="var(--color-strata-graph)"
+                  fill={lit ? 'var(--color-terracotta-500)' : 'var(--color-raised)'}
+                  stroke={lit ? 'var(--color-terracotta-400)' : 'var(--color-ink-low)'}
                   strokeWidth="1.5"
-                  style={lit ? { filter: `drop-shadow(0 0 8px ${rgba('graph', 0.7)})` } : undefined}
+                  style={lit ? { filter: `drop-shadow(0 0 8px ${EMBER(0.7)})` } : undefined}
                 />
                 <text
                   x={n.x}
@@ -589,28 +584,22 @@ export default function PrimitiveTabs() {
 
   return (
     <div ref={rootRef} className="relative">
-      {/* The stage lights: the active primitive's hue owns the room. One
-          field per hue, crossfaded on tab switch — triggered transitions,
-          not loops. */}
-      <div className="pointer-events-none absolute -inset-x-20 -inset-y-16" aria-hidden="true">
-        {PRIMS.map((p) => (
-          <motion.div
-            key={p.id}
-            className="absolute inset-0"
-            initial={false}
-            animate={{ opacity: p.id === selected ? 1 : 0 }}
-            transition={{ duration: reduced ? 0 : 0.7, ease: EASE }}
-            style={{
-              background: `radial-gradient(44% 58% at 66% 40%, ${rgba(p.id, 0.13)}, transparent 70%), radial-gradient(30% 44% at 12% 78%, ${rgba(p.id, 0.07)}, transparent 72%)`,
-            }}
-          />
-        ))}
-      </div>
+      {/* The stage lights: the page's one pair — ember over the demo, cool
+          counterpoint low on the rail side (the same lighting language as
+          the hero backdrop and the branch stage). Static fields. */}
+      <div
+        className="pointer-events-none absolute -inset-x-20 -inset-y-16"
+        aria-hidden="true"
+        style={{
+          background: `radial-gradient(44% 58% at 66% 40%, ${EMBER(0.11)}, transparent 70%), radial-gradient(30% 44% at 12% 78%, ${COOL(0.07)}, transparent 72%)`,
+        }}
+      />
 
       <div className="relative grid gap-10 lg:grid-cols-12">
         {/* The rail IS the strata column: five layers under one frame,
-            hairline-divided like a core sample, each wearing its hue on the
-            left edge — the active layer lit by its own hue wash. */}
+            hairline-divided like a core sample — monochrome, the active
+            layer lit by the page's ember (Ani's five-hue reservation,
+            resolved 2026-06-12: hue-coding read as jarring). */}
         <div
           role="tablist"
           aria-label="Primitives"
@@ -637,9 +626,9 @@ export default function PrimitiveTabs() {
                   isActive ? '' : 'bg-panel hover:bg-raised/70'
                 }`}
                 style={{
-                  borderColor: `var(--color-strata-${p.id})`,
+                  borderColor: isActive ? 'var(--color-terracotta-500)' : 'var(--color-line)',
                   background: isActive
-                    ? `linear-gradient(90deg, ${rgba(p.id, 0.12)}, ${rgba(p.id, 0.025)} 55%, transparent), var(--color-raised)`
+                    ? `linear-gradient(90deg, ${EMBER(0.12)}, ${EMBER(0.025)} 55%, transparent), var(--color-raised)`
                     : undefined,
                 }}
               >
@@ -648,7 +637,7 @@ export default function PrimitiveTabs() {
                     className="h-5 w-5 shrink-0 lg:h-6 lg:w-6"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke={`var(--color-strata-${p.id})`}
+                    stroke={isActive ? 'var(--color-terracotta-400)' : 'var(--color-ink-low)'}
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"

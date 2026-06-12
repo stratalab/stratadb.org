@@ -207,6 +207,16 @@ with glow; the graph traversal **travels** (a pulse rides each edge, lit nodes g
 drop-shadow); kv's v3 chip stamps with a scale pulse. Stage lights bleed past the
 container under `overflow-x-clip`.
 
+**v4 (2026-06-12, Ani: "keep the color scheme consistent with the rest of the page —
+the 5 primitives with 5 colors is a bit jarring"): one temperature.** The 02 §4.3
+reservation resolves against hue-coding: stage lights become the page's one static
+pair (ember over the demo, cool counterpoint on the rail side — the hero/branch
+lighting language); card material, rail accents, kv chip, vector bars, and the graph
+traversal all wear ember; rail layers go monochrome (line-colored edges, ink icons)
+with only the active layer lit. Inference ticks follow. Syntax amber on json keys
+survives as syntax. Differentiation now comes from the demo content itself, not from
+color-coding.
+
 **v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
 down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens
 +8px, surfaces the API line in `mono-sm`. *(Branch is not a layer — branching is the
