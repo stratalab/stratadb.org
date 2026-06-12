@@ -167,10 +167,34 @@ v2 line-diagram → v3 settings-doc cards → v4; each supersession same-day in 
 
 The motif's load-bearing appearance (02 §9). **Not** a card grid.
 
-**Layout.** Full-width cross-section: five layers — `kv` (surface) down to `graph`
-(bedrock). Each: icon + name + role line; hover/tap/focus thickens +8px, surfaces the
-API line in `mono-sm`. *(Branch is not a layer — branching is the model the layers live
-inside; it owns section 2 and wears terracotta as brand, not as a primitive hue.)*
+**v2 (2026-06-12, Ani): tabs + content, per claude.com/product/overview's "How you
+can use Claude" — "each primitive should be a tab and should have an animation in
+the content area."** The tab rail is **vertical, stacked like the column itself**,
+so the motif survives: five layers, each with its hue on the left edge, the active
+layer lit (`bg-raised`, ink-hi). The content area is a terminal-chrome demo card —
+each primitive plays a short beat sequence from the seed world on activation:
+
+| Tab | Demo (all seed-true) |
+|---|---|
+| kv | `kv put config.theme "midnight"` → v3; `kv history` → 3 versions stagger in, v3 lit |
+| event | `event append deploys {deploy.fail…}` → #3; `event list` → stream replays, fail in err |
+| json | `json get profile` → doc; `json set $.user.role "admin"` → path flash, value swap |
+| vector | `vector search docs "why did the deploy fail?" -k 2` → d1/d2 rise with score bars |
+| graph | nodes pop, edges draw, `graph bfs alice` → traversal lights the reachable set |
+
+Each demo ends on a deadpan caption (mono-sm, ink-low): "every write keeps its
+past…", "nothing is overwritten…", "one path written…", "search was ready before
+you asked", "not a join table in disguise". Beats play once per tab activation
+(manual tabs, no auto-rotate — no new infinite animation); SSR = completed state;
+reduced motion = final frames, instant tab swap; mobile = horizontal scrollable
+rail. Supersedes the v1 hover-rows + accordion (and 05's CSS-only rule for this
+section — it is now an island). Guides linked per tab below the demo.
+
+**v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
+down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens
++8px, surfaces the API line in `mono-sm`. *(Branch is not a layer — branching is the
+model the layers live inside; it owns section 2 and wears terracotta as brand, not
+as a primitive hue.)*
 
 **Copy.** Eyebrow `PRIMITIVES`; H2 **"Every kind of data. One file."** *(alternate held:
 "Five primitives. One file.")*; intro: "Purpose-built stores that share one engine, one

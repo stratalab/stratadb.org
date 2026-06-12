@@ -1,45 +1,12 @@
 ---
-// Section 3 (04 §5): the motif's load-bearing appearance. CSS-only — zero JS (05 §5).
-// Layers reveal bottom-up (geology accretes); hover/focus surfaces the API line via
-// opacity+transform only (03 §2: hover never moves layout — line space is reserved).
-// The five-hue treatment is judged at THIS checkpoint (Ani reservation, 02 §4.3);
-// fallback: monochrome + hue on hover only.
-// Icons: v1 of the shared family set (02 §6) — extracted to a package later.
+// Section 3 (04 §5 v2, 2026-06-12): tabs + content per the claude.com
+// reference — each primitive is a tab; the content area plays its demo.
+// The vertical tab rail preserves the motif's load-bearing appearance:
+// it IS the strata column, five hued layers stacked. (Supersedes the
+// CSS-only rule of 05 §5 — this section is now an island.)
 import SectionShell from '../foundation/SectionShell.astro';
 import Heading from '../foundation/Heading.astro';
-
-const layers = [
-  {
-    id: 'kv',
-    role: 'Versioned key-value. History included.',
-    api: 'kv put user:1 {…}  ·  kv history user:1',
-    icon: 'M5 7h14M5 12h14M5 17h8',
-  },
-  {
-    id: 'event',
-    role: 'Append-only streams. Replay anything.',
-    api: 'event append actions {…}  ·  event list actions',
-    icon: 'M4 12h16m-5-5l5 5-5 5',
-  },
-  {
-    id: 'json',
-    role: 'Documents with path-level writes.',
-    api: 'json set profile $.user.role "admin"',
-    icon: 'M8 4c-2 0-2 2-2 4s0 4-2 4c2 0 2 2 2 4s0 4 2 4M16 4c2 0 2 2 2 4s0 4 2 4c-2 0-2 2-2 4s0 4-2 4',
-  },
-  {
-    id: 'vector',
-    role: 'Embeddings with HNSW search.',
-    api: 'vector search docs <query> -k 5',
-    icon: 'M5 19L19 5m0 0h-7m7 0v7',
-  },
-  {
-    id: 'graph',
-    role: 'Nodes, edges, typed links. Traverse anything.',
-    api: 'graph add-edge alice knows bob  ·  graph bfs alice',
-    icon: 'M6 7a2 2 0 100-4 2 2 0 000 4zm12 4a2 2 0 100-4 2 2 0 000 4zM9 19a2 2 0 100-4 2 2 0 000 4zM7.5 8.5L16 10m-6.5 7L16 11',
-  },
-];
+import PrimitiveTabs from './primitives/PrimitiveTabs.tsx';
 ---
 
 <SectionShell id="primitives" eyebrow="PRIMITIVES">
@@ -50,61 +17,5 @@ const layers = [
     </p>
   </div>
 
-  <!-- desktop: the cross-section -->
-  <ul class="hidden flex-col md:flex" role="list">
-    {
-      layers.map((layer, i) => (
-        <li
-          class="strata-layer reveal group relative border-l-2 bg-panel transition-colors duration-200 first:rounded-t-(--radius-card) last:rounded-b-(--radius-card) hover:bg-raised focus-within:bg-raised"
-          style={`border-left-color: var(--color-strata-${layer.id}); transition-delay: ${(layers.length - 1 - i) * 60}ms`}
-        >
-          <a
-            href={`/docs/guides/${layer.id === 'kv' ? 'kv-store' : layer.id === 'event' ? 'event-log' : layer.id === 'json' ? 'json-store' : layer.id === 'vector' ? 'vector-store' : 'search'}`}
-            class="grid grid-cols-12 items-center gap-6 border-b border-line px-6 py-5 outline-none last:border-b-0"
-          >
-            <span class="col-span-3 flex items-center gap-3">
-              <svg
-                class="h-5 w-5 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={`var(--color-strata-${layer.id})`}
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d={layer.icon} />
-              </svg>
-              <span class="font-mono text-mono-body text-ink-hi">{layer.id}</span>
-            </span>
-            <span class="col-span-5 text-small text-ink-mid">{layer.role}</span>
-            <span class="col-span-4 translate-y-1 text-right font-mono text-mono-sm text-ink-low opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
-              {layer.api}
-            </span>
-          </a>
-        </li>
-      ))
-    }
-  </ul>
-
-  <!-- mobile: native accordion -->
-  <div class="md:hidden">
-    {
-      layers.map((layer) => (
-        <details class="group border-b border-line bg-panel first:rounded-t-(--radius-card) last:rounded-b-(--radius-card) last:border-b-0">
-          <summary class="flex cursor-pointer list-none items-center gap-3 border-l-2 px-4 py-4" style={`border-left-color: var(--color-strata-${layer.id})`}>
-            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke={`var(--color-strata-${layer.id})`} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d={layer.icon} />
-            </svg>
-            <span class="font-mono text-mono-body text-ink-hi">{layer.id}</span>
-            <span class="ml-auto text-ink-low transition-transform duration-200 group-open:rotate-90">›</span>
-          </summary>
-          <div class="space-y-2 px-4 pb-4 pl-12">
-            <p class="text-small text-ink-mid">{layer.role}</p>
-            <p class="font-mono text-mono-sm text-ink-low">{layer.api}</p>
-          </div>
-        </details>
-      ))
-    }
-  </div>
+  <PrimitiveTabs client:visible />
 </SectionShell>

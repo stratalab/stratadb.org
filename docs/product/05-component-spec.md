@@ -95,8 +95,8 @@ type ScriptEvent =
 | Component | Section | Notes | States beyond default |
 |---|---|---|---|
 | `ForkingTerminal` | Hero | Two `TerminalFrame`s + branch-line SVG; beats 1–7; `spring-settle` split/merge; pause/play; live: takeover + **fullscreen overlay** (⛶, focus-trapped, Esc, same instance) | idle · playing · paused · complete · takeover · fullscreen |
-| `VerbTranscript` | Branching | `TerminalFrame mode=transcript` — **zero JS, permanently** (scoped 2026-06-11) | — |
-| `StrataColumn` | Multi-primitive | **CSS-only, not an island** (no live counts): hover/focus thicken via transform; mobile accordion via `<details>`; arrow-key traversal via tabindex | hover · focus · expanded |
+| `BranchScrub` | Branching | Scrub #2 (04 §3 v4–v5): pinned 340vh fork→modify→diff→merge story + session terminal + branch river; reduced = steppers; mobile = snap carousel. *(Supersedes `VerbTranscript`'s "zero JS permanently" — reversed 2026-06-12 when the section became the page's second set-piece.)* | acts 1–4 · stepper · carousel |
+| `PrimitiveTabs` | Multi-primitive | Tabs + content (04 §4 v2): vertical rail = the strata column motif; five seed-true beat demos, replay per activation; roving-tabindex tablist; reduced = final frames; mobile = horizontal rail. *(Supersedes the v1 "CSS-only, not an island" rule — reversed 2026-06-12, Ani: each primitive a tab with an animation.)* | per-tab · playing · complete |
 | `VersionStrip` | Time travel | The only scrub (03 §3.2): sticky 1.5vh, 3 authored scenes, `spring-scrub`; reduced-motion = static + steppers. Choreographed permanently | scenes 1–3 · stepper mode |
 | `InferenceDemo` | Inference | Search field types the query (Tier-1); results stagger with primitive ticks. Choreographed permanently; authored against the seed dataset | idle · typing · results |
 | `NavMenu` | Nav | Mobile sheet; focus-trapped; closes on route/Escape | open/closed |
@@ -116,7 +116,10 @@ All six conform to 03 §8 (their full storyboard fields live in Doc 04).
 | InferenceDemo | 1.3KB | |
 | **Landing total** | **≈100.5KB** | vs the 140KB gate — ~40KB headroom; `WasmExecutor` loader OUTSIDE this budget (R8, 06 §8) |
 
-`VerbTranscript` and `StrataColumn` ship zero-JS, permanently (scoped 2026-06-11).
+~~`VerbTranscript` and `StrataColumn` ship zero-JS, permanently (scoped 2026-06-11).~~
+*(Reversed 2026-06-12: both sections became islands — `BranchScrub` and
+`PrimitiveTabs` — during the world-class iteration. The budget table above is the
+Phase-6 measurement; re-measure at the Phase 7 gate against the 140KB ceiling.)*
 The original "hero ≤60KB" line is restated as: **hero-specific JS ≤60KB excluding the
 shared React runtime** (ForkingTerminal at 43.6KB passes).
 

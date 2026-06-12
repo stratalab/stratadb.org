@@ -187,6 +187,12 @@ function DiffCard({ visible }: { visible: Driver }) {
 
 // The session terminal: lines flash in with their act, then dim into history.
 function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
+  // Unrevealed lines leave the a11y tree entirely — opacity 0 alone keeps
+  // them "visible" to checkers as unreadable text.
+  const vis =
+    lineIn !== undefined && typeof lineIn !== 'number'
+      ? useTransform(lineIn, (v) => (v <= 0.01 ? 'hidden' : 'visible'))
+      : undefined;
   return (
     <div
       className="overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
@@ -204,17 +210,32 @@ function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
         {SESSION.map((entry, i) => {
           if (entry.act > active) return null;
           const current = entry.act === active;
-          const style = current && lineIn !== undefined ? { opacity: lineIn } : undefined;
+          // Both states set opacity/visibility EXPLICITLY: motion keeps the
+          // last inline value when a style prop is simply dropped, so history
+          // lines would otherwise freeze at whatever mid-fade value the act
+          // flip caught them at.
+          const style =
+            current && lineIn !== undefined
+              ? { opacity: lineIn, visibility: vis }
+              : { opacity: 1, visibility: 'visible' as const };
+          // History recedes by COLOR, not opacity — dimmed ink-low fails
+          // WCAG contrast; full-strength ink-low is the floor (4.56:1).
           return (
-            <motion.div key={i} style={style} className={current ? '' : 'opacity-45'}>
+            <motion.div key={i} style={style}>
               {entry.cmd ? (
-                <>
-                  <span className="text-ink-low">strata:{entry.branch} </span>
-                  <span className="text-terracotta-500">›</span>
-                  <span className="text-ink-hi"> {entry.cmd}</span>
-                </>
+                current ? (
+                  <>
+                    <span className="text-ink-low">strata:{entry.branch} </span>
+                    <span className="text-terracotta-500">›</span>
+                    <span className="text-ink-hi"> {entry.cmd}</span>
+                  </>
+                ) : (
+                  <span className="text-ink-low">
+                    strata:{entry.branch} › {entry.cmd}
+                  </span>
+                )
               ) : (
-                <span className="text-ok">{entry.out}</span>
+                <span className={current ? 'text-ok' : 'text-ink-low'}>{entry.out}</span>
               )}
             </motion.div>
           );
