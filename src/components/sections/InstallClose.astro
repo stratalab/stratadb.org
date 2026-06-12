@@ -1,13 +1,13 @@
 ---
 // Section 7 (04 §8): the act section and the page's close. Horizon glow,
-// second and final permitted use (60% of hero opacity). No slogan — the
-// command is the copy.
+// second and final permitted use (60% of hero opacity). The quickstart IS
+// the close (v3.1 — the big pip-install sign-off retired; the footer
+// carries version/links).
 import SectionShell from '../foundation/SectionShell.astro';
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import HorizonGlow from '../foundation/HorizonGlow.astro';
 import InstallTabs from './install/InstallTabs.tsx';
-import release from '../../data/release.json';
 ---
 
 <section id="install" class="relative overflow-hidden">
@@ -21,42 +21,6 @@ import release from '../../data/release.json';
 
       <div class="reveal mx-auto max-w-[52rem]">
         <InstallTabs client:visible />
-      </div>
-
-      <!-- the close: the command is the copy -->
-      <div class="reveal mt-28 text-center">
-        <button
-          type="button"
-          class="copy-chip group inline-flex items-baseline gap-4 font-mono text-stat text-ink-hi transition-colors duration-200 hover:text-terracotta-300 max-md:text-title"
-          data-copy="pip install stratadb"
-          aria-label="Copy: pip install stratadb"
-        >
-          <span class="copy-chip-label">pip install stratadb</span>
-          <span class="copy-chip-icon text-ink-low opacity-0 transition-opacity duration-200 group-hover:opacity-100" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-              <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
-            </svg>
-          </span>
-          <span class="copy-chip-done hidden font-mono text-mono-body text-ok" aria-hidden="true">✓ copied</span>
-        </button>
-
-        <p class="mt-6 text-small text-ink-mid">One file. No server. Apache-2.0.</p>
-        <p class="mt-2 font-mono text-mono-sm text-ink-low">
-          fuzzing-tested · crash-recovery verified
-        </p>
-        <p class="mt-6 font-mono text-mono-sm text-ink-low">
-          v{release.version} · <a href="/changelog" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">changelog</a>
-        </p>
-        <div class="mt-8 flex items-center justify-center gap-6">
-          <a href="/docs/getting-started" class="text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi">Get Started</a>
-          <a
-            href="https://github.com/stratalab/strata-core"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi">Star on GitHub</a
-          >
-        </div>
       </div>
     </SectionShell>
   </div>

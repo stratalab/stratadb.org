@@ -415,6 +415,13 @@ The For-agents mode gains the hero's agent-instruction pattern: "copy agent
 instructions" → the for-agents.md one-liner. CLI/Foundry panes carry over from v2.
 Window title tracks the mode (quickstart.py / terminal / Strata Foundry / mcp.json).
 
+**v3.1 (same day, Ani): the big close retired.** The stat-scale "pip install
+stratadb" copy-chip and the small print beneath it (one-file line, fuzzing line,
+version/changelog, Get Started / Star links) are REMOVED — the quickstart window is
+the close; the footer already carries version, changelog, and GitHub. The original
+"the command is the copy" close concept is superseded: the command now lives inside
+the quickstart, where it runs.
+
 **Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
 *(same testable claim, imperative form; alternate held: "Thirty seconds to first
 write.")*
