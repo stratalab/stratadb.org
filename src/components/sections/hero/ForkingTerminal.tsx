@@ -1,7 +1,7 @@
 // Set-piece A: the forking terminal (04 §2). Scripted executor at launch;
 // the WasmExecutor swap (R8) replaces the runner, not this view.
 // Panel chrome MUST stay visually identical to chrome/TerminalFrame.astro.
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'motion/react';
 import {
   completedState,
@@ -110,72 +110,84 @@ export default function ForkingTerminal() {
     setReduced(document.documentElement.dataset.motion === 'reduced');
   }, []);
 
-  const sleep = useCallback(async (ms: number, token: number) => {
-    const step = 40;
-    let waited = 0;
-    while (waited < ms) {
-      if (runToken.current !== token) throw new Error('cancelled');
-      await new Promise((r) => setTimeout(r, step));
-      if (playingRef.current && inViewRef.current) waited += step;
-    }
-  }, []);
-
-  const run = useCallback(
-    async (token: number) => {
-      try {
-        setFading(true);
-        await sleep(320, token);
-        setState(EMPTY);
-        setTyping(null);
-        setFading(false);
-        await sleep(400, token);
-
-        for (const e of HERO_SCRIPT) {
-          if (runToken.current !== token) return;
-          if (e.type === 'cmd') {
-            for (let i = 1; i <= e.text.length; i++) {
-              setTyping({ panel: e.panel, branch: e.branch, text: e.text.slice(0, i) });
-              await sleep(KEY_MIN + Math.random() * KEY_JITTER, token);
-            }
-            await sleep(OUTPUT_BEAT, token);
-            setTyping(null);
-            setState((s) => ({
-              ...s,
-              [e.panel]: [...s[e.panel], { kind: 'cmd', text: e.text, branch: e.branch }],
-            }));
-          } else if (e.type === 'output') {
-            setState((s) => ({
-              ...s,
-              [e.panel]: [...s[e.panel], { kind: 'output', text: e.text, tone: e.tone }],
-            }));
-            await sleep(OUTPUT_BEAT, token);
-          } else if (e.type === 'split') {
-            setState((s) => ({ ...s, split: true }));
-          } else if (e.type === 'merge') {
-            setState((s) => ({ ...s, merged: true, split: false }));
-          } else if (e.type === 'pause') {
-            await sleep(e.ms, token);
-          }
-        }
-        await sleep(HERO_HOLD_MS, token);
-        if (runToken.current === token) run(++runToken.current);
-      } catch {
-        /* cancelled */
-      }
-    },
-    [sleep]
-  );
-
-  // Start the loop once: first time in view, non-reduced.
-  const started = useRef(false);
+  // One mount-scoped runner. Out-of-view and pause SUSPEND (the sleep loop simply
+  // stops accruing time); only unmount or a reduced-motion change cancels.
   useEffect(() => {
-    if (started.current || reduced || !inView) return;
-    started.current = true;
-    run(++runToken.current);
+    if (reduced) return;
+    const token = ++runToken.current;
+    const cancelled = () => runToken.current !== token;
+
+    const sleep = async (ms: number) => {
+      const step = 40;
+      let waited = 0;
+      while (waited < ms) {
+        if (cancelled()) throw new Error('cancelled');
+        await new Promise((r) => setTimeout(r, step));
+        if (playingRef.current && inViewRef.current) waited += step;
+      }
+    };
+
+    const waitForView = async () => {
+      while (!inViewRef.current) {
+        if (cancelled()) throw new Error('cancelled');
+        await new Promise((r) => setTimeout(r, 120));
+      }
+    };
+
+    const runOnce = async () => {
+      setFading(true);
+      await sleep(320);
+      setState(EMPTY);
+      setTyping(null);
+      setFading(false);
+      await sleep(400);
+
+      for (const e of HERO_SCRIPT) {
+        if (e.type === 'cmd') {
+          for (let i = 1; i <= e.text.length; i++) {
+            setTyping({ panel: e.panel, branch: e.branch, text: e.text.slice(0, i) });
+            await sleep(KEY_MIN + Math.random() * KEY_JITTER);
+          }
+          await sleep(OUTPUT_BEAT);
+          setTyping(null);
+          setState((s) => ({
+            ...s,
+            [e.panel]: [...s[e.panel], { kind: 'cmd', text: e.text, branch: e.branch }],
+          }));
+        } else if (e.type === 'output') {
+          setState((s) => ({
+            ...s,
+            [e.panel]: [...s[e.panel], { kind: 'output', text: e.text, tone: e.tone }],
+          }));
+          await sleep(OUTPUT_BEAT);
+        } else if (e.type === 'split') {
+          setState((s) => ({ ...s, split: true }));
+        } else if (e.type === 'merge') {
+          setState((s) => ({ ...s, merged: true, split: false }));
+        } else if (e.type === 'pause') {
+          await sleep(e.ms);
+        }
+      }
+      await sleep(HERO_HOLD_MS);
+    };
+
+    (async () => {
+      try {
+        await waitForView();
+        // eslint-disable-next-line no-constant-condition
+        while (true) await runOnce();
+      } catch {
+        // cancelled: restore a safe, complete state (never a blank frame)
+        setFading(false);
+        setTyping(null);
+        setState(DONE);
+      }
+    })();
+
     return () => {
       runToken.current++;
     };
-  }, [inView, reduced, run]);
+  }, [reduced]);
 
   const showFork = state.split || (reduced && DONE.split);
   const typedFor = (panel: PanelId) =>
