@@ -33,9 +33,6 @@ export const SEED: SeedWorld = {
   },
   json: {
     profile: { user: { name: 'Alice', role: 'engineer', prefs: { theme: 'midnight' } } },
-    // The branch-story document (section 2): intuitive to anyone, and it locks
-    // the page narrative — the hero, the branch story, and the time-travel
-    // strip all tell the SAME lead change: trying "midnight" on a branch.
     config: {
       theme: 'dark',
       font_size: 14,
@@ -43,6 +40,17 @@ export const SEED: SeedWorld = {
       notifications: true,
       sidebar: 'left',
       autosave: false,
+    },
+    // The branch-story document (section 2, finance domain 2026-06-12):
+    // nobody experiments on live money — which is exactly what branching is
+    // for. The risky branch tries the aggressive allocation.
+    portfolio: {
+      strategy: 'balanced',
+      stocks: 60,
+      bonds: 30,
+      cash: 10,
+      rebalance: 'quarterly',
+      currency: 'USD',
     },
   },
   vectors: {

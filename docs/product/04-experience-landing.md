@@ -120,28 +120,31 @@ path to real interaction.
 Eyebrow `BRANCH`; H2 **"Try anything. Keep what works."**; intro: "A branch is a
 complete database — fork it in O(1), change it, diff it, merge it back."
 
-**Set-piece: the branch story, v3 (2026-06-12, Ani: "show how it works in a database,
-with an actual JSON… intuitive to anyone") — the DATA is the protagonist.** Full-stage
-pin, 340vh (≈2.4 viewport-heights ownership, cap 2.5): a slim command strip on top
-(real prompt + command + one caption line + act-progress bars), and beneath it the cards
-own the viewport. The document is `json · config` from the seed world —
-`{ "theme": "dark", "font_size": 14, "language": "en" }` — settings anyone understands,
-and the SAME change the hero and time-travel sections tell: trying `"midnight"`.
+**Set-piece: the branch story, v4 (2026-06-12) — finance domain, session panel, stage
+lights.** The document is `json · portfolio` from the seed world —
+`{ strategy: "balanced", stocks: 60, bonds: 30, cash: 10, rebalance, currency }` —
+because *nobody experiments on live money, which is exactly what branching is for*. The
+risky branch tries the aggressive allocation: four writes (strategy, stocks, bonds,
+cash). Full pin, 340vh (≈2.4 vh ownership, cap 2.5), 4/8 grid:
 
-| Band | Act | Stage |
-|---|---|---|
-| 0–0.28 | Fork (`branch create risky`) | one card center-stage peels into two identical cards spreading from center (±54%) — the zero-copy fork shown as the document itself forking |
-| 0.28–0.55 | Modify (`json set config $.theme "midnight"`) | on the risky card, `"dark"` slides out and `"midnight"` slides in (ember line-flash); main visibly unchanged |
-| 0.55–0.80 | Diff (`branch diff risky`) | a true unified-diff card rises center-stage between them: `- "theme": "dark"` / `+ "theme": "midnight"` · `1 key` |
-| 0.80–1 | Merge (`branch merge risky`) | the cards converge home; risky fades as it merges; main's value swaps to `"midnight"` with a `merged` chip — full circle |
+- **Left — the act header + session terminal**: verb at title scale, finance-flavored
+  caption ("Every change, exactly — before real money moves."), progress bars; beneath,
+  a `strata — session` terminal where the commands ACCUMULATE like a real CLI
+  transcript — the current act's lines flash in bright (scroll-driven, first 6% of each
+  band), history dims above. By the merge, the whole session is on screen.
+- **Right — the color-coded worlds**: main = cool slate surfaces (stable), risky =
+  ember-warm (experimental); spread ±40%, geometry verified non-overlapping with the
+  session panel. Acts as v3 (fork-peel → four cascading ValueSwaps → unified diff card
+  `4 keys` → convergence, warm dissolving into cool, `merged` chip).
+- **Stage lights (the section's pop, hero-equivalent)**: two large radial fields behind
+  the cards — cool constant behind main's side; **ember scroll-driven**: blooms as the
+  branch spreads (0.12→0.62 opacity), dies as it merges. Scroll-driven, not infinite —
+  no new 03 §5 exemption needed.
 
-Conformance: tier-2 scrub, spring-scrub smoothing, band 0 clamped · props
-transform/opacity only · reduced motion = four static end-states + Prev/Next steppers ·
-mobile = swipeable acts showing each act's key artifact · command strip is real DOM
-text · no scroll hijacking. *(History: v2 was an abstract fork/merge line diagram —
-superseded same day; "everyone understands the concept of a branch," the point is the
-data. The old static verb-set transcript retired with v2; cherry-pick remains taught in
-the one-liner, llms.txt, and the for-agents recipe.)*
+Conformance: tier-2 scrub, spring-scrub, band 0 clamped · transform/opacity only ·
+reduced motion = static acts + steppers (session panel included) · mobile = swipeable
+acts with session + key artifact · all text real DOM · no scroll hijacking. *(History:
+v2 line-diagram → v3 settings-doc cards → v4; each supersession same-day in the log.)*
 
 ## 4. Section 3 — Multi-primitive: The Strata Column
 
