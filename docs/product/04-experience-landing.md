@@ -315,12 +315,14 @@ inference primitive, any model, travels with the file** — the portability pitc
 the headline value.
 
 **Copy.** H2 **"Inference is built in."** (eyebrow `NATIVE INFERENCE` lives in the
-section rule). Intro: "Databases don't usually do this. Strata ships a unified
-inference layer — embeddings, generation, and search through one primitive, with
-models from Hugging Face or hosted ones from OpenAI, Anthropic, and Google. Wire it
-once; it runs wherever the file does." Provider chips beneath (mono pills): Hugging
-Face · OpenAI · Anthropic · Google. *(v1 H2 "Just ask." retired with the reframe;
-the plain-language ask now lives inside the demo's generate beat.)*
+section rule). Intro: "A unified inference layer — embeddings, generation, and search
+through one primitive, with models from Hugging Face or hosted ones from OpenAI,
+Anthropic, and Google. Wire it once; it runs wherever the file does." Provider chips
+beneath (mono pills): Hugging Face · OpenAI · Anthropic · Google. *(v1 H2 "Just ask."
+retired with the reframe; the plain-language ask now lives inside the demo's generate
+beat. Same-day edit, Ani: "Don't say databases don't do this" — the comparative
+opener cut; the H2 already states the fact, the copy doesn't editorialize about other
+databases.)*
 
 **Layout.** The escalation pattern: head in the prose column, demo card (`infer`,
 shared TermCard material) on the 80rem stage with one quiet ember field.
