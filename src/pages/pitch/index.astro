@@ -1,6 +1,6 @@
 ---
 // PRIVATE pitch surface — Strata engine, "engineering spec-sheet" aesthetic.
-// §1–§2 built; §3–§7 anchored placeholders, filled one at a time.
+// §1–§5 built; §6–§7 anchored placeholders, filled one at a time.
 import PitchLayout from '../../layouts/PitchLayout.astro';
 
 const sections = [
@@ -14,7 +14,6 @@ const sections = [
 ];
 
 const pending = [
-  { id: 'testing', n: '05', name: 'How we test', tag: 'correctness', title: 'Coverage measured by bug class.' },
   { id: 'benchmarks', n: '06', name: 'Benchmarks', tag: 'the numbers', title: 'The numbers.' },
   { id: 'why', n: '07', name: 'Why it matters', tag: 'the transfer', title: 'Systems facts with product consequences.' },
 ];
@@ -651,7 +650,96 @@ const pending = [
     </div>
   </section>
 
-  <!-- §5–§7 · placeholders -->
+  <!-- §5 · HOW WE TEST -->
+  <section id="testing" class="pitch-section" aria-label="How we test">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;05<span class="sec-name">How we test</span></span>
+        <span class="sec-tag">correctness</span>
+      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Tested one bug class at a time.</h2>
+        <p class="sec-lead reveal" style="transition-delay: 60ms">
+          Different failures need different tests. The harness is built one bug class at a time — each paired with the technique that exposes it — and every one verifies through a single recovery oracle.
+        </p>
+
+        <div class="approaches reveal" style="transition-delay: 110ms">
+          <article class="approach approach-spine">
+            <div class="approach-spine-text">
+              <p class="approach-class">Recovery correctness</p>
+              <p class="approach-desc">After any crash, what the database recovers must be a prefix of what it acknowledged — losing a clean suffix is fine, a gap never. A shadow model records every acknowledged commit, and one oracle checks that prefix after every fault the classes below inject.</p>
+              <p class="approach-tag"><span>the oracle</span> every test verifies through it</p>
+            </div>
+            <div class="approach-spine-fig">
+              <svg viewBox="0 0 250 116" fill="none" aria-hidden="true">
+                <text x="6" y="26" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">ack</text>
+                <line x1="54" y1="22" x2="214" y2="22" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <circle cx="54" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="94" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="134" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="174" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="214" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <text x="6" y="66" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">prefix</text>
+                <text x="238" y="67" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;fill:var(--color-ink-mid)">✓</text>
+                <line x1="54" y1="62" x2="134" y2="62" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <circle cx="54" cy="62" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="94" cy="62" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="134" cy="62" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="174" cy="62" r="4" style="fill:var(--color-panel);stroke:var(--color-line-hover);stroke-width:1.25" />
+                <circle cx="214" cy="62" r="4" style="fill:var(--color-panel);stroke:var(--color-line-hover);stroke-width:1.25" />
+                <text x="6" y="104" style="font-family:var(--font-mono);font-size:8px;fill:var(--ember)">gap</text>
+                <text x="238" y="105" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;fill:var(--ember)">✗</text>
+                <line x1="54" y1="100" x2="114" y2="100" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <line x1="154" y1="100" x2="174" y2="100" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <circle cx="54" cy="100" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="94" cy="100" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="134" cy="100" r="5" style="fill:none;stroke:var(--ember);stroke-width:1.25;stroke-dasharray:2.5 2" />
+                <path d="M130 96 L138 104 M138 96 L130 104" style="stroke:var(--ember);stroke-width:1.25" />
+                <circle cx="174" cy="100" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="214" cy="100" r="4" style="fill:var(--color-panel);stroke:var(--color-line-hover);stroke-width:1.25" />
+              </svg>
+            </div>
+          </article>
+
+          <div class="approach-grid">
+            <article class="approach">
+              <p class="approach-class">Error paths</p>
+              <p class="approach-desc">Fail the Nth backend operation, check the engine survives cleanly, then increment N until a full clean pass — every reachable I/O call, plus disk-full and memory exhaustion.</p>
+              <p class="approach-tag">fail-once · fail-continuously</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Hostile disks</p>
+              <p class="approach-desc">Run on a disk modelled to misbehave — torn writes, reordered appends, non-atomic rename, garbage in an unsynced tail — and verify recovery under each.</p>
+              <p class="approach-tag">four filesystem models</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Rare interleavings</p>
+              <p class="approach-desc">A seeded scheduler randomises task order, the clock, and fault timing over the real lifecycle. Any failure prints its seed and replays bit-for-bit.</p>
+              <p class="approach-tag">deterministic simulation</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Compound failures</p>
+              <p class="approach-desc">Inject a second fault while recovery, compaction, or a checkpoint is still running. The engine must reach a valid state or return a typed, resumable error.</p>
+              <p class="approach-tag">fail · resume · succeed</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Config divergence</p>
+              <p class="approach-desc">Run the same workload under every mode, schedule, and budget; the results must come out identical — and progress must stay bounded, never stalling.</p>
+              <p class="approach-tag">model-parity oracle</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Process drift</p>
+              <p class="approach-desc">Merge-blocking CI: Miri and sanitizers, coverage and mutation thresholds that only ratchet up, nightly fuzzing, and a guard that fails if the test map goes stale.</p>
+              <p class="approach-tag">miri · mutants · charter guard</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §6–§7 · placeholders -->
   {
     pending.map((s) => (
       <section id={s.id} class="pitch-section">
@@ -1013,6 +1101,107 @@ const pending = [
       display: block;
       width: 100%;
       height: auto;
+    }
+
+    /* ===== §5 · how we test — bug-class approaches =================== */
+    .approaches {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .approach {
+      padding: 1.05rem 1.25rem 1.15rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+    }
+    .approach-class {
+      font-size: 1.06rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .approach-desc {
+      margin-top: 0.48rem;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--color-ink-mid);
+    }
+    .approach-tag {
+      margin-top: 0.72rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-low);
+    }
+    .approach-tag span {
+      margin-right: 0.45rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ember);
+    }
+
+    /* spine: the recovery oracle every test verifies through */
+    .approach-spine {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 16.5rem;
+      gap: 1.8rem;
+      align-items: center;
+      border-color: color-mix(in srgb, var(--ember) 32%, var(--color-line));
+      box-shadow: var(--shadow-panel), inset 3px 0 0 var(--ember);
+    }
+    @media (max-width: 760px) {
+      .approach-spine {
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+      }
+    }
+    .approach-spine .approach-class {
+      color: var(--color-terracotta-700);
+    }
+    .approach-spine-fig {
+      padding: 0.5rem 0.7rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .approach-spine-fig svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* the six other classes */
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem;
+    }
+    @media (max-width: 900px) {
+      .approach-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 600px) {
+      .approach-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .approach-grid .approach {
+      transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+    }
+    .approach-grid .approach:hover {
+      border-color: var(--color-line-hover);
+      transform: translateY(-1px);
+    }
+    .approach-grid .approach-class {
+      font-size: 0.98rem;
+    }
+    .approach-grid .approach-desc {
+      font-size: 0.85rem;
     }
 
     /* ===== §4 · architecture — section intro ========================= */
