@@ -1,9 +1,7 @@
 ---
-// PRIVATE — Pinecone Principal-PM technical deep-dive pitch surface.
-// Untracked (.gitignore); never deploys to stratadb.org. Reuses the shared
-// design system (tokens + fonts) but provides its own chrome: a sticky,
-// numbered section rail instead of the marketing Nav/Footer. The page is a
-// navigable teleprompter — Jeff (or you) can jump to any section.
+// PRIVATE — Strata engine-internals pitch surface. Own chrome (sticky section
+// rail), light "engineering spec-sheet" aesthetic: ruled structure, monospace
+// metadata, ember as the single instrument indicator. noindex.
 import '../styles/global.css';
 
 interface Section {
@@ -14,10 +12,7 @@ interface Props {
   title?: string;
   sections: Section[];
 }
-const {
-  title = 'Strata — engine internals',
-  sections,
-} = Astro.props;
+const { title = 'Strata — engine internals', sections } = Astro.props;
 ---
 
 <!doctype html>
@@ -34,76 +29,77 @@ const {
     <link rel="preload" href="/fonts/CommitMono-700.woff2" as="font" type="font/woff2" crossorigin />
 
     <script is:inline>
-      // Reduced-motion source of truth, set pre-paint (mirrors BaseLayout).
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
         document.documentElement.dataset.motion = 'reduced';
     </script>
   </head>
 
   <body class="pitch-light min-h-screen">
-    <!--
-      Light-mode retheme (interview surface, per Ani). The shared design system
-      is dark-only; here we remap the SAME token names to a warm-light palette
-      built from the sediment ramp + the terracotta accent, so every reused
-      utility (text-ink-hi, border-line, …) and foundation component flips to
-      light automatically. Scoped to .pitch-light — never leaks to the site.
-    -->
     <style is:global>
       .pitch-light {
-        /* warm-light stage: soft paper page, white cards, recessed wells */
-        --color-void: #faf9f7;
+        /* warm-light spec-sheet ground */
+        --color-void: #f7f5f1;
         --color-panel: #ffffff;
         --color-raised: #ffffff;
-        --color-inset: #f2efeb;
+        --color-inset: #efece6;
 
-        /* ink: warm near-black → warm grays (mid ≥6:1, low ≈3.9:1 on white) */
-        --color-ink-hi: #1b1a17;
+        --color-ink-hi: #191814;
         --color-ink-mid: #57534c;
-        --color-ink-low: #8a847c;
+        --color-ink-low: #8c867d;
 
-        /* hairlines: dark on light */
-        --color-line: rgba(27, 26, 23, 0.12);
-        --color-line-hover: rgba(27, 26, 23, 0.26);
+        --color-line: rgba(25, 24, 20, 0.1);
+        --color-line-hover: rgba(25, 24, 20, 0.22);
 
-        /* functional, retuned for a light ground */
         --color-ok: #1c9c68;
         --color-warn: #b27a12;
         --color-err: #d6453b;
 
-        /* the strata hues, darkened a step so they hold on white */
-        --color-strata-kv: #3b6fe0;
-        --color-strata-event: #149f6c;
-        --color-strata-json: #c98a1e;
-        --color-strata-vector: #d8579b;
-        --color-strata-graph: #7d5bd0;
+        /* the five primitive hues — one muted, harmonized scheme (uniform tone) */
+        --color-strata-kv: #4c6ea4;
+        --color-strata-json: #ae7f31;
+        --color-strata-event: #2f8970;
+        --color-strata-vector: #b85f78;
+        --color-strata-graph: #7e69a0;
 
-        /* soft elevation instead of the dark-tuned float shadow */
-        --shadow-float: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
-          0 18px 40px -24px rgba(27, 26, 23, 0.22);
+        /* the one ember register, on a light ground */
+        --ember: var(--color-terracotta-600);
+        --ember-soft: color-mix(in srgb, var(--color-terracotta-500) 14%, var(--color-panel));
+
+        --shadow-panel: 0 1px 1px rgba(25, 24, 20, 0.03), 0 12px 28px -18px rgba(25, 24, 20, 0.18);
+      }
+      .pitch-light body,
+      body.pitch-light {
+        background-color: var(--color-void);
       }
     </style>
 
     <div class="pitch-shell">
-      <!-- Sticky section rail — the navigable spine -->
+      <!-- Sticky section rail — the index -->
       <nav class="pitch-rail" aria-label="Sections">
-        <a href="#hero" class="pitch-brand">
-          <span class="pitch-diamond" aria-hidden="true">◆</span>
-          <span class="pitch-wordmark">STRATA</span>
+        <a href={`#${sections[0]?.id}`} class="rail-brand">
+          <span class="rail-diamond" aria-hidden="true">◆</span>
+          <span class="rail-word">STRATA</span>
         </a>
-        <p class="pitch-rail-kicker">ENGINE INTERNALS</p>
+        <p class="rail-sub">Engine&nbsp;·&nbsp;internals</p>
 
-        <ol class="pitch-rail-list">
+        <ol class="rail-index">
           {
             sections.map((s, i) => (
               <li>
-                <a href={`#${s.id}`} class="pitch-rail-link" data-rail-link={s.id}>
-                  <span class="pitch-rail-num">{String(i).padStart(2, '0')}</span>
-                  <span class="pitch-rail-label">{s.label}</span>
+                <a href={`#${s.id}`} class="rail-item" data-rail-link={s.id}>
+                  <span class="rail-dot" aria-hidden="true" />
+                  <span class="rail-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="rail-label">{s.label}</span>
                 </a>
               </li>
             ))
           }
         </ol>
+
+        <div class="rail-foot">
+          <span class="rail-foot-line" aria-hidden="true" />
+          <span class="rail-foot-meta">{sections.length} sections · scroll</span>
+        </div>
       </nav>
 
       <main class="pitch-main">
@@ -115,10 +111,10 @@ const {
       /* ---- shell ------------------------------------------------------ */
       .pitch-shell {
         display: grid;
-        grid-template-columns: 13rem minmax(0, 1fr);
+        grid-template-columns: 14.5rem minmax(0, 1fr);
         min-height: 100vh;
       }
-      @media (max-width: 880px) {
+      @media (max-width: 900px) {
         .pitch-shell {
           grid-template-columns: 1fr;
         }
@@ -132,125 +128,165 @@ const {
         height: 100vh;
         display: flex;
         flex-direction: column;
-        padding: 2rem 1.25rem;
+        padding: 2.1rem 1.5rem 1.6rem;
         border-right: 1px solid var(--color-line);
-        background:
-          linear-gradient(180deg, var(--color-panel), var(--color-void) 70%);
+        background: var(--color-void);
       }
-      @media (max-width: 880px) {
+      @media (max-width: 900px) {
         .pitch-rail {
           position: fixed;
           inset: auto 0 0 0;
           height: auto;
           flex-direction: row;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.5rem;
           overflow-x: auto;
-          padding: 0.75rem 1rem;
+          padding: 0.6rem 0.9rem;
           border-right: none;
-          border-top: 1px solid var(--color-line);
+          border-top: 1px solid var(--color-line-hover);
+          background: var(--color-panel);
           z-index: 40;
         }
-        .pitch-rail-kicker,
-        .pitch-rail-foot {
+        .rail-sub,
+        .rail-foot {
           display: none;
         }
-        .pitch-rail-list {
+        .rail-index {
           flex-direction: row;
           margin: 0;
-          gap: 0.25rem;
+          padding: 0;
+          border: none;
+          gap: 0.1rem;
         }
-        .pitch-rail-label {
+        .rail-index::before {
+          display: none;
+        }
+        .rail-label,
+        .rail-dot {
           display: none;
         }
       }
 
-      .pitch-brand {
+      .rail-brand {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.55rem;
         text-decoration: none;
       }
-      .pitch-diamond {
-        color: var(--color-terracotta-600);
-        font-size: 0.875rem;
+      .rail-diamond {
+        color: var(--ember);
+        font-size: 0.8rem;
         line-height: 1;
       }
-      .pitch-wordmark {
+      .rail-word {
         font-family: var(--font-sans);
         font-weight: 600;
-        letter-spacing: 0.18em;
-        font-size: 0.9375rem;
+        letter-spacing: 0.2em;
+        font-size: 0.9rem;
         color: var(--color-ink-hi);
       }
-      .pitch-rail-kicker {
-        margin-top: 0.4rem;
+      .rail-sub {
+        margin-top: 0.5rem;
         font-family: var(--font-mono);
         font-size: 0.625rem;
-        letter-spacing: 0.22em;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
         color: var(--color-ink-low);
       }
 
-      .pitch-rail-list {
+      /* the index, on a vertical measure line */
+      .rail-index {
         list-style: none;
-        margin: 2.5rem 0 0;
+        position: relative;
+        margin: 2.4rem 0 0;
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.125rem;
       }
-      .pitch-rail-link {
-        display: flex;
-        align-items: baseline;
-        gap: 0.625rem;
-        padding: 0.4rem 0.5rem;
-        border-radius: var(--radius-control);
-        border-left: 2px solid transparent;
+      .rail-index::before {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 0.75rem;
+        bottom: 0.75rem;
+        width: 1px;
+        background: var(--color-line);
+      }
+      .rail-item {
+        position: relative;
+        display: grid;
+        grid-template-columns: 7px auto 1fr;
+        align-items: center;
+        gap: 0 0.6rem;
+        padding: 0.46rem 0;
         text-decoration: none;
-        transition:
-          color var(--dur-2) var(--ease-out),
-          background var(--dur-2) var(--ease-out),
-          border-color var(--dur-2) var(--ease-out);
       }
-      .pitch-rail-num {
+      .rail-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--color-void);
+        box-shadow: inset 0 0 0 1.5px var(--color-ink-low);
+        transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+      }
+      .rail-num {
         font-family: var(--font-mono);
         font-size: 0.6875rem;
         color: var(--color-ink-low);
         transition: color var(--dur-2) var(--ease-out);
       }
-      .pitch-rail-label {
+      .rail-label {
         font-family: var(--font-mono);
-        font-size: 0.75rem;
-        letter-spacing: 0.04em;
+        font-size: 0.72rem;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
         color: var(--color-ink-mid);
         transition: color var(--dur-2) var(--ease-out);
       }
-      .pitch-rail-link:hover .pitch-rail-label,
-      .pitch-rail-link:hover .pitch-rail-num {
+      .rail-item:hover .rail-label {
         color: var(--color-ink-hi);
       }
-      /* active = the one temperature on the page */
-      .pitch-rail-link.is-active {
-        border-left-color: var(--color-terracotta-500);
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, var(--color-terracotta-500) 14%, transparent),
-          transparent
-        );
+      .rail-item:hover .rail-dot {
+        box-shadow: inset 0 0 0 1.5px var(--color-ink-mid);
       }
-      .pitch-rail-link.is-active .pitch-rail-num {
-        color: var(--color-terracotta-600);
+      .rail-item.is-active .rail-dot {
+        background: var(--ember);
+        box-shadow: inset 0 0 0 1.5px var(--ember), 0 0 0 3px var(--ember-soft);
       }
-      .pitch-rail-link.is-active .pitch-rail-label {
+      .rail-item.is-active .rail-num {
+        color: var(--ember);
+      }
+      .rail-item.is-active .rail-label {
         color: var(--color-ink-hi);
       }
 
-      /* ---- main ------------------------------------------------------- */
+      .rail-foot {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+      }
+      .rail-foot-line {
+        height: 1px;
+        background: var(--color-line);
+      }
+      .rail-foot-meta {
+        font-family: var(--font-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.08em;
+        color: var(--color-ink-low);
+      }
+
+      /* ---- main : the ruled engineering ground ------------------------ */
       .pitch-main {
         min-width: 0;
+        background-color: var(--color-void);
+        background-image:
+          linear-gradient(to right, color-mix(in srgb, var(--color-ink-hi) 3%, transparent) 1px, transparent 1px),
+          linear-gradient(to bottom, color-mix(in srgb, var(--color-ink-hi) 3%, transparent) 1px, transparent 1px);
+        background-size: 46px 46px;
       }
-      @media (max-width: 880px) {
+      @media (max-width: 900px) {
         .pitch-main {
           padding-bottom: 4rem;
         }
@@ -258,25 +294,20 @@ const {
     </style>
 
     <script>
-      // Scrollspy — light the rail link for the section nearest the top.
+      // Scrollspy — light the rail item for the section nearest the top band.
       const links = new Map<string, HTMLElement>();
       document.querySelectorAll<HTMLElement>('[data-rail-link]').forEach((el) => {
         const id = el.dataset.railLink;
         if (id) links.set(id, el);
       });
-
-      const setActive = (id: string) => {
+      const setActive = (id: string) =>
         links.forEach((el, key) => el.classList.toggle('is-active', key === id));
-      };
-
       const sections = Array.from(links.keys())
         .map((id) => document.getElementById(id))
         .filter((el): el is HTMLElement => el !== null);
-
       if (sections.length) {
         const io = new IntersectionObserver(
           (entries) => {
-            // Choose the entry whose top is closest to the viewport top band.
             const visible = entries
               .filter((e) => e.isIntersecting)
               .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -288,7 +319,7 @@ const {
         setActive(sections[0].id);
       }
 
-      // Standard reveal recipe (mirrors BaseLayout) for any .reveal elements.
+      // Reveal recipe for .reveal elements.
       const revealed = document.querySelectorAll('.reveal');
       if (revealed.length) {
         const ro = new IntersectionObserver(
@@ -300,7 +331,7 @@ const {
               }
             }
           },
-          { threshold: 0.2 }
+          { threshold: 0.15 }
         );
         revealed.forEach((el) => ro.observe(el));
       }
