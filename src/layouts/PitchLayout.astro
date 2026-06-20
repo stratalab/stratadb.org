@@ -1,0 +1,309 @@
+---
+// PRIVATE — Pinecone Principal-PM technical deep-dive pitch surface.
+// Untracked (.gitignore); never deploys to stratadb.org. Reuses the shared
+// design system (tokens + fonts) but provides its own chrome: a sticky,
+// numbered section rail instead of the marketing Nav/Footer. The page is a
+// navigable teleprompter — Jeff (or you) can jump to any section.
+import '../styles/global.css';
+
+interface Section {
+  id: string;
+  label: string;
+}
+interface Props {
+  title?: string;
+  sections: Section[];
+}
+const {
+  title = 'Strata — engine internals',
+  sections,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <link rel="preload" href="/fonts/GeneralSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/CommitMono-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/CommitMono-700.woff2" as="font" type="font/woff2" crossorigin />
+
+    <script is:inline>
+      // Reduced-motion source of truth, set pre-paint (mirrors BaseLayout).
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+        document.documentElement.dataset.motion = 'reduced';
+    </script>
+  </head>
+
+  <body class="pitch-light min-h-screen">
+    <!--
+      Light-mode retheme (interview surface, per Ani). The shared design system
+      is dark-only; here we remap the SAME token names to a warm-light palette
+      built from the sediment ramp + the terracotta accent, so every reused
+      utility (text-ink-hi, border-line, …) and foundation component flips to
+      light automatically. Scoped to .pitch-light — never leaks to the site.
+    -->
+    <style is:global>
+      .pitch-light {
+        /* warm-light stage: soft paper page, white cards, recessed wells */
+        --color-void: #faf9f7;
+        --color-panel: #ffffff;
+        --color-raised: #ffffff;
+        --color-inset: #f2efeb;
+
+        /* ink: warm near-black → warm grays (mid ≥6:1, low ≈3.9:1 on white) */
+        --color-ink-hi: #1b1a17;
+        --color-ink-mid: #57534c;
+        --color-ink-low: #8a847c;
+
+        /* hairlines: dark on light */
+        --color-line: rgba(27, 26, 23, 0.12);
+        --color-line-hover: rgba(27, 26, 23, 0.26);
+
+        /* functional, retuned for a light ground */
+        --color-ok: #1c9c68;
+        --color-warn: #b27a12;
+        --color-err: #d6453b;
+
+        /* the strata hues, darkened a step so they hold on white */
+        --color-strata-kv: #3b6fe0;
+        --color-strata-event: #149f6c;
+        --color-strata-json: #c98a1e;
+        --color-strata-vector: #d8579b;
+        --color-strata-graph: #7d5bd0;
+
+        /* soft elevation instead of the dark-tuned float shadow */
+        --shadow-float: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
+          0 18px 40px -24px rgba(27, 26, 23, 0.22);
+      }
+    </style>
+
+    <div class="pitch-shell">
+      <!-- Sticky section rail — the navigable spine -->
+      <nav class="pitch-rail" aria-label="Sections">
+        <a href="#hero" class="pitch-brand">
+          <span class="pitch-diamond" aria-hidden="true">◆</span>
+          <span class="pitch-wordmark">STRATA</span>
+        </a>
+        <p class="pitch-rail-kicker">ENGINE INTERNALS</p>
+
+        <ol class="pitch-rail-list">
+          {
+            sections.map((s, i) => (
+              <li>
+                <a href={`#${s.id}`} class="pitch-rail-link" data-rail-link={s.id}>
+                  <span class="pitch-rail-num">{String(i).padStart(2, '0')}</span>
+                  <span class="pitch-rail-label">{s.label}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <main class="pitch-main">
+        <slot />
+      </main>
+    </div>
+
+    <style>
+      /* ---- shell ------------------------------------------------------ */
+      .pitch-shell {
+        display: grid;
+        grid-template-columns: 13rem minmax(0, 1fr);
+        min-height: 100vh;
+      }
+      @media (max-width: 880px) {
+        .pitch-shell {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---- rail ------------------------------------------------------- */
+      .pitch-rail {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 1.25rem;
+        border-right: 1px solid var(--color-line);
+        background:
+          linear-gradient(180deg, var(--color-panel), var(--color-void) 70%);
+      }
+      @media (max-width: 880px) {
+        .pitch-rail {
+          position: fixed;
+          inset: auto 0 0 0;
+          height: auto;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.75rem;
+          overflow-x: auto;
+          padding: 0.75rem 1rem;
+          border-right: none;
+          border-top: 1px solid var(--color-line);
+          z-index: 40;
+        }
+        .pitch-rail-kicker,
+        .pitch-rail-foot {
+          display: none;
+        }
+        .pitch-rail-list {
+          flex-direction: row;
+          margin: 0;
+          gap: 0.25rem;
+        }
+        .pitch-rail-label {
+          display: none;
+        }
+      }
+
+      .pitch-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+      }
+      .pitch-diamond {
+        color: var(--color-terracotta-600);
+        font-size: 0.875rem;
+        line-height: 1;
+      }
+      .pitch-wordmark {
+        font-family: var(--font-sans);
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        font-size: 0.9375rem;
+        color: var(--color-ink-hi);
+      }
+      .pitch-rail-kicker {
+        margin-top: 0.4rem;
+        font-family: var(--font-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.22em;
+        color: var(--color-ink-low);
+      }
+
+      .pitch-rail-list {
+        list-style: none;
+        margin: 2.5rem 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+      }
+      .pitch-rail-link {
+        display: flex;
+        align-items: baseline;
+        gap: 0.625rem;
+        padding: 0.4rem 0.5rem;
+        border-radius: var(--radius-control);
+        border-left: 2px solid transparent;
+        text-decoration: none;
+        transition:
+          color var(--dur-2) var(--ease-out),
+          background var(--dur-2) var(--ease-out),
+          border-color var(--dur-2) var(--ease-out);
+      }
+      .pitch-rail-num {
+        font-family: var(--font-mono);
+        font-size: 0.6875rem;
+        color: var(--color-ink-low);
+        transition: color var(--dur-2) var(--ease-out);
+      }
+      .pitch-rail-label {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--color-ink-mid);
+        transition: color var(--dur-2) var(--ease-out);
+      }
+      .pitch-rail-link:hover .pitch-rail-label,
+      .pitch-rail-link:hover .pitch-rail-num {
+        color: var(--color-ink-hi);
+      }
+      /* active = the one temperature on the page */
+      .pitch-rail-link.is-active {
+        border-left-color: var(--color-terracotta-500);
+        background: linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-terracotta-500) 14%, transparent),
+          transparent
+        );
+      }
+      .pitch-rail-link.is-active .pitch-rail-num {
+        color: var(--color-terracotta-600);
+      }
+      .pitch-rail-link.is-active .pitch-rail-label {
+        color: var(--color-ink-hi);
+      }
+
+      /* ---- main ------------------------------------------------------- */
+      .pitch-main {
+        min-width: 0;
+      }
+      @media (max-width: 880px) {
+        .pitch-main {
+          padding-bottom: 4rem;
+        }
+      }
+    </style>
+
+    <script>
+      // Scrollspy — light the rail link for the section nearest the top.
+      const links = new Map<string, HTMLElement>();
+      document.querySelectorAll<HTMLElement>('[data-rail-link]').forEach((el) => {
+        const id = el.dataset.railLink;
+        if (id) links.set(id, el);
+      });
+
+      const setActive = (id: string) => {
+        links.forEach((el, key) => el.classList.toggle('is-active', key === id));
+      };
+
+      const sections = Array.from(links.keys())
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => el !== null);
+
+      if (sections.length) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            // Choose the entry whose top is closest to the viewport top band.
+            const visible = entries
+              .filter((e) => e.isIntersecting)
+              .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            if (visible[0]?.target.id) setActive(visible[0].target.id);
+          },
+          { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+        );
+        sections.forEach((s) => io.observe(s));
+        setActive(sections[0].id);
+      }
+
+      // Standard reveal recipe (mirrors BaseLayout) for any .reveal elements.
+      const revealed = document.querySelectorAll('.reveal');
+      if (revealed.length) {
+        const ro = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-revealed');
+                ro.unobserve(e.target);
+              }
+            }
+          },
+          { threshold: 0.2 }
+        );
+        revealed.forEach((el) => ro.observe(el));
+      }
+    </script>
+  </body>
+</html>

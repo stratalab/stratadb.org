@@ -1,0 +1,285 @@
+---
+// PRIVATE pitch surface — Strata engine, product + technical literacy.
+// Untracked; never deploys. Building section by section: §1 finalized;
+// §2–§7 are anchored placeholders filled one at a time.
+import PitchLayout from '../../layouts/PitchLayout.astro';
+
+const sections = [
+  { id: 'what-it-is', label: 'What it is' },
+  { id: 'where-it-fits', label: 'Where it fits' },
+  { id: 'what-it-does', label: 'What it does' },
+  { id: 'architecture', label: 'Architecture' },
+  { id: 'testing', label: 'How we test' },
+  { id: 'benchmarks', label: 'Benchmarks' },
+  { id: 'why', label: 'Why it matters' },
+];
+
+// Sections not yet built — anchors so the rail + scrollspy work end to end.
+const pending = [
+  { id: 'what-it-does', n: '03', eyebrow: 'What it does', title: 'Branch · time-travel · one store · runs anywhere.' },
+  { id: 'architecture', n: '04', eyebrow: 'The architecture', title: 'The engine, layer by layer.' },
+  { id: 'testing', n: '05', eyebrow: 'How we test', title: 'Bug-class coverage, not test count.' },
+  { id: 'benchmarks', n: '06', eyebrow: 'Does it work', title: 'The numbers.' },
+  { id: 'why', n: '07', eyebrow: 'Why it matters', title: 'Systems facts with product consequences.' },
+];
+---
+
+<PitchLayout title="Strata — engine internals" sections={sections}>
+  <!-- §1 · WHAT STRATA IS — two lenses (the establishing shot) -->
+  <section id="what-it-is" class="pitch-section" aria-label="What Strata is">
+    <div class="pitch-wrap">
+      <div class="open-block">
+        <h1 class="open-product reveal">Strata is an embedded database for AI agents — branch, fork, and time-travel your&nbsp;state.</h1>
+        <p class="open-technical reveal" style="transition-delay: 90ms">A branch-aware, MVCC, log-structured key-value store, with KV, JSON, and vectors as capabilities over one&nbsp;substrate.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- §2 · WHERE IT FITS — the era lineage -->
+  <section id="where-it-fits" class="pitch-section" aria-label="Where Strata fits">
+    <div class="pitch-wrap">
+      <div class="fit-block">
+        <p class="section-eyebrow reveal">Where it fits</p>
+        <h2 class="section-head reveal" style="transition-delay: 40ms">Every era gets an embedded database.</h2>
+        <p class="section-lead reveal" style="transition-delay: 80ms">
+          Every era of computing creates a new database class — each in two forms, server and embedded.
+        </p>
+
+        <table class="lineage reveal" style="transition-delay: 120ms">
+          <thead>
+            <tr>
+              <th scope="col" class="c-era">Era</th>
+              <th scope="col">Server</th>
+              <th scope="col" class="c-emb">Embedded</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Relational</th>
+              <td>Oracle · Postgres</td>
+              <td class="emb">SQLite</td>
+            </tr>
+            <tr>
+              <th scope="row">Analytics</th>
+              <td>Snowflake · BigQuery</td>
+              <td class="emb">DuckDB</td>
+            </tr>
+            <tr>
+              <th scope="row">Vector</th>
+              <td>Pinecone</td>
+              <td class="emb">LanceDB · Chroma</td>
+            </tr>
+            <tr class="row-agent">
+              <th scope="row">Agent state</th>
+              <td class="twin">Redis</td>
+              <td class="emb strata">Strata</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="fit-note reveal" style="transition-delay: 160ms">
+          Read the embedded column down — SQLite → DuckDB → LanceDB → <strong>Strata</strong>. Redis is
+          Strata's server-side twin: agent state lives there today, fast but in-memory and ephemeral.
+          Strata is the embedded, durable, branch-aware version.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- §3–§7 · placeholders (built next, one by one) -->
+  {
+    pending.map((s) => (
+      <section id={s.id} class="pitch-section">
+        <div class="pitch-wrap">
+          <p class="pending-eyebrow">§{s.n} · {s.eyebrow}</p>
+          <h2 class="pending-title">{s.title}</h2>
+          <span class="pending-tag">building next</span>
+        </div>
+      </section>
+    ))
+  }
+
+  <style>
+    /* Each section is its own full screen; content centered inside. */
+    .pitch-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-block: 6rem;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .pitch-section:last-child {
+      border-bottom: none;
+    }
+    .pitch-wrap {
+      width: 100%;
+      max-width: 92rem;
+      margin-inline: auto;
+      padding-inline: 2.5rem;
+    }
+    @media (max-width: 880px) {
+      .pitch-section {
+        min-height: 100svh;
+        padding-block: 4.5rem;
+      }
+      .pitch-wrap {
+        padding-inline: 1.5rem;
+      }
+    }
+
+    /* ---- §1 · one fused statement (product main, technical beneath) -- */
+    .open-block {
+      max-width: 56rem;
+      margin-inline: auto;
+    }
+    .open-product {
+      font-size: clamp(2.1rem, 1.3rem + 2.2vw, 3.3rem);
+      line-height: 1.13;
+      letter-spacing: -0.027em;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+      text-wrap: balance;
+    }
+    .open-technical {
+      margin-top: 1.6rem;
+      max-width: 46rem;
+      font-size: clamp(1.15rem, 1rem + 0.6vw, 1.55rem);
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+      text-wrap: pretty;
+    }
+
+    /* ---- shared section heading rhythm (§2+) ------------------------- */
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+    }
+    .section-head {
+      margin-top: 0.85rem;
+      font-size: clamp(1.85rem, 1.3rem + 1.5vw, 2.6rem);
+      line-height: 1.12;
+      letter-spacing: -0.022em;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+      text-wrap: balance;
+    }
+    .section-lead {
+      margin-top: 1rem;
+      max-width: 48rem;
+      font-size: var(--text-body-lg);
+      line-height: var(--text-body-lg--line-height);
+      color: var(--color-ink-mid);
+      text-wrap: pretty;
+    }
+
+    /* ---- §2 · era lineage table ------------------------------------- */
+    .fit-block {
+      max-width: 60rem;
+      margin-inline: auto;
+    }
+    .lineage {
+      margin-top: 2.5rem;
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+    .lineage th,
+    .lineage td {
+      text-align: left;
+      padding: 0.95rem 1.4rem;
+      border-bottom: 1px solid var(--color-line);
+      font-size: 1.0625rem;
+    }
+    .lineage thead th {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      padding-block: 0.4rem 0.75rem;
+      border-bottom-color: var(--color-line-hover);
+    }
+    .lineage tbody th {
+      font-weight: 500;
+      color: var(--color-ink-mid);
+    }
+    .lineage td {
+      color: var(--color-ink-mid);
+    }
+    /* the embedded column is the lineage — set it off + emphasize */
+    .lineage .c-emb,
+    .lineage td.emb {
+      background: var(--color-panel);
+      border-left: 1px solid var(--color-line);
+      color: var(--color-ink-hi);
+      font-weight: 500;
+    }
+    .lineage tbody tr:last-child th,
+    .lineage tbody tr:last-child td {
+      border-bottom: none;
+    }
+    /* the agent-state row — the payoff */
+    .row-agent th,
+    .lineage .twin {
+      color: var(--color-ink-hi);
+      font-weight: 600;
+    }
+    .lineage td.strata {
+      background: color-mix(in srgb, var(--color-terracotta-500) 15%, var(--color-panel));
+      border-left-color: color-mix(in srgb, var(--color-terracotta-500) 45%, transparent);
+      color: var(--color-terracotta-700);
+      font-weight: 700;
+    }
+    .fit-note {
+      margin-top: 1.75rem;
+      max-width: 52rem;
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--color-ink-low);
+    }
+    .fit-note strong {
+      color: var(--color-terracotta-700);
+      font-weight: 600;
+    }
+    @media (max-width: 640px) {
+      .lineage th,
+      .lineage td {
+        padding: 0.7rem 0.85rem;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* ---- §2–§7 placeholders ----------------------------------------- */
+    .pending-eyebrow {
+      font-family: var(--font-mono);
+      font-size: var(--text-mono-sm);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+    }
+    .pending-title {
+      margin-top: 0.8rem;
+      max-width: 24ch;
+      font-size: var(--text-heading);
+      line-height: var(--text-heading--line-height);
+      font-weight: 600;
+      color: var(--color-ink-mid);
+    }
+    .pending-tag {
+      display: inline-block;
+      margin-top: 1.25rem;
+      padding: 0.25rem 0.7rem;
+      border: 1px dashed var(--color-line-hover);
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.06em;
+      color: var(--color-ink-low);
+    }
+  </style>
+</PitchLayout>
