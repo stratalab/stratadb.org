@@ -1,20 +1,16 @@
 ---
 // PRIVATE pitch surface — Strata engine, "engineering spec-sheet" aesthetic.
-// §1–§6 built; §7 anchored placeholder, filled one at a time.
+// §1–§6, complete. Closes on the benchmarks (the "why it matters" close stays verbal).
 import PitchLayout from '../../layouts/PitchLayout.astro';
 
 const sections = [
   { id: 'what-it-is', label: 'What it is' },
-  { id: 'where-it-fits', label: 'Where it fits' },
-  { id: 'what-it-does', label: 'What it does' },
-  { id: 'architecture', label: 'Architecture' },
-  { id: 'testing', label: 'How we test' },
+  { id: 'where-it-fits', label: 'Market Position' },
+  { id: 'who', label: 'Ideal Customer Profile' },
+  { id: 'what-it-does', label: 'Capabilities' },
+  { id: 'architecture', label: 'Storage Architecture' },
+  { id: 'testing', label: 'Testing Methodology' },
   { id: 'benchmarks', label: 'Benchmarks' },
-  { id: 'why', label: 'Why it matters' },
-];
-
-const pending = [
-  { id: 'why', n: '07', name: 'Why it matters', tag: 'the transfer', title: 'Systems facts with product consequences.' },
 ];
 
 // §6 BENCHMARKS — ILLUSTRATIVE placeholder figures. A benchmark run is in
@@ -66,9 +62,7 @@ const fmtVec = (kind: string, v: number): string => {
   <section id="what-it-is" class="pitch-section" aria-label="What Strata is">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;01<span class="sec-name">What it is</span></span>
-        <span class="sec-tag">the substrate</span>
-      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;01<span class="sec-name">What it is</span></span>      </header>
 
       <div class="sec-body">
         <div class="open-grid">
@@ -108,14 +102,12 @@ const fmtVec = (kind: string, v: number): string => {
   <section id="where-it-fits" class="pitch-section" aria-label="Where Strata fits">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;02<span class="sec-name">Where it fits</span></span>
-        <span class="sec-tag">the lineage</span>
-      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;02<span class="sec-name">Market Position</span></span>      </header>
 
       <div class="sec-body">
-        <h2 class="sec-title reveal">Every era gets an embedded database.</h2>
+        <h2 class="sec-title reveal">Market Position</h2>
         <p class="sec-lead reveal" style="transition-delay: 60ms">
-          Every era of computing creates a new database class — each in two forms, server and embedded.
+          Every class of database comes in two forms: one runs as a server, one is embedded in the application.
         </p>
 
         <div class="data-panel reveal" style="transition-delay: 110ms">
@@ -128,10 +120,10 @@ const fmtVec = (kind: string, v: number): string => {
               </tr>
             </thead>
             <tbody>
-              <tr><th scope="row">Relational</th><td>Oracle · Postgres</td><td class="emb">SQLite</td></tr>
-              <tr><th scope="row">Analytics</th><td>Snowflake · BigQuery</td><td class="emb">DuckDB</td></tr>
-              <tr><th scope="row">Vector</th><td>Pinecone</td><td class="emb">LanceDB · Chroma</td></tr>
-              <tr class="row-agent"><th scope="row">Agent state</th><td class="twin">Redis</td><td class="emb strata">Strata</td></tr>
+              <tr><th scope="row">Relational</th><td>Oracle · Db2 · SQL Server · Postgres</td><td class="emb">SQLite · H2</td></tr>
+              <tr><th scope="row">Analytics</th><td>Snowflake · Databricks · BigQuery · Redshift</td><td class="emb">DuckDB</td></tr>
+              <tr><th scope="row">Vector</th><td>Pinecone · Milvus</td><td class="emb">LanceDB · Chroma</td></tr>
+              <tr class="row-agent"><th scope="row">Agent state</th><td><span class="twin">Redis</span> · Mem0 · Zep · Letta</td><td class="emb strata">Strata</td></tr>
             </tbody>
           </table>
         </div>
@@ -139,16 +131,45 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §3 · WHAT IT DOES -->
-  <section id="what-it-does" class="pitch-section" aria-label="What Strata does">
+  <!-- §3 · WHO IT'S FOR — ideal customer profile -->
+  <section id="who" class="pitch-section" aria-label="Who it's for">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;03<span class="sec-name">What it does</span></span>
-        <span class="sec-tag">capabilities</span>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;03<span class="sec-name">Ideal Customer Profile</span></span>
       </header>
 
       <div class="sec-body">
-        <h2 class="sec-title reveal">Operations on an agent's state.</h2>
+        <h2 class="sec-title reveal">Ideal Customer Profile</h2>
+
+        <div class="icp-grid">
+          <article class="icp reveal" style="transition-delay:110ms">
+            <p class="icp-n">01</p>
+            <h3 class="icp-name">Agentic AI developers</h3>
+            <p class="icp-desc">Their agents accumulate state and need it to survive restarts. They also need to branch it and roll back a failed path.</p>
+          </article>
+          <article class="icp reveal" style="transition-delay:170ms">
+            <p class="icp-n">02</p>
+            <h3 class="icp-name">Vibecoders</h3>
+            <p class="icp-desc">They build fast with AI coding tools and would rather not run a database. Strata is just a library in the app, with nothing to set up.</p>
+          </article>
+          <article class="icp reveal" style="transition-delay:230ms">
+            <p class="icp-n">03</p>
+            <h3 class="icp-name">Embedded &amp; edge developers</h3>
+            <p class="icp-desc">Their software runs on-device or at the edge, often offline. They need a real database in the same process, down to a Raspberry Pi.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §4 · WHAT IT DOES -->
+  <section id="what-it-does" class="pitch-section" aria-label="What Strata does">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;04<span class="sec-name">Capabilities</span></span>      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Capabilities</h2>
 
         <div class="cap-figs">
           <!-- Fig 01 · branch tree -->
@@ -156,7 +177,7 @@ const fmtVec = (kind: string, v: number): string => {
             <div class="cap-fig-text">
               <p class="cap-fig-kicker">Fig 01</p>
               <h3 class="cap-fig-name">Branch &amp; fork</h3>
-              <p class="cap-fig-desc">An agent can fork the whole database to try a change in isolation. If it works the branch is kept; if not it is discarded, without affecting the parent. Forks are cheap enough to explore several alternatives at once.</p>
+              <p class="cap-fig-desc">An agent can fork the whole database and work on the branch without touching the parent. The branch is kept if the change works out, and dropped if it doesn't. Forks are cheap, so an agent can keep several going at once.</p>
               <p class="cap-fig-mech">copy-on-write inheritance · fork is O(metadata), not O(data)</p>
             </div>
             <figure class="cap-fig-svg">
@@ -180,7 +201,7 @@ const fmtVec = (kind: string, v: number): string => {
             <div class="cap-fig-text">
               <p class="cap-fig-kicker">Fig 02</p>
               <h3 class="cap-fig-name">Time-travel &amp; diff</h3>
-              <p class="cap-fig-desc">Every version of every value is retained, so the database can be read as of any past point — to reproduce what an agent saw at a given step, compare two versions, or roll back a write without rebuilding state.</p>
+              <p class="cap-fig-desc">Every version of every value is kept, so the database can be read as of any past point. That reproduces the state an agent saw at an earlier step, or the value a key held before a later write.</p>
               <p class="cap-fig-mech">one versioned row chain · as-of reads from ordering (MVCC)</p>
             </div>
             <figure class="cap-fig-svg">
@@ -208,7 +229,7 @@ const fmtVec = (kind: string, v: number): string => {
             <div class="cap-fig-text">
               <p class="cap-fig-kicker">Fig 03</p>
               <h3 class="cap-fig-name">Multi-modal state</h3>
-              <p class="cap-fig-desc">Key-value, JSON, events, vectors, and graph are served from one store in a single consistent snapshot, so an agent's working state, structured facts, and embeddings all live in one place.</p>
+              <p class="cap-fig-desc">Key-value, JSON, events, vectors, and graph are all served from one store, and a single read sees them in one consistent snapshot.</p>
               <p class="cap-fig-mech">five primitives · capabilities over one substrate</p>
             </div>
             <figure class="cap-fig-svg">
@@ -234,7 +255,7 @@ const fmtVec = (kind: string, v: number): string => {
             <div class="cap-fig-text">
               <p class="cap-fig-kicker">Fig 04</p>
               <h3 class="cap-fig-name">Embedded</h3>
-              <p class="cap-fig-desc">Strata links into the application and runs in-process, with no separate server or network round-trip. The same engine runs from a Raspberry Pi to server-class hardware.</p>
+              <p class="cap-fig-desc">Strata links into the application and runs in-process, with no separate server and no network round-trip. The same build runs on a Raspberry Pi and on server-class hardware.</p>
               <p class="cap-fig-mech">self-contained Rust · flash- and disk-friendly</p>
             </div>
             <figure class="cap-fig-svg">
@@ -256,17 +277,15 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §4 · ARCHITECTURE — the storage engine (L1–L9 explorer) -->
+  <!-- §5 · ARCHITECTURE — the storage engine (L1–L9 explorer) -->
   <section id="architecture" class="pitch-section" aria-label="Architecture — the storage engine">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;04<span class="sec-name">Architecture</span></span>
-        <span class="sec-tag">the storage engine</span>
-      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;05<span class="sec-name">Storage Architecture</span></span>      </header>
 
       <div class="sec-body">
         <div class="arch-intro reveal">
-          <h2 class="sec-title">Inside the storage engine.</h2>
+          <h2 class="sec-title">Storage Architecture</h2>
           <p class="sec-lead">A branch-isolated, MVCC, log-structured key-value store, built in nine layers from backend I/O up to the public API. The storage layers handle durability and versioning; the engine adds the five primitives on top.</p>
         </div>
 
@@ -692,25 +711,23 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §5 · HOW WE TEST -->
+  <!-- §6 · HOW WE TEST -->
   <section id="testing" class="pitch-section" aria-label="How we test">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;05<span class="sec-name">How we test</span></span>
-        <span class="sec-tag">correctness</span>
-      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;06<span class="sec-name">Testing Methodology</span></span>      </header>
 
       <div class="sec-body">
-        <h2 class="sec-title reveal">Tested one bug class at a time.</h2>
+        <h2 class="sec-title reveal">Testing Methodology</h2>
         <p class="sec-lead reveal" style="transition-delay: 60ms">
-          Different failures need different tests. The harness is built one bug class at a time — each paired with the technique that exposes it — and every one verifies through a single recovery oracle.
+          SQLite is the gold standard for testing an embedded database, and this harness is modeled on it: one bug class at a time, each with the technique that exposes it, every test checked against one recovery oracle.
         </p>
 
         <div class="approaches reveal" style="transition-delay: 110ms">
           <article class="approach approach-spine">
             <div class="approach-spine-text">
               <p class="approach-class">Recovery correctness</p>
-              <p class="approach-desc">After any crash, what the database recovers must be a prefix of what it acknowledged — losing a clean suffix is fine, a gap never. A shadow model records every acknowledged commit, and one oracle checks that prefix after every fault the classes below inject.</p>
+              <p class="approach-desc">After any crash, what the database recovers must be a prefix of what it acknowledged: it may lose the most recent commits, but it must never leave a gap earlier in the history. A shadow model records every acknowledged commit, and one oracle checks the recovered state against that prefix after every fault the classes below inject.</p>
               <p class="approach-tag"><span>the oracle</span> every test verifies through it</p>
             </div>
             <div class="approach-spine-fig">
@@ -747,12 +764,12 @@ const fmtVec = (kind: string, v: number): string => {
           <div class="approach-grid">
             <article class="approach">
               <p class="approach-class">Error paths</p>
-              <p class="approach-desc">Fail the Nth backend operation, check the engine survives cleanly, then increment N until a full clean pass — every reachable I/O call, plus disk-full and memory exhaustion.</p>
+              <p class="approach-desc">Fail the Nth backend operation, check that the engine recovers, then increment N until a full pass injects no new failure. Covers every reachable I/O call, plus disk-full and memory exhaustion.</p>
               <p class="approach-tag">fail-once · fail-continuously</p>
             </article>
             <article class="approach">
               <p class="approach-class">Hostile disks</p>
-              <p class="approach-desc">Run on a disk modelled to misbehave — torn writes, reordered appends, non-atomic rename, garbage in an unsynced tail — and verify recovery under each.</p>
+              <p class="approach-desc">Run on a disk model that injects torn writes, reordered appends, non-atomic renames, and garbage in an unsynced tail, then verify recovery under each.</p>
               <p class="approach-tag">four filesystem models</p>
             </article>
             <article class="approach">
@@ -767,7 +784,7 @@ const fmtVec = (kind: string, v: number): string => {
             </article>
             <article class="approach">
               <p class="approach-class">Config divergence</p>
-              <p class="approach-desc">Run the same workload under every mode, schedule, and budget; the results must come out identical — and progress must stay bounded, never stalling.</p>
+              <p class="approach-desc">Run the same workload under every mode, schedule, and budget; the results must be identical, and progress must stay bounded.</p>
               <p class="approach-tag">model-parity oracle</p>
             </article>
             <article class="approach">
@@ -781,18 +798,16 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §6 · BENCHMARKS -->
+  <!-- §7 · BENCHMARKS -->
   <section id="benchmarks" class="pitch-section" aria-label="Benchmarks">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;06<span class="sec-name">Benchmarks</span></span>
-        <span class="sec-tag">the numbers</span>
-      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;07<span class="sec-name">Benchmarks</span></span>      </header>
 
       <div class="sec-body">
-        <h2 class="sec-title reveal">Benchmarked two ways.</h2>
+        <h2 class="sec-title reveal">Benchmarks</h2>
         <p class="sec-lead reveal" style="transition-delay: 60ms">
-          Strata is a key-value engine with a vector index, so it runs the standard suite for each — YCSB against RocksDB and LMDB, and ANN-Benchmarks across one million to a hundred million vectors.
+          Strata is a key-value engine with a vector index, so it runs the standard suite for each: YCSB against RocksDB and LMDB, and ANN-Benchmarks at one, ten, and a hundred million vectors.
         </p>
         <p class="bench-illustrative reveal" style="transition-delay: 90ms">
           <span>illustrative</span>a benchmark run is in progress; these figures are placeholders, to be replaced with measured data.
@@ -868,24 +883,6 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §7 · placeholder -->
-  {
-    pending.map((s) => (
-      <section id={s.id} class="pitch-section">
-        <div class="pitch-wrap">
-          <header class="sec-header">
-            <span class="sec-id"><span class="sec-hash">§</span>&thinsp;{s.n}<span class="sec-name">{s.name}</span></span>
-            <span class="sec-tag">{s.tag}</span>
-          </header>
-          <div class="sec-body">
-            <h2 class="sec-title pending-title">{s.title}</h2>
-            <span class="pending-tag">building next</span>
-          </div>
-        </div>
-      </section>
-    ))
-  }
-
   <style>
     /* ===== section frame : a ruled spec-sheet page ===================== */
     .pitch-section {
@@ -941,14 +938,6 @@ const fmtVec = (kind: string, v: number): string => {
       text-transform: uppercase;
       color: var(--color-ink-mid);
     }
-    .sec-tag {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-ink-low);
-    }
-
     .sec-body {
       flex: 1;
       display: flex;
@@ -1167,7 +1156,7 @@ const fmtVec = (kind: string, v: number): string => {
       }
     }
 
-    /* ===== §3 · capability figures =================================== */
+    /* ===== §4 · capability figures =================================== */
     .cap-figs {
       margin-top: 1.25rem;
     }
@@ -1232,7 +1221,7 @@ const fmtVec = (kind: string, v: number): string => {
       height: auto;
     }
 
-    /* ===== §5 · how we test — bug-class approaches =================== */
+    /* ===== §6 · how we test — bug-class approaches =================== */
     .approaches {
       margin-top: 2rem;
       display: flex;
@@ -1333,12 +1322,56 @@ const fmtVec = (kind: string, v: number): string => {
       font-size: 0.85rem;
     }
 
-    /* ===== §4 · architecture — section intro ========================= */
+    /* ===== §3 · who it's for — ideal customer profile =============== */
+    .icp-grid {
+      margin-top: 2.4rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem;
+    }
+    @media (max-width: 900px) {
+      .icp-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .icp {
+      padding: 1.5rem 1.45rem 1.6rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+      transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+    }
+    .icp:hover {
+      border-color: var(--color-line-hover);
+      transform: translateY(-1px);
+    }
+    .icp-n {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      color: var(--ember);
+    }
+    .icp-name {
+      margin-top: 0.85rem;
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .icp-desc {
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--color-ink-mid);
+    }
+
+    /* ===== §5 · architecture — section intro ========================= */
     .arch-intro {
       max-width: 52rem;
     }
 
-    /* ===== §4 · architecture — screen 2 (storage explorer) =========== */
+    /* ===== §5 · architecture — screen 2 (storage explorer) =========== */
     .explorer {
       display: grid;
       grid-template-columns: 16.5rem minmax(0, 1fr);
@@ -1514,7 +1547,7 @@ const fmtVec = (kind: string, v: number): string => {
       margin-right: 0.5rem;
     }
 
-    /* ===== §4 · L5 living-LSM interactive ============================ */
+    /* ===== §5 · L5 living-LSM interactive ============================ */
     .lsm {
       margin-top: 1.1rem;
     }
@@ -1740,7 +1773,7 @@ const fmtVec = (kind: string, v: number): string => {
       }
     }
 
-    /* ===== §4 · L6 branch-fork interactive =========================== */
+    /* ===== §5 · L6 branch-fork interactive =========================== */
     .bf {
       margin-top: 1.1rem;
     }
@@ -1883,7 +1916,7 @@ const fmtVec = (kind: string, v: number): string => {
       }
     }
 
-    /* ===== §6 · benchmarks =========================================== */
+    /* ===== §7 · benchmarks =========================================== */
     .bench-illustrative {
       margin-top: 1.4rem;
       max-width: 46rem;
@@ -2100,22 +2133,6 @@ const fmtVec = (kind: string, v: number): string => {
       color: var(--color-ink-low);
     }
 
-    /* ===== placeholders =============================================== */
-    .pending-title {
-      color: var(--color-ink-mid);
-      max-width: 24ch;
-    }
-    .pending-tag {
-      display: inline-block;
-      margin-top: 1.4rem;
-      padding: 0.25rem 0.7rem;
-      border: 1px dashed var(--color-line-hover);
-      border-radius: 999px;
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
-      letter-spacing: 0.06em;
-      color: var(--color-ink-low);
-    }
   </style>
 
   <script>

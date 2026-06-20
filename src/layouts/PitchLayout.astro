@@ -77,7 +77,7 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
       <!-- Sticky section rail — the index -->
       <nav class="pitch-rail" aria-label="Sections">
         <a href={`#${sections[0]?.id}`} class="rail-brand">
-          <span class="rail-diamond" aria-hidden="true">◆</span>
+          <img class="rail-logo" src="/logo.svg" alt="" width="22" height="22" />
           <span class="rail-word">STRATA</span>
         </a>
         <p class="rail-sub">Engine&nbsp;·&nbsp;internals</p>
@@ -173,10 +173,10 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
         gap: 0.55rem;
         text-decoration: none;
       }
-      .rail-diamond {
-        color: var(--ember);
-        font-size: 0.8rem;
-        line-height: 1;
+      .rail-logo {
+        width: 1.35rem;
+        height: 1.35rem;
+        display: block;
       }
       .rail-word {
         font-family: var(--font-sans);
