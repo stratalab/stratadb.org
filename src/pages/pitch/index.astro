@@ -1,6 +1,6 @@
 ---
 // PRIVATE pitch surface — Strata engine, "engineering spec-sheet" aesthetic.
-// §1–§5 built; §6–§7 anchored placeholders, filled one at a time.
+// §1–§6 built; §7 anchored placeholder, filled one at a time.
 import PitchLayout from '../../layouts/PitchLayout.astro';
 
 const sections = [
@@ -14,9 +14,51 @@ const sections = [
 ];
 
 const pending = [
-  { id: 'benchmarks', n: '06', name: 'Benchmarks', tag: 'the numbers', title: 'The numbers.' },
   { id: 'why', n: '07', name: 'Why it matters', tag: 'the transfer', title: 'Systems facts with product consequences.' },
 ];
+
+// §6 BENCHMARKS — ILLUSTRATIVE placeholder figures. A benchmark run is in
+// progress; replace the `v` / `qps` / `p99` values below with the real
+// harness output when it lands. Layout reads straight from these objects.
+const fmtOps = (n: number): string =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(2)} M` : `${Math.round(n / 1000)} K`;
+const fmtFull = (n: number): string => n.toLocaleString('en-US');
+
+const kvBench = {
+  unit: 'throughput · ops / sec · higher is better',
+  config: '8 vCPU · NVMe SSD · 100 M records · 1 KB · Zipfian',
+  engines: ['Strata', 'RocksDB', 'LMDB'],
+  rows: [
+    { w: 'A', name: 'update-heavy', vals: [412_000, 430_000, 120_000] },
+    { w: 'B', name: 'read-heavy', vals: [760_000, 800_000, 1_420_000] },
+    { w: 'C', name: 'read-only', vals: [905_000, 950_000, 1_950_000] },
+    { w: 'D', name: 'read-latest', vals: [815_000, 845_000, 1_300_000] },
+    { w: 'E', name: 'short scan', vals: [290_000, 320_000, 480_000] },
+    { w: 'F', name: 'read-modify-write', vals: [355_000, 370_000, 105_000] },
+  ],
+};
+
+const vecBench = {
+  config: 'ANN-Benchmarks protocol · 768-dim · cosine · top-10 · recall@10 ≈ 0.95',
+  sizes: ['1 M', '10 M', '100 M'],
+  // one card per metric; each `vals` aligns with `sizes` above. `dir` marks
+  // which way is better (↑ higher / ↓ lower), so the trend reads unambiguously.
+  metrics: [
+    { name: 'recall@10', kind: 'recall', dir: 'up', vals: [0.95, 0.95, 0.94] },
+    { name: 'throughput', unit: 'q/s', kind: 'qps', dir: 'up', vals: [8_600, 3_200, 1_100] },
+    { name: 'p99 latency', kind: 'ms', dir: 'down', vals: [1.4, 3.8, 9.5] },
+    { name: 'build time', kind: 'time', dir: 'down', vals: [4, 45, 480] },
+    { name: 'index size', kind: 'gb', dir: 'down', vals: [1.4, 14, 140] },
+  ],
+};
+const fmtVec = (kind: string, v: number): string => {
+  if (kind === 'recall') return v.toFixed(2);
+  if (kind === 'qps') return v.toLocaleString('en-US');
+  if (kind === 'ms') return `${v} ms`;
+  if (kind === 'time') return v >= 60 ? `${(v / 60).toFixed(v % 60 === 0 ? 0 : 1)} h` : `${v} m`;
+  if (kind === 'gb') return v >= 1000 ? `${(v / 1000).toFixed(1)} TB` : `${v} GB`;
+  return `${v}`;
+};
 ---
 
 <PitchLayout title="Strata — engine internals" sections={sections}>
@@ -739,7 +781,94 @@ const pending = [
     </div>
   </section>
 
-  <!-- §6–§7 · placeholders -->
+  <!-- §6 · BENCHMARKS -->
+  <section id="benchmarks" class="pitch-section" aria-label="Benchmarks">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;06<span class="sec-name">Benchmarks</span></span>
+        <span class="sec-tag">the numbers</span>
+      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Benchmarked two ways.</h2>
+        <p class="sec-lead reveal" style="transition-delay: 60ms">
+          Strata is a key-value engine with a vector index, so it runs the standard suite for each — YCSB against RocksDB and LMDB, and ANN-Benchmarks across one million to a hundred million vectors.
+        </p>
+        <p class="bench-illustrative reveal" style="transition-delay: 90ms">
+          <span>illustrative</span>a benchmark run is in progress; these figures are placeholders, to be replaced with measured data.
+        </p>
+
+        <div class="bench-grid reveal" style="transition-delay: 130ms">
+          <div class="bench-panel">
+            <div class="bench-head">
+              <h3 class="bench-name">Key-value engine</h3>
+              <span class="bench-sub">YCSB</span>
+            </div>
+            <div class="bench-bars">
+              {
+                kvBench.rows.map((row) => {
+                  const max = Math.max(...row.vals);
+                  return (
+                    <div class="bench-group">
+                      <p class="bench-wl"><b>{row.w}</b>{row.name}</p>
+                      {
+                        row.vals.map((v, i) => (
+                          <div class:list={['bench-bar', { 'is-strata': kvBench.engines[i] === 'Strata' }]}>
+                            <span class="bench-bar-label">{kvBench.engines[i]}</span>
+                            <span class="bench-bar-track"><span class="bench-bar-fill" style={`width:${((v / max) * 100).toFixed(1)}%`}></span></span>
+                            <span class="bench-bar-val">{fmtOps(v)}</span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  );
+                })
+              }
+            </div>
+            <p class="bench-foot">{kvBench.unit}<br />{kvBench.config}</p>
+          </div>
+
+          <div class="bench-panel">
+            <div class="bench-head">
+              <h3 class="bench-name">Vector search</h3>
+              <span class="bench-sub">ANN-Benchmarks · as it scales</span>
+            </div>
+            <div class="vmetrics">
+              {
+                vecBench.metrics.map((m) => {
+                  const max = Math.max(...m.vals);
+                  return (
+                    <div class="vmetric">
+                      <div class="vmetric-top">
+                        <span class="vmetric-name">{m.name}{m.unit ? <span class="vmetric-unit"> {m.unit}</span> : null}</span>
+                        <span class="vmetric-dir" title={m.dir === 'up' ? 'higher is better' : 'lower is better'}>{m.dir === 'up' ? '↑' : '↓'}</span>
+                      </div>
+                      <div class="vmetric-bars">
+                        {
+                          m.vals.map((v) => (
+                            <div class="vm-col">
+                              <span class="vm-v">{fmtVec(m.kind, v)}</span>
+                              <span class="vm-bar" style={`height:${Math.max(4, (v / max) * 80).toFixed(0)}%`}></span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                      <div class="vmetric-xs">
+                        {vecBench.sizes.map((s) => <span>{s}</span>)}
+                      </div>
+                    </div>
+                  );
+                })
+              }
+            </div>
+            <p class="bench-foot">{vecBench.config}<br />one index, measured at 1 M · 10 M · 100 M vectors</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §7 · placeholder -->
   {
     pending.map((s) => (
       <section id={s.id} class="pitch-section">
@@ -1752,6 +1881,223 @@ const pending = [
       .bf-cell.lsm-in {
         animation: lsm-in 0.26s var(--ease-out) both;
       }
+    }
+
+    /* ===== §6 · benchmarks =========================================== */
+    .bench-illustrative {
+      margin-top: 1.4rem;
+      max-width: 46rem;
+      padding: 0.6rem 0.9rem;
+      border: 1px dashed color-mix(in srgb, var(--ember) 45%, transparent);
+      border-radius: var(--radius-control);
+      background: var(--ember-soft);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+    }
+    .bench-illustrative span {
+      margin-right: 0.55rem;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-terracotta-700);
+    }
+    .bench-grid {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .bench-panel {
+      padding: 1rem 1.25rem 1.05rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+    }
+    .bench-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .bench-name {
+      font-size: 1.08rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .bench-sub {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-low);
+    }
+    /* KV — grouped bars per YCSB workload (Strata in ember) */
+    .bench-bars {
+      margin-top: 0.1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 1.9rem;
+    }
+    @media (max-width: 880px) {
+      .bench-bars {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 560px) {
+      .bench-bars {
+        grid-template-columns: 1fr;
+      }
+    }
+    .bench-group {
+      padding-top: 0.55rem;
+    }
+    .bench-wl {
+      margin-bottom: 0.42rem;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--color-ink-mid);
+    }
+    .bench-wl b {
+      margin-right: 0.5rem;
+      color: var(--color-ink-hi);
+    }
+    .bench-bar {
+      display: grid;
+      grid-template-columns: 3.9rem 1fr 3.3rem;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.08rem 0;
+    }
+    .bench-bar-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-ink-low);
+    }
+    .bench-bar-track {
+      height: 0.52rem;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--color-ink-hi) 6%, var(--color-panel));
+      overflow: hidden;
+    }
+    .bench-bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--color-ink-hi) 24%, transparent);
+    }
+    .bench-bar-val {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-align: right;
+      color: var(--color-ink-mid);
+      font-variant-numeric: tabular-nums;
+    }
+    .bench-bar.is-strata .bench-bar-fill {
+      background: var(--ember);
+    }
+    .bench-bar.is-strata .bench-bar-label {
+      color: var(--color-ink-hi);
+      font-weight: 500;
+    }
+    .bench-bar.is-strata .bench-bar-val {
+      color: var(--color-terracotta-700);
+    }
+
+    /* Vector — solo; five metrics, each its own card, charted across sizes */
+    .vmetrics {
+      margin-top: 0.7rem;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.8rem;
+    }
+    @media (max-width: 820px) {
+      .vmetrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .vmetric {
+      padding: 0.7rem 0.8rem 0.6rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 2%, var(--color-panel));
+    }
+    .vmetric-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.35rem;
+      margin-bottom: 0.7rem;
+    }
+    .vmetric-name {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-hi);
+    }
+    .vmetric-unit {
+      color: var(--color-ink-low);
+    }
+    .vmetric-dir {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1;
+      color: var(--color-ink-low);
+    }
+    .vmetric-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.4rem;
+      height: 3rem;
+    }
+    .vm-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+    }
+    .vm-v {
+      margin-bottom: 0.26rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-ink-hi);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .vm-bar {
+      width: 70%;
+      max-width: 1.3rem;
+      border-radius: 2px 2px 0 0;
+      background: var(--ember);
+    }
+    .vmetric-xs {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+      padding-top: 0.32rem;
+      border-top: 1px solid var(--color-line);
+    }
+    .vmetric-xs span {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--color-ink-low);
+    }
+    .bench-foot {
+      margin-top: 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      line-height: 1.5;
+      color: var(--color-ink-low);
     }
 
     /* ===== placeholders =============================================== */
