@@ -14,7 +14,6 @@ const sections = [
 ];
 
 const pending = [
-  { id: 'what-it-does', n: '03', name: 'What it does', tag: 'capabilities', title: 'Branch · time-travel · one store · runs anywhere.' },
   { id: 'architecture', n: '04', name: 'Architecture', tag: 'the engine', title: 'The engine, layer by layer.' },
   { id: 'testing', n: '05', name: 'How we test', tag: 'correctness', title: 'Bug-class coverage, not test count.' },
   { id: 'benchmarks', n: '06', name: 'Benchmarks', tag: 'the numbers', title: 'The numbers.' },
@@ -100,7 +99,124 @@ const pending = [
     </div>
   </section>
 
-  <!-- §3–§7 · placeholders -->
+  <!-- §3 · WHAT IT DOES -->
+  <section id="what-it-does" class="pitch-section" aria-label="What Strata does">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;03<span class="sec-name">What it does</span></span>
+        <span class="sec-tag">capabilities</span>
+      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Operations on an agent's state.</h2>
+
+        <div class="cap-figs">
+          <!-- Fig 01 · branch tree -->
+          <div class="cap-fig reveal">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 01</p>
+              <h3 class="cap-fig-name">Branch &amp; fork</h3>
+              <p class="cap-fig-desc">An agent can fork the whole database to try a change in isolation. If it works the branch is kept; if not it is discarded, without affecting the parent. Forks are cheap enough to explore several alternatives at once.</p>
+              <p class="cap-fig-mech">copy-on-write inheritance · fork is O(metadata), not O(data)</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <line x1="20" y1="64" x2="220" y2="64" style="stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <path d="M92 64 C 116 64, 124 34, 150 34 L 202 34" style="stroke:var(--ember);stroke-width:1.5" />
+                <circle cx="36" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="92" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="148" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="204" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="150" cy="34" r="4.5" style="fill:var(--color-panel);stroke:var(--ember);stroke-width:1.5" />
+                <circle cx="202" cy="34" r="4.5" style="fill:var(--color-panel);stroke:var(--ember);stroke-width:1.5" />
+                <text x="20" y="86" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">main</text>
+                <text x="184" y="22" style="font-family:var(--font-mono);font-size:9px;fill:var(--ember)">fork</text>
+              </svg>
+            </figure>
+          </div>
+
+          <!-- Fig 02 · version timeline -->
+          <div class="cap-fig reveal" style="transition-delay: 70ms">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 02</p>
+              <h3 class="cap-fig-name">Time-travel &amp; diff</h3>
+              <p class="cap-fig-desc">Every version of every value is retained, so the database can be read as of any past point — to reproduce what an agent saw at a given step, compare two versions, or roll back a write without rebuilding state.</p>
+              <p class="cap-fig-mech">one versioned row chain · as-of reads from ordering (MVCC)</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <line x1="20" y1="60" x2="220" y2="60" style="stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="32" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="80" cy="60" r="5.5" style="fill:var(--ember);stroke:var(--ember)" />
+                <circle cx="128" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="176" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="216" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <line x1="80" y1="26" x2="80" y2="52" style="stroke:var(--ember);stroke-width:1.5" />
+                <path d="M75 46 L80 53 L85 46 Z" style="fill:var(--ember)" />
+                <text x="62" y="20" style="font-family:var(--font-mono);font-size:9px;fill:var(--ember)">as of</text>
+                <text x="26" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v1</text>
+                <text x="74" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v2</text>
+                <text x="122" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v3</text>
+                <text x="170" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v4</text>
+                <text x="210" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v5</text>
+              </svg>
+            </figure>
+          </div>
+
+          <!-- Fig 03 · primitives → substrate -->
+          <div class="cap-fig reveal" style="transition-delay: 140ms">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 03</p>
+              <h3 class="cap-fig-name">Multi-modal state</h3>
+              <p class="cap-fig-desc">Key-value, JSON, events, vectors, and graph are served from one store in a single consistent snapshot — so an agent's working state, structured facts, and embeddings stay together, not spread across separate systems.</p>
+              <p class="cap-fig-mech">five primitives · capabilities over one substrate</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <rect x="16" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-kv)" />
+                <rect x="64" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-json)" />
+                <rect x="112" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-event)" />
+                <rect x="160" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-vector)" />
+                <rect x="208" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-graph)" />
+                <line x1="24" y1="30" x2="24" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="72" y1="30" x2="72" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="120" y1="30" x2="120" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="168" y1="30" x2="168" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="216" y1="30" x2="216" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <rect x="16" y="56" width="208" height="24" rx="4" style="fill:color-mix(in srgb, var(--color-ink-hi) 6%, var(--color-panel));stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="120" y="71" text-anchor="middle" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-mid)">one substrate</text>
+              </svg>
+            </figure>
+          </div>
+
+          <!-- Fig 04 · hardware range -->
+          <div class="cap-fig reveal" style="transition-delay: 210ms">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 04</p>
+              <h3 class="cap-fig-name">Embedded</h3>
+              <p class="cap-fig-desc">Strata links into the application and runs in-process, with no separate server or network round-trip. The same engine runs from a Raspberry Pi to server-class hardware.</p>
+              <p class="cap-fig-mech">self-contained Rust · flash- and disk-friendly</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <rect x="16" y="50" width="44" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <rect x="33" y="59" width="10" height="8" rx="1.5" style="fill:var(--ember)" />
+                <rect x="82" y="40" width="56" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <rect x="103" y="53" width="14" height="10" rx="1.5" style="fill:var(--ember)" />
+                <rect x="160" y="28" width="64" height="48" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <rect x="184" y="46" width="16" height="12" rx="1.5" style="fill:var(--ember)" />
+                <text x="22" y="90" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">Pi</text>
+                <text x="92" y="90" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">laptop</text>
+                <text x="174" y="90" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">server</text>
+              </svg>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §4–§7 · placeholders -->
   {
     pending.map((s) => (
       <section id={s.id} class="pitch-section">
@@ -186,7 +302,7 @@ const pending = [
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding-block: 2.5rem 0;
+      padding-block: 1.75rem 0;
     }
 
     .sec-title {
@@ -397,6 +513,71 @@ const pending = [
         padding: 0.7rem 0.85rem;
         font-size: 0.92rem;
       }
+    }
+
+    /* ===== §3 · capability figures =================================== */
+    .cap-figs {
+      margin-top: 1.25rem;
+    }
+    .cap-fig {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      gap: 2.4rem;
+      align-items: center;
+      padding-block: 1rem;
+      border-top: 1px solid var(--color-line);
+    }
+    .cap-fig:first-child {
+      border-top: none;
+      padding-top: 0.2rem;
+    }
+    @media (max-width: 860px) {
+      .cap-fig {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+      }
+    }
+    .cap-fig-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ember);
+    }
+    .cap-fig-name {
+      margin-top: 0.3rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .cap-fig-desc {
+      margin-top: 0.6rem;
+      max-width: 40rem;
+      font-size: 0.94rem;
+      line-height: 1.6;
+      color: var(--color-ink-mid);
+    }
+    .cap-fig-mech {
+      margin-top: 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.4;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-low);
+    }
+    .cap-fig-svg {
+      margin: 0;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+      box-shadow: var(--shadow-panel);
+    }
+    .cap-fig-svg svg {
+      display: block;
+      width: 100%;
+      height: auto;
     }
 
     /* ===== placeholders =============================================== */
