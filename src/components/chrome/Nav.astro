@@ -6,7 +6,9 @@
 // the launch-phase ask.
 import Button from '../foundation/Button.astro';
 
-const navItems = [{ label: 'Docs', href: '/docs' }];
+const navItems: { label: string; href: string }[] = [
+  // { label: 'Docs', href: '/docs' }, // Docs link temporarily hidden, will restore soon
+];
 const currentPath = Astro.url.pathname;
 
 // Star count: build-time cached, fails quiet (06 §4 pattern; live hydration later).

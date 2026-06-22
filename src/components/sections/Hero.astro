@@ -100,7 +100,7 @@ const dataModel = [
   <div class="relative mx-auto w-full max-w-[70rem] px-6 pb-24 pt-20 max-[480px]:px-4 md:pt-28">
     <div class="mb-14 text-center">
       <Badge href="/changelog" class="mb-8">Research preview · v{release.version}</Badge>
-      <Heading level={1} size="display-xl">Strata is the embedded database with git-like powers</Heading>
+      <Heading level={1} size="display-xl">Strata is the embedded database for the AI era</Heading>
 
       <!-- The acquisition control (2026-06-12): the hero IS the act surface.
            No Get Started — get the product: CLI via curl, or the studio. -->
@@ -108,24 +108,20 @@ const dataModel = [
            says what it IS (nobody knows "Foundry" yet); the CLI keeps the quiet
            mono chip. "Get", not "Download", until R1 artifacts exist. -->
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <Button
-          href="https://github.com/stratalab/strata-foundry"
-          class="shadow-[var(--shadow-float)]"
-        >
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-            <path d="M3 9h18M7 6.5h.01"></path>
-          </svg>
-          Get the desktop app
-        </Button>
+        <span class="inline-flex items-center rounded-full border border-line bg-panel/80 px-5 py-2.5 font-mono text-mono-sm text-ink-mid">
+          Under construction · check back soon
+        </span>
+        {/* install instructions — temporarily hidden, will restore soon
         <CopyChip
           value="curl -fsSL stratadb.org/install.sh | sh"
           class="!bg-raised [&_.copy-chip-label]:!text-ink-hi"
         />
+        */}
       </div>
       <!-- The agent door as an ACTION (2026-06-12, pattern: mem0.ai): copies a
            ready-to-paste instruction for the visitor's agent, pointing at the
            for-agents recipe's markdown mirror. The human is the courier. -->
+      {/* "set up with your agent" CTA — temporarily hidden, will restore soon
       <p class="mt-4">
         <button
           type="button"
@@ -143,6 +139,7 @@ const dataModel = [
           <span class="copy-chip-done hidden text-ok" aria-hidden="true">✓ copied — paste it to your agent</span>
         </button>
       </p>
+      */}
 
       <nav
         class="mt-12 flex flex-wrap items-start justify-center gap-x-3 gap-y-4"
