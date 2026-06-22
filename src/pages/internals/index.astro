@@ -8,7 +8,9 @@ const sections = [
   { id: 'where-it-fits', label: 'Market Position' },
   { id: 'who', label: 'Ideal Customer Profile' },
   { id: 'what-it-does', label: 'Capabilities' },
+  { id: 'product', label: 'Product Architecture' },
   { id: 'architecture', label: 'Storage Architecture' },
+  { id: 'vector', label: 'Vector Architecture' },
   { id: 'testing', label: 'Testing Methodology' },
   { id: 'benchmarks', label: 'Benchmarks' },
 ];
@@ -67,7 +69,7 @@ const fmtVec = (kind: string, v: number): string => {
       <div class="sec-body">
         <div class="open-grid">
           <div class="open-statement reveal">
-            <h1 class="open-product">Strata is an embedded database for AI&nbsp;agents.</h1>
+            <h1 class="open-product">Strata is an embedded database for the AI&nbsp;era.</h1>
             <p class="open-technical">A branch-aware, MVCC, log-structured key-value store — KV, JSON, events, vectors, and graph as capabilities over one&nbsp;substrate.</p>
           </div>
 
@@ -277,11 +279,61 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §5 · ARCHITECTURE — the storage engine (L1–L9 explorer) -->
+  <!-- §5 · PRODUCT ARCHITECTURE — the five crates -->
+  <section id="product" class="pitch-section" aria-label="Product architecture">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;05<span class="sec-name">Product Architecture</span></span>
+      </header>
+
+      <div class="sec-body">
+        <div class="arch-intro reveal">
+          <h2 class="sec-title">Product Architecture</h2>
+          <p class="sec-lead">Strata is built as five crates. At the top, the executor is the command surface; at the bottom, core holds the shared identity and ordering types everything builds on. In between sit inference for model calls, the engine and its five primitives, and storage, which the next section opens up into nine layers.</p>
+        </div>
+
+        <div class="crates reveal" style="transition-delay: 90ms">
+          <p class="crates-tag">five crates · executor → core</p>
+          <div class="crate-spine">
+            <article class="crate">
+              <div class="crate-h"><span class="crate-name">Executor</span><span class="crate-role">command boundary</span></div>
+              <p class="crate-desc">The public surface. Serializable commands in, results out.</p>
+            </article>
+            <article class="crate">
+              <div class="crate-h"><span class="crate-name">Inference</span><span class="crate-role">optional</span></div>
+              <p class="crate-desc">Inference runtime and a provider API for local, Anthropic, OpenAI, and Google models. Called by the executor.</p>
+            </article>
+            <article class="crate">
+              <div class="crate-h"><span class="crate-name">Engine</span><span class="crate-role">the primitives</span></div>
+              <p class="crate-desc">Builds the five primitives over the storage boundary.</p>
+              <div class="crate-prims">
+                <span class="prim" style="--hue: var(--color-strata-kv)">KV</span>
+                <span class="prim" style="--hue: var(--color-strata-json)">JSON</span>
+                <span class="prim" style="--hue: var(--color-strata-event)">Event</span>
+                <span class="prim" style="--hue: var(--color-strata-vector)">Vector</span>
+                <span class="prim" style="--hue: var(--color-strata-graph)">Graph</span>
+              </div>
+            </article>
+            <article class="crate crate-bridge">
+              <div class="crate-h"><span class="crate-name">Storage</span><span class="crate-role">the substrate</span></div>
+              <p class="crate-desc">Durable, branch-isolated, versioned persistence.</p>
+              <p class="crate-drill">↓ opened up next, in Storage Architecture</p>
+            </article>
+            <article class="crate crate-base">
+              <div class="crate-h"><span class="crate-name">Core</span><span class="crate-role">shared atoms</span></div>
+              <p class="crate-desc">Identity and ordering: branch, commit version, timestamp.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §6 · ARCHITECTURE — the storage engine (L1–L9 explorer) -->
   <section id="architecture" class="pitch-section" aria-label="Architecture — the storage engine">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;05<span class="sec-name">Storage Architecture</span></span>      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;06<span class="sec-name">Storage Architecture</span></span>      </header>
 
       <div class="sec-body">
         <div class="arch-intro reveal">
@@ -711,11 +763,115 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §6 · HOW WE TEST -->
+  <!-- §7 · VECTOR ARCHITECTURE — per-slab progressive index on the LSM -->
+  <section id="vector" class="pitch-section" aria-label="Vector architecture">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;07<span class="sec-name">Vector Architecture</span></span>
+      </header>
+
+      <div class="sec-body">
+        <div class="arch-intro reveal">
+          <h2 class="sec-title">Vector Architecture</h2>
+          <p class="sec-lead">The vector index is a derived artifact on the LSM, one per slab, and its kind changes by level: brute-force at the memtable, flat at the fresh L0 slabs, per-slab HNSW once a slab settles. Exact full-precision search stays the ground truth — the index only proposes candidates, an exact rerank decides the result, and a missing or corrupt index costs a rebuild, not a wrong answer.</p>
+        </div>
+
+        <div class="varch-top reveal" style="transition-delay: 90ms">
+          <div class="vstack">
+            <p class="vstack-tag">vector index · per slab · escalates by level</p>
+            <div class="vlevel">
+              <span class="vlevel-k">memtable</span>
+              <span class="vlevel-holds">newest writes</span>
+              <span class="vlevel-idx">brute-force · <em>exact</em></span>
+            </div>
+            <p class="vflow">↓ flush · build the cheap index</p>
+            <div class="vlevel">
+              <span class="vlevel-k">L0</span>
+              <span class="vlevel-holds">fresh slabs</span>
+              <span class="vlevel-idx">flat</span>
+            </div>
+            <p class="vflow vflow-key">↓ compaction · rebuild over live vectors · clean graph</p>
+            <div class="vlevel">
+              <span class="vlevel-k">L1</span>
+              <span class="vlevel-holds">settled</span>
+              <span class="vlevel-idx">per-slab HNSW</span>
+            </div>
+            <div class="vlevel vlevel-base">
+              <span class="vlevel-k">L2</span>
+              <span class="vlevel-holds">bulk</span>
+              <span class="vlevel-idx">per-slab HNSW</span>
+            </div>
+            <p class="vstack-note">under a few thousand live vectors, skip the graph and brute-force. recall climbs as slabs settle into larger graphs.</p>
+          </div>
+
+          <div class="vquery">
+            <figure class="pane-svg">
+              <svg viewBox="0 0 360 136" fill="none" aria-hidden="true">
+                <text x="6" y="12" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">fan out · overfetch · rerank exactly</text>
+                <rect x="6" y="56" width="54" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="33" y="72" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">query</text>
+                <text x="33" y="83" text-anchor="middle" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-ink-low)">q · k · filter</text>
+                <line x1="60" y1="74" x2="88" y2="35" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M83 33 L90 34 L85 39 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="60" y1="74" x2="88" y2="73" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M84 70 L90 73 L84 76 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="60" y1="74" x2="88" y2="111" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M83 107 L90 112 L85 113 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="92" y="22" width="82" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="99" y="38" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">memtable</text>
+                <text x="167" y="38" text-anchor="end" style="font-family:var(--font-mono);font-size:7px;fill:var(--ember)">exact</text>
+                <rect x="92" y="60" width="82" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="99" y="76" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">slab</text>
+                <text x="167" y="76" text-anchor="end" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">flat</text>
+                <rect x="92" y="98" width="82" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="99" y="114" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">slab</text>
+                <text x="167" y="114" text-anchor="end" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">HNSW</text>
+                <line x1="174" y1="35" x2="198" y2="61" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M193 58 L200 60 L194 63 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="174" y1="73" x2="198" y2="73" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M194 70 L200 73 L194 76 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="174" y1="111" x2="198" y2="85" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M193 83 L200 85 L194 88 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="200" y="49" width="100" height="48" rx="3" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.25" />
+                <text x="250" y="64" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-terracotta-700)">merge + exact rerank</text>
+                <text x="250" y="76" text-anchor="middle" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-terracotta-700)">visibility · branch cap</text>
+                <text x="250" y="86" text-anchor="middle" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-terracotta-700)">dedupe · full precision</text>
+                <line x1="300" y1="73" x2="318" y2="73" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <path d="M314 70 L320 73 L314 76 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="320" y="58" width="36" height="30" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-hi);stroke-width:1.25" />
+                <text x="338" y="76" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">top-k</text>
+              </svg>
+            </figure>
+            <p class="vq-cap">MVCC visibility and the branch fork cap are enforced in the merge, so the index never returns a row the read shouldn't see.</p>
+          </div>
+        </div>
+
+        <div class="varch-cards reveal" style="transition-delay: 140ms">
+          <article class="crate">
+            <p class="vcard-tag">lsm × hnsw</p>
+            <h3 class="vcard-name">Compaction keeps the graph clean</h3>
+            <p class="crate-desc">HNSW degrades as deletes and updates pile up; normally you rebuild it on a schedule. The LSM already rebuilds slabs and drops tombstones on every compaction, so each pass hands back a clean graph over only the live vectors. The re-index cost that sinks a graph at billion scale is cheap here, and recall climbs as slabs settle into larger graphs.</p>
+          </article>
+          <article class="crate">
+            <p class="vcard-tag">the boundary</p>
+            <h3 class="vcard-name">storage = WHEN · engine = WHAT</h3>
+            <p class="crate-desc">Storage owns the slab lifecycle and an opaque artifact slot; on compaction it emits a rebuild event and commits the engine's bytes atomically with the slab. The engine owns the vector logic and hands back opaque bytes. The index is derived state: a missing or corrupt artifact rebuilds from the slab, so it can cost a rebuild, never data.</p>
+          </article>
+          <article class="crate">
+            <p class="vcard-tag">the scale call</p>
+            <h3 class="vcard-name">HNSW now, IVF at the ceiling</h3>
+            <p class="crate-desc">At embedded scale (thousands to tens of millions of vectors per collection) the data fits in RAM and per-slab graphs are cheap to build, so HNSW is the default for its recall and latency. A configurable centroid/IVF mode is the scale-out path, for the rare deployment where re-index cost would dominate.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §8 · HOW WE TEST -->
   <section id="testing" class="pitch-section" aria-label="How we test">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;06<span class="sec-name">Testing Methodology</span></span>      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;08<span class="sec-name">Testing Methodology</span></span>      </header>
 
       <div class="sec-body">
         <h2 class="sec-title reveal">Testing Methodology</h2>
@@ -798,11 +954,11 @@ const fmtVec = (kind: string, v: number): string => {
     </div>
   </section>
 
-  <!-- §7 · BENCHMARKS -->
+  <!-- §9 · BENCHMARKS -->
   <section id="benchmarks" class="pitch-section" aria-label="Benchmarks">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;07<span class="sec-name">Benchmarks</span></span>      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;09<span class="sec-name">Benchmarks</span></span>      </header>
 
       <div class="sec-body">
         <h2 class="sec-title reveal">Benchmarks</h2>
@@ -1221,7 +1377,7 @@ const fmtVec = (kind: string, v: number): string => {
       height: auto;
     }
 
-    /* ===== §6 · how we test — bug-class approaches =================== */
+    /* ===== §8 · how we test — bug-class approaches =================== */
     .approaches {
       margin-top: 2rem;
       display: flex;
@@ -1366,12 +1522,93 @@ const fmtVec = (kind: string, v: number): string => {
       color: var(--color-ink-mid);
     }
 
-    /* ===== §5 · architecture — section intro ========================= */
+    /* ===== §5 · product architecture — the five crates ============== */
+    .crates {
+      margin-top: 1.2rem;
+    }
+    .crates-tag {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      margin-bottom: 0.7rem;
+    }
+    .crate-spine {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 46rem;
+    }
+    .crate {
+      padding: 0.7rem 1.2rem 0.78rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+    }
+    .crate-h {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+    .crate-name {
+      font-size: 1.12rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .crate-role {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      white-space: nowrap;
+    }
+    .crate-desc {
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+    }
+    .crate-prims {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+    }
+    .prim {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      padding: 0.14rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid color-mix(in srgb, var(--hue) 42%, transparent);
+      background: color-mix(in srgb, var(--hue) 12%, var(--color-panel));
+      color: var(--hue);
+    }
+    .crate-bridge {
+      border-left: 2px solid var(--ember);
+    }
+    .crate-drill {
+      margin-top: 0.65rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.02em;
+      color: var(--ember);
+    }
+    .crate-base {
+      background: color-mix(in srgb, var(--color-ink-hi) 3%, var(--color-panel));
+    }
+
+    /* ===== §6 · architecture — section intro ========================= */
     .arch-intro {
       max-width: 52rem;
     }
 
-    /* ===== §5 · architecture — screen 2 (storage explorer) =========== */
+    /* ===== §6 · architecture — screen 2 (storage explorer) =========== */
     .explorer {
       display: grid;
       grid-template-columns: 16.5rem minmax(0, 1fr);
@@ -1547,7 +1784,7 @@ const fmtVec = (kind: string, v: number): string => {
       margin-right: 0.5rem;
     }
 
-    /* ===== §5 · L5 living-LSM interactive ============================ */
+    /* ===== §6 · L5 living-LSM interactive ============================ */
     .lsm {
       margin-top: 1.1rem;
     }
@@ -1773,7 +2010,7 @@ const fmtVec = (kind: string, v: number): string => {
       }
     }
 
-    /* ===== §5 · L6 branch-fork interactive =========================== */
+    /* ===== §6 · L6 branch-fork interactive =========================== */
     .bf {
       margin-top: 1.1rem;
     }
@@ -1916,7 +2153,119 @@ const fmtVec = (kind: string, v: number): string => {
       }
     }
 
-    /* ===== §7 · benchmarks =========================================== */
+    /* ===== §7 · vector architecture — per-slab index on the LSM ====== */
+    .varch-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4rem;
+      align-items: start;
+      margin-top: 1rem;
+    }
+    @media (max-width: 860px) {
+      .varch-top {
+        grid-template-columns: 1fr;
+      }
+    }
+    .vstack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.26rem;
+      padding: 0.7rem 0.9rem 0.78rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .vstack-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      margin-bottom: 0.3rem;
+    }
+    .vlevel {
+      display: grid;
+      grid-template-columns: 4.4rem 1fr auto;
+      align-items: baseline;
+      gap: 0.6rem;
+      padding: 0.32rem 0.6rem;
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 3%, var(--color-panel));
+    }
+    .vlevel-base {
+      background: color-mix(in srgb, var(--color-ink-hi) 6.5%, var(--color-panel));
+    }
+    .vlevel-k {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+    }
+    .vlevel-holds {
+      font-size: 0.82rem;
+      color: var(--color-ink-mid);
+    }
+    .vlevel-idx {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-ink-mid);
+      text-align: right;
+    }
+    .vlevel-idx em {
+      font-style: normal;
+      color: var(--ember);
+    }
+    .vflow {
+      padding-left: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-low);
+    }
+    .vflow-key {
+      color: var(--ember);
+    }
+    .vstack-note {
+      margin-top: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      line-height: 1.55;
+      color: var(--color-ink-low);
+    }
+    .vq-cap {
+      margin-top: 0.7rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+    }
+    .varch-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 0.85rem;
+    }
+    @media (max-width: 860px) {
+      .varch-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+    .vcard-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+    }
+    .vcard-name {
+      margin-top: 0.35rem;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.012em;
+      line-height: 1.2;
+      color: var(--color-ink-hi);
+    }
+
+    /* ===== §9 · benchmarks =========================================== */
     .bench-illustrative {
       margin-top: 1.4rem;
       max-width: 46rem;
