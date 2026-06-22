@@ -773,7 +773,7 @@ const fmtVec = (kind: string, v: number): string => {
       <div class="sec-body">
         <div class="arch-intro reveal">
           <h2 class="sec-title">Vector Architecture</h2>
-          <p class="sec-lead">The vector index is a derived artifact on the LSM, one per slab, and its kind changes by level: brute-force at the memtable, flat at the fresh L0 slabs, per-slab HNSW once a slab settles. Exact full-precision search stays the ground truth — the index only proposes candidates, an exact rerank decides the result, and a missing or corrupt index costs a rebuild, not a wrong answer.</p>
+          <p class="sec-lead">The vector index is a per-slab derived artifact on the LSM. The index type depends on the level: brute-force in the memtable, flat in L0, HNSW in the compacted levels. Exact search over the full vectors is authoritative: the index only generates candidates, and an exact rerank produces the final ordering. A missing or corrupt index is rebuilt from the slab and cannot change a result.</p>
         </div>
 
         <div class="varch-top reveal" style="transition-delay: 90ms">
@@ -801,7 +801,7 @@ const fmtVec = (kind: string, v: number): string => {
               <span class="vlevel-holds">bulk</span>
               <span class="vlevel-idx">per-slab HNSW</span>
             </div>
-            <p class="vstack-note">under a few thousand live vectors, skip the graph and brute-force. recall climbs as slabs settle into larger graphs.</p>
+            <p class="vstack-note">below a few thousand live vectors, the graph is skipped in favor of brute force. recall improves as slabs merge into larger graphs.</p>
           </div>
 
           <div class="vquery">
@@ -848,19 +848,16 @@ const fmtVec = (kind: string, v: number): string => {
 
         <div class="varch-cards reveal" style="transition-delay: 140ms">
           <article class="crate">
-            <p class="vcard-tag">lsm × hnsw</p>
-            <h3 class="vcard-name">Compaction keeps the graph clean</h3>
-            <p class="crate-desc">HNSW degrades as deletes and updates pile up; normally you rebuild it on a schedule. The LSM already rebuilds slabs and drops tombstones on every compaction, so each pass hands back a clean graph over only the live vectors. The re-index cost that sinks a graph at billion scale is cheap here, and recall climbs as slabs settle into larger graphs.</p>
+            <h3 class="vcard-name">Deletes and compaction</h3>
+            <p class="crate-desc">An HNSW graph degrades as vectors are deleted or updated and must be rebuilt periodically. Compaction already rebuilds each slab over its live rows, so the graph is reconstructed without accumulated tombstones, at a cost that stays small at this scale.</p>
           </article>
           <article class="crate">
-            <p class="vcard-tag">the boundary</p>
-            <h3 class="vcard-name">storage = WHEN · engine = WHAT</h3>
-            <p class="crate-desc">Storage owns the slab lifecycle and an opaque artifact slot; on compaction it emits a rebuild event and commits the engine's bytes atomically with the slab. The engine owns the vector logic and hands back opaque bytes. The index is derived state: a missing or corrupt artifact rebuilds from the slab, so it can cost a rebuild, never data.</p>
+            <h3 class="vcard-name">Storage boundary</h3>
+            <p class="crate-desc">Storage manages the slab lifecycle and persists an opaque per-slab artifact without interpreting it; the engine builds the index from the slab's rows and returns the bytes to be committed with it. The index is derived state, rebuilt from the slab if lost.</p>
           </article>
           <article class="crate">
-            <p class="vcard-tag">the scale call</p>
-            <h3 class="vcard-name">HNSW now, IVF at the ceiling</h3>
-            <p class="crate-desc">At embedded scale (thousands to tens of millions of vectors per collection) the data fits in RAM and per-slab graphs are cheap to build, so HNSW is the default for its recall and latency. A configurable centroid/IVF mode is the scale-out path, for the rare deployment where re-index cost would dominate.</p>
+            <h3 class="vcard-name">Index choice by scale</h3>
+            <p class="crate-desc">At the embedded scale of thousands to tens of millions of vectors per collection, the data fits in memory and per-slab graphs are inexpensive to build, so HNSW is used by default. A centroid (IVF) index is available for larger deployments, where rebuild cost dominates.</p>
           </article>
         </div>
       </div>
@@ -2257,7 +2254,7 @@ const fmtVec = (kind: string, v: number): string => {
       color: var(--color-ink-low);
     }
     .vcard-name {
-      margin-top: 0.35rem;
+      margin-top: 0;
       font-size: 1rem;
       font-weight: 600;
       letter-spacing: -0.012em;
