@@ -24,38 +24,31 @@ const fmtFull = (n: number): string => n.toLocaleString('en-US');
 
 const kvBench = {
   unit: 'throughput · ops / sec · higher is better',
-  config: '8 vCPU · NVMe SSD · 100 M records · 1 KB · Zipfian',
-  engines: ['Strata', 'RocksDB', 'LMDB'],
+  engines: ['cache', 'durable', 'RocksDB'],
+  load: [540_000, 105_000, 960_000], // load / write phase, approximate
   rows: [
-    { w: 'A', name: 'update-heavy', vals: [412_000, 430_000, 120_000] },
-    { w: 'B', name: 'read-heavy', vals: [760_000, 800_000, 1_420_000] },
-    { w: 'C', name: 'read-only', vals: [905_000, 950_000, 1_950_000] },
-    { w: 'D', name: 'read-latest', vals: [815_000, 845_000, 1_300_000] },
-    { w: 'E', name: 'short scan', vals: [290_000, 320_000, 480_000] },
-    { w: 'F', name: 'read-modify-write', vals: [355_000, 370_000, 105_000] },
+    { w: 'A', name: 'update-heavy', vals: [240_363, 111_146, 325_236] },
+    { w: 'B', name: 'read-mostly', vals: [611_819, 137_641, 533_411] },
+    { w: 'C', name: 'read-only', vals: [716_632, 357_877, 571_605] },
+    { w: 'D', name: 'read-latest', vals: [499_021, 236_314, 368_831] },
+    { w: 'E', name: 'short ranges', vals: [9_612, 10_659, 43_985] },
+    { w: 'F', name: 'read-modify-write', vals: [221_828, 124_503, 252_030] },
   ],
 };
 
 const vecBench = {
-  config: 'ANN-Benchmarks protocol · 768-dim · cosine · top-10 · recall@10 ≈ 0.95',
-  sizes: ['1 M', '10 M', '100 M'],
-  // one card per metric; each `vals` aligns with `sizes` above. `dir` marks
-  // which way is better (↑ higher / ↓ lower), so the trend reads unambiguously.
-  metrics: [
-    { name: 'recall@10', kind: 'recall', dir: 'up', vals: [0.95, 0.95, 0.94] },
-    { name: 'throughput', unit: 'q/s', kind: 'qps', dir: 'up', vals: [8_600, 3_200, 1_100] },
-    { name: 'p99 latency', kind: 'ms', dir: 'down', vals: [1.4, 3.8, 9.5] },
-    { name: 'build time', kind: 'time', dir: 'down', vals: [4, 45, 480] },
-    { name: 'index size', kind: 'gb', dir: 'down', vals: [1.4, 14, 140] },
+  config: 'SIFT-128-euclidean · 1 M base · 128-dim · euclidean',
+  recallFloor: 0.8, // bar axis floor (recall is always high; truncate to show the climb)
+  qps: '≈ 4.2 q/s',
+  // recall@10 climbs with ef_search, at a roughly constant QPS
+  sweep: [
+    { ef: 40, recall: 0.871 },
+    { ef: 80, recall: 0.935 },
+    { ef: 120, recall: 0.956 },
+    { ef: 200, recall: 0.976 },
+    { ef: 400, recall: 0.985 },
+    { ef: 800, recall: 0.991 },
   ],
-};
-const fmtVec = (kind: string, v: number): string => {
-  if (kind === 'recall') return v.toFixed(2);
-  if (kind === 'qps') return v.toLocaleString('en-US');
-  if (kind === 'ms') return `${v} ms`;
-  if (kind === 'time') return v >= 60 ? `${(v / 60).toFixed(v % 60 === 0 ? 0 : 1)} h` : `${v} m`;
-  if (kind === 'gb') return v >= 1000 ? `${(v / 1000).toFixed(1)} TB` : `${v} GB`;
-  return `${v}`;
 };
 ---
 
@@ -958,19 +951,19 @@ const fmtVec = (kind: string, v: number): string => {
         <span class="sec-id"><span class="sec-hash">§</span>&thinsp;09<span class="sec-name">Benchmarks</span></span>      </header>
 
       <div class="sec-body">
-        <h2 class="sec-title reveal">Benchmarks</h2>
+        <h2 class="sec-title reveal">Preliminary Benchmarks</h2>
         <p class="sec-lead reveal" style="transition-delay: 60ms">
-          Strata is a key-value engine with a vector index, so it runs the standard suite for each: YCSB against RocksDB and LMDB, and ANN-Benchmarks at one, ten, and a hundred million vectors.
+          Strata is a key-value engine with a vector index, so it runs the standard suite for each: YCSB against RocksDB, and ANN-Benchmarks on the SIFT-1M corpus.
         </p>
         <p class="bench-illustrative reveal" style="transition-delay: 90ms">
-          <span>illustrative</span>a benchmark run is in progress; these figures are placeholders, to be replaced with measured data.
+          <span>in progress</span>database tuning and optimization is still underway.
         </p>
 
         <div class="bench-grid reveal" style="transition-delay: 130ms">
           <div class="bench-panel">
             <div class="bench-head">
               <h3 class="bench-name">Key-value engine</h3>
-              <span class="bench-sub">YCSB</span>
+              <span class="bench-sub">YCSB · Strata vs RocksDB</span>
             </div>
             <div class="bench-bars">
               {
@@ -981,7 +974,7 @@ const fmtVec = (kind: string, v: number): string => {
                       <p class="bench-wl"><b>{row.w}</b>{row.name}</p>
                       {
                         row.vals.map((v, i) => (
-                          <div class:list={['bench-bar', { 'is-strata': kvBench.engines[i] === 'Strata' }]}>
+                          <div class:list={['bench-bar', { 'is-strata': kvBench.engines[i] !== 'RocksDB' }]}>
                             <span class="bench-bar-label">{kvBench.engines[i]}</span>
                             <span class="bench-bar-track"><span class="bench-bar-fill" style={`width:${((v / max) * 100).toFixed(1)}%`}></span></span>
                             <span class="bench-bar-val">{fmtOps(v)}</span>
@@ -993,43 +986,38 @@ const fmtVec = (kind: string, v: number): string => {
                 })
               }
             </div>
-            <p class="bench-foot">{kvBench.unit}<br />{kvBench.config}</p>
+            <p class="bench-load"><b>load · write path</b> {kvBench.engines[0]} {fmtOps(kvBench.load[0])} · {kvBench.engines[1]} {fmtOps(kvBench.load[1])} · {kvBench.engines[2]} {fmtOps(kvBench.load[2])} <em>approx</em></p>
+            <p class="bench-foot">{kvBench.unit}</p>
           </div>
 
           <div class="bench-panel">
             <div class="bench-head">
               <h3 class="bench-name">Vector search</h3>
-              <span class="bench-sub">ANN-Benchmarks · as it scales</span>
+              <span class="bench-sub">ANN-Benchmarks · SIFT-1M</span>
             </div>
-            <div class="vmetrics">
-              {
-                vecBench.metrics.map((m) => {
-                  const max = Math.max(...m.vals);
-                  return (
-                    <div class="vmetric">
-                      <div class="vmetric-top">
-                        <span class="vmetric-name">{m.name}{m.unit ? <span class="vmetric-unit"> {m.unit}</span> : null}</span>
-                        <span class="vmetric-dir" title={m.dir === 'up' ? 'higher is better' : 'lower is better'}>{m.dir === 'up' ? '↑' : '↓'}</span>
-                      </div>
-                      <div class="vmetric-bars">
-                        {
-                          m.vals.map((v) => (
-                            <div class="vm-col">
-                              <span class="vm-v">{fmtVec(m.kind, v)}</span>
-                              <span class="vm-bar" style={`height:${Math.max(4, (v / max) * 80).toFixed(0)}%`}></span>
-                            </div>
-                          ))
-                        }
-                      </div>
-                      <div class="vmetric-xs">
-                        {vecBench.sizes.map((s) => <span>{s}</span>)}
-                      </div>
+            <div class="vrecall">
+              <div class="vmetric-top">
+                <span class="vmetric-name">recall@10 <span class="vmetric-unit">vs ef_search</span></span>
+                <span class="vmetric-dir" title="higher is better">↑</span>
+              </div>
+              <div class="vmetric-bars vrecall-bars">
+                {
+                  vecBench.sweep.map((p) => (
+                    <div class="vm-col">
+                      <span class="vm-v">{p.recall.toFixed(3)}</span>
+                      <span
+                        class="vm-bar"
+                        style={`height:${Math.max(4, ((p.recall - vecBench.recallFloor) / (1 - vecBench.recallFloor)) * 100).toFixed(0)}%`}
+                      ></span>
                     </div>
-                  );
-                })
-              }
+                  ))
+                }
+              </div>
+              <div class="vmetric-xs">
+                {vecBench.sweep.map((p) => <span>ef {p.ef}</span>)}
+              </div>
             </div>
-            <p class="bench-foot">{vecBench.config}<br />one index, measured at 1 M · 10 M · 100 M vectors</p>
+            <p class="bench-foot">{vecBench.qps} · single query, single thread · recall@10 vs exact · bars from 0.80<br />{vecBench.config}</p>
           </div>
         </div>
       </div>
@@ -2283,14 +2271,30 @@ const fmtVec = (kind: string, v: number): string => {
       text-transform: uppercase;
       color: var(--color-terracotta-700);
     }
+    .bench-load {
+      margin-top: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--color-ink-mid);
+    }
+    .bench-load b {
+      margin-right: 0.4rem;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+    }
+    .bench-load em {
+      margin-left: 0.4rem;
+      font-style: normal;
+      color: var(--color-ink-low);
+    }
     .bench-grid {
-      margin-top: 1.5rem;
+      margin-top: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.7rem;
     }
     .bench-panel {
-      padding: 1rem 1.25rem 1.05rem;
+      padding: 0.78rem 1.1rem 0.82rem;
       border: 1px solid var(--color-line);
       border-radius: var(--radius-card);
       background: var(--color-panel);
@@ -2334,10 +2338,10 @@ const fmtVec = (kind: string, v: number): string => {
       }
     }
     .bench-group {
-      padding-top: 0.55rem;
+      padding-top: 0.38rem;
     }
     .bench-wl {
-      margin-bottom: 0.42rem;
+      margin-bottom: 0.3rem;
       font-family: var(--font-mono);
       font-size: 0.74rem;
       color: var(--color-ink-mid);
@@ -2351,7 +2355,7 @@ const fmtVec = (kind: string, v: number): string => {
       grid-template-columns: 3.9rem 1fr 3.3rem;
       align-items: center;
       gap: 0.65rem;
-      padding: 0.08rem 0;
+      padding: 0.02rem 0;
     }
     .bench-bar-label {
       font-family: var(--font-mono);
@@ -2470,6 +2474,20 @@ const fmtVec = (kind: string, v: number): string => {
       font-family: var(--font-mono);
       font-size: 0.58rem;
       color: var(--color-ink-low);
+    }
+    .vrecall {
+      margin-top: 0.7rem;
+    }
+    .vrecall-bars {
+      height: 5.5rem;
+      gap: 1.2rem;
+    }
+    .vrecall .vm-bar {
+      width: 78%;
+      max-width: 5rem;
+    }
+    .vrecall .vm-v {
+      font-size: 0.66rem;
     }
     .bench-foot {
       margin-top: 0.7rem;
