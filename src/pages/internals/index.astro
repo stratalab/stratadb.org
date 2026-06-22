@@ -1,0 +1,2725 @@
+---
+// PRIVATE pitch surface — Strata engine, "engineering spec-sheet" aesthetic.
+// §1–§6, complete. Closes on the benchmarks (the "why it matters" close stays verbal).
+import PitchLayout from '../../layouts/PitchLayout.astro';
+
+const sections = [
+  { id: 'what-it-is', label: 'What it is' },
+  { id: 'where-it-fits', label: 'Market Position' },
+  { id: 'who', label: 'Ideal Customer Profile' },
+  { id: 'what-it-does', label: 'Capabilities' },
+  { id: 'product', label: 'Product Architecture' },
+  { id: 'architecture', label: 'Storage Architecture' },
+  { id: 'vector', label: 'Vector Architecture' },
+  { id: 'testing', label: 'Testing Methodology' },
+  { id: 'benchmarks', label: 'Benchmarks' },
+];
+
+// §6 BENCHMARKS — ILLUSTRATIVE placeholder figures. A benchmark run is in
+// progress; replace the `v` / `qps` / `p99` values below with the real
+// harness output when it lands. Layout reads straight from these objects.
+const fmtOps = (n: number): string =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(2)} M` : `${Math.round(n / 1000)} K`;
+const fmtFull = (n: number): string => n.toLocaleString('en-US');
+
+const kvBench = {
+  unit: 'throughput · ops / sec · higher is better',
+  config: '8 vCPU · NVMe SSD · 100 M records · 1 KB · Zipfian',
+  engines: ['Strata', 'RocksDB', 'LMDB'],
+  rows: [
+    { w: 'A', name: 'update-heavy', vals: [412_000, 430_000, 120_000] },
+    { w: 'B', name: 'read-heavy', vals: [760_000, 800_000, 1_420_000] },
+    { w: 'C', name: 'read-only', vals: [905_000, 950_000, 1_950_000] },
+    { w: 'D', name: 'read-latest', vals: [815_000, 845_000, 1_300_000] },
+    { w: 'E', name: 'short scan', vals: [290_000, 320_000, 480_000] },
+    { w: 'F', name: 'read-modify-write', vals: [355_000, 370_000, 105_000] },
+  ],
+};
+
+const vecBench = {
+  config: 'ANN-Benchmarks protocol · 768-dim · cosine · top-10 · recall@10 ≈ 0.95',
+  sizes: ['1 M', '10 M', '100 M'],
+  // one card per metric; each `vals` aligns with `sizes` above. `dir` marks
+  // which way is better (↑ higher / ↓ lower), so the trend reads unambiguously.
+  metrics: [
+    { name: 'recall@10', kind: 'recall', dir: 'up', vals: [0.95, 0.95, 0.94] },
+    { name: 'throughput', unit: 'q/s', kind: 'qps', dir: 'up', vals: [8_600, 3_200, 1_100] },
+    { name: 'p99 latency', kind: 'ms', dir: 'down', vals: [1.4, 3.8, 9.5] },
+    { name: 'build time', kind: 'time', dir: 'down', vals: [4, 45, 480] },
+    { name: 'index size', kind: 'gb', dir: 'down', vals: [1.4, 14, 140] },
+  ],
+};
+const fmtVec = (kind: string, v: number): string => {
+  if (kind === 'recall') return v.toFixed(2);
+  if (kind === 'qps') return v.toLocaleString('en-US');
+  if (kind === 'ms') return `${v} ms`;
+  if (kind === 'time') return v >= 60 ? `${(v / 60).toFixed(v % 60 === 0 ? 0 : 1)} h` : `${v} m`;
+  if (kind === 'gb') return v >= 1000 ? `${(v / 1000).toFixed(1)} TB` : `${v} GB`;
+  return `${v}`;
+};
+---
+
+<PitchLayout title="Strata — engine internals" sections={sections}>
+  <!-- §1 · WHAT IT IS -->
+  <section id="what-it-is" class="pitch-section" aria-label="What Strata is">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;01<span class="sec-name">What it is</span></span>      </header>
+
+      <div class="sec-body">
+        <div class="open-grid">
+          <div class="open-statement reveal">
+            <h1 class="open-product">Strata is an embedded database for the AI&nbsp;era.</h1>
+            <p class="open-technical">A branch-aware, MVCC, log-structured key-value store — KV, JSON, events, vectors, and graph as capabilities over one&nbsp;substrate.</p>
+          </div>
+
+          <aside class="substrate reveal" style="transition-delay: 110ms" aria-label="One substrate">
+            <div class="substrate-body">
+              <p class="substrate-tag">capabilities</p>
+              <div class="cap-row">
+                <span class="cap" style="--hue: var(--color-strata-kv)">KV</span>
+                <span class="cap" style="--hue: var(--color-strata-json)">JSON</span>
+                <span class="cap" style="--hue: var(--color-strata-event)">Event</span>
+                <span class="cap" style="--hue: var(--color-strata-vector)">Vector</span>
+                <span class="cap" style="--hue: var(--color-strata-graph)">Graph</span>
+              </div>
+              <p class="substrate-over">over one substrate</p>
+              <div class="base">
+                <span class="base-name">branch-aware · MVCC · LSM</span>
+                <div class="lsm" aria-hidden="true">
+                  <div class="lsm-row"><span class="lsm-lab">mem</span><span class="lsm-bar lsm-hot" style="width: 26%"></span></div>
+                  <div class="lsm-row"><span class="lsm-lab">L0</span><span class="lsm-bar" style="width: 46%"></span></div>
+                  <div class="lsm-row"><span class="lsm-lab">L1</span><span class="lsm-bar" style="width: 70%"></span></div>
+                  <div class="lsm-row"><span class="lsm-lab">L2</span><span class="lsm-bar" style="width: 96%"></span></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §2 · WHERE IT FITS -->
+  <section id="where-it-fits" class="pitch-section" aria-label="Where Strata fits">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;02<span class="sec-name">Market Position</span></span>      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Market Position</h2>
+        <p class="sec-lead reveal" style="transition-delay: 60ms">
+          Every class of database comes in two forms: one runs as a server, one is embedded in the application.
+        </p>
+
+        <div class="data-panel reveal" style="transition-delay: 110ms">
+          <table class="lineage">
+            <thead>
+              <tr>
+                <th scope="col" class="c-era">Era</th>
+                <th scope="col">Server</th>
+                <th scope="col" class="c-emb">Embedded</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Relational</th><td>Oracle · Db2 · SQL Server · Postgres</td><td class="emb">SQLite · H2</td></tr>
+              <tr><th scope="row">Analytics</th><td>Snowflake · Databricks · BigQuery · Redshift</td><td class="emb">DuckDB</td></tr>
+              <tr><th scope="row">Vector</th><td>Pinecone · Milvus</td><td class="emb">LanceDB · Chroma</td></tr>
+              <tr class="row-agent"><th scope="row">Agent state</th><td><span class="twin">Redis</span> · Mem0 · Zep · Letta</td><td class="emb strata">Strata</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §3 · WHO IT'S FOR — ideal customer profile -->
+  <section id="who" class="pitch-section" aria-label="Who it's for">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;03<span class="sec-name">Ideal Customer Profile</span></span>
+      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Ideal Customer Profile</h2>
+
+        <div class="icp-grid">
+          <article class="icp reveal" style="transition-delay:110ms">
+            <p class="icp-n">01</p>
+            <h3 class="icp-name">Agentic AI developers</h3>
+            <p class="icp-desc">Their agents accumulate state and need it to survive restarts. They also need to branch it and roll back a failed path.</p>
+          </article>
+          <article class="icp reveal" style="transition-delay:170ms">
+            <p class="icp-n">02</p>
+            <h3 class="icp-name">Vibecoders</h3>
+            <p class="icp-desc">They build fast with AI coding tools and would rather not run a database. Strata is just a library in the app, with nothing to set up.</p>
+          </article>
+          <article class="icp reveal" style="transition-delay:230ms">
+            <p class="icp-n">03</p>
+            <h3 class="icp-name">Embedded &amp; edge developers</h3>
+            <p class="icp-desc">Their software runs on-device or at the edge, often offline. They need a real database in the same process, down to a Raspberry Pi.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §4 · WHAT IT DOES -->
+  <section id="what-it-does" class="pitch-section" aria-label="What Strata does">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;04<span class="sec-name">Capabilities</span></span>      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Capabilities</h2>
+
+        <div class="cap-figs">
+          <!-- Fig 01 · branch tree -->
+          <div class="cap-fig reveal">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 01</p>
+              <h3 class="cap-fig-name">Branch &amp; fork</h3>
+              <p class="cap-fig-desc">An agent can fork the whole database and work on the branch without touching the parent. The branch is kept if the change works out, and dropped if it doesn't. Forks are cheap, so an agent can keep several going at once.</p>
+              <p class="cap-fig-mech">copy-on-write inheritance · fork is O(metadata), not O(data)</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <line x1="20" y1="64" x2="220" y2="64" style="stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <path d="M92 64 C 116 64, 124 34, 150 34 L 202 34" style="stroke:var(--ember);stroke-width:1.5" />
+                <circle cx="36" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="92" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="148" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="204" cy="64" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="150" cy="34" r="4.5" style="fill:var(--color-panel);stroke:var(--ember);stroke-width:1.5" />
+                <circle cx="202" cy="34" r="4.5" style="fill:var(--color-panel);stroke:var(--ember);stroke-width:1.5" />
+                <text x="20" y="86" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">main</text>
+                <text x="184" y="22" style="font-family:var(--font-mono);font-size:9px;fill:var(--ember)">fork</text>
+              </svg>
+            </figure>
+          </div>
+
+          <!-- Fig 02 · version timeline -->
+          <div class="cap-fig reveal" style="transition-delay: 70ms">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 02</p>
+              <h3 class="cap-fig-name">Time-travel &amp; diff</h3>
+              <p class="cap-fig-desc">Every version of every value is kept, so the database can be read as of any past point. That reproduces the state an agent saw at an earlier step, or the value a key held before a later write.</p>
+              <p class="cap-fig-mech">one versioned row chain · as-of reads from ordering (MVCC)</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <line x1="20" y1="60" x2="220" y2="60" style="stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="32" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="80" cy="60" r="5.5" style="fill:var(--ember);stroke:var(--ember)" />
+                <circle cx="128" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="176" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <circle cx="216" cy="60" r="4.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <line x1="80" y1="26" x2="80" y2="52" style="stroke:var(--ember);stroke-width:1.5" />
+                <path d="M75 46 L80 53 L85 46 Z" style="fill:var(--ember)" />
+                <text x="62" y="20" style="font-family:var(--font-mono);font-size:9px;fill:var(--ember)">as of</text>
+                <text x="26" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v1</text>
+                <text x="74" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v2</text>
+                <text x="122" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v3</text>
+                <text x="170" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v4</text>
+                <text x="210" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">v5</text>
+              </svg>
+            </figure>
+          </div>
+
+          <!-- Fig 03 · primitives → substrate -->
+          <div class="cap-fig reveal" style="transition-delay: 140ms">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 03</p>
+              <h3 class="cap-fig-name">Multi-modal state</h3>
+              <p class="cap-fig-desc">Key-value, JSON, events, vectors, and graph are all served from one store, and a single read sees them in one consistent snapshot.</p>
+              <p class="cap-fig-mech">five primitives · capabilities over one substrate</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <rect x="16" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-kv)" />
+                <rect x="64" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-json)" />
+                <rect x="112" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-event)" />
+                <rect x="160" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-vector)" />
+                <rect x="208" y="14" width="16" height="16" rx="2.5" style="fill:var(--color-strata-graph)" />
+                <line x1="24" y1="30" x2="24" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="72" y1="30" x2="72" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="120" y1="30" x2="120" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="168" y1="30" x2="168" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <line x1="216" y1="30" x2="216" y2="56" style="stroke:var(--color-line-hover);stroke-width:1.25" />
+                <rect x="16" y="56" width="208" height="24" rx="4" style="fill:color-mix(in srgb, var(--color-ink-hi) 6%, var(--color-panel));stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="120" y="71" text-anchor="middle" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-mid)">one substrate</text>
+              </svg>
+            </figure>
+          </div>
+
+          <!-- Fig 04 · hardware range -->
+          <div class="cap-fig reveal" style="transition-delay: 210ms">
+            <div class="cap-fig-text">
+              <p class="cap-fig-kicker">Fig 04</p>
+              <h3 class="cap-fig-name">Embedded</h3>
+              <p class="cap-fig-desc">Strata links into the application and runs in-process, with no separate server and no network round-trip. The same build runs on a Raspberry Pi and on server-class hardware.</p>
+              <p class="cap-fig-mech">self-contained Rust · flash- and disk-friendly</p>
+            </div>
+            <figure class="cap-fig-svg">
+              <svg viewBox="0 0 240 100" fill="none" aria-hidden="true">
+                <rect x="16" y="50" width="44" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <rect x="33" y="59" width="10" height="8" rx="1.5" style="fill:var(--ember)" />
+                <rect x="82" y="40" width="56" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <rect x="103" y="53" width="14" height="10" rx="1.5" style="fill:var(--ember)" />
+                <rect x="160" y="28" width="64" height="48" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.5" />
+                <rect x="184" y="46" width="16" height="12" rx="1.5" style="fill:var(--ember)" />
+                <text x="22" y="90" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">Pi</text>
+                <text x="92" y="90" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">laptop</text>
+                <text x="174" y="90" style="font-family:var(--font-mono);font-size:9px;fill:var(--color-ink-low)">server</text>
+              </svg>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §5 · PRODUCT ARCHITECTURE — the five crates -->
+  <section id="product" class="pitch-section" aria-label="Product architecture">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;05<span class="sec-name">Product Architecture</span></span>
+      </header>
+
+      <div class="sec-body">
+        <div class="arch-intro reveal">
+          <h2 class="sec-title">Product Architecture</h2>
+          <p class="sec-lead">Strata is built as five crates. At the top, the executor is the command surface; at the bottom, core holds the shared identity and ordering types everything builds on. In between sit inference for model calls, the engine and its five primitives, and storage, which the next section opens up into nine layers.</p>
+        </div>
+
+        <div class="crates reveal" style="transition-delay: 90ms">
+          <p class="crates-tag">five crates · executor → core</p>
+          <div class="crate-spine">
+            <article class="crate">
+              <div class="crate-h"><span class="crate-name">Executor</span><span class="crate-role">command boundary</span></div>
+              <p class="crate-desc">The public surface. Serializable commands in, results out.</p>
+            </article>
+            <article class="crate">
+              <div class="crate-h"><span class="crate-name">Inference</span><span class="crate-role">optional</span></div>
+              <p class="crate-desc">Inference runtime and a provider API for local, Anthropic, OpenAI, and Google models. Called by the executor.</p>
+            </article>
+            <article class="crate">
+              <div class="crate-h"><span class="crate-name">Engine</span><span class="crate-role">the primitives</span></div>
+              <p class="crate-desc">Builds the five primitives over the storage boundary.</p>
+              <div class="crate-prims">
+                <span class="prim" style="--hue: var(--color-strata-kv)">KV</span>
+                <span class="prim" style="--hue: var(--color-strata-json)">JSON</span>
+                <span class="prim" style="--hue: var(--color-strata-event)">Event</span>
+                <span class="prim" style="--hue: var(--color-strata-vector)">Vector</span>
+                <span class="prim" style="--hue: var(--color-strata-graph)">Graph</span>
+              </div>
+            </article>
+            <article class="crate crate-bridge">
+              <div class="crate-h"><span class="crate-name">Storage</span><span class="crate-role">the substrate</span></div>
+              <p class="crate-desc">Durable, branch-isolated, versioned persistence.</p>
+              <p class="crate-drill">↓ opened up next, in Storage Architecture</p>
+            </article>
+            <article class="crate crate-base">
+              <div class="crate-h"><span class="crate-name">Core</span><span class="crate-role">shared atoms</span></div>
+              <p class="crate-desc">Identity and ordering: branch, commit version, timestamp.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §6 · ARCHITECTURE — the storage engine (L1–L9 explorer) -->
+  <section id="architecture" class="pitch-section" aria-label="Architecture — the storage engine">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;06<span class="sec-name">Storage Architecture</span></span>      </header>
+
+      <div class="sec-body">
+        <div class="arch-intro reveal">
+          <h2 class="sec-title">Storage Architecture</h2>
+          <p class="sec-lead">A branch-isolated, MVCC, log-structured key-value store, built in nine layers from backend I/O up to the public API. The storage layers handle durability and versioning; the engine adds the five primitives on top.</p>
+        </div>
+
+        <div class="explorer reveal" style="transition-delay: 90ms">
+          <nav class="explorer-index" aria-label="Storage layers">
+            <p class="explorer-tag">storage · nine layers · API → backend IO</p>
+            <ul class="explorer-list">
+              <li>
+                <button type="button" class="explorer-node" data-node="boundary">
+                  <span class="explorer-node-k">L9</span>
+                  <span class="explorer-node-name">Storage API boundary</span>
+                  <span class="explorer-node-sub">the public API</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="lifecycle">
+                  <span class="explorer-node-k">L8</span>
+                  <span class="explorer-node-name">Lifecycle &amp; recovery</span>
+                  <span class="explorer-node-sub">states &amp; back-pressure</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="commit">
+                  <span class="explorer-node-k">L7</span>
+                  <span class="explorer-node-name">Commit runtime</span>
+                  <span class="explorer-node-sub">version + timestamp</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node is-active" data-node="branch">
+                  <span class="explorer-node-k">L6</span>
+                  <span class="explorer-node-name">Branch-isolated LSM</span>
+                  <span class="explorer-node-sub">COW MVCC forest</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="lsm">
+                  <span class="explorer-node-k">L5</span>
+                  <span class="explorer-node-name">Table runtime</span>
+                  <span class="explorer-node-sub">the LSM</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="durability">
+                  <span class="explorer-node-k">L4</span>
+                  <span class="explorer-node-name">Durability spine</span>
+                  <span class="explorer-node-sub">visible × durable</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="format">
+                  <span class="explorer-node-k">L3</span>
+                  <span class="explorer-node-name">Durable format</span>
+                  <span class="explorer-node-sub">the row key</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="layout">
+                  <span class="explorer-node-k">L2</span>
+                  <span class="explorer-node-name">Object layout</span>
+                  <span class="explorer-node-sub">the namespace</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="explorer-node" data-node="backendio">
+                  <span class="explorer-node-k">L1</span>
+                  <span class="explorer-node-name">Backend IO</span>
+                  <span class="explorer-node-sub">object-first</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+
+          <div class="explorer-detail">
+            <!-- branch -->
+            <article class="explorer-pane is-active" data-pane="branch">
+              <div class="pane-head">
+                <span class="pane-layer">L6</span>
+                <h3 class="pane-name">Branch-isolated MVCC runtime</h3>
+              </div>
+              <p class="pane-desc">A branch is a copy-on-write fork of one versioned key space. Forking copies the branch's metadata and points it at the parent's existing data layers, so a new branch is cheap to create regardless of how much data it holds. Each key keeps a single chain of versions, ordered newest-first; latest, as-of, and history reads all walk that one chain.</p>
+              <div class="bf" data-bf aria-label="Interactive: fork a branch, write to each, watch one key's reads diverge">
+                <div class="bf-stage">
+                  <div class="bf-key">key <b>k</b> · a read returns the newest version</div>
+                  <div class="bf-heads">
+                    <div class="bf-head">
+                      <span class="bf-head-label">main</span>
+                      <div class="bf-cells" data-bf-mainhead></div>
+                    </div>
+                    <div class="bf-head">
+                      <span class="bf-head-label">fork</span>
+                      <div class="bf-cells" data-bf-forkhead></div>
+                    </div>
+                  </div>
+                  <div class="bf-gate" data-bf-gate hidden>fork-version gate · v5</div>
+                  <div class="bf-base">
+                    <span class="bf-base-label" data-bf-baselabel>main · versions of k</span>
+                    <div class="bf-cells bf-base-cells" data-bf-base></div>
+                  </div>
+                  <div class="bf-reads">
+                    <span class="bf-read" data-bf-readmain>main reads k = <b>c</b></span>
+                    <span class="bf-read" data-bf-readfork hidden>fork reads k = <b>—</b></span>
+                  </div>
+                </div>
+                <p class="lsm-note" data-bf-note>main holds one key k with three versions, newest first. A read returns the newest.</p>
+                <div class="lsm-controls">
+                  <button type="button" class="lsm-btn" data-bf-reset>⟲ reset</button>
+                  <button type="button" class="lsm-btn" data-bf-prev aria-label="Step back">◂</button>
+                  <button type="button" class="lsm-btn lsm-btn-primary" data-bf-next>step ▸</button>
+                  <button type="button" class="lsm-btn" data-bf-play>play</button>
+                  <span class="lsm-count" data-bf-count>0 / 4</span>
+                </div>
+              </div>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>fork = O(metadata)&nbsp;&nbsp;·&nbsp;&nbsp;child shares parent layers by reference&nbsp;&nbsp;·&nbsp;&nbsp;inherited visible = min(req, fork_version)</p>
+            </article>
+
+            <!-- lsm -->
+            <article class="explorer-pane" data-pane="lsm">
+              <div class="pane-head">
+                <span class="pane-layer">L5</span>
+                <h3 class="pane-name">Table runtime — the LSM</h3>
+              </div>
+              <p class="pane-desc">Writes land in an in-memory table, then flush to immutable L0 tables and merge down the levels through compaction. The runtime keeps no retention policy of its own. The caller passes in which versions a compaction is allowed to drop, so versioning and garbage collection are decided by the layer above it.</p>
+              <div class="lsm" data-lsm aria-label="Interactive: an LSM write — flush, compaction, and read">
+                <div class="lsm-stage">
+                  <span class="lsm-read" data-lsm-read hidden>read b</span>
+                  <div class="lsm-level" data-lsm-level="mem">
+                    <span class="lsm-tag">mem</span>
+                    <div class="lsm-slots" data-lsm-mem></div>
+                    <span class="lsm-meta" data-lsm-memmeta>0 / 3</span>
+                  </div>
+                  <div class="lsm-flow" data-lsm-flow="flush"><span>↓ flush</span></div>
+                  <div class="lsm-level" data-lsm-level="l0">
+                    <span class="lsm-tag">L0</span>
+                    <div class="lsm-tiles" data-lsm-l0></div>
+                    <span class="lsm-meta">overlapping</span>
+                  </div>
+                  <div class="lsm-flow" data-lsm-flow="compact"><span>↓ compaction</span><em>policy: prune · tombstone · TTL</em></div>
+                  <div class="lsm-level" data-lsm-level="l1">
+                    <span class="lsm-tag">L1</span>
+                    <div class="lsm-runs" data-lsm-l1></div>
+                    <span class="lsm-meta">sorted</span>
+                  </div>
+                  <div class="lsm-level lsm-level-base" data-lsm-level="l2">
+                    <span class="lsm-tag">L2</span>
+                    <div class="lsm-base"></div>
+                  </div>
+                </div>
+                <p class="lsm-note" data-lsm-note>An LSM batches writes in memory, then flushes sorted tables to disk. Step&nbsp;▸ to follow one through.</p>
+                <div class="lsm-controls">
+                  <button type="button" class="lsm-btn" data-lsm-reset>⟲ reset</button>
+                  <button type="button" class="lsm-btn" data-lsm-prev aria-label="Step back">◂</button>
+                  <button type="button" class="lsm-btn lsm-btn-primary" data-lsm-next>step ▸</button>
+                  <button type="button" class="lsm-btn" data-lsm-play>play</button>
+                  <span class="lsm-count" data-lsm-count>00 / 14</span>
+                </div>
+              </div>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>compaction(prune · tombstone · TTL) — caller-supplied&nbsp;&nbsp;·&nbsp;&nbsp;L0 overlaps · L1+ sorted by range</p>
+            </article>
+
+            <!-- durability -->
+            <article class="explorer-pane" data-pane="durability">
+              <div class="pane-head">
+                <span class="pane-layer">L4</span>
+                <h3 class="pane-name">Durability spine</h3>
+              </div>
+              <p class="pane-desc">Visibility and durability are tracked as separate states. A write can become visible before its durability is confirmed, and if the process crashes during that window, recovery resolves each affected write to a specific outcome — durable, or visible with durability unconfirmed — and reports which is which.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="16" y="16" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">durable publish — one object, four steps</text>
+                  <rect x="16" y="40" width="74" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="53" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">write</text>
+                  <text x="53" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">temp obj</text>
+                  <rect x="102" y="40" width="74" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="139" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">fsync</text>
+                  <text x="139" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">bytes</text>
+                  <rect x="188" y="40" width="74" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="225" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">rename</text>
+                  <text x="225" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">atomic</text>
+                  <rect x="274" y="40" width="74" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="311" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">dir fsync</text>
+                  <text x="311" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">parent</text>
+                  <line x1="91" y1="54" x2="99" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M99 51 L104 54 L99 57 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="177" y1="54" x2="185" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M185 51 L190 54 L185 57 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="263" y1="54" x2="271" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M271 51 L276 54 L271 57 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="225" y1="68" x2="225" y2="88" style="stroke:var(--ember);stroke-width:1.25;stroke-dasharray:3 3" />
+                  <line x1="311" y1="68" x2="311" y2="88" style="stroke:var(--color-ink-mid);stroke-width:1.25;stroke-dasharray:3 3" />
+                  <text x="225" y="84" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--ember)">visible</text>
+                  <text x="311" y="84" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">durable</text>
+                  <rect x="225" y="90" width="86" height="20" rx="2.5" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.25" />
+                  <polyline points="240,93 235,100 241,100 236,107" style="fill:none;stroke:var(--ember);stroke-width:1.25" />
+                  <text x="282" y="103" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-terracotta-700)">unconfirmed</text>
+                  <text x="180" y="132" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-low)">visible at rename · durable at dir-fsync · gap classified on crash</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>write → fsync → rename → dir-fsync&nbsp;&nbsp;·&nbsp;&nbsp;crash in the gap → VisibleDurabilityUnconfirmed / VisibilityUnknown</p>
+            </article>
+
+            <!-- commit -->
+            <article class="explorer-pane" data-pane="commit">
+              <div class="pane-head">
+                <span class="pane-layer">L7</span>
+                <h3 class="pane-name">Commit runtime</h3>
+              </div>
+              <p class="pane-desc">A commit is a single batch, assigned one version and one timestamp. It is written to the WAL and made durable before it is applied and made visible, so a commit that reached the WAL before a crash is replayed during recovery. Every commit is recorded on a timeline, which is what as-of reads resolve against.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="16" y="13" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">one commit — durable in the WAL before visible</text>
+                  <rect x="16" y="40" width="70" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="51" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">batch</text>
+                  <text x="51" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">puts · deletes</text>
+                  <rect x="98" y="40" width="70" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="133" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">stamp</text>
+                  <text x="133" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">[v, t]</text>
+                  <rect x="180" y="40" width="70" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="215" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">WAL</text>
+                  <text x="215" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">append</text>
+                  <rect x="262" y="40" width="82" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="303" y="53" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">apply · publish</text>
+                  <text x="303" y="63" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">→ readers</text>
+                  <line x1="87" y1="54" x2="95" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M95 51 L100 54 L95 57 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="169" y1="54" x2="177" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M177 51 L182 54 L177 57 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="251" y1="54" x2="259" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M259 51 L264 54 L259 57 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="215" y1="68" x2="215" y2="88" style="stroke:var(--color-ink-mid);stroke-width:1.25;stroke-dasharray:3 3" />
+                  <line x1="303" y1="68" x2="303" y2="88" style="stroke:var(--color-ink-mid);stroke-width:1.25;stroke-dasharray:3 3" />
+                  <text x="215" y="84" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">durable</text>
+                  <text x="303" y="84" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">visible</text>
+                  <rect x="215" y="90" width="88" height="20" rx="2.5" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.25" />
+                  <polyline points="230,93 225,100 231,100 226,107" style="fill:none;stroke:var(--ember);stroke-width:1.25" />
+                  <text x="270" y="103" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-terracotta-700)">not visible</text>
+                  <text x="180" y="132" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-low)">durable in the WAL before visible · crash between → replays</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>one (version, timestamp) per commit&nbsp;&nbsp;·&nbsp;&nbsp;WAL durable before visible · crash after WAL → replays</p>
+            </article>
+
+            <!-- lifecycle -->
+            <article class="explorer-pane" data-pane="lifecycle">
+              <div class="pane-head">
+                <span class="pane-layer">L8</span>
+                <h3 class="pane-name">Lifecycle &amp; back-pressure</h3>
+              </div>
+              <p class="pane-desc">The engine moves through a typed lifecycle and reports a recovery-health status, so an open that recovered with possible data loss comes back marked degraded. Under heavy write load, flushing takes priority over compaction, and writers are slowed before memory is exhausted to keep the engine within its memory budget.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="16" y="13" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">typed lifecycle — recovery reports health</text>
+                  <rect x="16" y="28" width="38" height="20" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="35" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">New</text>
+                  <rect x="62" y="28" width="52" height="20" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="88" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">Opening</text>
+                  <rect x="122" y="28" width="64" height="20" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="154" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">Recovering</text>
+                  <rect x="194" y="28" width="42" height="20" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="215" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">Open</text>
+                  <rect x="244" y="28" width="52" height="20" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="270" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">Closing</text>
+                  <rect x="304" y="28" width="42" height="20" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="325" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">Closed</text>
+                  <line x1="54" y1="38" x2="60" y2="38" style="stroke:var(--color-ink-mid);stroke-width:1.1" /><path d="M60 35.5 L64 38 L60 40.5 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="114" y1="38" x2="120" y2="38" style="stroke:var(--color-ink-mid);stroke-width:1.1" /><path d="M120 35.5 L124 38 L120 40.5 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="186" y1="38" x2="192" y2="38" style="stroke:var(--color-ink-mid);stroke-width:1.1" /><path d="M192 35.5 L196 38 L192 40.5 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="236" y1="38" x2="242" y2="38" style="stroke:var(--color-ink-mid);stroke-width:1.1" /><path d="M242 35.5 L246 38 L242 40.5 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="296" y1="38" x2="302" y2="38" style="stroke:var(--color-ink-mid);stroke-width:1.1" /><path d="M302 35.5 L306 38 L302 40.5 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="154" y1="48" x2="154" y2="74" style="stroke:var(--ember);stroke-width:1.25;stroke-dasharray:3 3" /><path d="M151 70 L154 76 L157 70 Z" style="fill:var(--ember)" />
+                  <rect x="98" y="76" width="116" height="22" rx="3" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.5" />
+                  <text x="156" y="90" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-terracotta-700)">Degraded · DataLoss</text>
+                  <line x1="215" y1="48" x2="215" y2="66" style="stroke:var(--color-line-hover);stroke-width:1.1;stroke-dasharray:3 3" />
+                  <line x1="215" y1="66" x2="248" y2="66" style="stroke:var(--color-line-hover);stroke-width:1.1;stroke-dasharray:3 3" />
+                  <rect x="250" y="76" width="96" height="32" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="298" y="89" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">flush ⊳ compaction</text>
+                  <text x="298" y="101" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">writers stall</text>
+                  <text x="16" y="128" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">Opening · Recovering · Closing may transition → Failed</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>RecoveryHealth::Degraded &#123; DataLoss &#125;&nbsp;&nbsp;·&nbsp;&nbsp;flush preempts compaction · writers stall under back-pressure</p>
+            </article>
+
+            <!-- boundary -->
+            <article class="explorer-pane" data-pane="boundary">
+              <div class="pane-head">
+                <span class="pane-layer">L9</span>
+                <h3 class="pane-name">Storage API boundary</h3>
+              </div>
+              <p class="pane-desc">This is the only boundary the engine uses: open, commit, read, getv, as_of, scan, history, and fork. It keeps the engine out of backend I/O, byte formats, the WAL, manifests, and compaction. Storage provides these operations over keys and bytes, and the engine builds the five primitives on top of them.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="16" y="14" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">engine · the primitives</text>
+                  <rect x="22" y="20" width="52" height="20" rx="3" style="fill:color-mix(in srgb, var(--color-strata-kv) 14%, var(--color-panel));stroke:var(--color-strata-kv);stroke-width:1.25" />
+                  <text x="48" y="33" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-strata-kv)">KV</text>
+                  <rect x="90" y="20" width="52" height="20" rx="3" style="fill:color-mix(in srgb, var(--color-strata-json) 14%, var(--color-panel));stroke:var(--color-strata-json);stroke-width:1.25" />
+                  <text x="116" y="33" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-strata-json)">JSON</text>
+                  <rect x="158" y="20" width="52" height="20" rx="3" style="fill:color-mix(in srgb, var(--color-strata-event) 14%, var(--color-panel));stroke:var(--color-strata-event);stroke-width:1.25" />
+                  <text x="184" y="33" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-strata-event)">Event</text>
+                  <rect x="226" y="20" width="52" height="20" rx="3" style="fill:color-mix(in srgb, var(--color-strata-vector) 14%, var(--color-panel));stroke:var(--color-strata-vector);stroke-width:1.25" />
+                  <text x="252" y="33" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-strata-vector)">Vector</text>
+                  <rect x="294" y="20" width="52" height="20" rx="3" style="fill:color-mix(in srgb, var(--color-strata-graph) 14%, var(--color-panel));stroke:var(--color-strata-graph);stroke-width:1.25" />
+                  <text x="320" y="33" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-strata-graph)">Graph</text>
+                  <line x1="48" y1="40" x2="48" y2="58" style="stroke:var(--color-line-hover);stroke-width:1.1" />
+                  <line x1="116" y1="40" x2="116" y2="58" style="stroke:var(--color-line-hover);stroke-width:1.1" />
+                  <line x1="184" y1="40" x2="184" y2="58" style="stroke:var(--color-line-hover);stroke-width:1.1" />
+                  <line x1="252" y1="40" x2="252" y2="58" style="stroke:var(--color-line-hover);stroke-width:1.1" />
+                  <line x1="320" y1="40" x2="320" y2="58" style="stroke:var(--color-line-hover);stroke-width:1.1" />
+                  <rect x="16" y="60" width="330" height="24" rx="3" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.5" />
+                  <text x="181" y="75" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-terracotta-700)">commit · read · getv · as_of · scan · history · fork</text>
+                  <line x1="181" y1="84" x2="181" y2="98" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M177 94 L181 99 L185 94 Z" style="fill:var(--color-ink-mid)" />
+                  <text x="16" y="96" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">storage · keys &amp; bytes</text>
+                  <rect x="16" y="100" width="330" height="24" rx="3" style="fill:color-mix(in srgb, var(--color-ink-hi) 6%, var(--color-panel));stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="181" y="115" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-hi)">one versioned KV store · keys &amp; bytes only</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>StorageRuntime: open · commit · read · getv · as_of · scan · history · fork&nbsp;&nbsp;·&nbsp;&nbsp;engine builds the primitives on top</p>
+            </article>
+
+            <!-- L3 · durable format -->
+            <article class="explorer-pane" data-pane="format">
+              <div class="pane-head">
+                <span class="pane-layer">L3</span>
+                <h3 class="pane-name">Durable format</h3>
+              </div>
+              <p class="pane-desc">Owns the durable byte formats: record headers, frames, checksums, and the row key that every layer above sorts on. A key is branch · space · storage_space_id · user_key · commit, with the commit id stored bitwise-inverted so the newest version of a key sorts first. These formats are defined in this one layer, shared by the WAL, table, and recovery code.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="24" y="16" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">durable record — framed, checksummed</text>
+                  <rect x="24" y="26" width="312" height="24" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <line x1="86" y1="26" x2="86" y2="50" style="stroke:var(--color-ink-mid);stroke-width:1" />
+                  <line x1="148" y1="26" x2="148" y2="50" style="stroke:var(--color-ink-mid);stroke-width:1" />
+                  <line x1="250" y1="26" x2="250" y2="50" style="stroke:var(--color-ink-mid);stroke-width:1" />
+                  <text x="55" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">len u32</text>
+                  <text x="117" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">crc32</text>
+                  <text x="199" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">key</text>
+                  <text x="293" y="41" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">value</text>
+                  <line x1="148" y1="50" x2="24" y2="84" style="stroke:var(--color-line-hover);stroke-width:1;stroke-dasharray:3 3" />
+                  <line x1="250" y1="50" x2="336" y2="84" style="stroke:var(--color-line-hover);stroke-width:1;stroke-dasharray:3 3" />
+                  <rect x="24" y="84" width="64" height="28" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="56" y="102" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">branch</text>
+                  <rect x="88" y="84" width="64" height="28" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="120" y="102" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">space</text>
+                  <rect x="152" y="84" width="58" height="28" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="181" y="102" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">space_id</text>
+                  <rect x="210" y="84" width="66" height="28" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="243" y="102" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">user_key</text>
+                  <rect x="276" y="84" width="60" height="28" rx="2.5" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.5" />
+                  <text x="306" y="102" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-terracotta-700)">!commit</text>
+                  <line x1="306" y1="112" x2="306" y2="124" style="stroke:var(--ember);stroke-width:1.25;stroke-dasharray:3 3" />
+                  <text x="180" y="142" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--ember)">!commit = big-endian ~version → newest sorts first</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>record = len · crc32 · row&nbsp;&nbsp;·&nbsp;&nbsp;InternalKey = branch | space | storage_space_id | user_key | !commit_id&nbsp;&nbsp;·&nbsp;&nbsp;!commit_id = ~version</p>
+            </article>
+
+            <!-- L2 · object layout -->
+            <article class="explorer-pane" data-pane="layout">
+              <div class="pane-head">
+                <span class="pane-layer">L2</span>
+                <h3 class="pane-name">Object layout</h3>
+              </div>
+              <p class="pane-desc">One canonical object namespace under a database root — manifest, wal, tables, snapshots, quarantine, locks — built from typed constructors so no layer assembles its own paths. The layer defines the names; the bytes and policy live above it. The database manifest sits at a fixed path, <code>manifest/current</code>, and an object can be deleted only once it is proven unreachable from there.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="24" y="14" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">object namespace — canonical names</text>
+                  <rect x="24" y="20" width="216" height="20" rx="2.5" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.5" />
+                  <text x="34" y="34" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-terracotta-700)">manifest/current</text>
+                  <text x="252" y="34" style="font-family:var(--font-mono);font-size:8px;fill:var(--ember)">root of truth</text>
+                  <rect x="24" y="44" width="216" height="20" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="34" y="58" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">wal/0a3f9c4b…</text>
+                  <rect x="24" y="68" width="216" height="20" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="34" y="82" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">tables/&lt;branch&gt;/l0000/&lt;id&gt;</text>
+                  <rect x="24" y="92" width="216" height="20" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="34" y="106" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">snapshots/9c1d2b7a…</text>
+                  <rect x="24" y="116" width="216" height="20" rx="2.5" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="34" y="130" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-mid)">quarantine/&lt;branch&gt;/&lt;id&gt; · locks/writer</text>
+                  <text x="252" y="103" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">constructors</text>
+                  <text x="252" y="115" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">only — no</text>
+                  <text x="252" y="127" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">paths, no ..</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>families manifest · wal · tables · snapshots · quarantine · locks&nbsp;&nbsp;·&nbsp;&nbsp;reachability proven from manifest/current</p>
+            </article>
+
+            <!-- L1 · backend IO -->
+            <article class="explorer-pane" data-pane="backendio">
+              <div class="pane-head">
+                <span class="pane-layer">L1</span>
+                <h3 class="pane-name">Backend IO</h3>
+              </div>
+              <p class="pane-desc">The portability layer. Everything above it works in terms of named objects under a database root, through a small set of operations — read, read-range, write, append — rather than files, descriptors, or fsync calls. The same contract backs a durable local-filesystem implementation and a browser/cache one, and leaves room for an object-storage backend later.</p>
+              <figure class="pane-svg">
+                <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                  <text x="24" y="14" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)">object-first — one name, two realizations</text>
+                  <rect x="24" y="20" width="312" height="22" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <text x="34" y="35" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-mid)">tables/&lt;branch&gt;/l0000/&lt;id&gt;</text>
+                  <text x="326" y="35" text-anchor="end" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-low)">read · range · write · append</text>
+                  <line x1="180" y1="42" x2="180" y2="54" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <path d="M176 50 L180 55 L184 50 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="24" y1="58" x2="336" y2="58" style="stroke:var(--ember);stroke-width:1.5" />
+                  <text x="180" y="71" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--ember)">publish_object(name, bytes)</text>
+                  <line x1="99" y1="76" x2="99" y2="86" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <path d="M95 82 L99 87 L103 82 Z" style="fill:var(--color-ink-mid)" />
+                  <line x1="261" y1="76" x2="261" y2="86" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                  <path d="M257 82 L261 87 L265 82 Z" style="fill:var(--color-ink-mid)" />
+                  <rect x="24" y="88" width="150" height="54" rx="4" style="fill:color-mix(in srgb, var(--color-ink-hi) 4%, var(--color-panel));stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="99" y="104" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-hi)">local FS</text>
+                  <text x="99" y="116" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">durable publish</text>
+                  <text x="99" y="131" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">tmp→fsync→rename→dir-fsync</text>
+                  <rect x="186" y="88" width="150" height="54" rx="4" style="fill:color-mix(in srgb, var(--color-ink-hi) 4%, var(--color-panel));stroke:var(--color-ink-mid);stroke-width:1.25" />
+                  <text x="261" y="104" text-anchor="middle" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-hi)">browser / cache</text>
+                  <text x="261" y="116" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">in-memory map</text>
+                  <text x="261" y="131" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">no crash durability</text>
+                </svg>
+              </figure>
+              <p class="pane-show"><span class="pane-show-k">// show me</span>read · range · write · append · publish_object&nbsp;&nbsp;·&nbsp;&nbsp;object-first, never POSIX paths</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §7 · VECTOR ARCHITECTURE — per-slab progressive index on the LSM -->
+  <section id="vector" class="pitch-section" aria-label="Vector architecture">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;07<span class="sec-name">Vector Architecture</span></span>
+      </header>
+
+      <div class="sec-body">
+        <div class="arch-intro reveal">
+          <h2 class="sec-title">Vector Architecture</h2>
+          <p class="sec-lead">The vector index is a derived artifact on the LSM, one per slab, and its kind changes by level: brute-force at the memtable, flat at the fresh L0 slabs, per-slab HNSW once a slab settles. Exact full-precision search stays the ground truth — the index only proposes candidates, an exact rerank decides the result, and a missing or corrupt index costs a rebuild, not a wrong answer.</p>
+        </div>
+
+        <div class="varch-top reveal" style="transition-delay: 90ms">
+          <div class="vstack">
+            <p class="vstack-tag">vector index · per slab · escalates by level</p>
+            <div class="vlevel">
+              <span class="vlevel-k">memtable</span>
+              <span class="vlevel-holds">newest writes</span>
+              <span class="vlevel-idx">brute-force · <em>exact</em></span>
+            </div>
+            <p class="vflow">↓ flush · build the cheap index</p>
+            <div class="vlevel">
+              <span class="vlevel-k">L0</span>
+              <span class="vlevel-holds">fresh slabs</span>
+              <span class="vlevel-idx">flat</span>
+            </div>
+            <p class="vflow vflow-key">↓ compaction · rebuild over live vectors · clean graph</p>
+            <div class="vlevel">
+              <span class="vlevel-k">L1</span>
+              <span class="vlevel-holds">settled</span>
+              <span class="vlevel-idx">per-slab HNSW</span>
+            </div>
+            <div class="vlevel vlevel-base">
+              <span class="vlevel-k">L2</span>
+              <span class="vlevel-holds">bulk</span>
+              <span class="vlevel-idx">per-slab HNSW</span>
+            </div>
+            <p class="vstack-note">under a few thousand live vectors, skip the graph and brute-force. recall climbs as slabs settle into larger graphs.</p>
+          </div>
+
+          <div class="vquery">
+            <figure class="pane-svg">
+              <svg viewBox="0 0 360 136" fill="none" aria-hidden="true">
+                <text x="6" y="12" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">fan out · overfetch · rerank exactly</text>
+                <rect x="6" y="56" width="54" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="33" y="72" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">query</text>
+                <text x="33" y="83" text-anchor="middle" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-ink-low)">q · k · filter</text>
+                <line x1="60" y1="74" x2="88" y2="35" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M83 33 L90 34 L85 39 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="60" y1="74" x2="88" y2="73" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M84 70 L90 73 L84 76 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="60" y1="74" x2="88" y2="111" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M83 107 L90 112 L85 113 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="92" y="22" width="82" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="99" y="38" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">memtable</text>
+                <text x="167" y="38" text-anchor="end" style="font-family:var(--font-mono);font-size:7px;fill:var(--ember)">exact</text>
+                <rect x="92" y="60" width="82" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="99" y="76" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">slab</text>
+                <text x="167" y="76" text-anchor="end" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">flat</text>
+                <rect x="92" y="98" width="82" height="26" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="99" y="114" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-mid)">slab</text>
+                <text x="167" y="114" text-anchor="end" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">HNSW</text>
+                <line x1="174" y1="35" x2="198" y2="61" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M193 58 L200 60 L194 63 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="174" y1="73" x2="198" y2="73" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M194 70 L200 73 L194 76 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="174" y1="111" x2="198" y2="85" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M193 83 L200 85 L194 88 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="200" y="49" width="100" height="48" rx="3" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.25" />
+                <text x="250" y="64" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-terracotta-700)">merge + exact rerank</text>
+                <text x="250" y="76" text-anchor="middle" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-terracotta-700)">visibility · branch cap</text>
+                <text x="250" y="86" text-anchor="middle" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-terracotta-700)">dedupe · full precision</text>
+                <line x1="300" y1="73" x2="318" y2="73" style="stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <path d="M314 70 L320 73 L314 76 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="320" y="58" width="36" height="30" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-hi);stroke-width:1.25" />
+                <text x="338" y="76" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">top-k</text>
+              </svg>
+            </figure>
+            <p class="vq-cap">MVCC visibility and the branch fork cap are enforced in the merge, so the index never returns a row the read shouldn't see.</p>
+          </div>
+        </div>
+
+        <div class="varch-cards reveal" style="transition-delay: 140ms">
+          <article class="crate">
+            <p class="vcard-tag">lsm × hnsw</p>
+            <h3 class="vcard-name">Compaction keeps the graph clean</h3>
+            <p class="crate-desc">HNSW degrades as deletes and updates pile up; normally you rebuild it on a schedule. The LSM already rebuilds slabs and drops tombstones on every compaction, so each pass hands back a clean graph over only the live vectors. The re-index cost that sinks a graph at billion scale is cheap here, and recall climbs as slabs settle into larger graphs.</p>
+          </article>
+          <article class="crate">
+            <p class="vcard-tag">the boundary</p>
+            <h3 class="vcard-name">storage = WHEN · engine = WHAT</h3>
+            <p class="crate-desc">Storage owns the slab lifecycle and an opaque artifact slot; on compaction it emits a rebuild event and commits the engine's bytes atomically with the slab. The engine owns the vector logic and hands back opaque bytes. The index is derived state: a missing or corrupt artifact rebuilds from the slab, so it can cost a rebuild, never data.</p>
+          </article>
+          <article class="crate">
+            <p class="vcard-tag">the scale call</p>
+            <h3 class="vcard-name">HNSW now, IVF at the ceiling</h3>
+            <p class="crate-desc">At embedded scale (thousands to tens of millions of vectors per collection) the data fits in RAM and per-slab graphs are cheap to build, so HNSW is the default for its recall and latency. A configurable centroid/IVF mode is the scale-out path, for the rare deployment where re-index cost would dominate.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §8 · HOW WE TEST -->
+  <section id="testing" class="pitch-section" aria-label="How we test">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;08<span class="sec-name">Testing Methodology</span></span>      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Testing Methodology</h2>
+        <p class="sec-lead reveal" style="transition-delay: 60ms">
+          SQLite is the gold standard for testing an embedded database, and this harness is modeled on it: one bug class at a time, each with the technique that exposes it, every test checked against one recovery oracle.
+        </p>
+
+        <div class="approaches reveal" style="transition-delay: 110ms">
+          <article class="approach approach-spine">
+            <div class="approach-spine-text">
+              <p class="approach-class">Recovery correctness</p>
+              <p class="approach-desc">After any crash, what the database recovers must be a prefix of what it acknowledged: it may lose the most recent commits, but it must never leave a gap earlier in the history. A shadow model records every acknowledged commit, and one oracle checks the recovered state against that prefix after every fault the classes below inject.</p>
+              <p class="approach-tag"><span>the oracle</span> every test verifies through it</p>
+            </div>
+            <div class="approach-spine-fig">
+              <svg viewBox="0 0 250 116" fill="none" aria-hidden="true">
+                <text x="6" y="26" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">ack</text>
+                <line x1="54" y1="22" x2="214" y2="22" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <circle cx="54" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="94" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="134" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="174" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="214" cy="22" r="4" style="fill:var(--color-ink-mid)" />
+                <text x="6" y="66" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-ink-hi)">prefix</text>
+                <text x="238" y="67" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;fill:var(--color-ink-mid)">✓</text>
+                <line x1="54" y1="62" x2="134" y2="62" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <circle cx="54" cy="62" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="94" cy="62" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="134" cy="62" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="174" cy="62" r="4" style="fill:var(--color-panel);stroke:var(--color-line-hover);stroke-width:1.25" />
+                <circle cx="214" cy="62" r="4" style="fill:var(--color-panel);stroke:var(--color-line-hover);stroke-width:1.25" />
+                <text x="6" y="104" style="font-family:var(--font-mono);font-size:8px;fill:var(--ember)">gap</text>
+                <text x="238" y="105" text-anchor="middle" style="font-family:var(--font-mono);font-size:11px;fill:var(--ember)">✗</text>
+                <line x1="54" y1="100" x2="114" y2="100" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <line x1="154" y1="100" x2="174" y2="100" style="stroke:var(--color-line-hover);stroke-width:1" />
+                <circle cx="54" cy="100" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="94" cy="100" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="134" cy="100" r="5" style="fill:none;stroke:var(--ember);stroke-width:1.25;stroke-dasharray:2.5 2" />
+                <path d="M130 96 L138 104 M138 96 L130 104" style="stroke:var(--ember);stroke-width:1.25" />
+                <circle cx="174" cy="100" r="4" style="fill:var(--color-ink-mid)" />
+                <circle cx="214" cy="100" r="4" style="fill:var(--color-panel);stroke:var(--color-line-hover);stroke-width:1.25" />
+              </svg>
+            </div>
+          </article>
+
+          <div class="approach-grid">
+            <article class="approach">
+              <p class="approach-class">Error paths</p>
+              <p class="approach-desc">Fail the Nth backend operation, check that the engine recovers, then increment N until a full pass injects no new failure. Covers every reachable I/O call, plus disk-full and memory exhaustion.</p>
+              <p class="approach-tag">fail-once · fail-continuously</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Hostile disks</p>
+              <p class="approach-desc">Run on a disk model that injects torn writes, reordered appends, non-atomic renames, and garbage in an unsynced tail, then verify recovery under each.</p>
+              <p class="approach-tag">four filesystem models</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Rare interleavings</p>
+              <p class="approach-desc">A seeded scheduler randomises task order, the clock, and fault timing over the real lifecycle. Any failure prints its seed and replays bit-for-bit.</p>
+              <p class="approach-tag">deterministic simulation</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Compound failures</p>
+              <p class="approach-desc">Inject a second fault while recovery, compaction, or a checkpoint is still running. The engine must reach a valid state or return a typed, resumable error.</p>
+              <p class="approach-tag">fail · resume · succeed</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Config divergence</p>
+              <p class="approach-desc">Run the same workload under every mode, schedule, and budget; the results must be identical, and progress must stay bounded.</p>
+              <p class="approach-tag">model-parity oracle</p>
+            </article>
+            <article class="approach">
+              <p class="approach-class">Process drift</p>
+              <p class="approach-desc">Merge-blocking CI: Miri and sanitizers, coverage and mutation thresholds that only ratchet up, nightly fuzzing, and a guard that fails if the test map goes stale.</p>
+              <p class="approach-tag">miri · mutants · charter guard</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §9 · BENCHMARKS -->
+  <section id="benchmarks" class="pitch-section" aria-label="Benchmarks">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;09<span class="sec-name">Benchmarks</span></span>      </header>
+
+      <div class="sec-body">
+        <h2 class="sec-title reveal">Benchmarks</h2>
+        <p class="sec-lead reveal" style="transition-delay: 60ms">
+          Strata is a key-value engine with a vector index, so it runs the standard suite for each: YCSB against RocksDB and LMDB, and ANN-Benchmarks at one, ten, and a hundred million vectors.
+        </p>
+        <p class="bench-illustrative reveal" style="transition-delay: 90ms">
+          <span>illustrative</span>a benchmark run is in progress; these figures are placeholders, to be replaced with measured data.
+        </p>
+
+        <div class="bench-grid reveal" style="transition-delay: 130ms">
+          <div class="bench-panel">
+            <div class="bench-head">
+              <h3 class="bench-name">Key-value engine</h3>
+              <span class="bench-sub">YCSB</span>
+            </div>
+            <div class="bench-bars">
+              {
+                kvBench.rows.map((row) => {
+                  const max = Math.max(...row.vals);
+                  return (
+                    <div class="bench-group">
+                      <p class="bench-wl"><b>{row.w}</b>{row.name}</p>
+                      {
+                        row.vals.map((v, i) => (
+                          <div class:list={['bench-bar', { 'is-strata': kvBench.engines[i] === 'Strata' }]}>
+                            <span class="bench-bar-label">{kvBench.engines[i]}</span>
+                            <span class="bench-bar-track"><span class="bench-bar-fill" style={`width:${((v / max) * 100).toFixed(1)}%`}></span></span>
+                            <span class="bench-bar-val">{fmtOps(v)}</span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  );
+                })
+              }
+            </div>
+            <p class="bench-foot">{kvBench.unit}<br />{kvBench.config}</p>
+          </div>
+
+          <div class="bench-panel">
+            <div class="bench-head">
+              <h3 class="bench-name">Vector search</h3>
+              <span class="bench-sub">ANN-Benchmarks · as it scales</span>
+            </div>
+            <div class="vmetrics">
+              {
+                vecBench.metrics.map((m) => {
+                  const max = Math.max(...m.vals);
+                  return (
+                    <div class="vmetric">
+                      <div class="vmetric-top">
+                        <span class="vmetric-name">{m.name}{m.unit ? <span class="vmetric-unit"> {m.unit}</span> : null}</span>
+                        <span class="vmetric-dir" title={m.dir === 'up' ? 'higher is better' : 'lower is better'}>{m.dir === 'up' ? '↑' : '↓'}</span>
+                      </div>
+                      <div class="vmetric-bars">
+                        {
+                          m.vals.map((v) => (
+                            <div class="vm-col">
+                              <span class="vm-v">{fmtVec(m.kind, v)}</span>
+                              <span class="vm-bar" style={`height:${Math.max(4, (v / max) * 80).toFixed(0)}%`}></span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                      <div class="vmetric-xs">
+                        {vecBench.sizes.map((s) => <span>{s}</span>)}
+                      </div>
+                    </div>
+                  );
+                })
+              }
+            </div>
+            <p class="bench-foot">{vecBench.config}<br />one index, measured at 1 M · 10 M · 100 M vectors</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ===== section frame : a ruled spec-sheet page ===================== */
+    .pitch-section {
+      min-height: 100vh;
+      display: flex;
+      padding-block: 2.4rem 3rem;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .pitch-section:last-child {
+      border-bottom: none;
+    }
+    .pitch-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 78rem;
+      margin-inline: auto;
+      padding-inline: 3rem;
+    }
+    @media (max-width: 900px) {
+      .pitch-section {
+        padding-block: 2rem;
+      }
+      .pitch-wrap {
+        padding-inline: 1.4rem;
+      }
+    }
+
+    .sec-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--color-line-hover);
+    }
+    .sec-id {
+      display: inline-flex;
+      align-items: baseline;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+      color: var(--color-ink-hi);
+    }
+    .sec-hash {
+      color: var(--ember);
+    }
+    .sec-name {
+      margin-left: 0.7rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--color-ink-mid);
+    }
+    .sec-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-block: 1.75rem 0;
+    }
+
+    .sec-title {
+      font-size: clamp(1.85rem, 1.3rem + 1.5vw, 2.6rem);
+      line-height: 1.1;
+      letter-spacing: -0.022em;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+      text-wrap: balance;
+    }
+    .sec-lead {
+      margin-top: 1rem;
+      max-width: 46rem;
+      font-size: var(--text-body-lg);
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+      text-wrap: pretty;
+    }
+
+    /* ===== §1 · fused statement + datasheet spec panel ================= */
+    .open-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(22rem, 1fr);
+      gap: 3.5rem;
+      align-items: center;
+    }
+    @media (max-width: 880px) {
+      .open-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+    }
+    .open-product {
+      font-size: clamp(2rem, 1.2rem + 2.2vw, 3.2rem);
+      line-height: 1.12;
+      letter-spacing: -0.027em;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+      text-wrap: balance;
+    }
+    .open-technical {
+      margin-top: 1.4rem;
+      max-width: 40rem;
+      font-size: clamp(1.1rem, 1rem + 0.55vw, 1.45rem);
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+      text-wrap: pretty;
+    }
+
+    .substrate {
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+    .substrate-body {
+      padding: 1.5rem 1.5rem 1.6rem;
+    }
+    .substrate-tag,
+    .substrate-over {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+    }
+    .substrate-tag {
+      margin: 0 0 0.7rem;
+    }
+    .cap-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.4rem;
+    }
+    .cap {
+      padding: 0.5rem 0.3rem;
+      text-align: center;
+      border: 1px solid color-mix(in srgb, var(--hue) 34%, transparent);
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--hue) 10%, var(--color-panel));
+      color: var(--hue);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.01em;
+    }
+    .substrate-over {
+      margin: 1.15rem 0 0.85rem;
+      text-align: center;
+    }
+    .base {
+      padding: 1.2rem 1.3rem 1.3rem;
+      border: 1px solid var(--color-line-hover);
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 3.5%, var(--color-panel));
+    }
+    .base-name {
+      display: block;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      letter-spacing: 0.03em;
+      color: var(--color-ink-hi);
+    }
+    .lsm {
+      margin-top: 1.05rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.42rem;
+    }
+    .lsm-row {
+      display: grid;
+      grid-template-columns: 2.1rem 1fr;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .lsm-lab {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-low);
+      text-align: right;
+    }
+    .lsm-bar {
+      height: 0.72rem;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--color-ink-hi) 22%, transparent);
+    }
+    .lsm-hot {
+      background: var(--ember);
+    }
+
+    /* ===== §2 · lineage data panel ==================================== */
+    .data-panel {
+      margin-top: 2.25rem;
+      max-width: 62rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+    .lineage {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+    .lineage th,
+    .lineage td {
+      text-align: left;
+      padding: 0.95rem 1.4rem;
+      border-bottom: 1px solid var(--color-line);
+      font-size: 1.02rem;
+    }
+    .lineage thead th {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      padding-block: 0.78rem;
+      background: color-mix(in srgb, var(--color-ink-hi) 2.5%, var(--color-panel));
+    }
+    .lineage tbody th {
+      font-weight: 500;
+      color: var(--color-ink-mid);
+    }
+    .lineage td {
+      color: var(--color-ink-mid);
+    }
+    .lineage .c-emb,
+    .lineage td.emb {
+      border-left: 1px solid var(--color-line);
+      background: color-mix(in srgb, var(--color-ink-hi) 2%, var(--color-panel));
+      color: var(--color-ink-hi);
+      font-weight: 500;
+    }
+    .lineage tbody tr:last-child th,
+    .lineage tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .row-agent th,
+    .lineage .twin {
+      color: var(--color-ink-hi);
+      font-weight: 600;
+    }
+    .lineage td.strata {
+      background: var(--ember-soft);
+      border-left-color: color-mix(in srgb, var(--color-terracotta-500) 45%, transparent);
+      color: var(--color-terracotta-700);
+      font-weight: 700;
+    }
+    .sec-note {
+      margin-top: 1.6rem;
+      max-width: 54rem;
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--color-ink-low);
+    }
+    .sec-note strong {
+      color: var(--color-terracotta-700);
+      font-weight: 600;
+    }
+    @media (max-width: 640px) {
+      .lineage th,
+      .lineage td {
+        padding: 0.7rem 0.85rem;
+        font-size: 0.92rem;
+      }
+    }
+
+    /* ===== §4 · capability figures =================================== */
+    .cap-figs {
+      margin-top: 1.25rem;
+    }
+    .cap-fig {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      gap: 2.4rem;
+      align-items: center;
+      padding-block: 1rem;
+      border-top: 1px solid var(--color-line);
+    }
+    .cap-fig:first-child {
+      border-top: none;
+      padding-top: 0.2rem;
+    }
+    @media (max-width: 860px) {
+      .cap-fig {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+      }
+    }
+    .cap-fig-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ember);
+    }
+    .cap-fig-name {
+      margin-top: 0.3rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .cap-fig-desc {
+      margin-top: 0.6rem;
+      max-width: 40rem;
+      font-size: 0.94rem;
+      line-height: 1.6;
+      color: var(--color-ink-mid);
+    }
+    .cap-fig-mech {
+      margin-top: 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.4;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-low);
+    }
+    .cap-fig-svg {
+      margin: 0;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+      box-shadow: var(--shadow-panel);
+    }
+    .cap-fig-svg svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ===== §8 · how we test — bug-class approaches =================== */
+    .approaches {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .approach {
+      padding: 1.05rem 1.25rem 1.15rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+    }
+    .approach-class {
+      font-size: 1.06rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .approach-desc {
+      margin-top: 0.48rem;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--color-ink-mid);
+    }
+    .approach-tag {
+      margin-top: 0.72rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-low);
+    }
+    .approach-tag span {
+      margin-right: 0.45rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ember);
+    }
+
+    /* spine: the recovery oracle every test verifies through */
+    .approach-spine {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 16.5rem;
+      gap: 1.8rem;
+      align-items: center;
+      border-color: color-mix(in srgb, var(--ember) 32%, var(--color-line));
+      box-shadow: var(--shadow-panel), inset 3px 0 0 var(--ember);
+    }
+    @media (max-width: 760px) {
+      .approach-spine {
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+      }
+    }
+    .approach-spine .approach-class {
+      color: var(--color-terracotta-700);
+    }
+    .approach-spine-fig {
+      padding: 0.5rem 0.7rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .approach-spine-fig svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* the six other classes */
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem;
+    }
+    @media (max-width: 900px) {
+      .approach-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 600px) {
+      .approach-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .approach-grid .approach {
+      transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+    }
+    .approach-grid .approach:hover {
+      border-color: var(--color-line-hover);
+      transform: translateY(-1px);
+    }
+    .approach-grid .approach-class {
+      font-size: 0.98rem;
+    }
+    .approach-grid .approach-desc {
+      font-size: 0.85rem;
+    }
+
+    /* ===== §3 · who it's for — ideal customer profile =============== */
+    .icp-grid {
+      margin-top: 2.4rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem;
+    }
+    @media (max-width: 900px) {
+      .icp-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .icp {
+      padding: 1.5rem 1.45rem 1.6rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+      transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+    }
+    .icp:hover {
+      border-color: var(--color-line-hover);
+      transform: translateY(-1px);
+    }
+    .icp-n {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      color: var(--ember);
+    }
+    .icp-name {
+      margin-top: 0.85rem;
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .icp-desc {
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--color-ink-mid);
+    }
+
+    /* ===== §5 · product architecture — the five crates ============== */
+    .crates {
+      margin-top: 1.2rem;
+    }
+    .crates-tag {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      margin-bottom: 0.7rem;
+    }
+    .crate-spine {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 46rem;
+    }
+    .crate {
+      padding: 0.7rem 1.2rem 0.78rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+    }
+    .crate-h {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+    .crate-name {
+      font-size: 1.12rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .crate-role {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      white-space: nowrap;
+    }
+    .crate-desc {
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+    }
+    .crate-prims {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+    }
+    .prim {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      padding: 0.14rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid color-mix(in srgb, var(--hue) 42%, transparent);
+      background: color-mix(in srgb, var(--hue) 12%, var(--color-panel));
+      color: var(--hue);
+    }
+    .crate-bridge {
+      border-left: 2px solid var(--ember);
+    }
+    .crate-drill {
+      margin-top: 0.65rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.02em;
+      color: var(--ember);
+    }
+    .crate-base {
+      background: color-mix(in srgb, var(--color-ink-hi) 3%, var(--color-panel));
+    }
+
+    /* ===== §6 · architecture — section intro ========================= */
+    .arch-intro {
+      max-width: 52rem;
+    }
+
+    /* ===== §6 · architecture — screen 2 (storage explorer) =========== */
+    .explorer {
+      display: grid;
+      grid-template-columns: 16.5rem minmax(0, 1fr);
+      margin-top: 2.25rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+    @media (max-width: 880px) {
+      .explorer {
+        grid-template-columns: 1fr;
+      }
+    }
+    .explorer-index {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 0.8rem 0.9rem;
+      border-right: 1px solid var(--color-line);
+      background: color-mix(in srgb, var(--color-ink-hi) 2%, var(--color-panel));
+    }
+    @media (max-width: 880px) {
+      .explorer-index {
+        border-right: none;
+        border-bottom: 1px solid var(--color-line);
+      }
+    }
+    .explorer-tag {
+      margin: 0 0 0.7rem 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+    }
+    .explorer-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .explorer-node {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.9rem 1fr;
+      align-items: center;
+      column-gap: 0.55rem;
+      width: 100%;
+      padding: 0.55rem 0.6rem;
+      border: 0;
+      border-radius: var(--radius-control);
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      transition: background var(--dur-2) var(--ease-out);
+    }
+    .explorer-node:hover {
+      background: color-mix(in srgb, var(--color-ink-hi) 3.5%, transparent);
+    }
+    .explorer-node-k {
+      grid-row: 1 / span 2;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-ink-low);
+      text-align: center;
+    }
+    .explorer-node-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--color-ink-mid);
+    }
+    .explorer-node-sub {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-ink-low);
+    }
+    .explorer-node.is-active {
+      background: var(--ember-soft);
+      box-shadow: inset 2px 0 0 var(--ember);
+    }
+    .explorer-node.is-active .explorer-node-k {
+      color: var(--ember);
+    }
+    .explorer-node.is-active .explorer-node-name {
+      color: var(--color-terracotta-700);
+      font-weight: 600;
+    }
+    .explorer-detail {
+      position: relative;
+      padding: 1.5rem 1.7rem 1.6rem;
+    }
+    @media (max-width: 880px) {
+      .explorer-detail {
+        padding: 1.3rem 1.2rem;
+      }
+    }
+    .explorer-pane {
+      display: none;
+    }
+    .explorer-pane.is-active {
+      display: block;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .explorer-pane.is-active {
+        animation: pane-in 0.32s var(--ease-out) both;
+      }
+    }
+    @keyframes pane-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    .pane-head {
+      display: flex;
+      align-items: baseline;
+      gap: 0.7rem;
+    }
+    .pane-layer {
+      padding: 0.1rem 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--ember);
+      border: 1px solid color-mix(in srgb, var(--ember) 38%, transparent);
+      border-radius: 999px;
+    }
+    .pane-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--color-ink-hi);
+    }
+    .pane-desc {
+      margin-top: 0.7rem;
+      max-width: 44rem;
+      font-size: 0.94rem;
+      line-height: 1.6;
+      color: var(--color-ink-mid);
+    }
+    .pane-svg {
+      margin: 1.15rem 0 0;
+      padding: 0.6rem 0.9rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .pane-svg svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 11rem;
+    }
+    .pane-show {
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      line-height: 1.5;
+      color: var(--color-ink-low);
+      text-wrap: pretty;
+    }
+    .pane-show-k {
+      color: var(--ember);
+      margin-right: 0.5rem;
+    }
+
+    /* ===== §6 · L5 living-LSM interactive ============================ */
+    .lsm {
+      margin-top: 1.1rem;
+    }
+    .lsm-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.28rem;
+      padding: 0.85rem 1rem 0.95rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .lsm-level {
+      display: grid;
+      grid-template-columns: 2.1rem 1fr 5.4rem;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.34rem 0.4rem;
+      border-radius: var(--radius-control);
+      transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+    }
+    .lsm-level.is-active {
+      background: color-mix(in srgb, var(--ember) 7%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ember) 38%, transparent);
+    }
+    .lsm-level.is-probing {
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ember) 55%, transparent);
+    }
+    .lsm-tag {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-low);
+    }
+    .lsm-meta {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--color-ink-low);
+      text-align: right;
+    }
+    .lsm-slots {
+      display: flex;
+      gap: 0.3rem;
+    }
+    .lsm-slot,
+    .lsm-chip {
+      width: 2.7rem;
+      height: 1.15rem;
+      border-radius: 3px;
+    }
+    .lsm-slot {
+      border: 1px dashed var(--color-line-hover);
+    }
+    .lsm-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid color-mix(in srgb, var(--ember) 45%, transparent);
+      background: var(--ember-soft);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-terracotta-700);
+    }
+    .lsm-tiles {
+      display: flex;
+      gap: 0.35rem;
+    }
+    .lsm-tile {
+      min-width: 3.2rem;
+      height: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.45rem;
+      border: 1px solid var(--color-ink-mid);
+      border-radius: 3px;
+      background: var(--color-panel);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-ink-mid);
+    }
+    .lsm-runs {
+      display: flex;
+      gap: 0.3rem;
+      width: 100%;
+    }
+    .lsm-run {
+      flex: 1;
+      height: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--color-ink-mid);
+      border-radius: 3px;
+      background: var(--color-panel);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-ink-mid);
+    }
+    .lsm-level.is-hit .lsm-run {
+      border-color: var(--ember);
+      background: var(--ember-soft);
+      color: var(--color-terracotta-700);
+    }
+    .lsm-base {
+      height: 0.95rem;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--color-ink-hi) 8%, var(--color-panel));
+      border: 1px solid var(--color-line-hover);
+    }
+    .lsm-flow {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding-left: 2.7rem;
+      min-height: 0.95rem;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--color-ink-low);
+      transition: color var(--dur-2) var(--ease-out);
+    }
+    .lsm-flow em {
+      font-style: normal;
+      color: var(--color-ink-low);
+      opacity: 0.7;
+    }
+    .lsm-flow.is-active,
+    .lsm-flow.is-active em {
+      color: var(--ember);
+      opacity: 1;
+    }
+    .lsm-read {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border: 1px solid color-mix(in srgb, var(--ember) 40%, transparent);
+      border-radius: 999px;
+      background: var(--ember-soft);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-terracotta-700);
+    }
+    .lsm-read[hidden] {
+      display: none;
+    }
+    .lsm-stage.is-reading [data-lsm-memmeta] {
+      visibility: hidden;
+    }
+    .lsm-note {
+      margin-top: 0.7rem;
+      min-height: 2.55rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+      text-wrap: pretty;
+    }
+    .lsm-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .lsm-btn {
+      padding: 0.32rem 0.62rem;
+      border: 1px solid var(--color-line-hover);
+      border-radius: var(--radius-control);
+      background: var(--color-panel);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-ink-mid);
+      cursor: pointer;
+      transition: border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+    }
+    .lsm-btn:hover {
+      border-color: var(--color-ink-mid);
+      color: var(--color-ink-hi);
+    }
+    .lsm-btn-primary {
+      border-color: color-mix(in srgb, var(--ember) 45%, transparent);
+      background: var(--ember-soft);
+      color: var(--color-terracotta-700);
+    }
+    .lsm-btn-primary:hover {
+      border-color: var(--ember);
+      color: var(--color-terracotta-700);
+    }
+    .lsm-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .lsm-count {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-ink-low);
+    }
+    @keyframes lsm-in {
+      from {
+        opacity: 0;
+        transform: translateY(-3px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    @keyframes lsm-pulse {
+      0%, 100% {
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ember) 55%, transparent);
+      }
+      50% {
+        box-shadow: inset 0 0 0 2px var(--ember);
+      }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .lsm-in {
+        animation: lsm-in 0.26s var(--ease-out) both;
+      }
+      .lsm-level.is-probing {
+        animation: lsm-pulse 0.62s var(--ease-out);
+      }
+    }
+
+    /* ===== §6 · L6 branch-fork interactive =========================== */
+    .bf {
+      margin-top: 1.1rem;
+    }
+    .bf-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 0.36rem;
+      padding: 0.6rem 1rem 0.68rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .bf-key {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-low);
+    }
+    .bf-key b {
+      color: var(--color-ink-hi);
+      font-weight: 600;
+    }
+    .bf-heads,
+    .bf-reads {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    .bf-head {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .bf-head-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+    }
+    .bf-cells {
+      display: flex;
+      flex-direction: column;
+      gap: 0.26rem;
+    }
+    .bf-cell {
+      display: grid;
+      grid-template-columns: 2.1rem 1fr;
+      align-items: center;
+      gap: 0.5rem;
+      height: 1.25rem;
+      padding: 0 0.55rem;
+      border: 1px solid var(--color-ink-mid);
+      border-radius: 3px;
+      background: var(--color-panel);
+      font-family: var(--font-mono);
+    }
+    .bf-cell .bf-v {
+      font-size: 0.58rem;
+      color: var(--color-ink-low);
+    }
+    .bf-cell .bf-val {
+      font-size: 0.66rem;
+      color: var(--color-ink-hi);
+    }
+    .bf-cell.is-inherited {
+      border-style: dashed;
+      border-color: var(--color-line-hover);
+      background: transparent;
+    }
+    .bf-cell.is-inherited .bf-val {
+      color: var(--color-ink-mid);
+    }
+    .bf-cell.is-hot {
+      border-style: solid;
+      border-color: var(--ember);
+      background: var(--ember-soft);
+    }
+    .bf-cell.is-hot .bf-v {
+      color: var(--ember);
+    }
+    .bf-cell.is-hot .bf-val {
+      color: var(--color-terracotta-700);
+      font-weight: 600;
+    }
+    .bf-ghost {
+      display: flex;
+      align-items: center;
+      height: 1.25rem;
+      padding: 0 0.55rem;
+      border: 1px dashed var(--color-line-hover);
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-ink-low);
+    }
+    .bf-gate {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.05rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--ember);
+    }
+    .bf-gate::before,
+    .bf-gate::after {
+      content: '';
+      flex: 1;
+      border-top: 1px dashed var(--ember);
+    }
+    .bf-gate[hidden] {
+      display: none;
+    }
+    .bf-base {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .bf-base-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-low);
+    }
+    .bf-read {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-ink-mid);
+    }
+    .bf-read b {
+      color: var(--color-terracotta-700);
+      font-weight: 600;
+    }
+    .bf-read[hidden] {
+      display: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .bf-cell.lsm-in {
+        animation: lsm-in 0.26s var(--ease-out) both;
+      }
+    }
+
+    /* ===== §7 · vector architecture — per-slab index on the LSM ====== */
+    .varch-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4rem;
+      align-items: start;
+      margin-top: 1rem;
+    }
+    @media (max-width: 860px) {
+      .varch-top {
+        grid-template-columns: 1fr;
+      }
+    }
+    .vstack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.26rem;
+      padding: 0.7rem 0.9rem 0.78rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-ink-hi) 1.5%, var(--color-panel));
+    }
+    .vstack-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+      margin-bottom: 0.3rem;
+    }
+    .vlevel {
+      display: grid;
+      grid-template-columns: 4.4rem 1fr auto;
+      align-items: baseline;
+      gap: 0.6rem;
+      padding: 0.32rem 0.6rem;
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 3%, var(--color-panel));
+    }
+    .vlevel-base {
+      background: color-mix(in srgb, var(--color-ink-hi) 6.5%, var(--color-panel));
+    }
+    .vlevel-k {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-ink-hi);
+    }
+    .vlevel-holds {
+      font-size: 0.82rem;
+      color: var(--color-ink-mid);
+    }
+    .vlevel-idx {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--color-ink-mid);
+      text-align: right;
+    }
+    .vlevel-idx em {
+      font-style: normal;
+      color: var(--ember);
+    }
+    .vflow {
+      padding-left: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-low);
+    }
+    .vflow-key {
+      color: var(--ember);
+    }
+    .vstack-note {
+      margin-top: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      line-height: 1.55;
+      color: var(--color-ink-low);
+    }
+    .vq-cap {
+      margin-top: 0.7rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+    }
+    .varch-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 0.85rem;
+    }
+    @media (max-width: 860px) {
+      .varch-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+    .vcard-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-low);
+    }
+    .vcard-name {
+      margin-top: 0.35rem;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.012em;
+      line-height: 1.2;
+      color: var(--color-ink-hi);
+    }
+
+    /* ===== §9 · benchmarks =========================================== */
+    .bench-illustrative {
+      margin-top: 1.4rem;
+      max-width: 46rem;
+      padding: 0.6rem 0.9rem;
+      border: 1px dashed color-mix(in srgb, var(--ember) 45%, transparent);
+      border-radius: var(--radius-control);
+      background: var(--ember-soft);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: var(--color-ink-mid);
+    }
+    .bench-illustrative span {
+      margin-right: 0.55rem;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-terracotta-700);
+    }
+    .bench-grid {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .bench-panel {
+      padding: 1rem 1.25rem 1.05rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+    }
+    .bench-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .bench-name {
+      font-size: 1.08rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      color: var(--color-ink-hi);
+    }
+    .bench-sub {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      color: var(--color-ink-low);
+    }
+    /* KV — grouped bars per YCSB workload (Strata in ember) */
+    .bench-bars {
+      margin-top: 0.1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 1.9rem;
+    }
+    @media (max-width: 880px) {
+      .bench-bars {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 560px) {
+      .bench-bars {
+        grid-template-columns: 1fr;
+      }
+    }
+    .bench-group {
+      padding-top: 0.55rem;
+    }
+    .bench-wl {
+      margin-bottom: 0.42rem;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--color-ink-mid);
+    }
+    .bench-wl b {
+      margin-right: 0.5rem;
+      color: var(--color-ink-hi);
+    }
+    .bench-bar {
+      display: grid;
+      grid-template-columns: 3.9rem 1fr 3.3rem;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.08rem 0;
+    }
+    .bench-bar-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-ink-low);
+    }
+    .bench-bar-track {
+      height: 0.52rem;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--color-ink-hi) 6%, var(--color-panel));
+      overflow: hidden;
+    }
+    .bench-bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--color-ink-hi) 24%, transparent);
+    }
+    .bench-bar-val {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-align: right;
+      color: var(--color-ink-mid);
+      font-variant-numeric: tabular-nums;
+    }
+    .bench-bar.is-strata .bench-bar-fill {
+      background: var(--ember);
+    }
+    .bench-bar.is-strata .bench-bar-label {
+      color: var(--color-ink-hi);
+      font-weight: 500;
+    }
+    .bench-bar.is-strata .bench-bar-val {
+      color: var(--color-terracotta-700);
+    }
+
+    /* Vector — solo; five metrics, each its own card, charted across sizes */
+    .vmetrics {
+      margin-top: 0.7rem;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.8rem;
+    }
+    @media (max-width: 820px) {
+      .vmetrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .vmetric {
+      padding: 0.7rem 0.8rem 0.6rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: color-mix(in srgb, var(--color-ink-hi) 2%, var(--color-panel));
+    }
+    .vmetric-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.35rem;
+      margin-bottom: 0.7rem;
+    }
+    .vmetric-name {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.01em;
+      color: var(--color-ink-hi);
+    }
+    .vmetric-unit {
+      color: var(--color-ink-low);
+    }
+    .vmetric-dir {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1;
+      color: var(--color-ink-low);
+    }
+    .vmetric-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.4rem;
+      height: 3rem;
+    }
+    .vm-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+    }
+    .vm-v {
+      margin-bottom: 0.26rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-ink-hi);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .vm-bar {
+      width: 70%;
+      max-width: 1.3rem;
+      border-radius: 2px 2px 0 0;
+      background: var(--ember);
+    }
+    .vmetric-xs {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+      padding-top: 0.32rem;
+      border-top: 1px solid var(--color-line);
+    }
+    .vmetric-xs span {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--color-ink-low);
+    }
+    .bench-foot {
+      margin-top: 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      line-height: 1.5;
+      color: var(--color-ink-low);
+    }
+
+  </style>
+
+  <script>
+    // §4 storage explorer — select a layer, swap its detail pane.
+    const explorer = document.querySelector('.explorer');
+    if (explorer) {
+      const nodes = explorer.querySelectorAll<HTMLElement>('[data-node]');
+      const panes = explorer.querySelectorAll<HTMLElement>('[data-pane]');
+      const select = (key: string | undefined) => {
+        if (!key) return;
+        nodes.forEach((n) => n.classList.toggle('is-active', n.dataset.node === key));
+        panes.forEach((p) => p.classList.toggle('is-active', p.dataset.pane === key));
+      };
+      nodes.forEach((n) => n.addEventListener('click', () => select(n.dataset.node)));
+    }
+
+    // §4 · L5 living-LSM — deterministic, precomputed frames: write → flush → compaction → read.
+    interface LsmFrame {
+      mem: string[];
+      l0: string[];
+      l1: string[];
+      note: string;
+      active?: 'mem' | 'l0' | 'l1';
+      flow?: 'flush' | 'compact';
+      read?: string;
+      probe?: 'mem' | 'l0' | 'l1';
+      hit?: 'mem' | 'l0' | 'l1';
+    }
+    const lsm = document.querySelector<HTMLElement>('[data-lsm]');
+    if (lsm) {
+      const F: LsmFrame[] = [
+        { mem: [], l0: [], l1: [], note: 'An LSM batches writes in memory, then flushes sorted tables to disk. Step ▸ to follow one through.' },
+        { mem: ['a'], l0: [], l1: [], active: 'mem', note: 'write a → memtable — held in memory, kept sorted.' },
+        { mem: ['a', 'b'], l0: [], l1: [], active: 'mem', note: 'write b → memtable. No disk seek yet; writes stay sequential.' },
+        { mem: ['a', 'b', 'c'], l0: [], l1: [], active: 'mem', note: 'write c → the memtable is full (3 / 3).' },
+        { mem: [], l0: ['a–c'], l1: [], active: 'l0', flow: 'flush', note: 'flush → one immutable L0 table, written in one sequential pass. The memtable clears.' },
+        { mem: ['d', 'e', 'f'], l0: ['a–c'], l1: [], active: 'mem', note: 'more writes fill the next memtable.' },
+        { mem: [], l0: ['a–c', 'd–f'], l1: [], active: 'l0', flow: 'flush', note: 'flush → a second L0 table.' },
+        { mem: [], l0: ['a–c', 'd–f', 'a–e'], l1: [], active: 'l0', flow: 'flush', note: 'a third flush — L0 tables may overlap in key range (a–c, d–f, a–e), so a read may touch several.' },
+        { mem: [], l0: [], l1: ['a–f'], active: 'l1', flow: 'compact', note: 'L0 reaches its threshold, so compaction merges all three into one sorted, non-overlapping L1 run. The caller supplies the prune / tombstone / TTL policy that the compaction applies.' },
+        { mem: ['g', 'h', 'i'], l0: [], l1: ['a–f'], active: 'mem', note: 'writes keep landing in memory, on top of the merged level.' },
+        { mem: [], l0: ['g–i'], l1: ['a–f'], active: 'l0', flow: 'flush', note: 'flush → a fresh L0 table now sits above the L1 run.' },
+        { mem: ['k'], l0: ['g–i'], l1: ['a–f'], active: 'mem', note: 'one more write waits in the memtable.' },
+        { mem: ['k'], l0: ['g–i'], l1: ['a–f'], read: 'b', probe: 'mem', note: 'read b → check the memtable first… not here.' },
+        { mem: ['k'], l0: ['g–i'], l1: ['a–f'], read: 'b', probe: 'l0', note: '…then L0, newest table first… b is not in g–i.' },
+        { mem: ['k'], l0: ['g–i'], l1: ['a–f'], read: 'b', probe: 'l1', hit: 'l1', note: '…then L1 → found. The search stops at the first match and returns the newest version of b.' },
+      ];
+
+      const elStage = lsm.querySelector<HTMLElement>('.lsm-stage')!;
+      // Scoped-CSS bridge: stamp Astro's component scope attribute onto JS-built
+      // elements so the scoped .lsm-chip / .lsm-tile / .lsm-run rules match them.
+      const scopeAttr = Array.from(elStage.attributes).map((a) => a.name).find((n) => n.startsWith('data-astro-cid-')) ?? '';
+      const elMem = lsm.querySelector<HTMLElement>('[data-lsm-mem]')!;
+      const elMemMeta = lsm.querySelector<HTMLElement>('[data-lsm-memmeta]')!;
+      const elL0 = lsm.querySelector<HTMLElement>('[data-lsm-l0]')!;
+      const elL1 = lsm.querySelector<HTMLElement>('[data-lsm-l1]')!;
+      const elNote = lsm.querySelector<HTMLElement>('[data-lsm-note]')!;
+      const elCount = lsm.querySelector<HTMLElement>('[data-lsm-count]')!;
+      const elRead = lsm.querySelector<HTMLElement>('[data-lsm-read]')!;
+      const btnNext = lsm.querySelector<HTMLButtonElement>('[data-lsm-next]')!;
+      const btnPrev = lsm.querySelector<HTMLButtonElement>('[data-lsm-prev]')!;
+      const btnReset = lsm.querySelector<HTMLButtonElement>('[data-lsm-reset]')!;
+      const btnPlay = lsm.querySelector<HTMLButtonElement>('[data-lsm-play]')!;
+      const levels: Record<string, HTMLElement> = {};
+      lsm.querySelectorAll<HTMLElement>('[data-lsm-level]').forEach((l) => { levels[l.dataset.lsmLevel!] = l; });
+      const flows: Record<string, HTMLElement> = {};
+      lsm.querySelectorAll<HTMLElement>('[data-lsm-flow]').forEach((f) => { flows[f.dataset.lsmFlow!] = f; });
+
+      let i = 0;
+      let timer: ReturnType<typeof setInterval> | null = null;
+
+      const render = () => {
+        const f = F[i];
+        let mem = '';
+        for (let s = 0; s < 3; s++) {
+          mem += f.mem[s]
+            ? `<span class="lsm-chip${f.active === 'mem' && s === f.mem.length - 1 ? ' lsm-in' : ''}" ${scopeAttr}>${f.mem[s]}</span>`
+            : `<span class="lsm-slot" ${scopeAttr}></span>`;
+        }
+        elMem.innerHTML = mem;
+        elMemMeta.textContent = `${f.mem.length} / 3`;
+        elL0.innerHTML = f.l0
+          .map((r, idx) => `<span class="lsm-tile${f.active === 'l0' && idx === f.l0.length - 1 ? ' lsm-in' : ''}" ${scopeAttr}>${r}</span>`)
+          .join('');
+        elL1.innerHTML = f.l1
+          .map((r) => `<span class="lsm-run${f.active === 'l1' ? ' lsm-in' : ''}" ${scopeAttr}>${r} · sorted</span>`)
+          .join('');
+        elNote.textContent = f.note;
+        elCount.textContent = `${String(i).padStart(2, '0')} / ${String(F.length - 1).padStart(2, '0')}`;
+        for (const key of Object.keys(levels)) {
+          levels[key].classList.toggle('is-active', f.active === key && !f.read);
+          levels[key].classList.toggle('is-probing', f.probe === key);
+          levels[key].classList.toggle('is-hit', f.hit === key);
+        }
+        for (const key of Object.keys(flows)) {
+          flows[key].classList.toggle('is-active', f.flow === key);
+        }
+        if (f.read) {
+          elRead.textContent = `read ${f.read}`;
+          elRead.hidden = false;
+        } else {
+          elRead.hidden = true;
+        }
+        elStage.classList.toggle('is-reading', !!f.read);
+        btnPrev.disabled = i === 0;
+        btnNext.disabled = i === F.length - 1;
+      };
+
+      const go = (n: number) => { i = Math.max(0, Math.min(F.length - 1, n)); render(); };
+      const stopPlay = () => {
+        if (timer) { clearInterval(timer); timer = null; }
+        btnPlay.textContent = 'play';
+      };
+      btnNext.addEventListener('click', () => { stopPlay(); go(i + 1); });
+      btnPrev.addEventListener('click', () => { stopPlay(); go(i - 1); });
+      btnReset.addEventListener('click', () => { stopPlay(); go(0); });
+      btnPlay.addEventListener('click', () => {
+        if (timer) { stopPlay(); return; }
+        if (i === F.length - 1) go(0);
+        btnPlay.textContent = 'pause';
+        timer = setInterval(() => {
+          if (i >= F.length - 1) { stopPlay(); return; }
+          go(i + 1);
+        }, 1150);
+      });
+
+      render();
+    }
+
+    // §4 · L6 branch-fork — fork (O(metadata)) → write each branch → one key's reads diverge.
+    interface BfCell {
+      v: string;
+      val: string;
+    }
+    interface BfFrame {
+      fork: boolean;
+      baseLabel: string;
+      mainHead: BfCell[];
+      forkHead: BfCell[];
+      base: BfCell[];
+      hot: Record<string, string>;
+      readMain: string;
+      readFork: string | null;
+      readForkAs?: string;
+      note: string;
+    }
+    const bf = document.querySelector<HTMLElement>('[data-bf]');
+    if (bf) {
+      const BASE: BfCell[] = [{ v: 'v5', val: 'c' }, { v: 'v3', val: 'b' }, { v: 'v1', val: 'a' }];
+      const BF: BfFrame[] = [
+        { fork: false, baseLabel: 'main · versions of k', mainHead: [], forkHead: [], base: BASE,
+          hot: { v5: 'main' }, readMain: 'c', readFork: null,
+          note: 'main holds one key k with three versions — v1, v3, v5 — newest first. A read returns the newest: c.' },
+        { fork: true, baseLabel: 'shared base · inherited by reference', mainHead: [], forkHead: [], base: BASE,
+          hot: { v5: 'both' }, readMain: 'c', readFork: 'c',
+          note: 'Fork main. O(metadata) — zero rows copied; the fork inherits main’s layers by reference, gated at v5. Both branches read c.' },
+        { fork: true, baseLabel: 'shared base · inherited by reference', mainHead: [], forkHead: [{ v: 'v6', val: 'x' }], base: BASE,
+          hot: { v6: 'fork', v5: 'main' }, readMain: 'c', readFork: 'x',
+          note: 'Write k=x on the fork. It lands in the fork’s own layer (v6) and shadows the inherited base. The fork now reads x; main still reads c.' },
+        { fork: true, baseLabel: 'shared base · inherited by reference', mainHead: [{ v: 'v7', val: 'y' }], forkHead: [{ v: 'v6', val: 'x' }], base: BASE,
+          hot: { v7: 'main', v6: 'fork' }, readMain: 'y', readFork: 'x',
+          note: 'Write k=y on main (v7). The fork’s gate stays pinned at v5, so it never sees v7. The same key now reads y on main and x on the fork, from one shared base.' },
+        { fork: true, baseLabel: 'shared base · inherited by reference', mainHead: [{ v: 'v7', val: 'y' }], forkHead: [{ v: 'v6', val: 'x' }], base: BASE,
+          hot: { v7: 'main', v3: 'fork' }, readMain: 'y', readFork: 'b', readForkAs: '@ v3',
+          note: 'An as-of read works on the fork too: reading k as-of v3 returns b, found by walking the inherited chain. The same newest-first ordering serves latest, as-of, and history reads.' },
+      ];
+
+      const bfStage = bf.querySelector<HTMLElement>('.bf-stage')!;
+      const bfScope = Array.from(bfStage.attributes).map((a) => a.name).find((n) => n.startsWith('data-astro-cid-')) ?? '';
+      const elMainHead = bf.querySelector<HTMLElement>('[data-bf-mainhead]')!;
+      const elForkHead = bf.querySelector<HTMLElement>('[data-bf-forkhead]')!;
+      const elGate = bf.querySelector<HTMLElement>('[data-bf-gate]')!;
+      const elBaseLabel = bf.querySelector<HTMLElement>('[data-bf-baselabel]')!;
+      const elBase = bf.querySelector<HTMLElement>('[data-bf-base]')!;
+      const elReadMain = bf.querySelector<HTMLElement>('[data-bf-readmain]')!;
+      const elReadFork = bf.querySelector<HTMLElement>('[data-bf-readfork]')!;
+      const elNote = bf.querySelector<HTMLElement>('[data-bf-note]')!;
+      const elCount = bf.querySelector<HTMLElement>('[data-bf-count]')!;
+      const btnNext = bf.querySelector<HTMLButtonElement>('[data-bf-next]')!;
+      const btnPrev = bf.querySelector<HTMLButtonElement>('[data-bf-prev]')!;
+      const btnReset = bf.querySelector<HTMLButtonElement>('[data-bf-reset]')!;
+      const btnPlay = bf.querySelector<HTMLButtonElement>('[data-bf-play]')!;
+
+      let bi = 0;
+      let bfTimer: ReturnType<typeof setInterval> | null = null;
+
+      const cellInner = (c: BfCell) => `<span class="bf-v" ${bfScope}>${c.v}</span><span class="bf-val" ${bfScope}>${c.val}</span>`;
+      const ownCell = (c: BfCell, hot: boolean) =>
+        `<div class="bf-cell${hot ? ' is-hot' : ''} lsm-in" ${bfScope}>${cellInner(c)}</div>`;
+      const baseCell = (c: BfCell, hot: boolean, inherited: boolean) =>
+        `<div class="bf-cell${inherited ? ' is-inherited' : ''}${hot ? ' is-hot' : ''}" ${bfScope}>${cellInner(c)}</div>`;
+      const ghost = (t: string) => `<div class="bf-ghost" ${bfScope}>${t}</div>`;
+
+      const renderBf = () => {
+        const f = BF[bi];
+        elMainHead.innerHTML = f.mainHead.length
+          ? f.mainHead.map((c) => ownCell(c, !!f.hot[c.v])).join('')
+          : ghost('latest in base ↓');
+        elForkHead.innerHTML = !f.fork
+          ? ghost('— not forked —')
+          : f.forkHead.length
+            ? f.forkHead.map((c) => ownCell(c, !!f.hot[c.v])).join('')
+            : ghost('inherits base ↓');
+        elGate.hidden = !f.fork;
+        elBaseLabel.textContent = f.baseLabel;
+        elBase.innerHTML = f.base.map((c) => baseCell(c, !!f.hot[c.v], f.fork)).join('');
+        elReadMain.innerHTML = `main reads k = <b ${bfScope}>${f.readMain}</b>`;
+        if (f.readFork == null) {
+          elReadFork.hidden = true;
+        } else {
+          elReadFork.hidden = false;
+          elReadFork.innerHTML = `fork${f.readForkAs ? ' ' + f.readForkAs : ''} reads k = <b ${bfScope}>${f.readFork}</b>`;
+        }
+        elNote.textContent = f.note;
+        elCount.textContent = `${bi} / ${BF.length - 1}`;
+        btnPrev.disabled = bi === 0;
+        btnNext.disabled = bi === BF.length - 1;
+      };
+
+      const goBf = (n: number) => { bi = Math.max(0, Math.min(BF.length - 1, n)); renderBf(); };
+      const stopBfPlay = () => {
+        if (bfTimer) { clearInterval(bfTimer); bfTimer = null; }
+        btnPlay.textContent = 'play';
+      };
+      btnNext.addEventListener('click', () => { stopBfPlay(); goBf(bi + 1); });
+      btnPrev.addEventListener('click', () => { stopBfPlay(); goBf(bi - 1); });
+      btnReset.addEventListener('click', () => { stopBfPlay(); goBf(0); });
+      btnPlay.addEventListener('click', () => {
+        if (bfTimer) { stopBfPlay(); return; }
+        if (bi === BF.length - 1) goBf(0);
+        btnPlay.textContent = 'pause';
+        bfTimer = setInterval(() => {
+          if (bi >= BF.length - 1) { stopBfPlay(); return; }
+          goBf(bi + 1);
+        }, 1400);
+      });
+
+      renderBf();
+    }
+  </script>
+</PitchLayout>

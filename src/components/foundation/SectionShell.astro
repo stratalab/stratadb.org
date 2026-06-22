@@ -1,0 +1,18 @@
+---
+// The ONLY place section rhythm exists (02 §12, 05 §2).
+import Eyebrow from './Eyebrow.astro';
+
+interface Props {
+  id?: string;
+  eyebrow?: string;
+  class?: string;
+}
+const { id, eyebrow, class: className = '' } = Astro.props;
+---
+
+<section id={id} class={`py-32 max-md:py-20 ${className}`}>
+  <div class="mx-auto w-full max-w-[70rem] px-6 max-[480px]:px-4">
+    {eyebrow && <Eyebrow class="mb-4">{eyebrow}</Eyebrow>}
+    <slot />
+  </div>
+</section>

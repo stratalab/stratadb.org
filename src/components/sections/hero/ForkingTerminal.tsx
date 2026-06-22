@@ -1,0 +1,273 @@
+// Set-piece A: the forking terminal (04 §2). Scripted executor at launch;
+// the WasmExecutor swap (R8) replaces the runner, not this view.
+// Panel chrome MUST stay visually identical to chrome/TerminalFrame.astro.
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, useInView } from 'motion/react';
+import {
+  completedState,
+  type ScriptEvent,
+  type TerminalState,
+  type TermLineData,
+  type PanelId,
+} from '../../../lib/engine/types';
+import { HERO_SCRIPT, HERO_HOLD_MS } from '../../../lib/engine/heroScript';
+
+// 03 §1 spring-settle — panels splitting/joining
+const springSettle = { type: 'spring' as const, stiffness: 260, damping: 26 };
+// 03 §2 typing clock
+const KEY_MIN = 24;
+const KEY_JITTER = 16;
+const OUTPUT_BEAT = 300;
+
+const EMPTY: TerminalState = { main: [], fork: [], split: false, merged: false };
+const DONE = completedState(HERO_SCRIPT);
+
+function Line({ line }: { line: TermLineData }) {
+  if (line.kind === 'cmd')
+    return (
+      <div className="whitespace-pre-wrap">
+        <span className="text-ink-low">strata:{line.branch} </span>
+        <span className="text-terracotta-500">›</span>
+        <span className="text-ink-hi"> {line.text}</span>
+      </div>
+    );
+  const tone =
+    line.tone === 'ok'
+      ? 'text-ok'
+      : line.tone === 'nil'
+        ? 'text-ink-low'
+        : line.tone === 'err'
+          ? 'text-err'
+          : 'text-ink-mid';
+  return <div className={`whitespace-pre-wrap ${tone}`}>{line.text}</div>;
+}
+
+function Panel({
+  title,
+  status,
+  lines,
+  cursorBranch,
+  typed,
+}: {
+  title: string;
+  status?: string;
+  lines: TermLineData[];
+  cursorBranch?: string;
+  typed?: string;
+}) {
+  return (
+    <div
+      className="overflow-hidden rounded-(--radius-frame) border border-line bg-panel"
+      style={{ boxShadow: 'var(--shadow-float)' }}
+    >
+      <div className="flex h-10 items-center gap-2 border-b border-line px-4">
+        <span className="flex gap-1.5" aria-hidden="true">
+          <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+          <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+          <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+        </span>
+        <span className="ml-2 font-mono text-mono-sm text-ink-low">{title}</span>
+        {status && <span className="ml-auto font-mono text-mono-sm text-ink-low">{status}</span>}
+      </div>
+      <div
+        // FIXED height (03 §7: space always reserved) — lines append inside a
+        // constant box so the loop never shifts layout below the set-piece.
+        className="h-[21.5rem] overflow-hidden bg-inset p-4 font-mono text-mono-body text-ink-mid"
+        role="log"
+        aria-live="polite"
+      >
+        {lines.map((line, i) => (
+          <Line key={i} line={line} />
+        ))}
+        {typed !== undefined && (
+          <div className="whitespace-pre-wrap">
+            <span className="text-ink-low">strata:{cursorBranch} </span>
+            <span className="text-terracotta-500">›</span>
+            <span className="text-ink-hi"> {typed}</span>
+            <span className="term-cursor" aria-hidden="true" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function ForkingTerminal() {
+  // SSR first frame = completed state (03 §7); hydration resets and plays.
+  const [state, setState] = useState<TerminalState>(DONE);
+  const [typing, setTyping] = useState<{ panel: PanelId; branch: string; text: string } | null>(null);
+  const [playing, setPlaying] = useState(true);
+  const [reduced, setReduced] = useState(false);
+  const [fading, setFading] = useState(false);
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(rootRef, { amount: 0.5 });
+  const runToken = useRef(0);
+  const playingRef = useRef(true);
+  const inViewRef = useRef(false);
+  playingRef.current = playing;
+  inViewRef.current = inView;
+
+  useEffect(() => {
+    setReduced(document.documentElement.dataset.motion === 'reduced');
+  }, []);
+
+  // One mount-scoped runner. Out-of-view and pause SUSPEND (the sleep loop simply
+  // stops accruing time); only unmount or a reduced-motion change cancels.
+  useEffect(() => {
+    if (reduced) return;
+    const token = ++runToken.current;
+    const cancelled = () => runToken.current !== token;
+
+    const sleep = async (ms: number) => {
+      const step = 40;
+      let waited = 0;
+      while (waited < ms) {
+        if (cancelled()) throw new Error('cancelled');
+        await new Promise((r) => setTimeout(r, step));
+        if (playingRef.current && inViewRef.current) waited += step;
+      }
+    };
+
+    const waitForView = async () => {
+      while (!inViewRef.current) {
+        if (cancelled()) throw new Error('cancelled');
+        await new Promise((r) => setTimeout(r, 120));
+      }
+    };
+
+    const runOnce = async () => {
+      setFading(true);
+      await sleep(320);
+      setState(EMPTY);
+      setTyping(null);
+      setFading(false);
+      await sleep(400);
+
+      for (const e of HERO_SCRIPT) {
+        if (e.type === 'cmd') {
+          for (let i = 1; i <= e.text.length; i++) {
+            setTyping({ panel: e.panel, branch: e.branch, text: e.text.slice(0, i) });
+            await sleep(KEY_MIN + Math.random() * KEY_JITTER);
+          }
+          await sleep(OUTPUT_BEAT);
+          setTyping(null);
+          setState((s) => ({
+            ...s,
+            [e.panel]: [...s[e.panel], { kind: 'cmd', text: e.text, branch: e.branch }],
+          }));
+        } else if (e.type === 'output') {
+          setState((s) => ({
+            ...s,
+            [e.panel]: [...s[e.panel], { kind: 'output', text: e.text, tone: e.tone }],
+          }));
+          await sleep(OUTPUT_BEAT);
+        } else if (e.type === 'split') {
+          setState((s) => ({ ...s, split: true }));
+        } else if (e.type === 'merge') {
+          setState((s) => ({ ...s, merged: true, split: false }));
+        } else if (e.type === 'pause') {
+          await sleep(e.ms);
+        }
+      }
+      await sleep(HERO_HOLD_MS);
+    };
+
+    (async () => {
+      try {
+        await waitForView();
+        // eslint-disable-next-line no-constant-condition
+        while (true) await runOnce();
+      } catch {
+        // cancelled: restore a safe, complete state (never a blank frame)
+        setFading(false);
+        setTyping(null);
+        setState(DONE);
+      }
+    })();
+
+    return () => {
+      runToken.current++;
+    };
+  }, [reduced]);
+
+  const showFork = state.split || (reduced && DONE.split);
+  const typedFor = (panel: PanelId) =>
+    typing?.panel === panel ? { typed: typing.text, cursorBranch: typing.branch } : {};
+
+  return (
+    // Reserved heights (CLS gate): desktop rows are constant; on mobile the
+    // fork mounts below inside pre-reserved space, so nothing beneath moves.
+    <div ref={rootRef} className="relative md:min-h-[24rem] max-md:min-h-[47rem]">
+      <motion.div
+        animate={{ opacity: fading ? 0 : 1 }}
+        transition={{ duration: 0.32 }}
+        className="grid items-start gap-6 md:grid-cols-2"
+      >
+        {/* CLS-zero choreography (04 §2 amendment): the grid never re-templates.
+            Main is half-width always; pre-split it is CENTERED via transform and
+            translates into its column on fork. Transform/opacity only. */}
+        <motion.div
+          animate={{ x: showFork ? '0%' : '54%' }}
+          transition={springSettle}
+          className="max-md:!transform-none"
+        >
+          <Panel
+            title="strata"
+            status="engine: scripted replay"
+            lines={state.main}
+            {...typedFor('main')}
+          />
+        </motion.div>
+        <motion.div
+          initial={false}
+          animate={{
+            opacity: showFork ? 1 : 0,
+            x: showFork ? 0 : 24,
+            scale: showFork ? 1 : 0.98,
+          }}
+          transition={springSettle}
+          style={{ pointerEvents: showFork ? 'auto' : 'none' }}
+          aria-hidden={!showFork}
+        >
+          <Panel title="experiment" lines={state.fork} {...typedFor('fork')} />
+        </motion.div>
+      </motion.div>
+
+      {/* branch line: spans the gap while forked (desktop) */}
+      <AnimatePresence>
+        {showFork && (
+          <motion.svg
+            className="pointer-events-none absolute left-1/2 top-10 hidden h-12 w-12 -translate-x-1/2 md:block"
+            viewBox="0 0 48 48"
+            fill="none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            aria-hidden="true"
+          >
+            <motion.path
+              d="M 2 40 C 18 40 30 8 46 8"
+              stroke="var(--color-terracotta-500)"
+              strokeWidth="1"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.6 }}
+            />
+          </motion.svg>
+        )}
+      </AnimatePresence>
+
+      {!reduced && (
+        <button
+          type="button"
+          onClick={() => setPlaying((p) => !p)}
+          className="absolute -bottom-10 right-0 rounded-(--radius-control) border border-line px-3 py-1.5 font-mono text-mono-sm text-ink-low transition-colors duration-200 hover:border-line-hover hover:text-ink-mid"
+          aria-pressed={!playing}
+        >
+          {playing ? 'pause' : 'play'}
+        </button>
+      )}
+    </div>
+  );
+}

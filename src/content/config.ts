@@ -19,17 +19,8 @@ const architectureCollection = defineCollection({
   }),
 });
 
-const referenceCollection = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    languages: z.array(z.enum(['cli', 'python', 'node', 'mcp'])).optional(),
-  }),
-});
-
+// (The unused `reference` collection was removed 2026-06-12 — 01 §6 cleanup.)
 export const collections = {
   docs: docsCollection,
   architecture: architectureCollection,
-  reference: referenceCollection,
 };

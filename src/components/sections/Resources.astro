@@ -1,0 +1,69 @@
+---
+// Section 6 (04 §7 v2, 2026-06-12): the indexed catalog. Three quiet cards
+// become three numbered rows in the drafting voice — the same ruling system
+// as the section bands. Render only what exists (truth rule).
+import SectionShell from '../foundation/SectionShell.astro';
+import SectionRule from '../foundation/SectionRule.astro';
+import Heading from '../foundation/Heading.astro';
+
+const items = [
+  {
+    n: '01',
+    title: 'Documentation',
+    body: 'Concepts, guides, and the full reference.',
+    meta: 'concepts · guides · reference',
+    href: '/docs',
+  },
+  {
+    n: '02',
+    title: 'Examples & quickstarts',
+    body: 'First database in thirty seconds; real patterns after that.',
+    meta: 'quickstarts · cookbook',
+    href: '/docs/getting-started',
+  },
+  {
+    n: '03',
+    title: 'Whitepapers',
+    body: 'The internals, written down: storage engine, concurrency model, durability and recovery.',
+    meta: 'storage · concurrency · recovery',
+    href: '/architecture',
+  },
+];
+---
+
+<SectionRule label="RESOURCES" index="06" />
+<SectionShell id="resources">
+  <div class="reveal mb-12">
+    <Heading size="title">Go deeper.</Heading>
+  </div>
+  <div class="space-y-4">
+    {
+      items.map((item, i) => (
+        <div class="reveal" style={`transition-delay: ${i * 60}ms`}>
+          <a
+            href={item.href}
+            class="group grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-4 rounded-(--radius-card) border border-line-hover bg-raised px-6 py-6 shadow-[var(--shadow-float)] transition-colors duration-200 hover:border-[rgba(255,122,82,0.4)] max-md:grid-cols-[2.5rem_1fr_auto] max-md:px-4"
+          >
+            <span
+              class="font-mono text-mono-body text-ink-mid transition-colors duration-200 group-hover:text-terracotta-400"
+              aria-hidden="true"
+            >
+              {item.n}
+            </span>
+            <span>
+              <span class="block text-heading text-ink-hi">{item.title}</span>
+              <span class="mt-2 block max-w-[38rem] text-body text-ink-mid">{item.body}</span>
+              <span class="mt-2.5 block font-mono text-mono-sm text-ink-mid">{item.meta}</span>
+            </span>
+            <span
+              class="self-center pr-2 text-ink-low transition-all duration-200 group-hover:translate-x-1 group-hover:text-terracotta-400"
+              aria-hidden="true"
+            >
+              →
+            </span>
+          </a>
+        </div>
+      ))
+    }
+  </div>
+</SectionShell>

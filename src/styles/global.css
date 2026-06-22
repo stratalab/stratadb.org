@@ -1,363 +1,144 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import './tokens.css';
+@plugin '@tailwindcss/typography';
+
+/* ---- fonts: self-hosted, subset, variable (06 §2) ---- */
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Variable.woff2') format('woff2');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Commit Mono';
+  src: url('/fonts/CommitMono-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Commit Mono';
+  src: url('/fonts/CommitMono-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @layer base {
-  @font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 100 900;
-    font-display: swap;
-    src: url('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2') format('woff2');
-  }
-
-  @font-face {
-    font-family: 'JetBrains Mono';
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: swap;
-    src: url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2') format('woff2');
-  }
-
   html {
     scroll-behavior: smooth;
   }
+  html[data-motion='reduced'] {
+    scroll-behavior: auto;
+  }
 
   body {
-    @apply bg-background text-text-primary antialiased;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    /* The neutral stage (Neon-macro, 2026-06-12): flat true black —
+       all atmosphere lives in the hero's animated backdrop. */
+    background-color: var(--color-void);
+    color: var(--color-ink-hi);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'ss01' off;
   }
 
   ::selection {
-    @apply bg-terracotta/30;
+    background-color: color-mix(in srgb, var(--color-terracotta-500) 30%, transparent);
+  }
+
+  /* focus: 2px terracotta ring, 2px offset, everywhere (02 §12) */
+  :focus-visible {
+    outline: 2px solid var(--color-terracotta-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-control);
+  }
+
+  /* numbers in mono contexts are tabular (02 §11) */
+  code,
+  pre,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
-  /* Buttons */
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 font-medium text-white
-           bg-terracotta rounded-lg transition-all duration-200
-           hover:bg-terracotta-dark hover:shadow-lg hover:shadow-terracotta/20
-           focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-2 focus:ring-offset-background;
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3 font-medium text-text-primary
-           bg-background-elevated border border-border rounded-lg transition-all duration-200
-           hover:border-border-bright hover:bg-background-muted
-           focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-2 focus:ring-offset-background;
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center justify-center px-4 py-2 font-medium text-text-secondary
-           rounded-lg transition-all duration-200
-           hover:text-text-primary hover:bg-white/5;
-  }
-
-  .link {
-    @apply text-terracotta hover:text-terracotta-light transition-colors;
-  }
-
-  /* Cards */
-  .card {
-    @apply bg-background-subtle border border-border rounded-xl p-6
-           transition-all duration-300
-           hover:border-border-bright hover:shadow-xl hover:shadow-black/20;
-  }
-
-  .card-glow {
-    @apply relative overflow-hidden;
-  }
-
-  .card-glow::before {
-    content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-500;
-    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                rgba(224, 122, 95, 0.06), transparent 40%);
-  }
-
-  .card-glow:hover::before {
-    @apply opacity-100;
-  }
-
-  /* Glass effect */
-  .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
-  }
-
-  /* Glow effects */
-  .glow-terracotta {
-    box-shadow: 0 0 60px -15px rgba(224, 122, 95, 0.4);
-  }
-
-  .glow-soft {
-    box-shadow: 0 0 100px -20px rgba(224, 122, 95, 0.2);
-  }
-
-  /* Prose for docs */
+  /* Docs prose: typography plugin mapped onto the token system (Phase 5) */
   .prose-docs {
     @apply prose prose-invert max-w-none;
+    --tw-prose-body: var(--color-ink-mid);
+    --tw-prose-headings: var(--color-ink-hi);
+    --tw-prose-links: var(--color-terracotta-500);
+    --tw-prose-bold: var(--color-ink-hi);
+    --tw-prose-code: var(--color-ink-hi);
+    --tw-prose-quotes: var(--color-ink-mid);
+    --tw-prose-quote-borders: var(--color-terracotta-700);
+    --tw-prose-hr: var(--color-line);
+    --tw-prose-th-borders: var(--color-line);
+    --tw-prose-td-borders: var(--color-line);
+    --tw-prose-bullets: var(--color-ink-low);
+    --tw-prose-counters: var(--color-ink-low);
   }
-
-  .prose-docs h1 {
-    @apply text-3xl font-bold mb-6 pb-4 border-b border-border;
+  /* Shiki blocks keep their theme background — its token colors are contrast-
+     tuned for it (forcing inset under them failed AA in the Phase-6 audit). */
+  .prose-docs :where(pre) {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
   }
-
-  .prose-docs h2 {
-    @apply text-2xl font-semibold mt-10 mb-4;
+  .prose-docs :where(pre):not(.astro-code) {
+    background-color: var(--color-inset);
   }
-
-  .prose-docs h3 {
-    @apply text-xl font-semibold mt-8 mb-3;
+  .prose-docs :where(code):not(:where(pre code)) {
+    background-color: var(--color-raised);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-control);
+    font-weight: 400;
   }
-
-  .prose-docs h4 {
-    @apply text-lg font-semibold mt-6 mb-2;
-  }
-
-  .prose-docs pre {
-    @apply bg-background-elevated border border-border rounded-lg overflow-x-auto;
-  }
-
-  .prose-docs code {
-    @apply text-sm font-mono;
-  }
-
-  .prose-docs pre code {
-    @apply bg-transparent p-0;
-  }
-
-  .prose-docs table {
-    @apply w-full text-sm;
-  }
-
-  .prose-docs th {
-    @apply text-left font-semibold p-3 bg-background-muted border-b border-border;
-  }
-
-  .prose-docs td {
-    @apply p-3 border-b border-border;
-  }
-
-  .prose-docs blockquote {
-    @apply border-l-4 border-terracotta bg-terracotta/5 pl-4 py-2 my-4 italic;
-  }
-
-  .prose-docs ul {
-    @apply list-disc pl-6 space-y-2;
-  }
-
-  .prose-docs ol {
-    @apply list-decimal pl-6 space-y-2;
-  }
-
-  .prose-docs a {
-    @apply text-terracotta hover:text-terracotta-light underline-offset-2;
-  }
-
-  /* Section styling */
-  .section-dark {
-    @apply bg-background;
-  }
-
-  .section-subtle {
-    @apply bg-background-subtle;
-  }
-
-  /* Strata layers */
-  .strata-layer {
-    @apply relative overflow-hidden;
-  }
-
-  .strata-layer::after {
+  .prose-docs :where(code)::before,
+  .prose-docs :where(code)::after {
     content: '';
-    @apply absolute bottom-0 left-0 right-0 h-px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.1) 80%, transparent);
   }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .prose-docs :where(a) {
+    text-decoration: none;
   }
-
-  .gradient-text {
-    @apply bg-gradient-to-r from-terracotta via-terracotta-light to-terracotta bg-clip-text text-transparent;
+  .prose-docs :where(a):hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  .gradient-text-subtle {
-    @apply bg-gradient-to-r from-text-primary to-text-secondary bg-clip-text text-transparent;
+  /* Reveal recipe (03 §2) — applied via IntersectionObserver adding .is-revealed */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity var(--dur-4) var(--ease-out),
+      transform var(--dur-4) var(--ease-out);
+  }
+  .reveal.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  html[data-motion='reduced'] .reveal {
+    transform: none;
+    transition: opacity var(--dur-2) linear;
   }
 
-  /* Animated gradient */
-  .gradient-animated {
-    background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
+  /* The ONLY infinite animation on the site (03 §2): the terminal cursor. */
+  .term-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: var(--color-terracotta-500);
+    animation: cursor-blink 1.06s steps(2, start) infinite;
   }
-
-  @keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+  html[data-motion='reduced'] .term-cursor {
+    animation: none;
   }
-
-  /* Noise texture overlay */
-  .noise {
-    position: relative;
+  @keyframes cursor-blink {
+    to {
+      visibility: hidden;
+    }
   }
-
-  .noise::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.02;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  }
-
-  /* Scrollbar */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.1) transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(255,255,255,0.1);
-    border-radius: 3px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255,255,255,0.2);
-  }
-
-  /* Hide scrollbar but keep functionality */
-  .scrollbar-none {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-/* Shiki code blocks - dark theme */
-.astro-code {
-  @apply text-sm rounded-lg p-4 overflow-x-auto border border-border;
-  background-color: #0d0d0e !important;
-}
-
-.astro-code code {
-  @apply font-mono;
-}
-
-/* Terminal styling - premium dark */
-.terminal {
-  @apply bg-background-subtle rounded-2xl overflow-hidden;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 20px 50px -10px rgba(0, 0, 0, 0.5),
-    0 0 100px -20px rgba(224, 122, 95, 0.1);
-}
-
-.terminal-header {
-  @apply flex items-center gap-2 px-4 py-3 bg-background-muted border-b border-border;
-}
-
-.terminal-dot {
-  @apply w-3 h-3 rounded-full;
-}
-
-.terminal-dot-red {
-  background: #ff5f57;
-}
-
-.terminal-dot-yellow {
-  background: #febc2e;
-}
-
-.terminal-dot-green {
-  background: #28c840;
-}
-
-.terminal-body {
-  @apply p-4 font-mono text-sm text-text-primary min-h-[300px];
-  background: linear-gradient(180deg, #0d0d0e 0%, #0a0a0b 100%);
-}
-
-.terminal-prompt {
-  @apply text-terracotta;
-}
-
-.terminal-output {
-  @apply text-text-secondary;
-}
-
-/* Animated underline for links */
-.link-underline {
-  position: relative;
-}
-
-.link-underline::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.3s ease;
-}
-
-.link-underline:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-/* Fade in animation for scroll */
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.fade-in-up.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Staggered animations */
-.stagger-1 { transition-delay: 0.1s; }
-.stagger-2 { transition-delay: 0.2s; }
-.stagger-3 { transition-delay: 0.3s; }
-.stagger-4 { transition-delay: 0.4s; }
-.stagger-5 { transition-delay: 0.5s; }
-.stagger-6 { transition-delay: 0.6s; }
-
-/* Shimmer effect */
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }

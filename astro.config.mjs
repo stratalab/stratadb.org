@@ -1,34 +1,33 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
-// TODO: Re-enable when sitemap plugin compatibility with Astro 5 is fixed
-// import sitemap from '@astrojs/sitemap';
-import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   site: 'https://stratadb.org',
   integrations: [
+    sitemap({
+      filter: (page) => !page.includes('/404') && !page.includes('/specimen') && !page.includes('/playground'),
+    }),
     mdx({
       shikiConfig: {
-        theme: 'github-light',
+        theme: 'github-dark-default',
         langs: ['bash', 'rust', 'python', 'javascript', 'typescript', 'json', 'toml', 'yaml'],
         wrap: true,
       },
     }),
     react(),
-    // sitemap({
-    //   filter: (page) => !page.includes('/404'),
-    // }),
-    tailwind(),
   ],
   markdown: {
     shikiConfig: {
-      theme: 'github-light',
+      theme: 'github-dark-default',
       langs: ['bash', 'rust', 'python', 'javascript', 'typescript', 'json', 'toml', 'yaml'],
       wrap: true,
     },
   },
   vite: {
+    plugins: [tailwindcss()],
     ssr: {
       noExternal: ['framer-motion'],
     },

@@ -1,0 +1,50 @@
+---
+// Section 5 (04 §6 v2): "Inference is built in." — the unified inference
+// layer. Databases usually don't have this: one built-in primitive for
+// embeddings, generation, and search, with models from Hugging Face or
+// OpenAI / Anthropic / Google. The pitch is portability — an app that
+// needs LLMs gets deployed in a bunch of places; the layer travels with
+// the file. Head in the prose column, demo on the 80rem stage.
+import SectionShell from '../foundation/SectionShell.astro';
+import SectionRule from '../foundation/SectionRule.astro';
+import Heading from '../foundation/Heading.astro';
+import InferenceDemo from './inference/InferenceDemo.tsx';
+
+const providers = ['Hugging Face', 'OpenAI', 'Anthropic', 'Google'];
+---
+
+<SectionRule label="NATIVE INFERENCE" index="05" />
+<SectionShell id="inference" class="!pb-0">
+  <div class="reveal max-w-[44rem]">
+    <Heading size="display">Inference is built in.</Heading>
+    <p class="mt-6 text-body-lg text-ink-mid">
+      A unified inference layer — embeddings, generation, and search through one primitive,
+      with models from Hugging Face or hosted ones from OpenAI, Anthropic, and Google. Wire
+      it once; it runs wherever the file does.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-2.5">
+      {
+        providers.map((p) => (
+          <span class="rounded-full border border-line bg-panel px-3.5 py-1.5 font-mono text-mono-sm text-ink-mid">
+            {p}
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</SectionShell>
+
+<div
+  class="relative mx-auto w-full max-w-[80rem] overflow-x-clip px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4"
+>
+  <!-- one quiet stage light, the page's temperature -->
+  <div
+    class="pointer-events-none absolute -inset-x-16 -inset-y-10"
+    style="background: radial-gradient(46% 60% at 50% 45%, rgba(255, 122, 82, 0.09), transparent 70%);"
+    aria-hidden="true"
+  >
+  </div>
+  <div class="relative">
+    <InferenceDemo client:visible />
+  </div>
+</div>

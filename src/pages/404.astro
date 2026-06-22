@@ -1,0 +1,20 @@
+---
+// 404 (04 §9). The most personality anywhere on the site, kept by decision.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Heading from '../components/foundation/Heading.astro';
+---
+
+<BaseLayout title="404 — StrataDB" noindex>
+  <div class="mx-auto flex min-h-[60vh] w-full max-w-[42rem] flex-col items-start justify-center px-6">
+    <p class="mb-4 font-mono text-mono-sm text-ink-low">404</p>
+    <Heading level={1} size="display">This layer doesn't exist.</Heading>
+    <p class="mt-6 text-body-lg text-ink-mid">
+      Nothing was deposited at this address. Try the docs — or send your agent to llms.txt.
+    </p>
+    <div class="mt-8 flex gap-6 font-mono text-mono-sm">
+      <a href="/docs" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Docs</a>
+      <a href="/" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Home</a>
+      <a href="/llms.txt" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">llms.txt</a>
+    </div>
+  </div>
+</BaseLayout>

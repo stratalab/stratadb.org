@@ -1,0 +1,27 @@
+---
+// Section 7 (04 §8): the act section and the page's close. Horizon glow,
+// second and final permitted use (60% of hero opacity). The quickstart IS
+// the close (v3.1 — the big pip-install sign-off retired; the footer
+// carries version/links).
+import SectionShell from '../foundation/SectionShell.astro';
+import SectionRule from '../foundation/SectionRule.astro';
+import Heading from '../foundation/Heading.astro';
+import HorizonGlow from '../foundation/HorizonGlow.astro';
+import InstallTabs from './install/InstallTabs.tsx';
+---
+
+<section id="install" class="relative overflow-hidden">
+  <SectionRule label="INSTALL" index="07" />
+  <HorizonGlow dim />
+  <div class="relative">
+    <SectionShell>
+      <div class="reveal mb-10 max-w-[42rem]">
+        <Heading size="display">Start in thirty seconds.</Heading>
+      </div>
+
+      <div class="reveal mx-auto max-w-[52rem]">
+        <InstallTabs client:visible />
+      </div>
+    </SectionShell>
+  </div>
+</section>

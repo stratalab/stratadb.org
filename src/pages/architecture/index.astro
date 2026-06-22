@@ -1,0 +1,37 @@
+---
+// The whitepaper collection (decided 2026-06-12: the architecture deep-dives
+// ARE the whitepapers; future standalone papers join them here).
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionShell from '../../components/foundation/SectionShell.astro';
+import Heading from '../../components/foundation/Heading.astro';
+import Card from '../../components/foundation/Card.astro';
+
+const papers = (await getCollection('architecture'))
+  .filter((e) => e.slug !== 'index')
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99) || a.data.title.localeCompare(b.data.title));
+---
+
+<BaseLayout
+  title="Whitepapers — StrataDB"
+  description="The internals, written down: storage engine, concurrency model, durability and recovery."
+>
+  <SectionShell eyebrow="WHITEPAPERS">
+    <div class="mb-12 max-w-[42rem]">
+      <Heading level={1} size="display">The internals, written down.</Heading>
+      <p class="mt-6 text-body-lg text-ink-mid">
+        How StrataDB works, at the level of invariants and proofs — not promises.
+      </p>
+    </div>
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {
+        papers.map((paper) => (
+          <Card href={`/architecture/${paper.slug}`} class="h-full">
+            <h2 class="mb-2 text-heading text-ink-hi">{paper.data.title}</h2>
+            {paper.data.description && <p class="text-small text-ink-mid">{paper.data.description}</p>}
+          </Card>
+        ))
+      }
+    </div>
+  </SectionShell>
+</BaseLayout>

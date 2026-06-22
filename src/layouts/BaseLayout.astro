@@ -1,56 +1,75 @@
 ---
 import '../styles/global.css';
-import Navbar from '../components/layout/Navbar.astro';
-import Footer from '../components/layout/Footer.astro';
+import Nav from '../components/chrome/Nav.astro';
+import Footer from '../components/chrome/Footer.astro';
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
-  ogImage?: string;
+  noindex?: boolean;
 }
 
 const {
-  title,
-  description = 'The embedded database built for AI agents. Git-like branching, six primitives, intelligent operations.',
-  ogImage = '/og/default.png'
+  title = 'StrataDB — an embedded database with git semantics',
+  description = 'StrataDB is an embedded database with the whole git model: zero-copy O(1) branches, diff, merge, cherry-pick, time travel, and search — across five primitives. One file, no server. Research preview.',
+  noindex = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
     <meta name="description" content={description} />
-
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    {noindex && <meta name="robots" content="noindex" />}
 
-    <!-- Open Graph -->
+    <link rel="preload" href="/fonts/GeneralSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/CommitMono-400.woff2" as="font" type="font/woff2" crossorigin />
+
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
-
-    <!-- Twitter -->
+    <meta property="og:image" content={new URL('/og/default.png', Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+    <meta name="twitter:image" content={new URL('/og/default.png', Astro.site)} />
 
-    <title>{title}</title>
-
-    <!-- Preload fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script is:inline>
+      // Reduced-motion source of truth, set pre-paint (03 §6).
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+        document.documentElement.dataset.motion = 'reduced';
+    </script>
   </head>
-  <body class="min-h-screen flex flex-col">
-    <Navbar />
+  <body class="flex min-h-screen flex-col">
+    <Nav />
     <main class="flex-1">
       <slot />
     </main>
     <Footer />
+
+    <script>
+      // Standard reveal recipe (03 §2): one shared observer, 20% visibility, once.
+      const revealed = document.querySelectorAll('.reveal');
+      if (revealed.length) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-revealed');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { threshold: 0.2 }
+        );
+        revealed.forEach((el) => io.observe(el));
+      }
+    </script>
   </body>
 </html>

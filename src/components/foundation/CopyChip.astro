@@ -1,0 +1,43 @@
+---
+// Mono command + copy affordance (05 §2). `value` is what lands on the clipboard.
+interface Props {
+  value: string;
+  label?: string;
+  class?: string;
+}
+const { value, label, class: className = '' } = Astro.props;
+---
+
+<button
+  type="button"
+  class={`copy-chip group inline-flex items-center gap-3 rounded-(--radius-control) border border-line
+    bg-panel px-4 py-2.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200
+    hover:border-line-hover hover:text-ink-hi ${className}`}
+  data-copy={value}
+  aria-label={`Copy: ${value}`}
+>
+  <span class="copy-chip-label">{label ?? value}</span>
+  <span class="copy-chip-icon text-ink-low transition-colors duration-200 group-hover:text-ink-mid" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </svg>
+  </span>
+  <span class="copy-chip-done hidden text-ok" aria-hidden="true">✓ copied</span>
+</button>
+
+<script>
+  document.addEventListener('click', async (e) => {
+    const chip = (e.target as HTMLElement).closest<HTMLElement>('.copy-chip');
+    if (!chip?.dataset.copy) return;
+    await navigator.clipboard.writeText(chip.dataset.copy);
+    const icon = chip.querySelector('.copy-chip-icon');
+    const done = chip.querySelector('.copy-chip-done');
+    icon?.classList.add('hidden');
+    done?.classList.remove('hidden');
+    setTimeout(() => {
+      icon?.classList.remove('hidden');
+      done?.classList.add('hidden');
+    }, 2000);
+  });
+</script>

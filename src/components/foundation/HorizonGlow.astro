@@ -1,0 +1,31 @@
+---
+// The site's single signature lighting effect (02 §2, §10).
+// HARD CAP: two instances per page (hero, install close). Dev guard below.
+interface Props {
+  dim?: boolean; // install-close variant renders at 60% (04 §8)
+}
+const { dim = false } = Astro.props;
+---
+
+<div class="horizon-glow pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true" style={dim ? 'opacity:0.6' : ''}>
+  <div
+    class="absolute inset-x-0 bottom-0 h-[420px]"
+    style="background: radial-gradient(60% 100% at 50% 100%, var(--horizon-glow), transparent 70%);"
+  >
+  </div>
+  <div
+    class="absolute inset-x-0 bottom-0 h-px"
+    style="background: linear-gradient(90deg, transparent, var(--color-terracotta-500) 35%, var(--color-terracotta-300) 50%, var(--color-terracotta-500) 65%, transparent);"
+  >
+  </div>
+</div>
+
+<script>
+  if (import.meta.env.DEV) {
+    const count = document.querySelectorAll('.horizon-glow').length;
+    if (count > 2)
+      throw new Error(
+        `HorizonGlow: ${count} instances mounted — the cap is two per page (02 §10).`
+      );
+  }
+</script>

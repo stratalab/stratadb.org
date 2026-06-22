@@ -1,0 +1,28 @@
+---
+// The product-photography primitive — pixel-identical everywhere (02 §12, 05 §3).
+// Phase 1 ships `transcript` mode only; `scripted`/`live` arrive with the hero island.
+interface Props {
+  title?: string;
+  status?: string;
+  class?: string;
+}
+const { title = 'strata', status, class: className = '' } = Astro.props;
+---
+
+<figure
+  class={`overflow-hidden rounded-(--radius-frame) border border-line bg-panel ${className}`}
+  style="box-shadow: var(--shadow-float);"
+>
+  <figcaption class="flex h-10 items-center gap-2 border-b border-line px-4">
+    <span class="flex gap-1.5" aria-hidden="true">
+      <span class="h-2.5 w-2.5 rounded-full bg-ink-low/40"></span>
+      <span class="h-2.5 w-2.5 rounded-full bg-ink-low/40"></span>
+      <span class="h-2.5 w-2.5 rounded-full bg-ink-low/40"></span>
+    </span>
+    <span class="ml-2 font-mono text-mono-sm text-ink-low">{title}</span>
+    {status && <span class="ml-auto font-mono text-mono-sm text-ink-low">{status}</span>}
+  </figcaption>
+  <div class="bg-inset p-4 font-mono text-mono-body text-ink-mid" role="log">
+    <slot />
+  </div>
+</figure>

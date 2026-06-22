@@ -1,0 +1,27 @@
+---
+// The section rule (04 §1 v2, 2026-06-12): the page's drafting system.
+// Every section opens with a full-bleed hairline, registration marks at the
+// column edges, the mono eyebrow, and its index in the running order —
+// the page reads as one engineered document, not a stack of panels.
+// (Polish reference: supermemory.ai's ruling system; ours is quieter.)
+interface Props {
+  label: string;
+  index: string;
+  total?: string;
+}
+const { label, index, total = '07' } = Astro.props;
+---
+
+<div class="border-t border-line">
+  <div class="mx-auto flex w-full max-w-[70rem] items-baseline justify-between px-6 pt-3 max-[480px]:px-4">
+    <p class="font-mono text-eyebrow uppercase text-ink-low">
+      <span class="mr-3 select-none text-ink-low" aria-hidden="true">+</span>
+      <span class="text-terracotta-500" aria-hidden="true">⟩</span>
+      {label}
+    </p>
+    <p class="font-mono text-eyebrow text-ink-low" aria-hidden="true">
+      [ <span class="text-terracotta-400">{index}</span> / {total} ]
+      <span class="ml-3 select-none text-ink-low">+</span>
+    </p>
+  </div>
+</div>

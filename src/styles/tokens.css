@@ -1,0 +1,166 @@
+/*
+ * Strata design tokens — THE 02 §13 contract. The only file allowed to contain
+ * raw color/size/duration values. CI fails the build on literals elsewhere.
+ *
+ * Naming note: Doc 02 ink tokens (--text-hi/mid/low) collide with Tailwind v4's
+ * font-size namespace (--text-*), so ink colors map to --color-ink-* here
+ * (class form: text-ink-hi). All other names match the doc verbatim.
+ */
+
+/* `static` — the contract emits ALL tokens regardless of utility usage:
+   inline styles, JS islands, and future consumers read these vars directly. */
+@theme static {
+  /* ---- canvas: THE NEUTRAL STAGE (Neon-macro, 2026-06-12) ----
+     Decided in pixels after the full tour (clay → ember → sapphire →
+     midnight → daylight → aurora): a strictly NEUTRAL macro — true black,
+     pure white, crisp grays — so ember is the only temperature on the
+     page. Tinted canvases made the accent compete with ambient tint;
+     the neutral stage makes it electric. (Honest reversal of the same-day
+     "no greyish colors" rule: crisp neutral is a stage, not mud.) */
+  --color-void: #000000;
+  --color-panel: #0e0f10;
+  --color-raised: #17181a;
+  --color-inset: #070708;
+
+  /* ---- ink: pure white + neutral grays ----
+     Measured: ink-mid ≥6.48:1, ink-low ≥4.56:1 on every surface. */
+  --color-ink-hi: #ffffff;
+  --color-ink-mid: #9a9ca3;
+  --color-ink-low: #7e8189;
+
+  /* ---- lines: neutral hairlines ---- */
+  --color-line: rgba(255, 255, 255, 0.09);
+  --color-line-hover: rgba(255, 255, 255, 0.16);
+
+  /* ---- terracotta ramp (02 §4.1; EMBER recalibration 2026-06-12) ----
+     Clay → ember: same family, luminous instead of muted — the palette
+     emits light rather than absorbing it (Ani: the clay read "too serious").
+     Ramp rebalanced around the new 500. */
+  --color-terracotta-50: #fff1ec;
+  --color-terracotta-100: #ffe0d4;
+  --color-terracotta-200: #ffc4ae;
+  --color-terracotta-300: #ffb191;
+  --color-terracotta-400: #ff9670;
+  --color-terracotta-500: #ff7a52;
+  --color-terracotta-600: #e85f3a;
+  --color-terracotta-700: #c44a28;
+  --color-terracotta-800: #9c3a1f;
+  --color-terracotta-900: #7d2f1a;
+  --color-terracotta-950: #431711;
+
+  /* ---- sediment ramp (02 §4.2) ---- */
+  --color-sediment-50: #faf8f6;
+  --color-sediment-100: #f1eeea;
+  --color-sediment-200: #e2ddd6;
+  --color-sediment-300: #c9c2b9;
+  --color-sediment-400: #a8a29b;
+  --color-sediment-500: #8a847c;
+  --color-sediment-600: #6b665f;
+  --color-sediment-700: #4f4b45;
+  --color-sediment-800: #33302c;
+  --color-sediment-900: #1a1817;
+  --color-sediment-950: #0a0908;
+
+  /* ---- the five primitives, on-dark anchors (02 §4.3; ember-luminous) ----
+     branch is NOT a primitive — the branch model wears terracotta (brand). */
+  --color-strata-kv: #7caaff;
+  --color-strata-event: #4fe0a6;
+  --color-strata-json: #ffc66e;
+  --color-strata-vector: #ff8cc6;
+  --color-strata-graph: #b89cff;
+
+  /* ---- functional, on-dark (02 §4.4; ember-luminous) ---- */
+  --color-ok: #3fe3a4;
+  --color-warn: #ffc66e;
+  --color-err: #ff6f64;
+
+  /* ---- type (02 §5, §11) ---- */
+  --font-sans: 'General Sans', system-ui, sans-serif;
+  --font-mono: 'Commit Mono', ui-monospace, monospace;
+
+  --text-display-xl: clamp(2.75rem, 1.4rem + 5.2vw, 5.75rem);
+  --text-display-xl--line-height: 0.98;
+  --text-display-xl--letter-spacing: -0.035em;
+  --text-display-xl--font-weight: 600;
+
+  --text-display: clamp(2.25rem, 1.4rem + 3.2vw, 4rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.025em;
+  --text-display--font-weight: 600;
+
+  --text-title: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.015em;
+  --text-title--font-weight: 600;
+
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.25;
+  --text-heading--letter-spacing: -0.01em;
+  --text-heading--font-weight: 600;
+
+  --text-body-lg: 1.1875rem;
+  --text-body-lg--line-height: 1.55;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+
+  --text-eyebrow: 0.8125rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.06em;
+  --text-eyebrow--font-weight: 500;
+
+  --text-mono-body: 0.9375rem;
+  --text-mono-body--line-height: 1.7;
+
+  --text-mono-sm: 0.8125rem;
+  --text-mono-sm--line-height: 1.7;
+
+  --text-stat: 3.5rem;
+  --text-stat--line-height: 1;
+  --text-stat--letter-spacing: -0.02em;
+  --text-stat--font-weight: 500;
+
+  /* ---- radii (02 §12) ---- */
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --radius-frame: 14px;
+
+  /* ---- motion easings (03 §1) ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Non-Tailwind tokens: consumed as plain CSS vars / by JS islands */
+:root {
+  /* durations (03 §1) */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 480ms;
+  --dur-5: 800ms;
+
+  /* the ONE glow (02 §10) — used only by HorizonGlow; ember presence */
+  --horizon-glow: rgba(255, 122, 82, 0.24);
+
+  /* hero backdrop lights (the living background, 2026-06-12): three slow-
+     breathing fields on the neutral stage — ember dominant, one cool
+     counterpoint. Consumed only by the Hero backdrop. */
+  --backdrop-ember: rgba(255, 122, 82, 0.15);
+  --backdrop-ember-deep: rgba(232, 95, 58, 0.11);
+  --backdrop-cool: rgba(124, 170, 255, 0.09);
+
+  /* branch-story card surfaces (2026-06-12): the only tinted surfaces on the
+     neutral stage — main is cool slate (stable), risky is ember-warm
+     (experimental); the merge dissolves warm into cool. */
+  --color-branch-main-surface: #101a36;
+  --color-branch-main-well: #0b1226;
+  --color-branch-risky-surface: #2a150b;
+  --color-branch-risky-well: #1d0e06;
+
+  /* floating set-piece shadow (02 §12) */
+  --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,
+    0 24px 64px -32px rgba(0, 0, 0, 0.7);
+}

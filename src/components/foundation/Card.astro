@@ -1,0 +1,16 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+}
+const { href, class: className = '' } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  href={href}
+  class={`block rounded-(--radius-card) border border-line bg-panel p-6
+    transition-colors duration-200 hover:border-line-hover ${className}`}
+>
+  <slot />
+</Tag>

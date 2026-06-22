@@ -1,0 +1,380 @@
+---
+// Section 1 (04 §2): badge → H1 → CTAs → set-piece. No eyebrow, no sub.
+// (Stat strip removed 2026-06-12, Ani — the benchmark claims leave the hero;
+// benchmarks.json remains for the specimen/docs.) Parallax site #1 of 2
+// (03 §3.1): glow 0.85× · terminal 1.0×.
+import Badge from '../foundation/Badge.astro';
+import Heading from '../foundation/Heading.astro';
+import Button from '../foundation/Button.astro';
+import CopyChip from '../foundation/CopyChip.astro';
+import HorizonGlow from '../foundation/HorizonGlow.astro';
+import ForkingTerminal from './hero/ForkingTerminal.tsx';
+import release from '../../data/release.json';
+
+// The data-model index (2026-06-13, Ani: "reference it on the hero without
+// leaning in" → "make the icons more prominent and beautiful"). NOT the stat
+// strip reborn — that was claims; this is an index, and every tile is a link
+// into the section that proves it. Catalog order matches section 03's tabs.
+// One temperature: ink on a crafted tile at rest, ember only on hover.
+// Icons drawn at a 24 grid, balanced weight, round joins.
+const dataModel = [
+  {
+    label: 'kv',
+    href: '#primitives',
+    // a key: round bow, shaft, two teeth
+    icon: '<circle cx="6.5" cy="12" r="3.5"/><path d="M10 12h9.5"/><path d="M15.5 12v3.2M18.5 12v3.2"/>',
+  },
+  {
+    label: 'event',
+    href: '#primitives',
+    // an event spike on the timeline
+    icon: '<path d="M2.5 12.5h4.2l2.1-6.4 3.6 12 2.4-7 1.6 3.4h4.6"/>',
+  },
+  {
+    label: 'json',
+    href: '#primitives',
+    // matched braces with a value node between
+    icon: '<path d="M9 4.5C7.4 4.5 6.8 5.4 6.8 6.9v2c0 1.3-.7 2.1-1.8 2.6 1.1.5 1.8 1.3 1.8 2.6v2c0 1.5.6 2.4 2.2 2.4"/><path d="M15 4.5c1.6 0 2.2.9 2.2 2.4v2c0 1.3.7 2.1 1.8 2.6-1.1.5-1.8 1.3-1.8 2.6v2c0 1.5-.6 2.4-2.2 2.4"/><circle cx="12" cy="12" r="1.05"/>',
+  },
+  {
+    label: 'vector',
+    href: '#primitives',
+    // a directed magnitude from the origin
+    icon: '<circle cx="5.5" cy="18.5" r="1.6"/><path d="M6.7 17.3 17.5 6.5"/><path d="M12 6.5h5.5V12"/>',
+  },
+  {
+    label: 'graph',
+    href: '#primitives',
+    // three nodes, edges between
+    icon: '<circle cx="6" cy="17.5" r="2.2"/><circle cx="12.5" cy="6" r="2.2"/><circle cx="18" cy="15.5" r="2.2"/><path d="M7.1 15.6 11.4 7.9M14 7.2l3.2 6.3M8.2 17.2l7.6-1.2"/>',
+  },
+  {
+    label: 'ai',
+    href: '#inference',
+    // a four-point spark, with a smaller companion
+    icon: '<path d="M11 3.2l1.7 5 5 1.7-5 1.7-1.7 5-1.7-5-5-1.7 5-1.7z"/><path d="M18.4 14.6l.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7z"/>',
+  },
+];
+---
+
+<section class="relative overflow-hidden">
+  <!-- The living backdrop (2026-06-12): three light fields breathing on the
+       neutral stage. Transform-only, GPU-composited, 22–36s periods —
+       sanctioned infinite animation #2 (03 §5 amendment). -->
+  <div class="hero-backdrop pointer-events-none absolute inset-0" aria-hidden="true">
+    <div class="hero-light hero-light-ember"></div>
+    <div class="hero-light hero-light-cool"></div>
+    <div class="hero-light hero-light-deep"></div>
+    <!-- The branching river (2026-06-12): the product thesis as artwork — a
+         trunk forks, strands diverge, one merges back. Energy flows along the
+         lines via dashoffset; each strand = wide glow stroke + bright core. -->
+    <svg class="hero-river absolute inset-0 h-full w-full" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
+      {
+        [
+          { d: 'M -40 430 C 280 430 360 430 520 360 C 700 280 900 250 1480 230', cls: 'river-ember', dur: '7s' },
+          { d: 'M -40 430 C 300 430 420 440 560 500 C 760 590 980 620 1480 600', cls: 'river-ember', dur: '9s' },
+          { d: 'M -40 430 C 320 432 480 420 640 420 C 880 420 1100 430 1480 425', cls: 'river-cool', dur: '11s' },
+          { d: 'M 520 360 C 640 320 760 360 880 420 C 1000 480 1100 430 1180 428', cls: 'river-ember-dim', dur: '8s' },
+          { d: 'M -40 470 C 240 470 400 520 540 560 C 720 610 900 560 1480 660', cls: 'river-ember-dim', dur: '13s' },
+        ].map((p) => (
+          <>
+            <path d={p.d} class={`river-glow ${p.cls}`} style={`--dur: ${p.dur}`} />
+            <path d={p.d} class={`river-core ${p.cls}`} style={`--dur: ${p.dur}`} />
+          </>
+        ))
+      }
+    </svg>
+  </div>
+  <div data-parallax="0.85" class="absolute inset-0 will-change-transform">
+    <HorizonGlow />
+  </div>
+  <!-- Content scrim (2026-06-12): quiets the river exactly where the words
+       sit — the artwork stays, legibility wins. -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    style="background: radial-gradient(ellipse 58% 46% at 50% 36%, rgba(0,0,0,0.78), rgba(0,0,0,0.35) 55%, transparent 72%);"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="relative mx-auto w-full max-w-[70rem] px-6 pb-24 pt-20 max-[480px]:px-4 md:pt-28">
+    <div class="mb-14 text-center">
+      <Badge href="/changelog" class="mb-8">Research preview · v{release.version}</Badge>
+      <Heading level={1} size="display-xl">Strata is the embedded database for the AI era</Heading>
+
+      <!-- The acquisition control (2026-06-12): the hero IS the act surface.
+           No Get Started — get the product: CLI via curl, or the studio. -->
+      <!-- Two species, two paths (2026-06-12): the GUI gets a real button that
+           says what it IS (nobody knows "Foundry" yet); the CLI keeps the quiet
+           mono chip. "Get", not "Download", until R1 artifacts exist. -->
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <span class="inline-flex items-center rounded-full border border-line bg-panel/80 px-5 py-2.5 font-mono text-mono-sm text-ink-mid">
+          Under construction · check back soon
+        </span>
+        {/* install instructions — temporarily hidden, will restore soon
+        <CopyChip
+          value="curl -fsSL stratadb.org/install.sh | sh"
+          class="!bg-raised [&_.copy-chip-label]:!text-ink-hi"
+        />
+        */}
+      </div>
+      <!-- The agent door as an ACTION (2026-06-12, pattern: mem0.ai): copies a
+           ready-to-paste instruction for the visitor's agent, pointing at the
+           for-agents recipe's markdown mirror. The human is the courier. -->
+      {/* "set up with your agent" CTA — temporarily hidden, will restore soon
+      <p class="mt-4">
+        <button
+          type="button"
+          class="copy-chip group inline-flex items-center gap-2.5 rounded-full border border-line bg-panel/90 px-4 py-1.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
+          data-copy="Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/getting-started/for-agents.md — report the verification output when done."
+          aria-label="Copy setup instructions for your AI agent"
+        >
+          <span>Set up with your agent</span>
+          <span class="copy-chip-icon text-ink-low transition-colors duration-200 group-hover:text-ink-mid" aria-hidden="true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+              <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+            </svg>
+          </span>
+          <span class="copy-chip-done hidden text-ok" aria-hidden="true">✓ copied — paste it to your agent</span>
+        </button>
+      </p>
+      */}
+
+      <nav
+        class="mt-12 flex flex-wrap items-start justify-center gap-x-3 gap-y-4"
+        aria-label="Data model"
+      >
+        {
+          dataModel.map((item) => (
+            <a href={item.href} class="dm-tile group">
+              <span class="dm-chip">
+                <svg
+                  class="dm-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  set:html={item.icon}
+                />
+              </span>
+              <span class="dm-label">{item.label}</span>
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <div class="mx-auto max-w-[56rem]">
+      <ForkingTerminal client:visible />
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* Perceptibility fix (2026-06-12): the first cut moved ~0.5%/s — technically
+     animated, perceptually static. Now: 11–18s periods, wider travel, and
+     opacity breathing (the eye catches luminosity change fastest). Still
+     transform/opacity only; still off under reduced motion. */
+  .hero-light {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform, opacity;
+  }
+  .hero-light-ember {
+    width: 58%;
+    height: 80%;
+    left: 4%;
+    top: 0%;
+    background: radial-gradient(circle, var(--backdrop-ember), transparent 62%);
+    animation: hero-drift-a 14s ease-in-out infinite alternate;
+  }
+  .hero-light-cool {
+    width: 50%;
+    height: 70%;
+    right: -4%;
+    top: 8%;
+    background: radial-gradient(circle, var(--backdrop-cool), transparent 60%);
+    animation: hero-drift-b 18s ease-in-out infinite alternate;
+  }
+  .hero-light-deep {
+    width: 46%;
+    height: 56%;
+    left: 26%;
+    bottom: -14%;
+    background: radial-gradient(circle, var(--backdrop-ember-deep), transparent 65%);
+    animation: hero-drift-c 11s ease-in-out infinite alternate;
+  }
+  @keyframes hero-drift-a {
+    from { transform: translate3d(-10%, -7%, 0) scale(0.94); opacity: 0.55; }
+    to { transform: translate3d(14%, 10%, 0) scale(1.28); opacity: 1; }
+  }
+  @keyframes hero-drift-b {
+    from { transform: translate3d(10%, 8%, 0) scale(1.18); opacity: 1; }
+    to { transform: translate3d(-13%, -9%, 0) scale(0.88); opacity: 0.5; }
+  }
+  @keyframes hero-drift-c {
+    from { transform: translate3d(-8%, 5%, 0) scale(0.9); opacity: 0.6; }
+    to { transform: translate3d(10%, -8%, 0) scale(1.22); opacity: 1; }
+  }
+  html[data-motion='reduced'] .hero-light {
+    animation: none;
+  }
+
+  /* ---- the data-model index (crafted tiles) ----
+     Prominence from structure, not color: a raised glass tile with a hairline
+     edge and an inner top highlight. Ember is the hover temperature only —
+     the row never lights up five ways at once. */
+  .dm-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    width: 4.5rem;
+  }
+  .dm-chip {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 15px;
+    border: 1px solid var(--color-line);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.008));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.4);
+    color: var(--color-ink-mid);
+    transition:
+      transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.22s ease,
+      background 0.22s ease,
+      box-shadow 0.22s ease,
+      color 0.22s ease;
+  }
+  .dm-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .dm-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-mid);
+    transition: color 0.22s ease;
+  }
+  .dm-tile:hover .dm-chip {
+    transform: translateY(-3px);
+    border-color: rgba(255, 122, 82, 0.55);
+    background: linear-gradient(180deg, rgba(255, 122, 82, 0.14), rgba(255, 122, 82, 0.02));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 12px 26px -12px rgba(255, 122, 82, 0.5);
+    color: var(--color-terracotta-400);
+  }
+  .dm-tile:hover .dm-label {
+    color: var(--color-ink-hi);
+  }
+  .dm-tile:focus-visible {
+    outline: none;
+  }
+  .dm-tile:focus-visible .dm-chip {
+    border-color: rgba(255, 122, 82, 0.55);
+    color: var(--color-terracotta-400);
+    box-shadow: 0 0 0 2px rgba(255, 122, 82, 0.45);
+  }
+  html[data-motion='reduced'] .dm-chip {
+    transition: border-color 0.22s ease, background 0.22s ease, color 0.22s ease;
+  }
+  html[data-motion='reduced'] .dm-tile:hover .dm-chip {
+    transform: none;
+  }
+
+  /* ---- the branching river ---- */
+  .hero-river {
+    opacity: 0.85;
+  }
+  .river-glow,
+  .river-core {
+    stroke-linecap: round;
+    fill: none;
+  }
+  .river-glow {
+    stroke-width: 7;
+    opacity: 0.25;
+  }
+  .river-core {
+    stroke-width: 1.75;
+    opacity: 0.9;
+    stroke-dasharray: 90 160;
+    animation: river-flow var(--dur, 9s) linear infinite;
+  }
+  .river-core.river-ember {
+    stroke: var(--color-terracotta-400);
+  }
+  .river-glow.river-ember {
+    stroke: var(--color-terracotta-600);
+  }
+  .river-core.river-ember-dim {
+    stroke: var(--color-terracotta-600);
+    opacity: 0.6;
+  }
+  .river-glow.river-ember-dim {
+    stroke: var(--color-terracotta-800);
+    opacity: 0.18;
+  }
+  .river-core.river-cool {
+    stroke: #7caaff;
+    opacity: 0.55;
+  }
+  .river-glow.river-cool {
+    stroke: #7caaff;
+    opacity: 0.12;
+  }
+  @keyframes river-flow {
+    to {
+      stroke-dashoffset: -250;
+    }
+  }
+  html[data-motion='reduced'] .river-core {
+    animation: none;
+    stroke-dasharray: none;
+    opacity: 0.5;
+  }
+</style>
+
+<script>
+  // Hero parallax: one rAF sampler, transform-only, off for touch + reduced motion,
+  // drift clamped to 48px (03 §3.1, §3.3).
+  const reduced = document.documentElement.dataset.motion === 'reduced';
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  if (!reduced && !coarse) {
+    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]')).map((el) => ({
+      el,
+      factor: parseFloat(el.dataset.parallax || '1'),
+    }));
+    let ticking = false;
+    const apply = () => {
+      ticking = false;
+      const y = window.scrollY;
+      for (const { el, factor } of els) {
+        const drift = Math.max(-48, Math.min(48, y * (1 - factor)));
+        el.style.transform = `translate3d(0, ${drift}px, 0)`;
+      }
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(apply);
+        }
+      },
+      { passive: true }
+    );
+  }
+</script>

@@ -1,0 +1,20 @@
+---
+// Maps the 02 §11 scale; tracking/weight/line-height live in the size tokens.
+interface Props {
+  level?: 1 | 2 | 3 | 4;
+  size: 'display-xl' | 'display' | 'title' | 'heading';
+  class?: string;
+}
+const { level = 2, size, class: className = '' } = Astro.props;
+const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
+const sizeClass = {
+  'display-xl': 'text-display-xl',
+  display: 'text-display',
+  title: 'text-title',
+  heading: 'text-heading',
+}[size];
+---
+
+<Tag class={`${sizeClass} text-balance text-ink-hi ${className}`}>
+  <slot />
+</Tag>

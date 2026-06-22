@@ -1,147 +1,39 @@
 ---
+// Docs reading experience, re-skinned with tokens (Phase 5). Prose is owned by
+// strata-core (synced); this layout owns presentation only.
 import BaseLayout from './BaseLayout.astro';
-import Sidebar from '../components/layout/Sidebar.astro';
+import DocsSidebar from '../components/chrome/DocsSidebar.astro';
+import { docsNav } from '../lib/docsNav';
 
 interface Props {
   title: string;
   description?: string;
+  mdHref?: string;
 }
-
-const { title, description } = Astro.props;
-const currentPath = Astro.url.pathname;
-
-// Sidebar structure
-const sidebarItems = [
-  {
-    title: 'Getting Started',
-    href: '/docs/getting-started',
-    items: [
-      { title: 'Installation', href: '/docs/getting-started/installation' },
-      { title: 'Your First Database', href: '/docs/getting-started/first-database' },
-    ],
-  },
-  {
-    title: 'Concepts',
-    href: '/docs/concepts',
-    items: [
-      { title: 'Branches', href: '/docs/concepts/branches' },
-      { title: 'Primitives', href: '/docs/concepts/primitives' },
-      { title: 'Value Types', href: '/docs/concepts/value-types' },
-      { title: 'Transactions', href: '/docs/concepts/transactions' },
-      { title: 'Durability', href: '/docs/concepts/durability' },
-    ],
-  },
-  {
-    title: 'Guides',
-    href: '/docs/guides',
-    items: [
-      { title: 'KV Store', href: '/docs/guides/kv-store' },
-      { title: 'Event Log', href: '/docs/guides/event-log' },
-      { title: 'State Cell', href: '/docs/guides/state-cell' },
-      { title: 'JSON Store', href: '/docs/guides/json-store' },
-      { title: 'Vector Store', href: '/docs/guides/vector-store' },
-      { title: 'Branch Management', href: '/docs/guides/branch-management' },
-      { title: 'Spaces', href: '/docs/guides/spaces' },
-      { title: 'Sessions & Transactions', href: '/docs/guides/sessions-and-transactions' },
-      { title: 'Search', href: '/docs/guides/search' },
-      { title: 'Configuration', href: '/docs/guides/database-configuration' },
-      { title: 'Branch Bundles', href: '/docs/guides/branch-bundles' },
-      { title: 'Error Handling', href: '/docs/guides/error-handling' },
-      { title: 'Observability', href: '/docs/guides/observability' },
-    ],
-  },
-  {
-    title: 'Cookbook',
-    href: '/docs/cookbook',
-    items: [
-      { title: 'Agent State Management', href: '/docs/cookbook/agent-state-management' },
-      { title: 'Multi-Agent Coordination', href: '/docs/cookbook/multi-agent-coordination' },
-      { title: 'RAG with Vectors', href: '/docs/cookbook/rag-with-vectors' },
-      { title: 'Deterministic Replay', href: '/docs/cookbook/deterministic-replay' },
-      { title: 'A/B Testing with Branches', href: '/docs/cookbook/ab-testing-with-branches' },
-    ],
-  },
-  {
-    title: 'Reference',
-    href: '/docs/reference',
-    items: [
-      { title: 'CLI Reference', href: '/docs/reference/cli' },
-      { title: 'MCP Server Reference', href: '/docs/reference/mcp' },
-      { title: 'Python SDK Reference', href: '/docs/reference/python-sdk' },
-      { title: 'Node.js SDK Reference', href: '/docs/reference/node-sdk' },
-      { title: 'API Quick Reference', href: '/docs/reference/api-quick-reference' },
-      { title: 'Value Types', href: '/docs/reference/value-type-reference' },
-      { title: 'Error Reference', href: '/docs/reference/error-reference' },
-      { title: 'Command Reference', href: '/docs/reference/command-reference' },
-      { title: 'Configuration', href: '/docs/reference/configuration-reference' },
-    ],
-  },
-  { title: 'FAQ', href: '/docs/faq' },
-  { title: 'Troubleshooting', href: '/docs/troubleshooting' },
-];
+const { title, description, mdHref } = Astro.props;
+const sections = await docsNav();
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
 ---
 
-<BaseLayout title={`${title} - StrataDB Docs`} description={description}>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex gap-8">
-      <!-- Sidebar -->
-      <Sidebar items={sidebarItems} currentPath={currentPath} />
-
-      <!-- Main content -->
-      <article class="flex-1 min-w-0">
+<BaseLayout title={`${title} — StrataDB Docs`} description={description}>
+  <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4">
+    <div class="flex gap-12">
+      <DocsSidebar sections={sections} currentPath={currentPath} />
+      <article class="min-w-0 flex-1">
         <div class="prose-docs">
           <slot />
         </div>
-
-        <!-- Prev/Next navigation -->
-        <nav class="mt-16 pt-8 border-t border-border">
-          <div class="flex justify-between">
-            <slot name="prev" />
-            <slot name="next" />
-          </div>
-        </nav>
+        {
+          mdHref && (
+            <p class="mt-16 border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
+              agents: this page as markdown →{' '}
+              <a href={mdHref} class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">
+                {mdHref}
+              </a>
+            </p>
+          )
+        }
       </article>
-
-      <!-- Table of contents (placeholder) -->
-      <aside class="w-56 flex-shrink-0 hidden xl:block">
-        <div class="sticky top-24">
-          <h4 class="text-sm font-semibold text-text-primary mb-4">On this page</h4>
-          <div id="toc" class="text-sm text-text-secondary space-y-2">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-      </aside>
     </div>
   </div>
 </BaseLayout>
-
-<script>
-  // Generate table of contents
-  const article = document.querySelector('article');
-  const toc = document.getElementById('toc');
-
-  if (article && toc) {
-    const headings = article.querySelectorAll('h2, h3');
-    const tocList = document.createElement('ul');
-    tocList.className = 'space-y-2';
-
-    headings.forEach((heading) => {
-      if (!heading.id) {
-        heading.id = heading.textContent?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') || '';
-      }
-
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = `#${heading.id}`;
-      a.textContent = heading.textContent;
-      a.className = heading.tagName === 'H3'
-        ? 'block pl-4 hover:text-terracotta transition-colors'
-        : 'block hover:text-terracotta transition-colors font-medium';
-
-      li.appendChild(a);
-      tocList.appendChild(li);
-    });
-
-    toc.appendChild(tocList);
-  }
-</script>

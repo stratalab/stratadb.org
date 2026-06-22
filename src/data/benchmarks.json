@@ -1,0 +1,13 @@
+{
+  "provenance": {
+    "source": "strata-benchmarks (import pending verification — Doc 06 §4; numbers inherited from prior site claims and MUST be re-measured before cutover)",
+    "measured_at": null
+  },
+  "stats": [
+    { "value": "250K ops/s", "note": "single thread, Cache mode" },
+    { "value": "<1 ms fork", "note": "branch fork, any size — O(1), zero copy" },
+    { "value": "5 primitives", "note": "kv · event · json · vector · graph" },
+    { "value": "0 servers", "note": "embedded — runs inside your process" },
+    { "value": "Apache-2.0", "note": "strata-core license" }
+  ]
+}

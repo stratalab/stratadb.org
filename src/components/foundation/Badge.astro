@@ -1,0 +1,16 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+}
+const { href, class: className = '' } = Astro.props;
+const Tag = href ? 'a' : 'span';
+const base =
+  'inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-1.5 ' +
+  'font-mono text-mono-sm text-ink-mid transition-colors duration-200';
+const interactive = href ? 'hover:border-line-hover hover:text-ink-hi' : '';
+---
+
+<Tag href={href} class={`${base} ${interactive} ${className}`}>
+  <slot />
+</Tag>
