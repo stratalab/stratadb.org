@@ -1,6 +1,6 @@
 ---
 // PRIVATE pitch surface — Strata engine, "engineering spec-sheet" aesthetic.
-// §1–§6, complete. Closes on the benchmarks (the "why it matters" close stays verbal).
+// §1–§10. Closes on the benchmarks (the "why it matters" close stays verbal).
 import PitchLayout from '../../layouts/PitchLayout.astro';
 
 const sections = [
@@ -11,6 +11,7 @@ const sections = [
   { id: 'product', label: 'Product Architecture' },
   { id: 'architecture', label: 'Storage Architecture' },
   { id: 'vector', label: 'Vector Architecture' },
+  { id: 'api', label: 'API Surface' },
   { id: 'testing', label: 'Testing Methodology' },
   { id: 'benchmarks', label: 'Benchmarks' },
 ];
@@ -857,11 +858,111 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §8 · HOW WE TEST -->
+  <!-- §8 · API SURFACE — one operation contract, machine-actionable errors -->
+  <section id="api" class="pitch-section" aria-label="API surface">
+    <div class="pitch-wrap">
+      <header class="sec-header reveal">
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;08<span class="sec-name">API Surface</span></span>
+      </header>
+
+      <div class="sec-body">
+        <div class="arch-intro reveal">
+          <h2 class="sec-title">API Surface</h2>
+          <p class="sec-lead">Strata is embedded, so the API is a library call inside the host process. One schema defines the operations, and every surface is generated from it: the CLI, the REPL, the language SDKs, and an MCP server for agents. Every failure returns the same structured value, carrying a stable code, a retry rule, and a commit outcome. Calling code branches on those fields rather than parsing a message.</p>
+        </div>
+
+        <div class="varch-top api-top reveal" style="transition-delay: 90ms">
+          <div class="vquery">
+            <figure class="pane-svg">
+              <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                <text x="6" y="11" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">one schema · every surface generated</text>
+                <rect x="6" y="56" width="78" height="40" rx="3" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.25" />
+                <text x="45" y="73" text-anchor="middle" style="font-family:var(--font-mono);font-size:8px;fill:var(--color-terracotta-700)">schema</text>
+                <text x="45" y="85" text-anchor="middle" style="font-family:var(--font-mono);font-size:6px;fill:var(--color-terracotta-700)">ops + errors</text>
+                <line x1="84" y1="76" x2="208" y2="32" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M202 29 L210 33 L203 38 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="84" y1="76" x2="208" y2="76" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M204 73 L211 76 L204 79 Z" style="fill:var(--color-ink-mid)" />
+                <line x1="84" y1="76" x2="208" y2="120" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M202 123 L210 119 L203 114 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="212" y="14" width="142" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="221" y="31" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">CLI · REPL</text>
+                <text x="221" y="43" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-ink-low)">strata ./db</text>
+                <rect x="212" y="58" width="142" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="221" y="75" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">SDK</text>
+                <text x="221" y="87" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-ink-low)">Python · Rust · TS · Go</text>
+                <rect x="212" y="102" width="142" height="36" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="221" y="119" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">MCP</text>
+                <text x="221" y="131" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-ink-low)">tools · resources</text>
+              </svg>
+            </figure>
+            <p class="vq-cap">Add an operation once and it reaches every surface; the same schema also emits the OpenAPI document and the reference docs, so the surfaces cannot drift apart.</p>
+          </div>
+
+          <div class="vquery">
+            <figure class="pane-svg">
+              <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
+                <text x="6" y="11" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)">one failure shape · branch on the fields</text>
+                <rect x="6" y="67" width="50" height="32" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="31" y="86" text-anchor="middle" style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-hi)">commit()</text>
+                <text x="68" y="78" text-anchor="middle" style="font-family:var(--font-mono);font-size:6px;fill:var(--color-ink-low)">fails</text>
+                <line x1="56" y1="83" x2="78" y2="83" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M74 80 L80 83 L74 86 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="82" y="20" width="182" height="126" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="91" y="39" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">class</text>
+                <text x="140" y="39" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">ambiguous_commit</text>
+                <text x="91" y="58" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">code</text>
+                <text x="140" y="58" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-terracotta-700)">ambiguous_commit.wal_publish</text>
+                <text x="91" y="77" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">message</text>
+                <text x="140" y="77" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">publish unconfirmed</text>
+                <text x="91" y="96" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">fix</text>
+                <text x="140" y="96" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">read the commit back</text>
+                <text x="91" y="115" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">ref</text>
+                <text x="140" y="115" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">evt_01H8RX2K</text>
+                <text x="91" y="134" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-low)">docs</text>
+                <text x="140" y="134" style="font-family:var(--font-mono);font-size:7px;fill:var(--color-ink-mid)">/errors/ambiguous_commit</text>
+                <line x1="264" y1="66" x2="276" y2="66" style="stroke:var(--color-ink-mid);stroke-width:1.1" />
+                <path d="M272 63 L278 66 L272 69 Z" style="fill:var(--color-ink-mid)" />
+                <rect x="278" y="52" width="78" height="28" rx="3" style="fill:var(--color-panel);stroke:var(--color-ink-mid);stroke-width:1.25" />
+                <text x="285" y="65" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-ink-low)">retry</text>
+                <text x="285" y="75" style="font-family:var(--font-mono);font-size:6.8px;fill:var(--color-ink-mid)">unknown</text>
+                <line x1="264" y1="100" x2="276" y2="100" style="stroke:var(--ember);stroke-width:1.1" />
+                <path d="M272 97 L278 100 L272 103 Z" style="fill:var(--ember)" />
+                <rect x="278" y="86" width="78" height="28" rx="3" style="fill:var(--ember-soft);stroke:var(--ember);stroke-width:1.25" />
+                <text x="285" y="99" style="font-family:var(--font-mono);font-size:6.5px;fill:var(--color-terracotta-700)">outcome</text>
+                <text x="285" y="109" style="font-family:var(--font-mono);font-size:6.8px;fill:var(--color-terracotta-700)">maybe_committed</text>
+              </svg>
+            </figure>
+            <p class="vq-cap">The same six fields render in every language and on the wire. An agent reads the code and the outcome and decides what to do next, with no message parsing.</p>
+          </div>
+        </div>
+
+        <div class="varch-cards api-cards reveal" style="transition-delay: 140ms">
+          <article class="crate">
+            <h3 class="vcard-name">Stable error codes</h3>
+            <p class="crate-desc">Every error carries a code drawn from a fixed set of classes. Callers and tests match on the code, so the message wording can change without breaking them.</p>
+            <p class="api-enum"><code>class</code>.<code>area</code>.<code>detail</code> · 15 classes</p>
+          </article>
+          <article class="crate">
+            <h3 class="vcard-name">Retry policy</h3>
+            <p class="crate-desc">Each error states how it may be retried, so a loop reads the rule instead of guessing whether a failure was transient.</p>
+            <p class="api-enum">never · after_state_change · same_request · idempotent_only · unknown</p>
+          </article>
+          <article class="crate">
+            <h3 class="vcard-name">Commit outcomes</h3>
+            <p class="crate-desc">Each write reports what is known about durability. An ambiguous commit is reported as such instead of being folded into a generic timeout, so the caller can read it back and resolve it.</p>
+            <p class="api-enum">not_applicable · not_started · definitely_not_committed · <span class="k">maybe_committed</span> · committed_post_commit_failed</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §9 · HOW WE TEST -->
   <section id="testing" class="pitch-section" aria-label="How we test">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;08<span class="sec-name">Testing Methodology</span></span>      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;09<span class="sec-name">Testing Methodology</span></span>      </header>
 
       <div class="sec-body">
         <h2 class="sec-title reveal">Testing Methodology</h2>
@@ -944,11 +1045,11 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §9 · BENCHMARKS -->
+  <!-- §10 · BENCHMARKS -->
   <section id="benchmarks" class="pitch-section" aria-label="Benchmarks">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
-        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;09<span class="sec-name">Benchmarks</span></span>      </header>
+        <span class="sec-id"><span class="sec-hash">§</span>&thinsp;10<span class="sec-name">Benchmarks</span></span>      </header>
 
       <div class="sec-body">
         <h2 class="sec-title reveal">Preliminary Benchmarks</h2>
@@ -1362,7 +1463,7 @@ const vecBench = {
       height: auto;
     }
 
-    /* ===== §8 · how we test — bug-class approaches =================== */
+    /* ===== §9 · how we test — bug-class approaches =================== */
     .approaches {
       margin-top: 2rem;
       display: flex;
@@ -2250,7 +2351,35 @@ const vecBench = {
       color: var(--color-ink-hi);
     }
 
-    /* ===== §9 · benchmarks =========================================== */
+    /* ===== §8 · api surface — fan-out + contract enums =============== */
+    .api-enum {
+      margin-top: 0.55rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--color-line);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      line-height: 1.7;
+      color: var(--color-ink-low);
+    }
+    .api-enum code {
+      color: var(--color-ink-mid);
+    }
+    .api-enum .k {
+      color: var(--ember);
+    }
+    /* §8 panes render larger so the schematics fill the pane width (no letterbox) */
+    .api-top {
+      gap: 1.9rem;
+      margin-top: 1.3rem;
+    }
+    .api-top .pane-svg svg {
+      max-height: 14rem;
+    }
+    .api-cards {
+      margin-top: 1.15rem;
+    }
+
+    /* ===== §10 · benchmarks ========================================== */
     .bench-illustrative {
       margin-top: 1.4rem;
       max-width: 46rem;
