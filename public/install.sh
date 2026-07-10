@@ -1,9 +1,13 @@
 #!/bin/sh
 # Strata installer — https://stratadb.org
 # Usage: curl -fsSL https://stratadb.org/install.sh | sh
+#
+# Environment overrides:
+#   STRATA_VERSION      install a specific version (e.g. 1.0.0) instead of latest
+#   STRATA_INSTALL_DIR  install directory (default: ~/.strata/bin)
 set -eu
 
-REPO="strata-ai-labs/strata-core"
+REPO="stratalab/strata-core"
 INSTALL_DIR="${STRATA_INSTALL_DIR:-${HOME}/.strata/bin}"
 BINARY_NAME="strata"
 
@@ -99,6 +103,13 @@ detect_platform() {
 }
 
 get_latest_version() {
+    # Explicit pin wins over the latest-release lookup.
+    if [ -n "${STRATA_VERSION:-}" ]; then
+        VERSION="${STRATA_VERSION#v}"
+        step "Pinned version: ${BOLD}v${VERSION}${RESET}"
+        return
+    fi
+
     RELEASE_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
     if [ "$DOWNLOAD" = "curl" ]; then
@@ -144,6 +155,8 @@ download_and_install() {
 
     step "Downloaded ${ARCHIVE_NAME}"
 
+    verify_checksum
+
     mkdir -p "$INSTALL_DIR"
 
     if [ "$ARCHIVE_EXT" = "tar.gz" ]; then
@@ -166,6 +179,38 @@ download_and_install() {
     chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
 
     step "Installed to ${BOLD}${INSTALL_DIR}/${BINARY_NAME}${RESET}"
+}
+
+verify_checksum() {
+    CHECKSUMS_URL="https://github.com/${REPO}/releases/download/v${VERSION}/checksums-sha256.txt"
+
+    if [ "$DOWNLOAD" = "curl" ]; then
+        curl -fsSL "$CHECKSUMS_URL" -o "${TMPDIR}/checksums-sha256.txt" 2>/dev/null || true
+    else
+        wget -q "$CHECKSUMS_URL" -O "${TMPDIR}/checksums-sha256.txt" 2>/dev/null || true
+    fi
+
+    if [ ! -s "${TMPDIR}/checksums-sha256.txt" ]; then
+        err "Could not download checksums for v${VERSION}; refusing to install unverified binaries."
+    fi
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        ACTUAL=$(sha256sum "${TMPDIR}/${ARCHIVE_NAME}" | awk '{print $1}')
+    elif command -v shasum >/dev/null 2>&1; then
+        ACTUAL=$(shasum -a 256 "${TMPDIR}/${ARCHIVE_NAME}" | awk '{print $1}')
+    else
+        err "Neither sha256sum nor shasum is available; cannot verify the download."
+    fi
+
+    EXPECTED=$(grep "${ARCHIVE_NAME}\$" "${TMPDIR}/checksums-sha256.txt" | awk '{print $1}')
+    if [ -z "$EXPECTED" ]; then
+        err "No checksum entry for ${ARCHIVE_NAME} in the release manifest."
+    fi
+    if [ "$ACTUAL" != "$EXPECTED" ]; then
+        err "Checksum mismatch for ${ARCHIVE_NAME} (expected ${EXPECTED}, got ${ACTUAL}). Aborting."
+    fi
+
+    step "Checksum verified"
 }
 
 setup_path() {
@@ -259,10 +304,10 @@ print_success() {
     fi
 
     printf '%b\n' ""
-    printf '%b\n' "    ${CYAN}strata${RESET}                             Open the interactive REPL"
-    printf '%b\n' "    ${CYAN}strata kv put greeting \"hello world\"${RESET}  Store your first key-value pair"
-    printf '%b\n' "    ${CYAN}strata kv get greeting${RESET}              Read it back"
-    printf '%b\n' "    ${CYAN}strata ai${RESET}                          Start the AI agent ${DIM}(requires ANTHROPIC_API_KEY)${RESET}"
+    printf '%b\n' "    ${CYAN}strata --cache ping${RESET}                              Instant smoke test"
+    printf '%b\n' "    ${CYAN}strata ./mydb kv put user:ada '{\"role\":\"eng\"}'${RESET}   Create a database and write"
+    printf '%b\n' "    ${CYAN}strata ./mydb kv get user:ada${RESET}                    Read it back"
+    printf '%b\n' "    ${CYAN}strata ./mydb branch fork default experiment${RESET}     Fork it, instantly"
     printf '%b\n' ""
     printf '%b\n' "  ${DIM}Docs: https://stratadb.org/docs${RESET}"
     printf '%b\n' ""
