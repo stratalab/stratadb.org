@@ -304,10 +304,9 @@ print_success() {
     fi
 
     printf '%b\n' ""
-    printf '%b\n' "    ${CYAN}strata --cache ping${RESET}                              Instant smoke test"
-    printf '%b\n' "    ${CYAN}strata ./mydb kv put user:ada '{\"role\":\"eng\"}'${RESET}   Create a database and write"
-    printf '%b\n' "    ${CYAN}strata ./mydb kv get user:ada${RESET}                    Read it back"
-    printf '%b\n' "    ${CYAN}strata ./mydb branch fork default experiment${RESET}     Fork it, instantly"
+    printf '%b\n' "    ${CYAN}strata${RESET}                      Interactive REPL ${DIM}(in-memory, nothing written to disk)${RESET}"
+    printf '%b\n' "    ${CYAN}strata ./mydb${RESET}               Open or create a database at ./mydb"
+    printf '%b\n' "    ${CYAN}strata agents guide${RESET}         Full usage guide ${DIM}(for you or your AI agent)${RESET}"
     printf '%b\n' ""
     printf '%b\n' "  ${DIM}Docs: https://stratadb.org/docs${RESET}"
     printf '%b\n' ""
