@@ -1,0 +1,48 @@
+---
+// Error registry index (doc 10 §3): every public error code, grouped by
+// class. Source: src/data/error-registry.json (see [code].astro).
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/foundation/Heading.astro';
+import registry from '../../data/error-registry.json';
+
+const byClass = new Map<string, typeof registry.errors>();
+for (const entry of registry.errors) {
+  const list = byClass.get(entry.class) ?? [];
+  list.push(entry);
+  byClass.set(entry.class, list);
+}
+const classes = [...byClass.keys()].sort();
+---
+
+<BaseLayout
+  title="Error code registry — StrataDB"
+  description="Every public StrataDB error code, grouped by class."
+>
+  <div class="mx-auto w-full max-w-[46rem] px-6 py-16">
+    <p class="mb-4 font-mono text-mono-sm text-ink-low">{registry.count} codes</p>
+    <Heading level={1} size="title">Error code registry</Heading>
+    <p class="mt-6 text-body text-ink-mid">
+      Every structured error carries a <code class="font-mono">class.area.detail</code> code and links
+      here. See the <a href="/docs/reference/error-reference" class="underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi">error model reference</a> for
+      how classes, retry policies, and commit outcomes work.
+    </p>
+
+    {classes.map((cls) => (
+      <section class="mt-12">
+        <h2 class="font-mono text-mono-sm uppercase text-ink-low">
+          {cls} <span class="ml-2">({byClass.get(cls)!.length})</span>
+        </h2>
+        <ul class="mt-3 space-y-1 border-l border-line pl-4">
+          {byClass.get(cls)!.map((entry) => (
+            <li>
+              <a
+                href={`/e/${entry.code}`}
+                class="font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+              >{entry.code}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

@@ -1,253 +1,163 @@
 ---
-title: "Vector Store Guide"
+title: "Vector Store"
 section: "guides"
+description: "Create collections, upsert embeddings with metadata, and run similarity search."
+source: "strata-core@v1.0.0"
 ---
 
+The vector store holds embeddings — fixed-length float arrays — grouped into
+named collections, and searches them by similarity. Use it for semantic
+retrieval: find the stored vectors closest to a query vector, optionally
+filtered by metadata. Like every [primitive](/docs/concepts/primitives),
+collections and vectors are branch-aware and versioned.
 
-The Vector Store holds embedding vectors in named collections and supports similarity search. Use it for RAG context, agent memory, and any workflow that involves finding similar items.
+Examples below were run against the shipped binary. Use a directory path for a
+durable database or `--cache` for a throwaway run. The vectors here are 4
+dimensions so the output is readable; real embeddings are hundreds or thousands
+of dimensions.
 
-## Command Overview
+## Create a collection
 
-| Command | Syntax | Returns |
-|---------|--------|---------|
-| `vector create` | `vector create <name> <dim> [--metric M]` | OK |
-| `vector drop` | `vector drop <name>` | OK |
-| `vector collections` | `vector collections` | All collections |
-| `vector stats` | `vector stats <coll>` | Collection details |
-| `vector upsert` | `vector upsert <coll> <key> <vector> [--metadata JSON]` | OK |
-| `vector batch-upsert` | `vector batch-upsert <coll> <json>` | OK |
-| `vector get` | `vector get <coll> <key>` | Vector data |
-| `vector del` | `vector del <coll> <key>` | OK |
-| `vector search` | `vector search <coll> <query> [k] [--metric M] [--filter JSON]` | Top-k matches |
-
-## Collections
-
-Before storing vectors, create a collection with a fixed dimension and distance metric:
-
-```
-$ strata --cache
-strata:default/default> vector create embeddings 384 --metric cosine
-OK
-strata:default/default> vector create positions 3 --metric euclidean
-OK
-strata:default/default> vector create scores 128 --metric dot
-OK
-```
-
-### Distance Metrics
-
-| Metric | Best For | Score Range |
-|--------|----------|-------------|
-| `cosine` | Text embeddings, normalized vectors | [-1, 1] (higher = more similar) |
-| `euclidean` | Spatial data, positions | (0, 1] (higher = more similar) |
-| `dot` | Pre-normalized embeddings, scoring | Unbounded (higher = more similar) |
-
-All metrics are normalized so that **higher scores = more similar**.
-
-### List Collections
-
-```
-$ strata --cache
-strata:default/default> vector create embeddings 384 --metric cosine
-OK
-strata:default/default> vector collections
-embeddings: 384 dimensions, cosine metric, 0 vectors
-```
-
-### Collection Statistics
-
-Get detailed information about a specific collection:
-
-```
-$ strata --cache
-strata:default/default> vector create embeddings 384 --metric cosine
-OK
-strata:default/default> vector stats embeddings
-name: embeddings
-count: 0
-dimension: 384
-metric: cosine
-index_type: flat
-memory_bytes: 0
-```
-
-### Delete a Collection
-
-```
-$ strata --cache
-strata:default/default> vector create old-collection 4 --metric cosine
-OK
-strata:default/default> vector drop old-collection
-OK
-```
-
-## Index Backends
-
-The Vector Store supports two index backends:
-
-| Backend | Complexity | Recall | Best For |
-|---------|-----------|--------|----------|
-| **Brute Force** | O(n) exact | 100% | Collections < 10K vectors |
-| **HNSW** | O(log n) approximate | ~95%+ | Collections 10K+ vectors |
-
-The default backend is **Brute Force**. HNSW can be selected per collection at creation time via the engine-level configuration.
-
-### HNSW Configuration
-
-The HNSW backend accepts the following parameters:
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `m` | 16 | Max connections per graph layer |
-| `ef_construction` | 200 | Beam width during index build (higher = better recall, slower build) |
-| `ef_search` | 50 | Beam width during search (higher = better recall, slower search) |
-| `ml` | 1/ln(m) | Level multiplier for probabilistic layer assignment |
-
-## Storing Vectors
-
-Use `vector upsert` to insert or update a vector by key:
-
-```
-$ strata --cache
-strata:default/default> vector create docs 4 --metric cosine
-OK
-strata:default/default> vector upsert docs doc-1 [1.0,0.0,0.0,0.0]
-OK
-strata:default/default> vector upsert docs doc-2 [0.0,1.0,0.0,0.0] --metadata '{"source":"conversation","timestamp":1234567890}'
-OK
-```
-
-The dimension of the vector must match the collection's dimension. A mismatch returns a `DimensionMismatch` error.
-
-### Batch Upsert
-
-For bulk loading, use `vector batch-upsert` to insert multiple vectors in a single operation:
+A collection fixes a dimension and a distance metric up front. Every vector you
+upsert into it must match that dimension. The metric is one of `cosine`
+(default), `euclidean`, or `dot-product`.
 
 ```bash
-strata --cache vector batch-upsert docs '[{"key":"chunk-0","vector":[1.0,0.0,0.0,0.0],"metadata":{"page":1}},{"key":"chunk-1","vector":[0.0,1.0,0.0,0.0],"metadata":{"page":2}},{"key":"chunk-2","vector":[0.0,0.0,1.0,0.0],"metadata":{"page":3}}]'
+strata ./mydb vector collection create docs 4 --metric cosine
+strata ./mydb vector collection list
 ```
 
-Batch upsert validates all entries before committing. If any entry has an invalid dimension, the entire batch fails atomically (no partial writes).
-
-## Retrieving Vectors
-
-```
-$ strata --cache
-strata:default/default> vector create docs 4 --metric cosine
-OK
-strata:default/default> vector upsert docs doc-1 [1.0,0.0,0.0,0.0]
-OK
-strata:default/default> vector get docs doc-1
-key=doc-1 vector=[1.0,0.0,0.0,0.0] metadata=null
+```text
+{"count":0,"dimension":4,"metric":"cosine","name":"docs"}
+{"count":0,"dimension":4,"metric":"cosine","name":"docs"}
 ```
 
-## Searching
+`vector collection stats <name>` reports the same facts for one collection, and
+`vector collection delete <name>` removes it.
 
-Search for the `k` most similar vectors to a query:
+## Upsert vectors with metadata
 
-```
-$ strata --cache
-strata:default/default> vector create items 4 --metric cosine
-OK
-strata:default/default> vector upsert items a [1.0,0.0,0.0,0.0]
-OK
-strata:default/default> vector upsert items b [0.9,0.1,0.0,0.0]
-OK
-strata:default/default> vector upsert items c [0.0,1.0,0.0,0.0]
-OK
-strata:default/default> vector search items [1.0,0.0,0.0,0.0] 2
-key=a score=1.0000
-key=b score=0.9939
-```
-
-### Search Result Fields
-
-| Field | Description |
-|-------|-------------|
-| `key` | The vector's key |
-| `score` | Similarity score (higher = more similar) |
-| `metadata` | The vector's metadata (if stored) |
-
-### Metadata Filtering
-
-Search results can be filtered by metadata using 8 operators:
-
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `eq` | Equals | `source == "docs"` |
-| `ne` | Not equals | `status != "archived"` |
-| `gt` | Greater than | `score > 0.5` |
-| `gte` | Greater than or equal | `version >= 2` |
-| `lt` | Less than | `priority < 10` |
-| `lte` | Less than or equal | `age <= 30` |
-| `in` | Value in set | `category in ["a", "b"]` |
-| `contains` | String contains substring | `name contains "test"` |
+`vector upsert <collection> <key> <vector>` inserts or replaces one vector. The
+vector is a JSON array, comma-separated floats, or `@path`. Attach a metadata
+JSON object with `--metadata` (or `--metadata-file`) to filter on later.
 
 ```bash
-strata --cache vector search items [1.0,0.0,0.0,0.0] 10 --filter '{"source":{"eq":"docs"}}'
+strata ./mydb vector upsert docs a "[1,0,0,0]" --metadata '{"lang":"en","year":2020}'
+strata ./mydb vector upsert docs b "[0.9,0.1,0,0]" --metadata '{"lang":"en","year":2021}'
+strata ./mydb vector upsert docs c "[0,1,0,0]" --metadata '{"lang":"fr","year":2020}'
+strata ./mydb vector count docs
 ```
 
-Metadata filtering is **post-filter** — the backend returns candidates, then metadata is loaded and filtered. The engine uses adaptive over-fetch (3x, 6x, 12x multipliers) to ensure enough results survive filtering.
-
-## Deleting Vectors
-
-```
-$ strata --cache
-strata:default/default> vector create docs 4 --metric cosine
-OK
-strata:default/default> vector upsert docs doc-1 [1.0,0.0,0.0,0.0]
-OK
-strata:default/default> vector del docs doc-1
-OK
+```text
+created a applied=true
+created b applied=true
+created c applied=true
+3
 ```
 
-## Common Patterns
+Read one vector back with `vector get`, list keys with `vector keys`, and check
+existence with `vector exists`.
 
-### RAG Context Store
+## Query by similarity
+
+`vector query <collection> <vector>` returns the `-k` nearest keys with their
+scores. For cosine, higher is closer.
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-# Create collection
-strata --cache vector create knowledge 384 --metric cosine
-
-# Bulk-index document chunks (generate embeddings externally)
-strata --cache vector batch-upsert knowledge '[
-  {"key":"chunk-0","vector":[...],"metadata":{"text":"...","source":"docs","chunk_index":0}},
-  {"key":"chunk-1","vector":[...],"metadata":{"text":"...","source":"docs","chunk_index":1}}
-]'
-
-# Search for relevant context
-strata --cache vector search knowledge "[0.1,0.2,...]" 5
+strata ./mydb vector query docs "[1,0,0,0]" -k 3
 ```
 
-## Branch Isolation
-
-Vector collections and their data are isolated by branch.
-
-## Space Isolation
-
-Within a branch, vector collections are scoped to the current space. Each space has its own independent set of collections:
-
-```
-$ strata --cache
-strata:default/default> vector create docs 4 --metric cosine
-OK
-strata:default/default> vector upsert docs item-1 [1.0,0.0,0.0,0.0]
-OK
-strata:default/default> use default other
-strata:default/other> vector collections
-(empty)
+```text
+a	1.0
+b	0.9938837289810181
+c	0.0
 ```
 
-See [Spaces](spaces) for the full guide.
+The `--json` form includes each match's metadata; add `--diagnostics` to include
+vector index diagnostics with the results.
 
-## Transactions
+## Filter by metadata
 
-Vector operations **do not** participate in transactions. They are executed immediately and are always visible, even within a session that has an active transaction.
+Restrict a query — or a bulk delete — to vectors whose metadata matches. The
+filter is a JSON object with a `conditions` array; each condition names a
+`field`, an `op` of `eq`, and a typed `value` (`{"type":"string","value":...}`,
+or `type` of `number`, `bool`, or `null`). Conditions are AND-composed.
 
-## Next
+```bash
+strata ./mydb vector query docs "[1,0,0,0]" -k 5 \
+  --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"en"}}]}'
+```
 
-- [Branch Management](branch-management) — creating and managing branches
-- [Cookbook: RAG with Vectors](/docs/cookbook/rag-with-vectors) — full RAG pattern
+```text
+a	1.0
+b	0.9938837289810181
+```
+
+The French document is excluded. Use `--filter-file` to read the filter from a
+file.
+
+## Metadata patch and deletes
+
+`vector update-metadata <collection> <key> <patch>` merges a top-level patch
+into a vector's metadata, leaving the embedding untouched:
+
+```bash
+strata ./mydb vector update-metadata docs a '{"year":2022,"reviewed":true}'
+```
+
+```text
+updated a applied=true
+```
+
+Delete one vector with `vector delete <collection> <key>`, every vector with
+`vector delete-all <collection>`, or a matching subset with
+`vector delete-by-filter` (same filter shape as query):
+
+```bash
+strata ./mydb vector delete-by-filter docs \
+  --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"fr"}}]}'
+strata ./mydb vector count docs
+```
+
+```text
+deleted docs applied=true
+2
+```
+
+## History, branches, time travel
+
+`vector history <collection> <key>` lists a vector's prior revisions
+newest-first. Reads accept `--as-of <timestamp>` for a historical snapshot, and
+everything is branch-scoped — fork a branch to try a different set of embeddings
+without touching the parent. See [Branches](/docs/concepts/branches).
+
+## Error cases worth knowing
+
+Upserting a vector whose length does not match the collection dimension is
+rejected:
+
+```bash
+strata --json ./mydb vector upsert docs z "[1,2,3]"
+```
+
+```text
+{"error":{"class":"invalid_argument","code":"invalid_argument.engine.vector_dimension","retry_policy":"never","retryable":false,"commit_outcome":"not_started","message":"vector dimension mismatch: expected 4, got 3","suggested_fix":"Correct the request input and retry the operation.","docs_url":"https://stratadb.org/e/invalid_argument.engine.vector_dimension","reference_id":"err_local_1bff3bcc_000001"}}
+```
+
+Querying a collection that does not exist returns
+[/e/not_found.engine.vector_collection](/e/not_found.engine.vector_collection),
+and creating a collection whose name is taken returns
+[/e/already_exists.engine.vector_collection](/e/already_exists.engine.vector_collection).
+Recover by code — see [error handling](/docs/guides/error-handling).
+
+## When to use vectors vs other primitives
+
+- Use **vectors** for similarity search over embeddings.
+- Use [JSON](/docs/guides/json-store) for structured records you query by field.
+- Use [KV](/docs/guides/kv-store) for opaque keyed values.
+- Use the [Event Log](/docs/guides/event-log) for ordered, append-only history.
+
+Strata does not generate embeddings inside the vector primitive — you supply the
+floats. For end-to-end retrieval that embeds text for you, see
+[RAG with vectors](/docs/cookbook/rag-with-vectors). The full verb list is in the
+[CLI reference](/docs/reference/cli).

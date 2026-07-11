@@ -1,90 +1,100 @@
 ---
 title: "Deterministic Replay"
 section: "cookbook"
+description: "Record external inputs in the event log and reconstruct any past state exactly, using versioned reads and fork-at-version."
+source: "strata-core@v1.0.0"
 ---
 
+Goal: make an agent run reproducible by recording every nondeterministic input in
+the event log, then reconstruct the exact committed state at any past point.
 
-This recipe shows how to record nondeterministic inputs (API responses, timestamps, random values) into the Event Log so you can replay an agent session deterministically.
+Prerequisites: the `strata` binary on your PATH, and `jq` for readable event
+output. Commands write to a durable directory (`./replay.db`) that each
+invocation reopens.
 
-## Pattern
+## 1. Record every external input
 
-During a live session, the agent:
-1. Before making an external call, records the intent
-2. After receiving the response, records the result in the Event Log
-3. All decisions are based on recorded data
-
-During replay, the agent reads from the Event Log instead of making external calls.
-
-## Implementation
-
-### Recording Phase
-
-Record all external inputs as events during the live session:
+Before the agent acts on a clock reading, an API response, or a random draw, write
+it to the event log. The log is append-only and hash-linked, so it is the source
+of truth for the run. Derived decisions go in KV.
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-DB="--db ./data"
-SESSION="session-001"
-
-# Create isolated branch for this session
-strata $DB branch create "$SESSION"
-
-# Record external API response
-API_RESPONSE=$(curl -s https://api.weather.com/current)  # nondeterministic
-strata $DB --branch "$SESSION" event append external_input "{\"source\":\"weather_api\",\"response\":$API_RESPONSE}"
-
-# Record a random decision
-RANDOM_CHOICE=$((RANDOM % 3))
-strata $DB --branch "$SESSION" event append external_input "{\"source\":\"random\",\"value\":$RANDOM_CHOICE}"
-
-# Record timestamp
-NOW=$(date +%s)
-strata $DB --branch "$SESSION" event append external_input "{\"source\":\"timestamp\",\"value\":$NOW}"
-
-# Use the recorded values for agent logic
-strata $DB --branch "$SESSION" kv put decision "chose option $RANDOM_CHOICE"
-strata $DB --branch "$SESSION" state set status completed
+strata ./replay.db event append input '{"source":"clock","epoch":1706900000}'
+strata ./replay.db event append input '{"source":"weather_api","temp_c":12}'
+strata ./replay.db event append input '{"source":"rng","value":2}'
+strata ./replay.db kv put decision "option 2"
 ```
 
-### Replay Phase
+```text
+created applied=true
+created applied=true
+created applied=true
+created decision applied=true
+```
 
-Read all external inputs from the Event Log and replay:
+## 2. Walk the recorded inputs in order
+
+Read the log back by sequence. Because the decision was a pure function of these
+inputs, re-running the same logic over them reproduces the same result.
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-DB="--db ./data"
-SESSION="session-001"
-
-# Read all external inputs in order
-strata $DB --branch "$SESSION" event list external_input
-
-# The agent can re-execute its logic using recorded inputs
-# and produce the exact same results
+strata ./replay.db event range 0 --json | jq -c '.data.items[] | {seq: .event.sequence, type: .event.event_type, payload: .event.payload}'
 ```
 
-### Interactive Replay
-
-You can also replay interactively:
-
-```
-$ strata --db ./data
-strata:default/default> use session-001
-strata:session-001/default> event list external_input
-seq=1 type=external_input payload={"source":"weather_api","response":{...}}
-seq=2 type=external_input payload={"source":"random","value":2}
-seq=3 type=external_input payload={"source":"timestamp","value":1706900000}
-strata:session-001/default> kv get decision
-"chose option 2"
-strata:session-001/default> state get status
-"completed"
+```text
+{"seq":0,"type":"input","payload":{"epoch":1706900000,"source":"clock"}}
+{"seq":1,"type":"input","payload":{"source":"weather_api","temp_c":12}}
+{"seq":2,"type":"input","payload":{"source":"rng","value":2}}
 ```
 
-## See Also
+## 3. Verify the log was not tampered with
 
-- [Event Log Guide](/docs/guides/event-log) — event append and read operations
-- [Branch Management Guide](/docs/guides/branch-management) — branch-per-session pattern
-- [Agent State Management](agent-state-management) — full session pattern
+Every event links to the previous one by hash. `verify-chain` confirms the
+sequence is dense and the linkage is intact.
+
+```bash
+strata ./replay.db event verify-chain
+```
+
+```text
+{
+  "error": null,
+  "first_invalid": null,
+  "length": 3,
+  "valid": true
+}
+```
+
+## 4. Reconstruct an exact past state
+
+Suppose the agent later overwrites its decision. You can still recover the earlier
+committed state: fork a branch at the version where `option 2` was written. The
+`decision` write committed at version 6, so fork there.
+
+```bash
+strata ./replay.db kv put decision "option 9"
+strata ./replay.db branch fork default replay --version 6 --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
+strata ./replay.db --raw kv get decision --branch replay
+strata ./replay.db --raw kv get decision
+```
+
+```text
+updated decision applied=true
+{"name":"replay","forked_from":"default","at_version":6}
+option 2
+option 9
+```
+
+The `replay` branch reads the historical `option 2`; `default` keeps the current
+`option 9`.
+
+## Why this works
+
+Nondeterminism only breaks reproducibility if it is thrown away. Recording each
+input in the [event log](/docs/guides/event-log) turns the run into a replayable
+transcript, and hash linkage lets you prove it is unaltered. Every write also
+gets a monotonic [commit](/docs/concepts/commits) version, so forking a
+[branch](/docs/concepts/branches) at that version rebuilds the exact state the
+agent saw — no snapshots to manage. See the
+[branch management guide](/docs/guides/branch-management) for the fork variants
+(at-version and at-timestamp).

@@ -1,168 +1,174 @@
 ---
-title: "KV Store Guide"
+title: "Key-Value Store"
 section: "guides"
+description: "Store, read, version, and scan raw byte values with the KV primitive."
+source: "strata-core@v1.0.0"
 ---
 
+The KV store maps a byte key to a byte value. It is the simplest of the five
+[primitives](/docs/concepts/primitives) and the closest to the underlying
+storage substrate: every other primitive is layered over the same
+branch-aware, versioned rows. Reach for KV when you want a plain lookup table —
+session data, feature flags, cached blobs, small config — and you do not need
+JSON paths, similarity search, or an append-only log.
 
-The KV Store is StrataDB's most general-purpose primitive. It maps string keys to arbitrary values with simple put/get/delete semantics.
+Every example below was run against the shipped binary. Durable databases live
+in a directory you name; add `--cache` for a throwaway in-memory run.
 
-## Command Overview
+## Write and read one key
 
-| Command | Syntax | Returns |
-|---------|--------|---------|
-| `kv put` | `kv put <key> <value>` | Version number |
-| `kv get` | `kv get <key>` | The value, or `(nil)` |
-| `kv del` | `kv del <key>` | OK |
-| `kv list` | `kv list [--prefix P] [--limit N] [--cursor C]` | Matching key names |
-| `kv history` | `kv history <key>` | Version history |
+`kv put` writes a single key. The value is a positional argument; use `@path`
+or `-f <file>` to read bytes from a file instead.
 
-## Put
-
-`kv put` creates or overwrites a key. It returns the version number of the write.
-
-```
-$ strata --cache
-strata:default/default> kv put name Alice
-(version) 1
-strata:default/default> kv put age 30
-(version) 1
-strata:default/default> kv put score 99.5
-(version) 1
-strata:default/default> kv put active true
-(version) 1
-strata:default/default> kv put counter 1
-(version) 1
-strata:default/default> kv put counter 2
-(version) 2
+```bash
+strata ./mydb kv put greeting "hello world"
+strata ./mydb kv get greeting
 ```
 
-The CLI auto-detects types from input format (strings, integers, floats, booleans).
-
-## Get
-
-`kv get` returns the latest value for a key, or `(nil)` if the key doesn't exist.
-
-```
-$ strata --cache
-strata:default/default> kv put key value
-(version) 1
-strata:default/default> kv get key
-"value"
-strata:default/default> kv get nonexistent
-(nil)
+```text
+created greeting applied=true
+hello world
 ```
 
-## Delete
+Each write auto-commits — there is no separate transaction step. The `--json`
+envelope shows the commit that the write produced:
 
-`kv del` removes a key.
-
-```
-$ strata --cache
-strata:default/default> kv put key value
-(version) 1
-strata:default/default> kv del key
-OK
-strata:default/default> kv get key
-(nil)
+```bash
+strata --json ./mydb kv put counter 1
 ```
 
-## List Keys
-
-`kv list` returns all keys, optionally filtered by prefix.
-
-```
-$ strata --cache
-strata:default/default> kv put user:1 Alice
-(version) 1
-strata:default/default> kv put user:2 Bob
-(version) 1
-strata:default/default> kv put task:1 Review
-(version) 1
-strata:default/default> kv list
-task:1 = "Review"
-user:1 = "Alice"
-user:2 = "Bob"
-strata:default/default> kv list --prefix user:
-user:1 = "Alice"
-user:2 = "Bob"
+```text
+{"data":{"commit":{"delete_count":0,"durable":true,"put_count":1,"timestamp":4,"version":4},"effect":{"affected_count":1,"applied":true,"kind":"created","matched":false},"key":"Y291bnRlcg=="},"type":"write_result"}
 ```
 
-## Key Naming Conventions
+On the JSON wire, keys and values are base64 strings (`Y291bnRlcg==` is
+`counter`). Note `commit.timestamp` — you pass that value back to read the
+database as it stood at that point. See [Commits](/docs/concepts/commits).
 
-Use colon-separated namespaces for organized key spaces:
+## Existence, counts, and listing
 
-```
-$ strata --cache
-strata:default/default> kv put user:123:name Alice
-(version) 1
-strata:default/default> kv put user:123:email alice@example.com
-(version) 1
-strata:default/default> kv put config:model gpt-4
-(version) 1
-strata:default/default> kv put config:temperature 0.7
-(version) 1
-strata:default/default> kv list --prefix user:123:
-user:123:email = "alice@example.com"
-user:123:name = "Alice"
-strata:default/default> kv list --prefix config:
-config:model = "gpt-4"
-config:temperature = 0.7
+```bash
+strata ./mydb kv exists greeting
+strata ./mydb kv count
+strata ./mydb kv list --prefix c
 ```
 
-## Branch Isolation
-
-KV data is isolated by branch. See [Branches](/docs/concepts/branches) for details.
-
-```
-$ strata --cache
-strata:default/default> kv put key default-value
-(version) 1
-strata:default/default> branch create other
-OK
-strata:default/default> use other
-strata:other/default> kv get key
-(nil)
+```text
+true
+3
+counter
 ```
 
-## Space Isolation
+`exists` returns `true`/`false`, `count` returns the number of visible keys,
+and `list` returns keys, optionally filtered by `--prefix`. Reading a key that
+was never written is not an error — `kv get missing` prints `(nil)` and exits
+zero.
 
-Within a branch, KV data is further organized by space. Each space has independent keys:
+## Scanning rows
 
-```
-$ strata --cache
-strata:default/default> kv put config default-value
-(version) 1
-strata:default/default> use default experiments
-strata:default/experiments> kv get config
-(nil)
-strata:default/experiments> kv put config experiment-value
-(version) 1
-strata:default/experiments> use default
-strata:default/default> kv get config
-"default-value"
+`kv scan` returns keys with their values and version facts, paged by `--limit`.
+When more rows remain, the last line is a base64 continuation cursor you pass
+back verbatim via `--cursor`.
+
+```bash
+strata ./mydb kv scan --limit 2
 ```
 
-See [Spaces](spaces) for the full guide.
-
-## Transactions
-
-KV operations participate in transactions. Within a transaction, reads and writes are atomic:
-
-```
-$ strata --cache
-strata:default/default> begin
-OK
-strata:default/default> kv put a 1
-(version) 1
-strata:default/default> kv put b 2
-(version) 1
-strata:default/default> commit
-OK
+```text
+{"key":"counter","timestamp":4,"value":"1","version":4}
+{"key":"doc","timestamp":6,"value":"final","version":6}
+-- more: Z3JlZXRpbmc=
 ```
 
-Both writes become visible atomically. See [Sessions and Transactions](sessions-and-transactions) for the full guide.
+`kv sample --count <n>` returns an arbitrary handful of rows without paging —
+useful for a quick peek at a large keyspace.
 
-## Next
+## Version history and time travel
 
-- [Event Log](event-log) — append-only event streams
-- [API Quick Reference](/docs/reference/api-quick-reference) — all methods at a glance
+Overwriting a key retains its prior versions. `kv history` lists them
+newest-first with the commit timestamp that produced each:
+
+```bash
+strata ./mydb kv history doc
+```
+
+```text
+{"timestamp":6,"tombstone":false,"value":"final","version":6}
+{"timestamp":5,"tombstone":false,"value":"draft","version":5}
+```
+
+To read the value as of an earlier commit, pass that timestamp with `--as-of`.
+Capture the timestamp from a write receipt (the `commit.timestamp` field) and
+reuse it:
+
+```bash
+strata ./mydb kv get doc --as-of 5
+```
+
+```text
+draft
+```
+
+Every read command (`get`, `list`, `scan`) accepts `--as-of`, so you can view a
+consistent historical snapshot of the whole keyspace.
+
+## Branches
+
+KV rows are branch-scoped. Fork a branch, write on it, and the parent is
+untouched — no copy is made until you write.
+
+```bash
+strata ./mydb branch fork default experiment
+strata ./mydb kv put doc branched --branch experiment
+strata ./mydb kv get doc --branch experiment   # branched
+strata ./mydb kv get doc                        # final
+```
+
+Merging a branch back is strict: it refuses when both sides changed
+concurrently. See [Branches](/docs/concepts/branches) and
+[Branch Management](/docs/guides/branch-management).
+
+## Deleting
+
+```bash
+strata ./mydb kv delete greeting
+```
+
+```text
+deleted greeting applied=true
+```
+
+Deleting a key that does not exist reports `not_found nope applied=false`
+and still exits zero — the operation simply had no effect. The delete is
+recorded as a tombstone, so history and `--as-of` reads before the delete still
+resolve.
+
+## Error cases worth knowing
+
+Errors carry a stable `<class>.<area>.<detail>` code and a docs ref. An empty
+key is rejected:
+
+```bash
+strata --json ./mydb kv put "" x
+```
+
+```text
+{"error":{"class":"invalid_argument","code":"invalid_argument.engine.kv_key","retry_policy":"never","retryable":false,"commit_outcome":"not_started","message":"KV key must not be empty","suggested_fix":"Correct the request input and retry the operation.","docs_url":"https://stratadb.org/e/invalid_argument.engine.kv_key","reference_id":"err_local_1f01a1d8_000001"}}
+```
+
+Recover by code, never by message text. See
+[/e/invalid_argument.engine.kv_key](/e/invalid_argument.engine.kv_key) and the
+[error handling guide](/docs/guides/error-handling).
+
+## When to use KV vs other primitives
+
+- Use **KV** for opaque values keyed by a string, with no structure to query.
+- Use [JSON](/docs/guides/json-store) when you need to read or update fields
+  inside a document by path, or index by field.
+- Use [Vectors](/docs/guides/vector-store) for similarity search over embeddings.
+- Use the [Event Log](/docs/guides/event-log) for an ordered, hash-linked,
+  append-only history.
+
+The full verb list is in the [CLI reference](/docs/reference/cli). To batch many
+writes into one shared commit, use the raw `command` path or MCP tools; the CLI
+`kv` verbs operate on one key at a time.

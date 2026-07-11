@@ -1,119 +1,104 @@
 ---
 title: "Agent State Management"
 section: "cookbook"
+description: "Hold agent config in KV, working memory in a JSON document, and an action log in events, then inspect any earlier state with versioned reads."
+source: "strata-core@v1.0.0"
 ---
 
+Goal: keep an agent's configuration, working memory, and action history in the
+primitives that fit each best, and use versioned reads to inspect what the agent
+believed at an earlier point.
 
-This recipe shows how to manage a complete AI agent session using multiple primitives: KV for configuration, StateCell for status tracking, and EventLog for audit trails.
+Prerequisites: the `strata` binary on your PATH. Commands write to a durable
+directory (`./agent.db`) that each invocation reopens.
 
-## Pattern
+## 1. Pin configuration in KV
 
-Each agent session gets its own branch. Within that branch:
-- **KV Store** holds agent configuration and working memory
-- **State Cell** tracks the agent's current status
-- **Event Log** records every action for auditing and replay
-
-## Implementation
-
-Set up and run an agent session in the REPL:
-
-```
-$ strata --cache
-strata:default/default> branch create session-001
-OK
-strata:default/default> use session-001
-strata:session-001/default> kv put config:model gpt-4
-(version) 1
-strata:session-001/default> kv put config:max_steps 10
-(version) 1
-strata:session-001/default> kv put config:temperature 0.7
-(version) 1
-strata:session-001/default> state init status started
-(version) 1
-strata:session-001/default> state init step_count 0
-(version) 1
-strata:session-001/default> state set status thinking
-(version) 2
-strata:session-001/default> event append tool_call '{"step":0,"action":"web_search","query":"step 0 query"}'
-(seq) 1
-strata:session-001/default> kv put result:step:0 "Result from step 0"
-(version) 1
-strata:session-001/default> state set step_count 1
-(version) 2
-strata:session-001/default> state set status completed
-(version) 3
-strata:session-001/default> event len
-1
-strata:session-001/default> state get status
-"completed"
-strata:session-001/default> state get step_count
-1
-```
-
-Or as a shell script for automated sessions:
+Flat, rarely-changing settings belong in the key-value store.
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-DB="--db ./data"
-SESSION="session-001"
-
-# Create isolated branch
-strata $DB branch create "$SESSION"
-
-# Configuration
-strata $DB --branch "$SESSION" kv put config:model gpt-4
-strata $DB --branch "$SESSION" kv put config:max_steps 10
-strata $DB --branch "$SESSION" kv put config:temperature 0.7
-
-# Initialize status
-strata $DB --branch "$SESSION" state init status started
-strata $DB --branch "$SESSION" state init step_count 0
-
-# Agent loop
-for step in $(seq 0 9); do
-    strata $DB --branch "$SESSION" state set status thinking
-    strata $DB --branch "$SESSION" event append tool_call "{\"step\":$step,\"action\":\"web_search\"}"
-    strata $DB --branch "$SESSION" kv put "result:step:$step" "Result from step $step"
-    strata $DB --branch "$SESSION" state set step_count $((step + 1))
-done
-
-# Mark complete
-strata $DB --branch "$SESSION" state set status completed
-
-echo "Session complete"
-strata $DB --branch "$SESSION" event len
-strata $DB --branch "$SESSION" state get status
+strata ./agent.db kv put config:model tinyllama
+strata ./agent.db kv put config:max_steps 8
 ```
 
-## Reading Session History
-
-After a session completes, switch to its branch and read everything:
-
-```
-$ strata --db ./data
-strata:default/default> use session-001
-strata:session-001/default> event list tool_call
-seq=1 type=tool_call payload={"step":0,"action":"web_search","query":"step 0 query"}
-...
-strata:session-001/default> kv get config:model
-"gpt-4"
-strata:session-001/default> state get status
-"completed"
+```text
+created config:model applied=true
+created config:max_steps applied=true
 ```
 
-## Cleanup
+## 2. Initialize working memory as a JSON document
 
-Delete sessions you no longer need:
+Structured, evolving state belongs in a JSON document you can patch by path.
 
 ```bash
-strata --db ./data branch del session-001
+strata ./agent.db json set agent '$' '{"status":"planning","step":0,"scratchpad":[]}'
 ```
 
-## See Also
+```text
+created agent applied=true
+```
 
-- [KV Store Guide](/docs/guides/kv-store)
-- [Event Log Guide](/docs/guides/event-log)
-- [State Cell Guide](/docs/guides/state-cell)
-- [Branch Management Guide](/docs/guides/branch-management)
+## 3. Advance the run
+
+Each step patches memory and appends to the action log. The event log is your
+append-only audit trail.
+
+```bash
+strata ./agent.db event append tool_call '{"step":0,"tool":"web_search","query":"strata database"}'
+strata ./agent.db json set agent '$.status' '"acting"'
+strata ./agent.db event append tool_result '{"step":0,"status":"ok","hits":3}'
+strata ./agent.db json set agent '$.step' '1'
+strata ./agent.db event append tool_call '{"step":1,"tool":"summarize"}'
+strata ./agent.db json set agent '$.step' '2'
+strata ./agent.db json set agent '$.status' '"done"'
+```
+
+Each `json set` prints `updated agent applied=true`; each `event append` prints
+`created applied=true`.
+
+## 4. Read the current state
+
+```bash
+strata ./agent.db --raw kv get config:model
+strata ./agent.db --raw json get agent '$'
+strata ./agent.db event len
+```
+
+```text
+tinyllama
+{"scratchpad":[],"status":"done","step":2}
+3
+```
+
+## 5. Inspect an earlier state
+
+Every write carries a commit timestamp. List the document's history, then read
+`--as-of` any of those timestamps to see the exact memory at that point — a
+rollback-style inspection with no rollback.
+
+```bash
+strata ./agent.db json history agent
+strata ./agent.db --raw json get agent '$' --as-of 5
+strata ./agent.db --raw json get agent '$' --as-of 9
+```
+
+```text
+{"document_version":5,"timestamp":12,"tombstone":false,"value":{"scratchpad":[],"status":"done","step":2},"version":12}
+{"document_version":4,"timestamp":11,"tombstone":false,"value":{"scratchpad":[],"status":"acting","step":2},"version":11}
+{"document_version":3,"timestamp":9,"tombstone":false,"value":{"scratchpad":[],"status":"acting","step":1},"version":9}
+{"document_version":2,"timestamp":7,"tombstone":false,"value":{"scratchpad":[],"status":"acting","step":0},"version":7}
+{"document_version":1,"timestamp":5,"tombstone":false,"value":{"scratchpad":[],"status":"planning","step":0},"version":5}
+{"scratchpad":[],"status":"planning","step":0}
+{"scratchpad":[],"status":"acting","step":1}
+```
+
+## Why this works
+
+Each primitive carries its own version history, so you never overwrite the past —
+you append to it. Config lives in [KV](/docs/guides/kv-store), evolving memory in
+a [JSON document](/docs/guides/json-store), and every action in the
+[event log](/docs/guides/event-log). Because reads accept a
+[commit](/docs/concepts/commits) timestamp via `--as-of`, "what did the agent
+know at step 1" is one query, not a reconstruction. When you need to branch from
+an earlier point rather than just read it, fork the branch at that version — see
+[A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches).

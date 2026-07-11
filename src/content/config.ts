@@ -7,6 +7,8 @@ const docsCollection = defineCollection({
     description: z.string().optional(),
     order: z.number().optional(),
     section: z.string().optional(),
+    // Sourcing policy §2: which repo@version this page documents.
+    source: z.string().optional(),
   }),
 });
 

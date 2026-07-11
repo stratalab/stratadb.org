@@ -1,146 +1,173 @@
 ---
-title: "Event Log Guide"
+title: "Event Log"
 section: "guides"
+description: "Append hash-linked events and read them back by sequence, type, or time."
+source: "strata-core@v1.0.0"
 ---
 
+The event log is an append-only, ordered sequence of typed events. Each event
+gets a monotonic sequence number and is hash-linked to the one before it, so the
+log is tamper-evident. Use it for audit trails, agent action histories, change
+feeds, or anything where the order and integrity of what happened matters. Like
+every [primitive](/docs/concepts/primitives), the log is branch-aware and
+versioned.
 
-The Event Log is an append-only sequence of typed events. Events are immutable once written — you cannot update or delete individual events. This makes it ideal for audit trails, tool call history, and decision logs.
+Examples below were run against the shipped binary. Use a directory path for a
+durable database or `--cache` for a throwaway run.
 
-## Command Overview
+## Append events
 
-| Command | Syntax | Returns |
-|---------|--------|---------|
-| `event append` | `event append <type> <payload>` | Sequence number |
-| `event get` | `event get <seq>` | Event at sequence |
-| `event list` | `event list <type> [--limit N] [--after SEQ]` | All events of type |
-| `event len` | `event len` | Total event count |
-
-## Appending Events
-
-Each event has a **type** (a string label) and a **payload** (must be a JSON object):
-
-```
-$ strata --cache
-strata:default/default> event append tool_call '{"tool":"web_search","query":"rust embedded database","results":10}'
-(seq) 1
-```
-
-### Payload Must Be a JSON Object
-
-Event payloads must be JSON objects. This ensures events are structured and queryable:
-
-```
-$ strata --cache
-strata:default/default> event append auth '{"action":"login","user_id":42}'
-(seq) 1
-```
-
-## Reading Events
-
-### By Sequence Number
-
-Each event gets a unique sequence number (starting from 1):
-
-```
-$ strata --cache
-strata:default/default> event append log '{"msg":"hello"}'
-(seq) 1
-strata:default/default> event get 1
-seq=1 type=log payload={"msg":"hello"}
-```
-
-### By Event Type
-
-Retrieve all events with a specific type label:
-
-```
-$ strata --cache
-strata:default/default> event append tool_call '{"tool":"search"}'
-(seq) 1
-strata:default/default> event append decision '{"choice":"A"}'
-(seq) 2
-strata:default/default> event append tool_call '{"tool":"calculator"}'
-(seq) 3
-strata:default/default> event list tool_call
-seq=1 type=tool_call payload={"tool":"search"}
-seq=3 type=tool_call payload={"tool":"calculator"}
-strata:default/default> event list decision
-seq=2 type=decision payload={"choice":"A"}
-```
-
-## Event Count
-
-Get the total number of events in the current branch:
-
-```
-$ strata --cache
-strata:default/default> event len
-0
-strata:default/default> event append log '{"msg":"one"}'
-(seq) 1
-strata:default/default> event append log '{"msg":"two"}'
-(seq) 2
-strata:default/default> event len
-2
-```
-
-## Common Patterns
-
-### Audit Trail
-
-Log every tool call with input and output:
+`event append <type> <payload>` adds one event. The payload is parsed as JSON;
+use `@path` or `-f <file>` to read it from a file. Appends auto-commit.
 
 ```bash
-strata --cache event append tool_call '{"tool":"search","input":"query","output":"results"}'
+strata ./mydb event append order.created '{"id":"A1","total":42}'
 ```
 
-### Decision Log
+```text
+created applied=true
+```
 
-Record agent decisions with reasoning:
+The `--json` envelope shows the assigned sequence. Sequences start at 0:
 
 ```bash
-strata --cache event append decision '{"decision":"use_tool_A","reason":"higher confidence","confidence":0.92}'
+strata --json ./mydb event append order.paid '{"id":"A1"}'
 ```
 
-## Branch Isolation
-
-Events are isolated by branch. `event len` returns 0 in a new branch even if other branches have events:
-
-```
-$ strata --cache
-strata:default/default> event append log '{"msg":"in default"}'
-(seq) 1
-strata:default/default> branch create other
-OK
-strata:default/default> use other
-strata:other/default> event len
-0
+```text
+{"data":{"commit":{"delete_count":0,"durable":true,"put_count":3,"timestamp":4,"version":4},"effect":{"affected_count":1,"applied":true,"kind":"created","matched":false},"event_type":"order.paid","sequence":1,"timestamp":4,"version":4},"type":"event_append_result"}
 ```
 
-## Space Isolation
+## Read one event
 
-Within a branch, events are scoped to the current space:
+`event get <sequence>` returns a single event. Alongside the payload and type
+it carries a `hash`, the `previous_hash` it links to, and an internal wall-clock
+`timestamp` in microseconds.
 
-```
-$ strata --cache
-strata:default/default> event append log '{"msg":"in default space"}'
-(seq) 1
-strata:default/default> event len
-1
-strata:default/default> use default other
-strata:default/other> event len
-0
+```bash
+strata ./mydb event get 0
 ```
 
-See [Spaces](spaces) for the full guide.
+```text
+{
+  "event": {
+    "event_type": "order.created",
+    "hash": "82e2c6af52801cb5376a91937ddf98f0dddb10bf335b797035308179b0de29f6",
+    "payload": {
+      "id": "A1",
+      "total": 42
+    },
+    "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "sequence": 0,
+    "timestamp": 1783735254224134
+  },
+  "timestamp": 3,
+  "version": 3
+}
+```
 
-## Transactions
+The first event links to an all-zero `previous_hash`. Reading a sequence that
+does not exist is not an error — it returns null and exits zero. `event exists
+<sequence>` returns `true`/`false`, and `event len` counts visible events.
 
-Event append operations participate in transactions. Within a transaction, appended events are only visible after commit.
+## List, filter by type
 
-See [Sessions and Transactions](sessions-and-transactions) for details.
+`event list` returns events in order; `--limit`, `--event-type`, and
+`--after-sequence` (an exclusive cursor) page and filter it. `event types` lists
+the distinct types present, and `event by-type <type>` returns only that type.
 
-## Next
+```bash
+strata ./mydb event types
+strata ./mydb event by-type order.created --limit 5
+```
 
-- [State Cell](state-cell) — mutable state with CAS
-- [Cookbook: Agent State Management](/docs/cookbook/agent-state-management) — combining events with other primitives
+```text
+order.created
+order.paid
+order.shipped
+{"event":{"event_type":"order.created","hash":"82e2c6af52801cb5376a91937ddf98f0dddb10bf335b797035308179b0de29f6","payload":{"id":"A1","total":42},"previous_hash":"0000000000000000000000000000000000000000000000000000000000000000","sequence":0,"timestamp":1783735254224134},"timestamp":3,"version":3}
+{"event":{"event_type":"order.created","hash":"3d44143df25625c0833ba804cff9530e502b0fc8bfd4ba2514f64afce1cee341","payload":{"id":"A2","total":17},"previous_hash":"4dc2683aad6b5f2ac92da28bfc738b21bc0d4db3424840abd8de7f4bc46a0c22","sequence":2,"timestamp":1783735254242541},"timestamp":5,"version":5}
+```
+
+## Read ranges by sequence
+
+`event range <start-seq>` reads from a sequence forward; `--end-seq` is an
+exclusive upper bound, `--limit` caps the page, and `--direction reverse` walks
+backward from the start. A trailing `-- more:` line carries the next cursor.
+
+```bash
+strata ./mydb event range 3 --direction reverse --limit 2
+```
+
+```text
+{"event":{"event_type":"order.shipped","hash":"ac28ae25f43d627ca1503c3ec49be79930781526e747039283f158a027685387","payload":{"id":"A1"},"previous_hash":"3d44143df25625c0833ba804cff9530e502b0fc8bfd4ba2514f64afce1cee341","sequence":3,"timestamp":1783735254251352},"timestamp":6,"version":6}
+{"event":{"event_type":"order.created","hash":"3d44143df25625c0833ba804cff9530e502b0fc8bfd4ba2514f64afce1cee341","payload":{"id":"A2","total":17},"previous_hash":"4dc2683aad6b5f2ac92da28bfc738b21bc0d4db3424840abd8de7f4bc46a0c22","sequence":2,"timestamp":1783735254242541},"timestamp":5,"version":5}
+-- more: 2
+```
+
+## Read ranges by time
+
+`event range-time <start-ts>` selects events by their wall-clock timestamp
+(microseconds, as printed in each event). `--end-ts` is an inclusive upper
+bound; `--direction` and `--event-type` work as with sequence ranges.
+
+```bash
+strata ./mydb event range-time 1783735254224134 --end-ts 1783735254251352
+```
+
+This returns every event whose internal timestamp falls in that window. Note
+the distinction from `--as-of`: the internal event `timestamp` is wall-clock,
+while `--as-of <timestamp>` on reads uses the commit clock (the small
+`commit.timestamp` from a write receipt) to view a historical snapshot of the
+log.
+
+## Verify the chain
+
+`event verify-chain` walks the log and confirms both that sequence numbers are
+dense and that each event's hash links to its predecessor.
+
+```bash
+strata ./mydb event verify-chain
+```
+
+```text
+{
+  "error": null,
+  "first_invalid": null,
+  "length": 4,
+  "valid": true
+}
+```
+
+If a link were broken, `valid` would be `false` and `first_invalid` would name
+the offending sequence.
+
+## Branches and time travel
+
+The log is branch-scoped — each branch has its own sequence. Fork a branch to
+record a separate stream of events without touching the parent, and pass
+`--as-of` to any read verb (including `event len`) to see the log as of an
+earlier commit. See [Branches](/docs/concepts/branches) and
+[Commits](/docs/concepts/commits).
+
+## Error cases worth knowing
+
+An invalid event type or an oversized payload is rejected with a coded error —
+for example [/e/invalid_argument.engine.event_type](/e/invalid_argument.engine.event_type)
+or
+[/e/invalid_argument.engine.event_payload_too_large](/e/invalid_argument.engine.event_payload_too_large).
+A payload that is not valid JSON fails to parse before it reaches the log.
+Recover by code, never by message — see
+[error handling](/docs/guides/error-handling).
+
+## When to use the event log vs other primitives
+
+- Use the **event log** when order and integrity matter and you only ever
+  append.
+- Use [KV](/docs/guides/kv-store) or [JSON](/docs/guides/json-store) for mutable
+  state you overwrite in place.
+- Use [Vectors](/docs/guides/vector-store) for similarity search.
+
+For a worked pattern, see
+[deterministic replay](/docs/cookbook/deterministic-replay). The full verb list
+is in the [CLI reference](/docs/reference/cli).

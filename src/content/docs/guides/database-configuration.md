@@ -1,109 +1,137 @@
 ---
-title: "Database Configuration Guide"
+title: "Database Configuration"
 section: "guides"
+description: "Read a database's config, manage the global hub setting, and understand hub URL resolution."
+source: "strata-core@v1.0.0"
 ---
 
 
-This guide covers the different ways to open a StrataDB database and configure its behavior.
+The `strata config` command reads and writes configuration. It covers two
+distinct things: the read-only facts about an open database, and the writable
+user setting that points Strata at a hub. This guide walks through all six
+verbs — `get`, `get-key`, `set`, `unset`, `path`, and `show` — and explains how
+the hub URL is resolved. For every configurable key, see the
+[Configuration Reference](/docs/reference/configuration-reference).
 
-## Opening Methods
+## Read a database's config
 
-### Ephemeral (In-Memory)
-
-For testing and development. No files are created on disk.
-
-```bash
-strata --cache
-```
-
-### Persistent
-
-Creates or opens a database at the specified path:
+`config get` prints the sanitized configuration of an open database. It needs a
+database target:
 
 ```bash
-strata --db /path/to/data
+strata ./mydb config get
 ```
 
-If the directory doesn't exist, it is created. If a database already exists at that path, it is opened and any WAL entries are replayed for recovery.
+```text
+{
+  "created": false,
+  "default_branch": "default",
+  "durable": true,
+  "target": "durable_local"
+}
+```
 
-## Database Operations
+These are facts about how the database was opened — its default branch, whether
+it is durable, and its storage target. They are read-only; you change them by
+how you open the database, not by writing config.
 
-### Ping
+## The global hub setting
 
-Verify the database is responsive:
+The remaining verbs manage the user config, whose one key in this release is
+`hub.url` — the hub that [`clone`](/docs/guides/cloning-datasets) fetches from.
+It lives in a global file. `config path` prints where:
 
 ```bash
-strata --cache ping
+strata config path
 ```
 
-Output:
-
-```
-PONG
-```
-
-### Info
-
-Get database statistics:
-
-```
-$ strata --cache
-strata:default/default> info
-version: 0.1.0
-branches: 1
-total_keys: 0
-```
-
-Or from the shell:
+The path is `~/.config/strata/config.toml`. Read the current key with
+`config get-key`, which returns `null` when nothing is set:
 
 ```bash
-strata --cache info
+strata config get-key hub.url
 ```
 
-### Flush
+```text
+{
+  "key": "hub.url",
+  "value": null
+}
+```
 
-Force pending writes to disk (relevant in Buffered durability mode):
+Set it with `config set`. The value is normalized (a trailing slash is added)
+and written to the global file:
 
 ```bash
-strata --db ./data flush
+strata config set hub.url https://hub.example.com
 ```
 
-### Compact
+```text
+{
+  "key": "hub.url",
+  "path": "/home/you/.config/strata/config.toml",
+  "value": "https://hub.example.com/"
+}
+```
 
-Trigger storage compaction:
+The file now contains a `[hub]` table:
+
+```toml
+[hub]
+url = "https://hub.example.com/"
+```
+
+Remove the key with `config unset hub.url`, which returns `"unset": true`. Once
+unset, `config show` falls back to the built-in default again.
+
+## Which hub URL wins
+
+`config show` prints the resolved hub URL and the layer that supplied it. With
+nothing configured, that is the built-in default:
 
 ```bash
-strata --db ./data compact
+strata config show
 ```
 
-## Shell Flags
+```text
+{
+  "hub.url": "https://hub.stratahub.io/",
+  "source": "built-in default"
+}
+```
 
-The CLI supports several flags for controlling behavior:
-
-| Flag | Description |
-|------|-------------|
-| `--db <path>` | Open a persistent database at the given path |
-| `--cache` | Open an ephemeral in-memory database |
-| `--branch <name>` | Set the active branch (default: `default`) |
-| `--space <name>` | Set the active space (default: `default`) |
-| `--json` | Output results as JSON |
-| `--raw` | Output raw values without formatting |
-| `--read-only` | Open in read-only mode |
-
-### Examples
+Set the global key and the source becomes the config file's path. Export
+`STRATA_HUB_URL` and it wins over the file:
 
 ```bash
-# Persistent database with specific branch
-strata --db ./data --branch experiment kv get config
-
-# Ephemeral with JSON output
-strata --cache --json kv get key
-
-# Read-only access
-strata --db ./data --read-only kv list
+STRATA_HUB_URL=https://env.example.com strata config show
 ```
+
+```text
+{
+  "hub.url": "https://env.example.com/",
+  "source": "STRATA_HUB_URL"
+}
+```
+
+Run from a directory that has a `.strata/config.toml` with its own `[hub]` table,
+and that project file wins over the global file — but still loses to the
+environment variable. The full precedence, highest first:
+
+| Layer | Source | Scope |
+|-------|--------|-------|
+| `--hub <url>` flag | this invocation | one hub command, e.g. `clone` |
+| `STRATA_HUB_URL` | environment | current shell session |
+| `.strata/config.toml` | project file | the working directory tree |
+| `~/.config/strata/config.toml` | global file | this user |
+| built-in default | Strata | fallback |
+
+The `--hub` flag sits on commands that reach a hub, such as `clone`, and its
+help states it overrides both the environment variable and the config files for
+that single invocation.
 
 ## Next
 
-- [Branch Bundles](branch-bundles) — exporting and importing branches
-- [Error Handling](error-handling) — error categories
+- [Cloning Datasets](/docs/guides/cloning-datasets) — put the hub URL to work.
+- [Observability](/docs/guides/observability) — inspect a database's health and facts.
+- [Configuration Reference](/docs/reference/configuration-reference) — the full key list.

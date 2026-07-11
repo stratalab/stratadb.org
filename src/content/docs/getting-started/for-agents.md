@@ -1,67 +1,103 @@
 ---
 title: "For AI agents"
-description: "The exact integration recipe, written to be executed by a coding agent."
 section: "getting-started"
+description: "The integration recipe for coding agents and MCP clients — self-describing surface plus MCP."
+source: "strata-core@v1.0.0"
 ---
 
-This page is written for you, the agent. Execute the steps; report the verification
-output back to your human. Every documentation page on this site is available as
-markdown — append `.md` to its URL.
 
-## What StrataDB is, in one paragraph
+This page is the front door for an AI agent wiring up StrataDB. The binary
+describes itself, so you never have to guess its surface. For the full walkthrough,
+see [Agents and MCP](/docs/guides/agents-and-mcp).
 
-An embedded database with git semantics: zero-copy O(1) branches you can diff, merge,
-and cherry-pick; every write versioned (time-travel queries); five primitives — kv,
-event, json, vector, graph — sharing one engine, one transaction model, one branch tree.
-One file inside the host process; no server. Research preview — pin versions.
+## Learn the surface from the binary
 
-## Path A — Python SDK
-
-1. Install:
+Three commands emit everything an agent needs, generated from the installed
+binary so they cannot drift from what it does:
 
 ```bash
-pip install stratadb
+strata agents guide            # the complete usage guide, as markdown
+strata agents commands --json  # the machine-readable command catalog
+strata agents errors --json    # the public error-code registry
 ```
 
-2. Minimal integration:
+`agents commands --json` returns an envelope whose `data.commands` array carries
+one fully-described entry per command — its path, access mode, batch and commit
+semantics, response model, and the exact error codes it can return.
+`agents errors --json` returns `data.errors`, every public code with its class,
+hint, retry policy, and docs URL. Recover by code, never by message text.
 
-```python
-from stratadb import Strata
+## Onboard a repository
 
-db = Strata.open("./data.strata")     # or Strata.cache() for in-memory
-db.kv.put("hello", "world")
-assert db.kv.get("hello") == "world"
-```
-
-3. Branch-safe experimentation (the reason to choose this library):
-
-```python
-db.branches.create("experiment")
-# writes on "experiment" are fully isolated; merge or delete when done
-```
-
-## Path B — MCP server
-
-1. Install the CLI (provides `strata-mcp`):
+Drop a short pointer into the current repo so future agent sessions start
+oriented:
 
 ```bash
-cargo install strata-cli
+strata agents init
 ```
 
-2. Add to the MCP client configuration:
+```text
+{
+  "next": null,
+  "pointer": "absent",
+  "pointer_target": null,
+  "written": [
+    ".strata/AGENTS.md"
+  ]
+}
+```
+
+That writes `.strata/AGENTS.md`. Add `--apply` to also append a pointer block to
+the repo's `AGENTS.md` or `CLAUDE.md`.
+
+## Target a database explicitly
+
+Every data command needs a database — including `mcp serve`. Pass a path, set
+`STRATA_DB`, or use `--cache` for an ephemeral one — StrataDB never opens the
+current directory implicitly. (`STRATA_DB` and the other environment variables
+are documented in the
+[configuration reference](/docs/reference/configuration-reference).) A bare
+invocation with no target refuses, and the refusal teaches the fix:
+
+```text
+$ strata
+error: [invalid_argument.cli.no_database]: no database specified
+  hint: pass a path (strata ./mydb kv put …), set STRATA_DB, or use --cache for ephemeral
+```
+
+That is the `invalid_argument.cli.no_database` code. CLI usage errors like it
+print a plain `error:` line and exit with status 2 even under `--json`, and their
+`cli.*` codes are not in the `/e/` registry. Errors from data operations are
+richer: each carries a `<class>.<area>.<detail>` code, a one-line hint, and a
+`https://stratadb.org/e/<code>` reference, and under `--json` they emit a full
+error envelope. Recover by code, never by message text.
+
+## Speak MCP
+
+The same binary is a Model Context Protocol server over stdio — no separate
+package to install:
+
+```bash
+strata ./mydb mcp serve
+```
+
+Point an MCP client at it with:
 
 ```json
 {
   "mcpServers": {
-    "stratadb": {
-      "command": "strata-mcp",
-      "args": ["/path/to/data"]
+    "strata": {
+      "command": "strata",
+      "args": ["./mydb", "mcp", "serve"]
     }
   }
 }
 ```
 
-Use `"args": ["--memory"]` for an ephemeral database.
+The server exposes a curated set of tools plus `strata_guide` (the guide above)
+and `strata_command` (any cataloged command as raw wire JSON). Tools return the
+same envelopes and the same error codes as the CLI. Use `--cache` in place of
+the path for an ephemeral server.
 
 ## Verify
 
@@ -69,16 +105,13 @@ Use `"args": ["--memory"]` for an ephemeral database.
 strata --cache ping
 ```
 
-Expected output: `PONG`. For Path A: the `assert` in step 2 passing is the verification.
+This prints `pong` and the installed version. If you see it, the binary runs.
 
-## Report back
+## Next
 
-Tell your human: which path you used, the installed version (`pip show stratadb` or
-`strata --version`), and that verification passed. Cite this page:
-`https://stratadb.org/docs/getting-started/for-agents`.
-
-## Going deeper
-
-- [API quick reference](/docs/reference/api-quick-reference)
-- [MCP server reference](/docs/reference/mcp) — the full tool list
-- [Concepts: branches](/docs/concepts/branches)
+- [Agents and MCP](/docs/guides/agents-and-mcp) — the full integration guide.
+- [MCP reference](/docs/reference/mcp) — the complete tool list.
+- [Error handling](/docs/guides/error-handling) and the
+  [error reference](/docs/reference/error-reference) — recover by code.
+- [Your first database](/docs/getting-started/first-database) — the hands-on
+  basics if you want them.
