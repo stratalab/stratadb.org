@@ -1,183 +1,252 @@
 ---
 title: "Your First Database"
 section: "getting-started"
+description: "Create a durable database, write across capabilities, fork a branch, and read history."
+source: "strata-core@v1.0.0"
 ---
 
 
-This tutorial walks through all six StrataDB primitives. Every example uses `strata --cache` so you can follow along without disk setup.
+This tutorial creates a real on-disk database and walks through the everyday
+moves: writing and reading, working in the REPL, forking a branch, and reading
+an earlier version. Every command and output below comes from a live run.
 
 ## Prerequisites
 
-- [Strata CLI installed](installation)
+- The [CLI installed](/docs/getting-started/installation).
 
-## Step 1: Open a Database
+## Create a database
 
-```
-$ strata --cache
-strata:default/default>
-```
+A database is a directory. Name a path and StrataDB creates it on first write —
+no separate "create" step:
 
-The CLI starts you on the "default" branch in the "default" space. All data operations target the current branch and space.
-
-For a persistent database, use `strata --db ./my-data` instead.
-
-## Step 2: KV Store — Working Memory
-
-The KV Store is the most general-purpose primitive. Store any value by key.
-
-```
-$ strata --cache
-strata:default/default> kv put agent:name Alice
-(version) 1
-strata:default/default> kv put agent:score 95
-(version) 1
-strata:default/default> kv put agent:active true
-(version) 1
-strata:default/default> kv get agent:name
-"Alice"
-strata:default/default> kv list --prefix agent:
-agent:active = true
-agent:name = "Alice"
-agent:score = 95
-strata:default/default> kv del agent:score
-OK
-strata:default/default> kv get agent:score
-(nil)
+```bash
+strata ./mydb kv put greeting hello
 ```
 
-## Step 3: Event Log — Immutable History
-
-The Event Log records events that cannot be modified after writing. Each event has a type and a JSON payload.
-
-```
-$ strata --cache
-strata:default/default> event append tool_call '{"tool":"search","query":"weather"}'
-(seq) 1
-strata:default/default> event get 1
-seq=1 type=tool_call payload={"tool":"search","query":"weather"}
-strata:default/default> event list tool_call
-seq=1 type=tool_call payload={"tool":"search","query":"weather"}
-strata:default/default> event len
-1
+```text
+created greeting applied=true
 ```
 
-## Step 4: State Cell — Coordination
+Read it back:
 
-State cells provide mutable state with compare-and-swap (CAS) for safe concurrent updates.
-
-```
-$ strata --cache
-strata:default/default> state init status idle
-(version) 1
-strata:default/default> state init status should-not-overwrite
-(no-op)
-strata:default/default> state get status
-"idle"
-strata:default/default> state set counter 0
-(version) 1
-strata:default/default> state cas counter 1 1
-(version) 2
-strata:default/default> state cas counter 999 2
-(error) CAS conflict: expected version 999, current version 2
+```bash
+strata ./mydb kv get greeting
 ```
 
-The `state cas` command takes the cell name, the expected version, and the new value. It succeeds only if the current version matches the expected version.
-
-## Step 5: JSON Store — Structured Documents
-
-Store JSON documents and mutate them at specific paths.
-
-```
-$ strata --cache
-strata:default/default> json set config $ '{"model":"gpt-4","temperature":0.7,"max_tokens":1000}'
-(version) 1
-strata:default/default> json get config
-{"model":"gpt-4","temperature":0.7,"max_tokens":1000}
-strata:default/default> json set config $.temperature 0.9
-(version) 2
-strata:default/default> json get config $.temperature
-0.9
-strata:default/default> json list
-config
-strata:default/default> json del config $
-OK
+```text
+hello
 ```
 
-## Step 6: Vector Store — Similarity Search
+That directory now holds a write-ahead log and a manifest. It is durable: the
+data survives the process exiting. For a throwaway database that never touches
+disk, swap the path for `--cache` (for example `strata --cache kv put a b`).
 
-Store embeddings and search by similarity.
+## Two ways to run
 
-```
-$ strata --cache
-strata:default/default> vector create embeddings 4 --metric cosine
-OK
-strata:default/default> vector upsert embeddings doc-1 [1.0,0.0,0.0,0.0]
-OK
-strata:default/default> vector upsert embeddings doc-2 [0.0,1.0,0.0,0.0]
-OK
-strata:default/default> vector upsert embeddings doc-3 [0.9,0.1,0.0,0.0]
-OK
-strata:default/default> vector search embeddings [1.0,0.0,0.0,0.0] 2
-key=doc-1 score=1.0000
-key=doc-3 score=0.9939
-strata:default/default> vector del embeddings doc-2
-OK
-```
+Everything above used the **one-shot** form: `strata <db> <command>`, one
+command per invocation, good for scripts.
 
-## Step 7: Branches — Data Isolation
+For an interactive session, pass just the path to open a **REPL**:
 
-Branches give you isolated namespaces for data, like git branches.
-
-```
-$ strata --cache
-strata:default/default> kv put shared-key default-value
-(version) 1
-strata:default/default> branch create experiment
-OK
-strata:default/default> use experiment
-strata:experiment/default> kv get shared-key
-(nil)
-strata:experiment/default> kv put shared-key experiment-value
-(version) 1
-strata:experiment/default> use default
-strata:default/default> kv get shared-key
-"default-value"
-strata:default/default> branch list
-- default
-- experiment
-strata:default/default> branch del experiment
-OK
+```text
+$ strata ./mydb
+strata:default/default> kv put agent:model gpt-4
+created agent:model applied=true
+strata:default/default> kv get agent:model
+gpt-4
+strata:default/default> kv list
+agent:model
+greeting
+strata:default/default> quit
 ```
 
-## Putting It All Together
+The prompt shows your current branch and space (`default/default`). Inside the
+REPL, type commands without the leading `strata`. A few meta-commands help you
+move around: `use <branch>` (optionally `use <branch>/<space>`) switches context,
+`help` prints the command list, and `quit`, `exit`, or Ctrl-D leaves. Quote rules
+differ from the shell, so for JSON documents the one-shot form below is easier to
+get right.
 
-Here is a REPL session that simulates an AI agent session using multiple primitives:
+## Write JSON documents
 
-```
-$ strata --cache
-strata:default/default> branch create session-001
-OK
-strata:default/default> use session-001
-strata:session-001/default> kv put config:model gpt-4
-(version) 1
-strata:session-001/default> kv put config:max_retries 3
-(version) 1
-strata:session-001/default> state init status started
-(version) 1
-strata:session-001/default> event append tool_call '{"tool":"web_search","query":"StrataDB docs"}'
-(seq) 1
-strata:session-001/default> json set conversation $ '{"messages":[{"role":"user","content":"What is StrataDB?"},{"role":"assistant","content":"An embedded database for AI agents."}]}'
-(version) 1
-strata:session-001/default> state set status completed
-(version) 2
-strata:session-001/default> event len
-1
-strata:session-001/default> state get status
-"completed"
+The JSON capability stores documents you address by key and mutate at JSON
+paths. `$` is the document root:
+
+```bash
+strata ./mydb json set profile '$' '{"name":"Ada","score":95}'
 ```
 
-## Next Steps
+```text
+created profile applied=true
+```
 
-- [Concepts](/docs/concepts/index) — understand branches, value types, and transactions
-- [Guides](/docs/guides/index) — deep dives into each primitive
-- [Cookbook](/docs/cookbook/index) — real-world patterns
+Read the whole document, then a single path:
+
+```bash
+strata ./mydb json get profile '$'
+```
+
+```text
+{"name":"Ada","score":95}
+```
+
+```bash
+strata ./mydb json get profile '$.score'
+```
+
+```text
+95
+```
+
+Updating one path leaves the rest of the document untouched:
+
+```bash
+strata ./mydb json set profile '$.score' 99
+```
+
+```text
+updated profile applied=true
+```
+
+KV and JSON both live in the same database on the same branch — one store, many
+shapes of data.
+
+## Fork a branch
+
+A branch is an isolated line of data. Fork the current one and writes on the
+fork stay off the parent. First put a value on `default`:
+
+```bash
+strata ./mydb kv put city tokyo
+strata ./mydb branch fork default experiment
+```
+
+```text
+created city applied=true
+{
+  "branch_id": "1a29fdd4-745b-5b66-ad18-75b3cf51cef6",
+  "created_at": 6,
+  "deleted_at": null,
+  "generation": 1,
+  "name": "experiment",
+  "parent": {
+    "branch_id": "00000000-0000-0000-0000-000000000000",
+    "fork_timestamp": null,
+    "fork_version": 6,
+    "generation": 1,
+    "name": "default"
+  },
+  "state_revision": 0,
+  "status": "active"
+}
+```
+
+The fork starts as a copy of its parent, so `city` already reads `tokyo` on
+`experiment`. Overwrite it there and check both branches:
+
+```bash
+strata ./mydb kv put city kyoto --branch experiment
+strata ./mydb kv get city --branch experiment
+strata ./mydb kv get city
+```
+
+```text
+updated city applied=true
+kyoto
+tokyo
+```
+
+`experiment` sees `kyoto`; `default` still reads `tokyo`. The write on the fork
+was invisible to its parent. (The `created_at` and `fork_version` numbers above
+track your database's own commit history, so yours will differ.)
+
+## Read an earlier version
+
+Every write returns a commit. Ask for the commit's timestamp with `--json`:
+
+```bash
+strata --json ./mydb kv put note first
+```
+
+```text
+{"data":{"commit":{"delete_count":0,"durable":true,"put_count":1,"timestamp":11,"version":11},"effect":{"affected_count":1,"applied":true,"kind":"created","matched":false},"key":"bm90ZQ=="},"type":"write_result"}
+```
+
+Note `data.commit.timestamp` (here `11`). Overwrite the key, then read it back
+both live and as of that earlier commit with `--as-of`:
+
+```bash
+strata ./mydb kv put note second
+strata ./mydb kv get note
+strata ./mydb kv get note --as-of 11
+```
+
+```text
+updated note applied=true
+second
+first
+```
+
+The live read returns `second`; the `--as-of` read returns the value as it
+stood at that commit. Time travel works the same way for JSON, vectors, events,
+and the graph.
+
+## Look at the whole database
+
+`describe` prints a compact summary — branches, capabilities, and per-capability
+counts (the `version` field is omitted here):
+
+```bash
+strata ./mydb describe
+```
+
+```text
+{
+  "branch": "default",
+  "branches": [
+    "default",
+    "experiment"
+  ],
+  "capabilities": {
+    "arrow": true,
+    "event": true,
+    "graph_core": true,
+    "inference": true,
+    "json": true,
+    "kv": true,
+    "vector": true,
+    "vector_index": true
+  },
+  "config": {
+    "created": false,
+    "default_branch": "default",
+    "durable": true,
+    "target": "durable_local"
+  },
+  "default_branch": "default",
+  "primitives": {
+    "event_count": 0,
+    "graphs": [],
+    "json_count": 1,
+    "kv_count": 4,
+    "vector_collections": []
+  },
+  "spaces": [
+    "default"
+  ],
+  "target": "durable_local"
+}
+```
+
+`strata ./mydb info` gives the shorter version — branch count, durability, and
+target.
+
+## Next
+
+- [Concepts: branches](/docs/concepts/branches) and
+  [commits](/docs/concepts/commits) — the model behind fork and `--as-of`.
+- [Guides](/docs/guides/kv-store) — each capability in depth:
+  [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store),
+  [event log](/docs/guides/event-log), [vectors](/docs/guides/vector-store),
+  [graph](/docs/guides/graph).
+- [For AI agents](/docs/getting-started/for-agents) — wire this into an agent.

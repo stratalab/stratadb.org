@@ -1,214 +1,108 @@
 ---
 title: "MCP Server Reference"
 section: "reference"
+description: "The Strata MCP server: stdio JSON-RPC, the initialize handshake, and the exact tools it advertises."
+source: "strata-core@v1.0.0"
 ---
 
-# MCP Server Reference
+> **Interim page.** Maintained by hand until it is generated from the resolved command index (IDL). Where this page and `strata agents commands --json` disagree, the command index wins.
 
-The StrataDB MCP (Model Context Protocol) server exposes StrataDB as a tool provider for AI assistants like Claude.
+`strata mcp serve` runs a [Model Context Protocol](https://modelcontextprotocol.io) server over **stdio**: newline-delimited JSON-RPC on stdin/stdout, logs on stderr. It exposes the same database, the same JSON envelopes, and the same [error codes](/docs/reference/error-reference) as the CLI. For a task-oriented walkthrough see the [Agents and MCP guide](/docs/guides/agents-and-mcp).
 
-## Installation
+## Running the server
+
+The server opens a database the same way every command does — it needs a durable path, `--cache`, or `STRATA_DB`.
 
 ```bash
-# From crates.io
-cargo install strata-mcp
-
-# From source
-git clone https://github.com/stratadb-labs/strata-core
-cd strata-core
-cargo install --path crates/mcp
+strata ./my-db.strata mcp serve   # durable, positional path
+strata --db ./my-db.strata mcp serve
+strata --cache mcp serve          # ephemeral, in-memory
 ```
 
-## Configuration
+With no target it refuses:
 
-### Claude Desktop
+```console
+$ strata mcp serve
+error: [invalid_argument.cli.no_database]: no database specified
+  hint: pass a path (strata ./mydb kv put …), set STRATA_DB, or use --cache for ephemeral
+```
 
-Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+## Handshake
+
+A client sends `initialize`, then the `notifications/initialized` notification, then may call `tools/list` and `tools/call`. Piping the requests in as newline-delimited JSON:
+
+```jsonl
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"0.0.1"}}}
+{"jsonrpc":"2.0","method":"notifications/initialized"}
+{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+```
+
+The `initialize` result advertises the tools capability and carries an `instructions` string:
 
 ```json
-{
-  "mcpServers": {
-    "stratadb": {
-      "command": "strata-mcp",
-      "args": ["/path/to/data"]
-    }
-  }
-}
+{"id":1,"jsonrpc":"2.0","result":{
+  "protocolVersion":"2025-06-18",
+  "capabilities":{"tools":{"listChanged":false}},
+  "serverInfo":{"name":"strata","version":"…"},
+  "instructions":"Strata is an embedded multi-model database (KV, JSON, vectors, events, graphs) with branches and time travel. When unsure, call the `strata_guide` tool first …"
+}}
 ```
 
-### In-Memory Mode
-
-For ephemeral databases:
-
-```json
-{
-  "mcpServers": {
-    "stratadb": {
-      "command": "strata-mcp",
-      "args": ["--memory"]
-    }
-  }
-}
-```
-
-## Command Line Options
-
-| Option | Description |
-|--------|-------------|
-| `<PATH>` | Path to the database directory |
-| `--memory` | Use ephemeral in-memory database |
-| `-h, --help` | Show help |
-| `-V, --version` | Show version |
-
----
+The server **echoes back the `protocolVersion` the client requested** rather than pinning one of its own — send `2024-11-05` and the result says `2024-11-05`. `serverInfo.name` is `strata` and `serverInfo.version` matches the running binary. Tool results come back as MCP `content` items whose text is the same JSON envelope the CLI prints; errors carry the same `class` and `code`. On the wire, byte fields (KV keys and values, list cursors) are **base64**.
 
 ## Tools
 
-The MCP server exposes 50+ tools to AI assistants, organized by category.
+`tools/list` returns 20 tools. Two are meta-tools; the rest are one canonical verb per capability.
 
-### Database Tools
+| Tool | Required inputs | Optional inputs | Purpose |
+|------|-----------------|-----------------|---------|
+| `strata_guide` | — | — | Return the complete usage guide (markdown, matched to this binary). Call first when unsure. |
+| `strata_command` | `command` | — | Escape hatch: run any cataloged command as raw wire JSON. Byte fields are base64. |
+| `strata_kv_put` | `key`, `value` | `branch`, `space` | Write one key (text value). Returns a commit receipt. |
+| `strata_kv_get` | `key` | `as_of`, `branch`, `space` | Read one key. `data.value` is base64. |
+| `strata_kv_delete` | `key` | `branch`, `space` | Delete one key. |
+| `strata_kv_list` | — | `prefix`, `limit`, `cursor`, `as_of`, `branch`, `space` | List keys with base64 cursor pagination. |
+| `strata_json_set` | `key`, `path`, `value` | `branch`, `space` | Set a JSON path (`$` replaces the document). |
+| `strata_json_get` | `key`, `path` | `as_of`, `branch`, `space` | Read a JSON path. |
+| `strata_json_delete` | `key`, `path` | `branch`, `space` | Delete a JSON path. |
+| `strata_vector_create_collection` | `collection`, `dimension` | `metric`, `branch`, `space` | Create a collection (`metric`: `cosine`, `euclidean`, `dot_product`). |
+| `strata_vector_upsert` | `collection`, `key`, `vector` | `metadata`, `branch`, `space` | Upsert one embedding. |
+| `strata_vector_query` | `collection`, `query` | `k`, `filter`, `as_of`, `branch`, `space` | Similarity search with an AND-composed metadata filter. |
+| `strata_event_append` | `event_type`, `payload` | `branch`, `space` | Append one immutable, hash-chained event. |
+| `strata_event_list` | — | `event_type`, `limit`, `after_sequence`, `as_of`, `branch`, `space` | List events, optionally by type. |
+| `strata_graph_create` | `graph` | `branch`, `space` | Create a graph. |
+| `strata_graph_add_node` | `graph`, `node_id` | `properties`, `branch`, `space` | Add or replace a node. |
+| `strata_graph_add_edge` | `graph`, `src`, `edge_type`, `dst` | `weight`, `properties`, `branch`, `space` | Add or replace a typed, optionally weighted edge. |
+| `strata_graph_neighbors` | `graph`, `node_id` | `direction`, `edge_type`, `limit`, `as_of`, `branch`, `space` | Traverse a node's neighbors (`direction`: `outgoing`, `incoming`, `both`). |
+| `strata_branch_list` | — | — | List branches with status and lineage. |
+| `strata_branch_fork` | `source`, `branch` | `version`, `timestamp` | Fork a branch; anchor to a retained `version` or `timestamp` for time travel. |
 
-| Tool | Description |
-|------|-------------|
-| `strata_ping` | Check connectivity, returns version |
-| `strata_info` | Get database statistics |
-| `strata_flush` | Flush pending writes to disk |
-| `strata_compact` | Trigger database compaction |
+The curated tools cover the core verbs. Anything else in the catalog — deletes for graphs, analytics, history, spaces — is reachable through `strata_command`; the guide lists the full command catalog. `as_of` accepts a commit timestamp taken from a prior write receipt's `data.commit.timestamp`.
 
-### KV Store Tools
+### The two meta-tools
 
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_kv_put` | `key`, `value` | Store a key-value pair |
-| `strata_kv_get` | `key` | Get value by key |
-| `strata_kv_delete` | `key` | Delete a key |
-| `strata_kv_list` | `prefix?`, `limit?`, `cursor?` | List keys |
-| `strata_kv_history` | `key` | Get version history |
+- **`strata_guide`** returns the full, version-matched usage guide as markdown. A client that is unsure how anything works should call this before guessing.
+- **`strata_command`** executes any cataloged command by its raw wire JSON, for example `{"command":{"type":"kv_scan","limit":10}}`. Invalid input returns the exact field-level [error envelope](/docs/reference/error-reference).
 
-### State Cell Tools
+## Client configuration
 
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_state_set` | `cell`, `value` | Set state cell |
-| `strata_state_get` | `cell` | Get state cell |
-| `strata_state_init` | `cell`, `value` | Initialize if not exists |
-| `strata_state_cas` | `cell`, `value`, `expected_version?` | Compare-and-swap |
-| `strata_state_delete` | `cell` | Delete state cell |
-| `strata_state_list` | `prefix?` | List state cells |
-
-### Event Log Tools
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_event_append` | `event_type`, `payload` | Append event |
-| `strata_event_get` | `sequence` | Get by sequence |
-| `strata_event_list` | `event_type`, `limit?`, `after?` | List events |
-| `strata_event_len` | — | Get event count |
-
-### JSON Store Tools
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_json_set` | `key`, `path`, `value` | Set at JSONPath |
-| `strata_json_get` | `key`, `path` | Get at JSONPath |
-| `strata_json_delete` | `key`, `path` | Delete at JSONPath |
-| `strata_json_list` | `prefix?`, `limit`, `cursor?` | List documents |
-
-### Vector Store Tools
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_vector_create_collection` | `collection`, `dimension`, `metric?` | Create collection |
-| `strata_vector_delete_collection` | `collection` | Delete collection |
-| `strata_vector_list_collections` | — | List collections |
-| `strata_vector_upsert` | `collection`, `key`, `vector`, `metadata?` | Insert/update |
-| `strata_vector_get` | `collection`, `key` | Get vector |
-| `strata_vector_delete` | `collection`, `key` | Delete vector |
-| `strata_vector_search` | `collection`, `query`, `k`, `filter?` | Search |
-| `strata_vector_batch_upsert` | `collection`, `entries` | Batch insert |
-
-### Branch Tools
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_branch_create` | `name` | Create branch |
-| `strata_branch_get` | `name` | Get branch info |
-| `strata_branch_list` | — | List branches |
-| `strata_branch_exists` | `name` | Check existence |
-| `strata_branch_delete` | `name` | Delete branch |
-| `strata_branch_fork` | `source`, `destination` | Fork branch |
-| `strata_branch_diff` | `branch_a`, `branch_b` | Compare branches |
-| `strata_branch_merge` | `source`, `target`, `strategy?` | Merge branches |
-| `strata_branch_use` | `name` | Switch branch |
-| `strata_current_branch` | — | Get current branch |
-| `strata_branch_export` | `branch`, `path` | Export to bundle |
-| `strata_branch_import` | `path` | Import from bundle |
-| `strata_branch_validate` | `path` | Validate bundle |
-
-### Space Tools
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_space_create` | `name` | Create space |
-| `strata_space_list` | — | List spaces |
-| `strata_space_exists` | `name` | Check existence |
-| `strata_space_delete` | `name` | Delete empty space |
-| `strata_space_use` | `name` | Switch space |
-| `strata_current_space` | — | Get current space |
-
-### Transaction Tools
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_txn_begin` | `read_only?` | Begin transaction |
-| `strata_txn_commit` | — | Commit transaction |
-| `strata_txn_rollback` | — | Rollback transaction |
-| `strata_txn_info` | — | Get transaction info |
-| `strata_txn_is_active` | — | Check if active |
-
-### Search Tool
-
-| Tool | Parameters | Description |
-|------|------------|-------------|
-| `strata_search` | `query`, `k?`, `primitives?` | Cross-primitive search |
-
----
-
-## Usage with Claude
-
-Once configured, Claude can use StrataDB tools naturally:
-
-**User:** "Store my name as Alice"
-
-**Claude:** I'll store that for you.
-*[Calls strata_kv_put with key="name", value="Alice"]*
-
-Done! I've stored your name as "Alice" in the database.
-
-**User:** "Create a branch called 'experiment' and switch to it"
-
-**Claude:** I'll create that branch and switch to it.
-*[Calls strata_branch_create with name="experiment"]*
-*[Calls strata_branch_use with name="experiment"]*
-
-Done! Created the "experiment" branch and switched to it.
-
----
-
-## Error Handling
-
-Tool errors are returned in the standard MCP error format:
+A Claude-style `mcpServers` entry, with the database path baked into the arguments:
 
 ```json
 {
-  "error": {
-    "code": -32000,
-    "message": "Branch not found: nonexistent"
+  "mcpServers": {
+    "strata": {
+      "command": "strata",
+      "args": ["/absolute/path/to/my-db.strata", "mcp", "serve"]
+    }
   }
 }
 ```
 
-Common error codes:
-- `-32000`: Application error (invalid operation, not found, etc.)
-- `-32602`: Invalid parameters
-- `-32603`: Internal error
+Use `strata` if it is on `PATH`, otherwise an absolute path to the binary. For an ephemeral database use `["--cache", "mcp", "serve"]`; to keep the path out of the arguments, drop the path argument and set `STRATA_DB` in the server's environment.
+
+## See also
+
+- [Agents and MCP guide](/docs/guides/agents-and-mcp) — using the server with an assistant.
+- [Value Type Reference](/docs/reference/value-type-reference) — the value forms behind each tool.
+- [Error Reference](/docs/reference/error-reference) — the `class`/`code` model shared with the CLI.

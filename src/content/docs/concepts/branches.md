@@ -1,140 +1,128 @@
 ---
 title: "Branches"
 section: "concepts"
+description: "Branches are the isolation model: every value lives in a branch, forks are cheap, and writes on one branch stay invisible to another."
+source: "strata-core@v1.0.0"
 ---
 
+A **branch** is an isolated namespace for data. Every value in StrataDB lives inside a branch, and every capability — KV, JSON, event log, vectors, graphs — is branch-aware. Branches are how you keep one agent session, experiment, or tenant from seeing another's data, without copying the whole database.
 
-A **branch** is an isolated namespace for data. All data in StrataDB lives inside a branch. Branches are the core isolation mechanism — they keep data from different agent sessions, experiments, or workflows separate from each other.
+A database always has a `default` branch. You never create it; it is there the moment the database exists.
 
-## The Git Analogy
+## Forking a branch
 
-If you know git, you already understand branches:
+`branch fork` creates a new branch from an existing one. The fork starts as a copy-on-write view of its parent — you see the parent's data, but your writes go only to your branch.
 
-| Git | StrataDB | Description |
-|-----|----------|-------------|
-| Repository | Database | The whole storage, opened once per path |
-| Working directory | CLI session | Your view into the database with a current branch |
-| Branch | Branch | An isolated namespace for data |
-| HEAD | Current branch | The branch all operations target |
-| `main` | `"default"` | The auto-created branch you start on |
-
-Just as git branches isolate file changes, branches isolate data changes. Switching branches changes which data you see, without copying anything.
-
-## How Branches Work
-
-When you open the CLI, you start on the **default branch**:
-
-```
-$ strata --cache
-strata:default/default> kv put key value
-(version) 1
+```bash
+strata ./db kv put city london
+strata ./db branch fork default experiment
+strata ./db kv put city tokyo --branch experiment
 ```
 
-You can create additional branches and switch between them:
+Reading each branch shows the isolation:
 
+```text
+$ strata ./db kv get city --branch experiment
+tokyo
+$ strata ./db kv get city
+london
 ```
-$ strata --cache
-strata:default/default> kv put key default-value
-(version) 1
-strata:default/default> branch create experiment
-OK
+
+The write on `experiment` never touched `default`. Forking is cheap because nothing is copied up front; the branch records its parent and the commit version it forked from:
+
+```text
+$ strata ./db branch get experiment
+{
+  "branch_id": "1a29fdd4-745b-5b66-ad18-75b3cf51cef6",
+  "created_at": 3,
+  "deleted_at": null,
+  "generation": 1,
+  "name": "experiment",
+  "parent": {
+    "branch_id": "00000000-0000-0000-0000-000000000000",
+    "fork_timestamp": null,
+    "fork_version": 3,
+    "generation": 1,
+    "name": "default"
+  },
+  "state_revision": 0,
+  "status": "active"
+}
+```
+
+The `parent` block names the branch you forked from and the `fork_version` you forked at; `default` always has the all-zero `branch_id`.
+
+## Empty branches
+
+`branch create` makes a fresh **root** branch with no parent and no data — useful when you want a clean namespace rather than a fork of existing state.
+
+```text
+$ strata ./db branch create fresh
+$ strata ./db kv get city --branch fresh
+(nil)
+```
+
+## Listing and inspecting
+
+```bash
+strata ./db branch list            # every branch, one per line
+strata ./db branch get experiment  # one branch's metadata
+strata ./db branch delete fresh    # remove a branch and its data
+```
+
+Branch generations are monotonic per name: delete a branch and create it again, and the new one has a higher generation, so stale references never silently resolve to fresh data.
+
+## Forking a point in time
+
+A fork does not have to start from the tip. Pass `--version` or `--timestamp` to fork from a retained point in the source branch's history:
+
+```bash
+strata ./db branch fork default older --version 3
+```
+
+The new branch sees the source exactly as it stood at that version, while the source keeps moving forward:
+
+```text
+$ strata ./db kv get x --branch older
+v1
+$ strata ./db kv get x
+v2
+```
+
+## Safety rules
+
+- The `default` branch cannot be deleted. Attempting it fails with `invalid_argument.engine.branch_delete`.
+- Cross-branch references are rejected — you cannot point an operation at data in a branch other than the one it targets.
+- There is no merge command in this release. Branches diverge freely; to bring work from one branch onto another, re-apply (replay) the writes you want on the target. This release ships forking, isolated writes, and deletion, and leaves merge to a future surface.
+
+## Choosing a branch per command
+
+One-shot commands take `--branch <name>`; without it they target `default`. This is the clearest way to script against a specific branch, because each process is independent:
+
+```bash
+strata ./db kv put status ready --branch session-42
+strata ./db kv get status --branch session-42
+```
+
+In the interactive REPL (`strata ./db` with no command), the branch is sticky: `use <branch>` — or passing `--branch` on any line — switches the current branch for the lines that follow, and the prompt reflects it.
+
+```text
 strata:default/default> use experiment
-strata:experiment/default> kv get key
-(nil)
-strata:experiment/default> kv put key experiment-value
-(version) 1
-strata:experiment/default> use default
-strata:default/default> kv get key
-"default-value"
+strata:experiment/default>
 ```
 
-## Data Isolation
-
-Every primitive (KV, EventLog, StateCell, JSON, Vector) is isolated by branch. Data written in one branch is invisible from another:
-
-```
-$ strata --cache
-strata:default/default> kv put kv-key 1
-(version) 1
-strata:default/default> state set cell active
-(version) 1
-strata:default/default> event append log '{"msg":"hello"}'
-(seq) 1
-strata:default/default> branch create isolated
-OK
-strata:default/default> use isolated
-strata:isolated/default> kv get kv-key
-(nil)
-strata:isolated/default> state get cell
-(nil)
-strata:isolated/default> event len
-0
-```
-
-## Branch Lifecycle
-
-| Operation | CLI Command | Notes |
-|-----------|-------------|-------|
-| Create | `branch create <name>` | Creates an empty branch. Stays on current branch. |
-| Switch | `use <branch>` | Switches current branch. Branch must exist. |
-| List | `branch list` | Returns all branch names. |
-| Delete | `branch del <name>` | Deletes branch and all its data. Cannot delete current or default branch. |
-| Check info | `branch info <name>` | Returns branch details. |
-| Check existence | `branch exists <name>` | Returns whether the branch exists. |
-
-### Safety Rules
-
-- You **cannot delete the current branch**. Switch to a different branch first.
-- You **cannot delete the "default" branch**. It always exists.
-- You **cannot switch to a branch that doesn't exist**. Create it first.
-- Creating a branch does **not** switch to it. You must call `use` explicitly.
-
-## When to Use Branches
+## When to use branches
 
 | Scenario | Pattern |
 |----------|---------|
-| Each agent session gets its own state | One branch per session ID |
-| A/B testing different strategies | One branch per variant |
-| Safe experimentation | Fork-like: create branch, experiment, delete if bad |
-| Audit trail | Keep completed branches around for review |
+| Each agent session gets its own state | One branch per session id |
+| A/B testing two strategies | One branch per variant, compare, keep the winner |
+| Safe experiments | Fork, try changes, delete the branch if it goes wrong |
 | Multi-tenant isolation | One branch per tenant |
-
-## Branch Operations
-
-For advanced branch operations:
-
-```
-$ strata --cache
-strata:default/default> branch create my-branch
-OK
-strata:default/default> branch list
-- default
-- my-branch
-strata:default/default> branch exists my-branch
-true
-strata:default/default> branch del my-branch
-OK
-```
-
-Or from the shell:
-
-```bash
-strata --cache branch create my-branch
-strata --cache branch list
-strata --cache branch exists my-branch
-strata --cache branch del my-branch
-```
-
-## Branch Internals
-
-Under the hood, every key in storage is prefixed with its branch ID. When you run `kv put key value`, the storage layer stores it under `{branch_id}:kv:key`. This makes branch isolation automatic — no filtering needed, because the keys are simply different.
-
-This also means:
-- Deleting a branch is O(branch size), scanning only that branch's keys
-- Branches share no state, so they cannot conflict with each other
-- Cross-branch operations (fork, diff, merge) are available — see the [Branch Management Guide](/docs/guides/branch-management)
+| Reproducible snapshots | Fork at a known point and read it later |
 
 ## Next
 
-- [Primitives](primitives) — the six data types
-- [Branch Management Guide](/docs/guides/branch-management) — complete API walkthrough
+- [Commits](/docs/concepts/commits) — how writes on a branch become versioned and durable
+- [Branch Management Guide](/docs/guides/branch-management) — the full branch API
+- [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches) and [Multi-Agent Coordination](/docs/cookbook/multi-agent-coordination) — worked patterns

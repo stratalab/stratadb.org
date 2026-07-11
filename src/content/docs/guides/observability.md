@@ -1,127 +1,185 @@
 ---
-title: "Observability Guide"
+title: "Observability"
 section: "guides"
+description: "Check a database's liveness, facts, health, metrics, and installation with the read-only status commands."
+source: "strata-core@v1.0.0"
 ---
 
 
-StrataDB uses the [`tracing`](https://docs.rs/tracing) crate for structured logging. Instrumentation is built into the engine but produces zero overhead unless you wire up a subscriber in your application.
+Six read-only commands report on a database and the installation: `ping`,
+`info`, `health`, `metrics`, `describe`, and `doctor`. Each prints
+human-readable output by default and a compact envelope with `--json`, so the
+same command serves both a quick eyeball and a script. None of them writes
+anything. Examples use a durable database at `./mydb`.
 
-## How It Works
+## ping — liveness
 
-StrataDB emits `tracing` spans and events on key code paths. Your application controls what gets collected by configuring a `tracing` subscriber. If no subscriber is set up, all instrumentation is compiled away to no-ops.
-
-```rust
-use tracing_subscriber::EnvFilter;
-
-// Wire up a subscriber before opening the database
-tracing_subscriber::fmt()
-    .with_env_filter(EnvFilter::from_default_env())
-    .init();
-
-let db = Strata::open("/data/myapp")?;
-// Now you'll see structured log output
-```
-
-## Subsystem Targets
-
-StrataDB defines 10 subsystem targets for fine-grained log control:
-
-| Target | Subsystem | What Gets Logged |
-|--------|-----------|------------------|
-| `strata::branch` | Branch management | Branch create, delete, switch |
-| `strata::space` | Space management | Space registration, deletion |
-| `strata::command` | Command dispatch | Command execution, routing |
-| `strata::txn` | Transactions | Begin, commit, abort, validation, conflicts |
-| `strata::db` | Database | Database-level operations, lifecycle |
-| `strata::wal` | Write-Ahead Log | Record append, rotation, flush, sync |
-| `strata::snapshot` | Snapshots | Snapshot writing, atomic operations |
-| `strata::recovery` | Recovery | Participant registration, WAL replay |
-| `strata::compaction` | Compaction | WAL compaction operations |
-| `strata::vector` | Vector store | Upsert, search, collection management |
-
-## Log Levels
-
-Each subsystem uses standard `tracing` levels:
-
-| Level | When Used |
-|-------|-----------|
-| `error` | Unrecoverable failures — corruption detected, recovery failure |
-| `warn` | Recoverable issues — transaction conflicts, retries, degraded performance |
-| `info` | Key lifecycle events — branch created, transaction committed, snapshot written |
-| `debug` | Detailed operational data — individual key operations, search parameters |
-
-## Configuration
-
-Use the `RUST_LOG` environment variable to control which targets and levels are active:
+`ping` confirms the binary responds and reports its version:
 
 ```bash
-# All strata logs at info level
-RUST_LOG=info
-
-# Transaction debugging
-RUST_LOG=strata::txn=debug
-
-# Multiple subsystems
-RUST_LOG=strata::txn=debug,strata::wal=info,strata::recovery=debug
-
-# Everything at debug (verbose)
-RUST_LOG=strata=debug
-
-# Only errors
-RUST_LOG=strata=error
+strata ./mydb ping
 ```
 
-## Setting Up a Subscriber
-
-### Basic Console Output
-
-```rust
-use tracing_subscriber::EnvFilter;
-
-tracing_subscriber::fmt()
-    .with_env_filter(EnvFilter::from_default_env())
-    .init();
+```text
+pong 1.0.0
 ```
 
-### JSON Output
-
-For structured log consumption (log aggregators, monitoring):
-
-```rust
-use tracing_subscriber::EnvFilter;
-
-tracing_subscriber::fmt()
-    .json()
-    .with_env_filter(EnvFilter::from_default_env())
-    .init();
+```bash
+strata --json ./mydb ping
 ```
 
-### Custom Subscriber
-
-```rust
-use tracing_subscriber::{fmt, EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
-
-tracing_subscriber::registry()
-    .with(fmt::layer().with_target(true))
-    .with(EnvFilter::new("strata::txn=debug,strata::wal=info"))
-    .init();
+```text
+{"data":{"version":"1.0.0"},"type":"pong"}
 ```
 
-## Example Output
+## info — top-line facts
 
-With `RUST_LOG=strata::txn=debug,strata::branch=info`:
+`info` prints the essential facts about an open database — branch and space
+counts, the default branch, whether it is durable and open, and its storage
+target:
 
+```bash
+strata ./mydb info
 ```
-2026-02-04T10:30:00Z  INFO strata::branch: branch created name="experiment-1"
-2026-02-04T10:30:00Z DEBUG strata::txn: transaction begun txn_id=42 branch="default"
-2026-02-04T10:30:00Z DEBUG strata::txn: transaction committed txn_id=42 writes=3
+
+```text
+{
+  "branch_count": 1,
+  "created": false,
+  "default_branch": "default",
+  "durable": true,
+  "open": true,
+  "space_count": 1,
+  "target": "durable_local",
+  "version": "1.0.0"
+}
 ```
 
-## Zero Overhead
+## health — subsystem checks
 
-When no subscriber is configured, `tracing` macros compile to no-ops. There is no runtime cost — no string formatting, no allocation, no I/O. You only pay for what you collect.
+`health` reports the status of each control-plane subsystem and an overall
+`status`. Everything healthy looks like this:
+
+```bash
+strata ./mydb health
+```
+
+```text
+{
+  "branch_catalog": "healthy",
+  "branch_count": 1,
+  "default_branch": "default",
+  "identity": "healthy",
+  "registry": "healthy",
+  "space_catalog": "healthy",
+  "status": "healthy"
+}
+```
+
+Watch the top-level `status`: it is the single field to alert on.
+
+## metrics — operational facts
+
+`metrics` reports operational state — control status, durability, open state,
+target, and the branch and space counts:
+
+```bash
+strata ./mydb metrics
+```
+
+```text
+{
+  "branch_count": 1,
+  "control_status": "healthy",
+  "durable": true,
+  "open": true,
+  "space_count": 1,
+  "target": "durable_local"
+}
+```
+
+## describe — full snapshot
+
+`describe` is the widest view: which capabilities are present, the current and
+available branches and spaces, and per-primitive counts. It is the fastest way
+to see what a database actually contains:
+
+```bash
+strata ./mydb describe
+```
+
+```text
+{
+  "branch": "default",
+  "branches": [
+    "default"
+  ],
+  "capabilities": {
+    "arrow": true,
+    "event": true,
+    "graph_core": true,
+    "inference": true,
+    "json": true,
+    "kv": true,
+    "vector": true,
+    "vector_index": true
+  },
+  "config": {
+    "created": false,
+    "default_branch": "default",
+    "durable": true,
+    "target": "durable_local"
+  },
+  "default_branch": "default",
+  "primitives": {
+    "event_count": 0,
+    "graphs": [],
+    "json_count": 0,
+    "kv_count": 2,
+    "vector_collections": []
+  },
+  "spaces": [
+    "default"
+  ],
+  "target": "durable_local",
+  "version": "1.0.0"
+}
+```
+
+## doctor — installation and database check
+
+`doctor` checks the installation: the binary version, the Strata home
+directory, whether it is on your `PATH`, the platform, and any `issues`. With no
+target it checks the install alone and exits zero when clean:
+
+```bash
+strata doctor
+```
+
+```text
+{
+  "binary": "1.0.0",
+  "database": null,
+  "home": "~/.strata",
+  "issues": [],
+  "path_ok": true,
+  "platform": "linux-x86_64"
+}
+```
+
+Pass a database as the global target — before the `doctor` verb — to also open
+it and report its facts under `database`:
+
+```bash
+strata ./mydb doctor
+```
+
+The `database` object then carries `exists`, `open_ok`, `path`, and the same
+`info` block shown above. `doctor` exits non-zero when anything in `issues`
+needs attention, which makes it a natural preflight check in scripts and CI.
 
 ## Next
 
-- [Database Configuration](database-configuration) — durability modes and opening methods
-- [Error Handling](error-handling) — error categories and patterns
+- [Error Handling](/docs/guides/error-handling) — decode failures when a check goes red.
+- [Database Configuration](/docs/guides/database-configuration) — read a database's config.
+- [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface behind these facts.

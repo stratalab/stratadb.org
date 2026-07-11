@@ -28,7 +28,7 @@ const PRIMS = [
   { id: 'event', label: 'Events', role: 'Append-only streams. Replay anything.', guide: '/docs/guides/event-log' },
   { id: 'json', label: 'JSON', role: 'Documents with path-level writes.', guide: '/docs/guides/json-store' },
   { id: 'vector', label: 'Vectors', role: 'Embeddings with HNSW search.', guide: '/docs/guides/vector-store' },
-  { id: 'graph', label: 'Graph', role: 'Nodes, edges, typed links. Traverse anything.', guide: '/docs/guides/search' },
+  { id: 'graph', label: 'Graph', role: 'Nodes, edges, typed links. Traverse anything.', guide: '/docs/guides/graph' },
 ] as const;
 
 // The rest of the real app's nav — present and dimmed: Foundry is bigger

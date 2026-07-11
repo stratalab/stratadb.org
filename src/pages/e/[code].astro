@@ -1,0 +1,71 @@
+---
+// Per-error-code pages (doc 10 §3). The shipping binary emits
+// https://stratadb.org/e/<code> on every structured error; these pages are
+// that target. Interim source: src/data/error-registry.json, exported from
+// `strata agents errors --json` at the release named in release.json. Phase 2
+// replaces the vendored snapshot with a fetch-from-release artifact.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/foundation/Heading.astro';
+import registry from '../../data/error-registry.json';
+
+export async function getStaticPaths() {
+  return registry.errors.map((entry) => ({
+    params: { code: entry.code },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+
+const RETRY_MEANING: Record<string, string> = {
+  never: 'Do not retry the same request — fix the request or the referenced state first.',
+  same_request: 'Safe to retry the same request unchanged (transient condition).',
+  after_state_change: 'Retry only after the blocking state changes (see the hint).',
+  unknown: 'Outcome unknown — inspect the database state before retrying.',
+};
+
+const COMMIT_MEANING: Record<string, string> = {
+  not_started: 'No commit was started; the database is unchanged.',
+  definitely_not_committed: 'The commit did not apply; the database is unchanged.',
+  maybe_committed: 'The commit may or may not have applied — verify with a read before retrying.',
+  not_applicable: 'This operation does not commit.',
+};
+---
+
+<BaseLayout title={`${entry.code} — StrataDB error`} description={entry.message}>
+  <div class="mx-auto w-full max-w-[46rem] px-6 py-16">
+    <p class="mb-4 font-mono text-mono-sm text-ink-low">
+      <a href="/e" class="transition-colors duration-200 hover:text-ink-hi">error registry</a>
+      <span class="mx-1">/</span>{entry.class}
+    </p>
+    <Heading level={1} size="title"><code class="font-mono">{entry.code}</code></Heading>
+
+    <p class="mt-6 text-body-lg text-ink-hi">{entry.message}</p>
+    <p class="mt-4 text-body text-ink-mid">{entry.hint}</p>
+
+    <dl class="mt-10 space-y-4 border-t border-line pt-6">
+      <div>
+        <dt class="font-mono text-mono-sm uppercase text-ink-low">class</dt>
+        <dd class="mt-1 font-mono text-mono-sm text-ink-hi">{entry.class}</dd>
+      </div>
+      <div>
+        <dt class="font-mono text-mono-sm uppercase text-ink-low">retry</dt>
+        <dd class="mt-1 text-small text-ink-mid">
+          <code class="font-mono">{entry.retry_policy}</code> — {RETRY_MEANING[entry.retry_policy] ?? ''}
+        </dd>
+      </div>
+      <div>
+        <dt class="font-mono text-mono-sm uppercase text-ink-low">commit outcome</dt>
+        <dd class="mt-1 text-small text-ink-mid">
+          <code class="font-mono">{entry.commit_outcome}</code> — {COMMIT_MEANING[entry.commit_outcome] ?? ''}
+        </dd>
+      </div>
+    </dl>
+
+    <div class="mt-10 flex gap-6 font-mono text-mono-sm">
+      <a href="/docs/reference/error-reference" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Error model</a>
+      <a href="/e" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">All codes</a>
+      <a href="/docs" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Docs</a>
+    </div>
+  </div>
+</BaseLayout>

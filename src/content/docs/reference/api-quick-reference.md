@@ -1,133 +1,127 @@
 ---
 title: "API Quick Reference"
 section: "reference"
+description: "A one-page cheat sheet of the most common strata operation per capability, with verified examples."
+source: "strata-core@v1.0.0"
 ---
 
+> **Interim page.** Maintained by hand until it is generated from the resolved command index (IDL). Where this page and `strata agents commands --json` disagree, the command index wins.
 
-Every method on the `Strata` struct, grouped by category.
+The operations you reach for most, one per capability. Examples assume a durable database at `./my-db`; swap in `--cache` for an ephemeral one. The full surface is in the [Command Reference](/docs/reference/command-reference); how to invoke the binary is in the [CLI Reference](/docs/reference/cli).
 
-## Database
+## Targeting and output
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `open` | `(path: impl AsRef<Path>) -> Result<Self>` | New Strata instance |
-| `cache` | `() -> Result<Self>` | Ephemeral in-memory instance |
-| `new_handle` | `() -> Result<Self>` | Independent handle to same database |
-| `ping` | `() -> Result<String>` | Version string |
-| `info` | `() -> Result<DatabaseInfo>` | Database statistics |
-| `flush` | `() -> Result<()>` | Flushes pending writes |
-| `compact` | `() -> Result<()>` | Triggers compaction |
+```bash
+strata ./my-db kv get k        # durable path (or --db ./my-db, or STRATA_DB=./my-db)
+strata --cache kv get k        # ephemeral, nothing persisted
+strata --json ./my-db kv get k # {"type":…,"data":…} envelope; values base64
+strata --raw  ./my-db kv get k # bare value, for scripts
+```
 
-## Branch Context
+## KV
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `current_branch` | `() -> &str` | Current branch name |
-| `set_branch` | `(name: &str) -> Result<()>` | Switches current branch |
-| `create_branch` | `(name: &str) -> Result<()>` | Creates empty branch |
-| `list_branches` | `() -> Result<Vec<String>>` | All branch names |
-| `delete_branch` | `(name: &str) -> Result<()>` | Deletes branch + data |
-| `fork_branch` | `(dest: &str) -> Result<()>` | Copies current branch to dest |
-| `branches` | `() -> Branches<'_>` | Power API handle |
+```bash
+strata ./my-db kv put greeting hello     # created greeting applied=true
+strata ./my-db kv get greeting           # hello
+strata ./my-db kv list --prefix user:    # keys with a prefix
+strata ./my-db kv delete greeting
+```
 
-## Space Context
+## JSON
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `current_space` | `() -> &str` | Current space name |
-| `set_space` | `(name: &str) -> Result<()>` | Switches current space |
-| `list_spaces` | `() -> Result<Vec<String>>` | All space names in current branch |
-| `delete_space` | `(name: &str) -> Result<()>` | Deletes empty space |
-| `delete_space_force` | `(name: &str) -> Result<()>` | Deletes space and all its data |
+```bash
+strata ./my-db json set user:1 '$' '{"name":"Ada","age":36}'   # $ is the document root
+strata ./my-db json get user:1 '$.name'                        # "Ada"
+strata ./my-db json set user:1 '$.age' 37                      # update one path
+strata ./my-db json list --prefix user:
+```
 
-> **Note:** All data methods (KV, Event, State, JSON, Vector) operate on the current space set via `set_space`. The default space is `"default"`.
+## Event log
 
-## KV Store
+```bash
+strata ./my-db event append signup '{"user":"ada"}'   # created applied=true
+strata ./my-db event len                              # 1
+strata ./my-db event get 0                            # sequences start at 0
+strata ./my-db event by-type signup
+```
 
-| Method | Signature | Returns | Notes |
-|--------|-----------|---------|-------|
-| `kv_put` | `(key: &str, value: impl Into<Value>) -> Result<u64>` | Version | Creates or overwrites |
-| `kv_get` | `(key: &str) -> Result<Option<Value>>` | Value or None | |
-| `kv_delete` | `(key: &str) -> Result<bool>` | Whether key existed | |
-| `kv_list` | `(prefix: Option<&str>) -> Result<Vec<String>>` | Key names | |
+## Vector
 
-## Event Log
+```bash
+strata ./my-db vector collection create docs 4 --metric cosine
+strata ./my-db vector upsert docs d1 '[0.1,0.2,0.3,0.4]' --metadata '{"lang":"en"}'
+strata ./my-db vector query docs '[0.1,0.2,0.3,0.4]' -k 3     # d1  1.0
+# metadata filter: AND-composed conditions, each value tagged by type
+strata ./my-db vector query docs '[0.1,0.2,0.3,0.4]' -k 3 \
+  --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"en"}}]}'
+```
 
-| Method | Signature | Returns | Notes |
-|--------|-----------|---------|-------|
-| `event_append` | `(event_type: &str, payload: Value) -> Result<u64>` | Sequence number | Payload must be Object |
-| `event_get` | `(sequence: u64) -> Result<Option<VersionedValue>>` | Event or None | |
-| `event_get_by_type` | `(event_type: &str) -> Result<Vec<VersionedValue>>` | All events of type | |
-| `event_len` | `() -> Result<u64>` | Total event count | |
+## Graph
 
-## State Cell
+```bash
+strata ./my-db graph create social
+strata ./my-db graph add-node social alice --properties '{"city":"tokyo"}'
+strata ./my-db graph add-edge social alice follows bob --weight 1.0
+strata ./my-db graph neighbors social alice --direction outgoing
+strata ./my-db graph pagerank social         # analytics over the graph
+```
 
-| Method | Signature | Returns | Notes |
-|--------|-----------|---------|-------|
-| `state_set` | `(cell: &str, value: impl Into<Value>) -> Result<u64>` | Version | Unconditional write |
-| `state_get` | `(cell: &str) -> Result<Option<Value>>` | Value or None | |
-| `state_init` | `(cell: &str, value: impl Into<Value>) -> Result<u64>` | Version | Only if absent |
-| `state_cas` | `(cell: &str, expected: Option<u64>, value: impl Into<Value>) -> Result<Option<u64>>` | New version or None | CAS |
+## Branches
 
-## JSON Store
+```bash
+strata ./my-db branch fork default experiment   # cheap copy-on-write fork
+strata ./my-db kv put city tokyo --branch experiment
+strata ./my-db kv get city --branch experiment  # tokyo
+strata ./my-db kv get city                       # unchanged on default
+strata ./my-db branch list
+```
 
-| Method | Signature | Returns | Notes |
-|--------|-----------|---------|-------|
-| `json_set` | `(key: &str, path: &str, value: impl Into<Value>) -> Result<u64>` | Version | Use "$" for root |
-| `json_get` | `(key: &str, path: &str) -> Result<Option<Value>>` | Value or None | |
-| `json_delete` | `(key: &str, path: &str) -> Result<u64>` | Count deleted | |
-| `json_list` | `(prefix: Option<String>, cursor: Option<String>, limit: u64) -> Result<(Vec<String>, Option<String>)>` | Keys + cursor | |
+## Spaces
 
-## Vector Store
+```bash
+strata ./my-db space create staging
+strata ./my-db kv put k v --space staging   # isolated from the default space
+strata ./my-db space list
+```
 
-| Method | Signature | Returns | Notes |
-|--------|-----------|---------|-------|
-| `vector_create_collection` | `(name: &str, dimension: u64, metric: DistanceMetric) -> Result<u64>` | Version | |
-| `vector_delete_collection` | `(name: &str) -> Result<bool>` | Whether it existed | |
-| `vector_list_collections` | `() -> Result<Vec<CollectionInfo>>` | All collections | |
-| `vector_collection_stats` | `(collection: &str) -> Result<CollectionInfo>` | Collection details | Includes `index_type`, `memory_bytes` |
-| `vector_upsert` | `(collection: &str, key: &str, vector: Vec<f32>, metadata: Option<Value>) -> Result<u64>` | Version | |
-| `vector_batch_upsert` | `(collection: &str, entries: Vec<BatchVectorEntry>) -> Result<Vec<u64>>` | Versions | Atomic bulk insert |
-| `vector_get` | `(collection: &str, key: &str) -> Result<Option<VersionedVectorData>>` | Vector data or None | |
-| `vector_delete` | `(collection: &str, key: &str) -> Result<bool>` | Whether it existed | |
-| `vector_search` | `(collection: &str, query: Vec<f32>, k: u64) -> Result<Vec<VectorMatch>>` | Top-k matches | 8 metadata filter operators |
+## Time travel
 
-## Branch Operations (Low-Level)
+Every write receipt carries a commit clock value at `data.commit.timestamp` (a small integer, visible with `--json`). Pass it back with `--as-of` on any read. It is the commit clock, not a wall-clock time.
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `branch_create` | `(branch_id: Option<String>, metadata: Option<Value>) -> Result<(BranchInfo, u64)>` | Info + version |
-| `branch_get` | `(branch: &str) -> Result<Option<VersionedBranchInfo>>` | Branch info or None |
-| `branch_list` | `(state: Option<BranchStatus>, limit: Option<u64>, offset: Option<u64>) -> Result<Vec<VersionedBranchInfo>>` | Branch info list |
-| `branch_exists` | `(branch: &str) -> Result<bool>` | Whether branch exists |
-| `branch_delete` | `(branch: &str) -> Result<()>` | Deletes branch |
+```bash
+strata --json ./my-db kv put k v1   # data.commit.timestamp: 3
+strata ./my-db kv put k v2          # data.commit.timestamp: 4
+strata ./my-db kv get k --as-of 3   # v1
+```
 
-## Bundle Operations
+## Inference
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `branch_export` | `(branch_id: &str, path: &str) -> Result<BranchExportResult>` | Export info |
-| `branch_import` | `(path: &str) -> Result<BranchImportResult>` | Import info |
-| `branch_validate_bundle` | `(path: &str) -> Result<BundleValidateResult>` | Validation info |
+```bash
+strata inference models list
+strata inference embed <model> "text to embed"
+strata inference generate <model> "prompt" --max-tokens 128 --temperature 0.7
+```
 
-## Branches Power API
+## Errors
 
-Methods on the `Branches` handle returned by `db.branches()`:
+Failures carry a stable code, a hint, and a per-code reference. Recover by code and class, never by message text.
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `list` | `() -> Result<Vec<String>>` | Branch names |
-| `exists` | `(name: &str) -> Result<bool>` | Whether branch exists |
-| `create` | `(name: &str) -> Result<()>` | Creates empty branch |
-| `delete` | `(name: &str) -> Result<()>` | Deletes branch |
-| `fork` | `(source: &str, dest: &str) -> Result<ForkInfo>` | Copies branch data |
-| `diff` | `(branch1: &str, branch2: &str) -> Result<BranchDiff>` | Compares two branches |
-| `merge` | `(source: &str, target: &str, strategy: MergeStrategy) -> Result<MergeInfo>` | Merges source into target |
+```bash
+$ strata ./my-db vector get missing k1
+not_found.engine.vector_collection: vector collection does not exist (err_local_…)
+  hint: Check that the requested branch, space, collection, graph, document, key, or model exists.
+  ref: https://stratadb.org/e/not_found.engine.vector_collection
+```
 
-## Session
+Full registry: [Error Reference](/docs/reference/error-reference) and [Error Handling](/docs/guides/error-handling).
 
-| Method | Signature | Returns |
-|--------|-----------|---------|
-| `Session::new` | `(db: Arc<Database>) -> Self` | New session |
-| `execute` | `(cmd: Command) -> Result<Output>` | Command result |
-| `in_transaction` | `() -> bool` | Whether a txn is active |
+## For agents
+
+```bash
+strata agents guide              # the full offline usage guide, version-matched
+strata agents commands --json    # the machine-readable command catalog
+strata agents errors --json      # the public error-code registry
+strata ./my-db mcp serve         # Model Context Protocol over stdio
+```
+
+See [Agents and MCP](/docs/guides/agents-and-mcp) and the [MCP Server Reference](/docs/reference/mcp).

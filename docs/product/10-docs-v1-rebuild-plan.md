@@ -1,6 +1,9 @@
 # 10 — V1 Docs Rebuild: Audit and IDL-Driven Plan
 
-**Status:** Audit complete, plan proposed (2026-07-10). Companion to
+**Status:** Audit complete (2026-07-10); **Phase 0 shipped 2026-07-10** — 42 pages
+rewritten/added, 7 deleted, `/e/<code>` live (204 codes), `source:` frontmatter on
+every page. Phases 1–3 (IDL completion, generation pipeline, snippet CI) open.
+Companion to
 [09 — Documentation Sourcing Policy](09-docs-sourcing-policy.md); this document
 applies that policy to the concrete V1 rebuild of `src/content/docs/`.
 

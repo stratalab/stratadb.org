@@ -1,162 +1,169 @@
 ---
-title: "Branch Management Guide"
+title: "Branch Management"
 section: "guides"
+description: "List, read, create, fork, and delete branches, and understand the fork-and-refuse merge model."
+source: "strata-core@v1.0.0"
 ---
 
 
-This guide covers the complete CLI for creating, switching, listing, and deleting branches. For the conceptual overview, see [Concepts: Branches](/docs/concepts/branches).
+A branch is an isolated line of history. Every primitive is branch-aware, forks
+are cheap, and writes on one branch are invisible to every other branch until
+you fork again. For the mental model, see
+[Concepts: Branches](/docs/concepts/branches). This guide covers the five branch
+verbs on the CLI: `list`, `get`, `create`, `fork`, and `delete`.
 
-## Opening and Default Branch
+Examples use a durable database at `./mydb`. Every branch command also accepts
+`--branch`, `--space`, and `--json`.
 
-When you open the CLI, a "default" branch is automatically created and set as current:
+## List branches
 
-```
-$ strata --cache
-strata:default/default>
-```
-
-## Creating Branches
-
-`branch create` creates a new empty branch. It does **not** switch to it:
-
-```
-$ strata --cache
-strata:default/default> branch create experiment-1
-OK
-strata:default/default> branch create experiment-1
-(error) BranchExists: branch "experiment-1" already exists
-```
-
-## Switching Branches
-
-`use <branch>` changes the current branch. All subsequent data operations target the new branch:
-
-```
-$ strata --cache
-strata:default/default> branch create my-branch
-OK
-strata:default/default> use my-branch
-strata:my-branch/default> use nonexistent
-(error) BranchNotFound: branch "nonexistent" does not exist
-```
-
-## Listing Branches
-
-`branch list` returns all branch names:
-
-```
-$ strata --cache
-strata:default/default> branch create branch-a
-OK
-strata:default/default> branch create branch-b
-OK
-strata:default/default> branch list
-- branch-a
-- branch-b
-- default
-```
-
-## Deleting Branches
-
-`branch del` removes a branch and all its data (KV, Events, State, JSON, Vectors):
-
-```
-$ strata --cache
-strata:default/default> branch create temp
-OK
-strata:default/default> branch del temp
-OK
-```
-
-### Safety Rules
-
-```
-$ strata --cache
-strata:default/default> branch create my-branch
-OK
-strata:default/default> use my-branch
-strata:my-branch/default> branch del my-branch
-(error) ConstraintViolation: cannot delete current branch
-strata:my-branch/default> use default
-strata:default/default> branch del my-branch
-OK
-strata:default/default> branch del default
-(error) ConstraintViolation: cannot delete default branch
-```
-
-## Branch Info
-
-Get detailed information about a branch:
-
-```
-$ strata --cache
-strata:default/default> branch create my-branch
-OK
-strata:default/default> branch info my-branch
-id: my-branch
-status: active
-```
-
-## Branch Existence Check
-
-```
-$ strata --cache
-strata:default/default> branch create experiment
-OK
-strata:default/default> branch exists experiment
-true
-strata:default/default> branch exists nonexistent
-false
-```
-
-## Fork a Branch
-
-Fork creates an exact copy of a branch, including all data across all primitives and spaces:
-
-```
-$ strata --cache
-strata:default/default> kv put key value
-(version) 1
-strata:default/default> branch fork experiment-1
-OK
-strata:default/default> use experiment-1
-strata:experiment-1/default> kv get key
-"value"
-```
-
-## Diff Branches
-
-Compare two branches to see what's different:
+`branch list` prints one branch record per line. A fresh database has only
+`default`:
 
 ```bash
-strata --cache branch diff branch-a branch-b
+strata ./mydb branch list
 ```
 
-## Merge Branches
+```text
+{"branch_id":"00000000-0000-0000-0000-000000000000","created_at":null,"deleted_at":null,"generation":1,"name":"default","parent":null,"state_revision":0,"status":"active"}
+```
 
-Merge data from one branch into another:
+## Read one branch
+
+`branch get <name>` returns the full record. The human form is pretty-printed;
+add `--json` for a compact envelope:
 
 ```bash
-# Last-writer-wins: source values overwrite target on conflict
-strata --cache branch merge source --strategy lww
-
-# Strict: fails if any conflicts exist
-strata --cache branch merge source --strategy strict
+strata ./mydb branch get default
 ```
 
-## Shell Mode
+```text
+{
+  "branch_id": "00000000-0000-0000-0000-000000000000",
+  "created_at": null,
+  "deleted_at": null,
+  "generation": 1,
+  "name": "default",
+  "parent": null,
+  "state_revision": 0,
+  "status": "active"
+}
+```
 
-All branch operations work from the shell too:
+## Create an empty branch
+
+`branch create <name>` makes a new root branch with no data and no parent. It
+does not switch you onto it — pass `--branch` on later commands to target it:
 
 ```bash
-strata --cache branch create experiment
-strata --cache branch list
-strata --cache branch exists experiment
-strata --cache --branch experiment kv put key value
-strata --cache branch del experiment
+strata ./mydb branch create scratch
+strata ./mydb kv count --branch scratch
 ```
+
+```text
+0
+```
+
+## Fork a branch
+
+`branch fork <source> <name>` copies a branch's visible history into a new
+branch. There are three variants, chosen by which flags you pass. To show them,
+first make three writes to `config` and note the version and timestamp on each
+receipt (`strata --json ./mydb kv put config v1` prints
+`"commit":{...,"timestamp":3,"version":3}`, and so on for `v2` at 4 and `v3` at 5).
+
+**From the tip** (no flags) forks the source's latest state:
+
+```bash
+strata ./mydb branch fork default review
+strata ./mydb kv get config --branch review
+```
+
+```text
+v3
+```
+
+**At a version** (`--version`) forks from a retained commit version:
+
+```bash
+strata ./mydb branch fork default rollback --version 3
+strata ./mydb kv get config --branch rollback
+```
+
+```text
+v1
+```
+
+**At a timestamp** (`--timestamp`) forks from a retained commit timestamp:
+
+```bash
+strata ./mydb branch fork default snapshot --timestamp 4
+strata ./mydb kv get config --branch snapshot
+```
+
+```text
+v2
+```
+
+The fork record records where it split from under `parent`, for example
+`"parent":{"name":"default","fork_version":5,"fork_timestamp":null,...}`.
+
+## Isolation
+
+Writes are scoped to their branch. Writing `config` on `review` leaves `default`
+untouched:
+
+```bash
+strata ./mydb kv put config review-only --branch review
+strata ./mydb kv get config --branch review   # review-only
+strata ./mydb kv get config                    # v3
+```
+
+## Delete a branch
+
+`branch delete <name>` removes a branch and its history:
+
+```bash
+strata ./mydb branch delete scratch
+```
+
+```text
+deleted applied=true
+```
+
+The default branch cannot be deleted:
+
+```text
+invalid_argument.engine.branch_delete: default branch cannot be deleted (err_local_0b3b7d37_000001)
+  hint: Correct the request input and retry the operation.
+  ref: https://stratadb.org/e/invalid_argument.engine.branch_delete
+```
+
+## Refusals
+
+Branch operations fail with stable codes, not prose. Recover by code — see
+[Error Handling](/docs/guides/error-handling). Common cases:
+
+- Reserved names (the `_system_` prefix is engine-owned) →
+  [`invalid_argument.engine.branch_name_reserved`](/e/invalid_argument.engine.branch_name_reserved).
+- Re-creating an existing branch →
+  [`already_exists.engine.branch`](/e/already_exists.engine.branch).
+- Reading or forking a missing branch →
+  [`not_found.engine.branch`](/e/not_found.engine.branch).
+- Forking at a version or timestamp outside retained history →
+  [`history_unavailable.engine.persistence_history`](/e/history_unavailable.engine.persistence_history).
+
+## Merging
+
+This release exposes no `branch merge` command. Combine work by forking and
+re-applying writes on the target branch. When merge does run inside the engine,
+it strictly refuses branches whose history has diverged rather than guessing a
+resolution, so there is no silent last-writer-wins. Fork-based workflows —
+review a change on a fork, then replay it onto `default` — are the supported
+path today.
 
 ## Next
 
-- [Sessions and Transactions](sessions-and-transactions) — multi-operation atomicity
-- [Branch Bundles](branch-bundles) — exporting and importing branches
+- [Spaces](/docs/guides/spaces) — organize data within a branch.
+- [KV Store](/docs/guides/kv-store) — versioned reads and `--as-of` time travel.
+- [Concepts: Branches](/docs/concepts/branches) — the model behind these verbs.

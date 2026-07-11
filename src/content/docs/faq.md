@@ -1,114 +1,124 @@
 ---
 title: "Frequently Asked Questions"
+description: "What StrataDB is and isn't, how it stores data, and what changed in the V1 line."
+source: "strata-core@v1.0.0"
 ---
 
 
-## General
+## What it is
 
 ### What is StrataDB?
 
-StrataDB is an embedded database designed for AI agents. It provides six data primitives (KV, EventLog, StateCell, JSON, Vector, Branch) with branch-based data isolation, OCC transactions, and three durability modes.
+An embedded, multi-model database. It runs inside your process against a local
+directory — one binary, one database directory, no server. Five data
+capabilities share one storage substrate: key-value, JSON documents, an event
+log, vectors, and a graph. On top of that substrate you get git-style branches
+and time travel. See [Your first database](/docs/getting-started/first-database)
+for a hands-on tour.
 
-### Is StrataDB a replacement for Redis or Postgres?
+### Is it a server?
 
-No. StrataDB complements traditional databases. Use Postgres for application data, Redis for caching, and a dedicated vector database for large-scale embedding search. Use StrataDB for agent state that needs branch isolation, atomicity across primitives, and deterministic replay.
+No. StrataDB is embedded and in-process, like SQLite or DuckDB. You do not start
+a daemon, open a port, or manage a connection pool — you point the CLI (or,
+later, an SDK) at a directory and it opens the database in-process. There is no
+network mode in this line.
+
+### Is it a replacement for Postgres or Redis?
+
+No — it complements them. Keep Postgres for relational application data and
+Redis for a shared cache. Reach for StrataDB when you want branch-isolated,
+versioned state with a KV, JSON, event, vector, and graph model in one place —
+agent memory, experiment isolation, and replayable history are the sweet spot.
 
 ### Why not just use SQLite?
 
-SQLite is excellent for relational data but doesn't provide branch-scoped operations, purpose-built primitives for agent state (EventLog, StateCell, VectorStore), or multi-primitive transactions out of the box. You would build these features yourself on top of SQLite.
+SQLite is a great relational store, but it has no branch-scoped isolation, no
+built-in vector or graph capability, and no per-commit time travel. StrataDB
+gives you those on one substrate instead of asking you to build them yourself.
 
-### Is StrataDB production-ready?
+## Storage and durability
 
-StrataDB is production-ready for embedded (in-process) use. It has comprehensive test coverage, verified crash recovery, and benchmarked performance. A network layer and distributed mode are planned for the future.
+### Durable mode versus cache mode?
 
-## Data Model
+Point StrataDB at a path and it runs **durable**: writes go through a
+write-ahead log and survive the process exiting. Run it with `--cache` and it
+runs **in-memory** — nothing is written to disk and the data is gone when the
+process ends. Durable mode is the default for any named path; cache mode is for
+tests, scratch work, and ephemeral MCP servers.
 
-### What are branches?
+### Where does my data live?
 
-Branches are isolated data namespaces, similar to git branches. All data in StrataDB lives in a branch. Data written in one branch is invisible from another. See [Concepts: Branches](/docs/concepts/branches).
+In the directory you name. A durable database directory holds a write-ahead log,
+a manifest, and lock files — treat the directory as one unit; do not edit files
+inside it by hand. Global CLI configuration lives separately under your home
+directory, so uninstalling the binary never touches your databases.
 
-### How many primitives are there?
+### How does branching relate to git?
 
-Six: KV Store, Event Log, State Cell, JSON Store, Vector Store, and Branch. See [Concepts: Primitives](/docs/concepts/primitives).
+The mental model is the same: fork a branch, get an isolated line of data, and
+writes on the fork are invisible to its parent. A fork is cheap because it
+shares the parent's data until you change something (copy-on-write), and every
+write is a commit you can read back with `--as-of`. Where it differs from git:
+this release has no merge command. You fork, isolate, and time-travel; you do not
+merge two divergent branches back together. The workflow is fork-and-replay, not
+fork-and-merge. See [Branches](/docs/concepts/branches) and
+[Commits](/docs/concepts/commits).
 
-### What value types are supported?
+## What changed in this line
 
-Eight: Null, Bool, Int (i64), Float (f64), String, Bytes, Array, and Object. There are no implicit type coercions. See [Concepts: Value Types](/docs/concepts/value-types).
+The V1 line is a clean break, so a few things from earlier previews are gone or
+deferred. Straight answers:
 
-### Can I store arbitrary Rust structs?
+### What happened to the state cell?
 
-Not directly. Convert your struct to a `Value` (typically via `serde_json::json!()` for Object values, or use the `From` implementations for simple types). StrataDB's type system is intentionally simple — 8 types that map cleanly to JSON.
+Removed. There is no separate state-cell capability. Use the KV store for
+mutable keyed state, or a JSON document for structured state.
 
-## Performance
+### What happened to sessions and transactions?
 
-### What throughput can I expect?
+Removed as a public surface. There is no `begin` / `commit` / `rollback`. Writes
+auto-commit, and multi-item batches commit itemwise or under one shared commit —
+you do not manage a transaction by hand.
 
-| Mode | Throughput |
-|------|-----------|
-| Ephemeral | 250K+ ops/sec (single thread), 800K+ (4 threads) |
-| Buffered | 50K+ ops/sec |
-| Strict | ~500 ops/sec |
+### What happened to branch bundles?
 
-### What is the read latency?
+Replaced by hub clones. Instead of exporting a bundle file, you clone a dataset
+from a hub into a new local database with `strata clone`, and `strata remote`
+shows where a database was cloned from. See
+[Cloning datasets](/docs/guides/cloning-datasets).
 
-Fast path reads (in-memory, no transaction) are typically under 10 microseconds.
+### What happened to search?
 
-### How does the Vector Store compare to dedicated vector databases?
+Vector similarity search is here — create a collection and run `vector query`.
+The broader standalone search surface and its optimizer are deferred beyond this
+line; the substrate for them is in place. See
+[Vectors](/docs/guides/vector-store).
 
-The Vector Store is designed for branch-scoped agent memory (hundreds to tens of thousands of vectors per collection), not large-scale similarity search. For million-scale embeddings, use a dedicated vector database. For agent context, working memory, and session-scoped RAG, use StrataDB's Vector Store.
+### Can it run local models?
 
-## Transactions
+Not with the released binary. The shipped build executes inference through
+cloud providers (Anthropic, OpenAI, Google — bring an API key); local GGUF
+execution is compiled in only when the binary is built with the local
+feature. The model catalog commands work either way. See
+[Inference](/docs/guides/inference).
 
-### Are transactions required?
+## Language SDKs and MCP
 
-No. Individual operations (kv_put, kv_get, etc.) are already atomic. Use transactions when you need multi-operation atomicity (e.g., read-modify-write, or updating multiple keys together).
+### Is there a Python or Node SDK?
 
-### Do vector operations participate in transactions?
+Not in this line yet. The Python and Node SDKs land as post-V1 work. Today the
+supported surfaces are the `strata` CLI and its MCP server. Any language that
+can run a subprocess or speak MCP can drive it now.
 
-No. Vector operations bypass the transaction system and execute immediately. All other data primitives (KV, Event, State, JSON) are transactional.
+### How do I use it from an AI agent?
 
-### What happens if my application crashes during a transaction?
+The Model Context Protocol server is built into the binary — run
+`strata <db> mcp serve`; there is no separate package to install. See
+[For AI agents](/docs/getting-started/for-agents) and
+[Agents and MCP](/docs/guides/agents-and-mcp).
 
-Uncommitted transactions are automatically discarded during recovery. Only committed data survives a crash.
+## Still stuck?
 
-## Durability
-
-### What durability mode should I use?
-
-- **Testing:** None (`Strata::cache()`)
-- **Production:** Buffered (default) — good balance of speed and safety
-- **Critical data:** Strict — zero data loss, but slower
-
-See [Concepts: Durability](/docs/concepts/durability).
-
-### Can I change the durability mode after opening?
-
-The durability mode is set when the database is opened and cannot be changed at runtime.
-
-### How does crash recovery work?
-
-On restart, StrataDB loads the latest snapshot (if any) and replays WAL entries after it. Only committed transactions are applied. See [Architecture: Durability and Recovery](/architecture/durability-and-recovery).
-
-## Scaling
-
-### Can I use StrataDB from multiple threads?
-
-Yes. Share an `Arc<Database>` between threads and create a separate `Strata` or `Session` per thread.
-
-### Is there a network/server mode?
-
-Not yet. StrataDB is currently embedded (in-process). A network layer is planned.
-
-### Can I use this with LangChain or other agent frameworks?
-
-Yes. StrataDB is a library that any Rust application can use. Agent frameworks can use it for state management.
-
-## Contributing
-
-### How do I contribute?
-
-See [Contributing](https://github.com/stratadb-labs/strata-core/blob/main/CONTRIBUTING.md) for development setup, running tests, and PR guidelines.
-
-### Where do I report bugs?
-
-File an issue at [GitHub Issues](https://github.com/stratadb-labs/strata-core/issues).
+Check [Troubleshooting](/docs/troubleshooting) for concrete failure modes, or
+the [error reference](/docs/reference/error-reference) to look up a specific
+code.

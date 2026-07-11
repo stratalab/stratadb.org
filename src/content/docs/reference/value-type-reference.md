@@ -1,145 +1,174 @@
 ---
 title: "Value Type Reference"
 section: "reference"
+description: "The concrete value forms each Strata capability stores and returns, shown with real write-then-read round-trips."
+source: "strata-core@v1.0.0"
 ---
 
+> **Interim page.** Maintained by hand until it is generated from the resolved command index (IDL). Where this page and `strata agents commands --json` disagree, the command index wins.
 
-Complete specification of the `Value` enum and its conversions.
+Strata has five capabilities — **kv**, **json**, **event**, **vector**, and **graph** — over one branch-aware versioned store. This page shows what each one accepts and returns, verified by writing and reading each value. For the conceptual model see [Primitives](/docs/concepts/primitives) and [Value Types](/docs/concepts/value-types).
 
-## Variants
+Every write returns a commit receipt (`version`, `timestamp`, put/delete counts, `durable`, and an `effect`); reads return the value plus its `version` and `timestamp`. The `version`/`timestamp` pair is a logical commit clock, distinct from any wall-clock time stored inside a value.
 
-```rust
-pub enum Value {
-    Null,
-    Bool(bool),
-    Int(i64),
-    Float(f64),
-    String(String),
-    Bytes(Vec<u8>),
-    Array(Vec<Value>),
-    Object(HashMap<String, Value>),
-}
+## KV — opaque bytes
+
+KV values are opaque byte strings. Text from the CLI is stored as its UTF-8 bytes; arbitrary bytes come from a file (`--file` or `@path`).
+
+```console
+$ strata --db ./db kv put greeting "hello world"
+created greeting applied=true
+
+$ strata --db ./db kv get greeting          # plain: UTF-8 decoded
+hello world
+
+$ strata --db ./db --json kv get greeting   # --json: value is base64
+{"data":{"timestamp":3,"value":"aGVsbG8gd29ybGQ=","version":3},"type":"kv_versioned_value"}
 ```
 
-## Type Rules
+Binary values round-trip byte-for-byte:
 
-| Rule | Specification |
-|------|--------------|
-| **VAL-1** | Exactly 8 variants. No extensions. |
-| **VAL-2** | No implicit type coercions. `i32` promotes to `i64` in `From`, not at runtime. |
-| **VAL-3** | Different types are never equal: `Int(1) != Float(1.0)` |
-| **VAL-4** | `Bytes` and `String` are distinct: `Bytes(b"hello") != String("hello")` |
-| **VAL-5** | Float equality follows IEEE-754: `NaN != NaN`, `-0.0 == 0.0` |
+```console
+$ strata --db ./db kv put blob --file ./payload.bin
+created blob applied=true
 
-## `From<T>` Implementations
-
-| Source Type | Target Variant | Example |
-|-------------|---------------|---------|
-| `&str` | `String` | `"hello".into()` |
-| `String` | `String` | `String::from("hello").into()` |
-| `i32` | `Int` | `42i32.into()` → `Int(42)` |
-| `i64` | `Int` | `42i64.into()` → `Int(42)` |
-| `f32` | `Float` | `2.5f32.into()` → `Float(2.5)` |
-| `f64` | `Float` | `3.14f64.into()` → `Float(3.14)` |
-| `bool` | `Bool` | `true.into()` → `Bool(true)` |
-| `Vec<u8>` | `Bytes` | `vec![1u8, 2, 3].into()` |
-| `&[u8]` | `Bytes` | `(&[1u8, 2, 3][..]).into()` |
-| `Vec<Value>` | `Array` | `vec![Value::Int(1)].into()` |
-| `HashMap<String, Value>` | `Object` | `map.into()` |
-| `()` | `Null` | `().into()` → `Null` |
-| `serde_json::Value` | Corresponding | `serde_json::json!(42).into()` → `Int(42)` |
-
-## Accessor Methods
-
-| Method | Return Type | For Variant |
-|--------|-------------|-------------|
-| `as_bool()` | `Option<bool>` | `Bool` |
-| `as_int()` | `Option<i64>` | `Int` |
-| `as_float()` | `Option<f64>` | `Float` |
-| `as_str()` | `Option<&str>` | `String` |
-| `as_bytes()` | `Option<&[u8]>` | `Bytes` |
-| `as_array()` | `Option<&[Value]>` | `Array` |
-| `as_object()` | `Option<&HashMap<String, Value>>` | `Object` |
-
-All accessors return `None` when called on the wrong variant.
-
-## Type Checking Methods
-
-| Method | Checks |
-|--------|--------|
-| `is_null()` | `Null` |
-| `is_bool()` | `Bool` |
-| `is_int()` | `Int` |
-| `is_float()` | `Float` |
-| `is_string()` | `String` |
-| `is_bytes()` | `Bytes` |
-| `is_array()` | `Array` |
-| `is_object()` | `Object` |
-| `type_name()` | Returns `"Null"`, `"Bool"`, `"Int"`, `"Float"`, `"String"`, `"Bytes"`, `"Array"`, or `"Object"` |
-
-## serde_json Conversion
-
-### `serde_json::Value` → `Value`
-
-| JSON | Value |
-|------|-------|
-| `null` | `Null` |
-| `true` / `false` | `Bool(b)` |
-| Integer that fits `i64` | `Int(n)` |
-| Other number | `Float(f)` |
-| String | `String(s)` |
-| Array | `Array(vec)` |
-| Object | `Object(map)` |
-
-### `Value` → `serde_json::Value`
-
-| Value | JSON | Notes |
-|-------|------|-------|
-| `Null` | `null` | |
-| `Bool(b)` | `true`/`false` | |
-| `Int(n)` | Number | |
-| `Float(f)` | Number | `NaN` and `Infinity` become `null` |
-| `String(s)` | String | |
-| `Bytes(b)` | String (base64) | **Lossy** — round-trip produces `String` |
-| `Array(a)` | Array | Recursive conversion |
-| `Object(o)` | Object | Recursive conversion |
-
-## Equality Semantics
-
-`Value` implements `PartialEq` but not `Eq` (because `Float(NaN) != Float(NaN)`).
-
-### Cross-Type Inequality
-
-Different variants are never equal regardless of the values they contain:
-
-```rust
-assert_ne!(Value::Int(0), Value::Float(0.0));
-assert_ne!(Value::Int(0), Value::Bool(false));
-assert_ne!(Value::Null, Value::Bool(false));
-assert_ne!(Value::Null, Value::Int(0));
-assert_ne!(Value::String("hello".into()), Value::Bytes(b"hello".to_vec()));
+$ strata --db ./db --json kv get blob
+{"data":{"timestamp":4,"value":"AAEC/2Jpbg==","version":4},"type":"kv_versioned_value"}
 ```
 
-### Object Equality
+Rules of thumb:
 
-Objects are equal when they have the same keys with equal values. Key order does not matter.
+- Under `--json`, both the key and the value are **base64** (they are bytes on the wire).
+- Plain and `--raw` output decode UTF-8 for display; non-text bytes are best read via `--json` and decoded by the caller.
+- A read of a missing key returns `{"data":null,...}` with exit 0 — absence is not an error.
 
-### Float Edge Cases
+## JSON — documents addressed by path
 
-```rust
-assert_ne!(Value::Float(f64::NAN), Value::Float(f64::NAN));  // NaN != NaN
-assert_eq!(Value::Float(-0.0), Value::Float(0.0));            // -0.0 == 0.0
-assert_eq!(Value::Float(f64::INFINITY), Value::Float(f64::INFINITY));
-assert_ne!(Value::Float(f64::INFINITY), Value::Float(f64::NEG_INFINITY));
+JSON values are real JSON documents. Paths use `$` for the whole document and `$.field` for a member. Writing `$` replaces the document; a subpath read returns just that value.
+
+```console
+$ strata --db ./db json set user:1 '$' '{"name":"Ada","age":36,"tags":["a","b"]}'
+created user:1 applied=true
+
+$ strata --db ./db json get user:1 '$'
+{"age":36,"name":"Ada","tags":["a","b"]}
+
+$ strata --db ./db --json json get user:1 '$.name'
+{"data":{"found":true,"value":{"document_version":1,"timestamp":3,"value":"Ada","version":3}},"type":"json_versioned_value"}
 ```
 
-## Serialization
+Documents carry a `document_version` (per-document revision) alongside the commit `version`/`timestamp`. Values may be any JSON type: object, array, string, number, boolean, or null. Non-JSON text passed to `json set` is stored as a JSON string.
 
-`Value` implements `Serialize` and `Deserialize` (serde). The serialized format uses tagged variants:
+## Event — immutable, hash-chained log
+
+Events are append-only. Each event has a string `event_type`, a JSON `payload`, a dense `sequence` starting at 0, a microsecond wall-clock `timestamp`, and a SHA-256 `hash` chained to the `previous_hash` of the prior event.
+
+```console
+$ strata --db ./db event append user.created '{"id":1,"email":"a@b.co"}'
+created applied=true
+
+$ strata --db ./db --json event list
+```
 
 ```json
-{"Int": 42}
-{"String": "hello"}
-{"Array": [{"Int": 1}, {"Bool": true}]}
-{"Object": {"key": {"String": "value"}}}
+{"data":{"items":[
+  {"event":{"event_type":"user.created","sequence":0,
+    "payload":{"email":"a@b.co","id":1},
+    "hash":"1d2616c3…","previous_hash":"0000000000…",
+    "timestamp":1783735353572894},
+   "version":3,"timestamp":3},
+  {"event":{"event_type":"user.updated","sequence":1,
+    "payload":{"id":1},
+    "hash":"f331b047…","previous_hash":"1d2616c3…",
+    "timestamp":1783735353581986},
+   "version":4,"timestamp":4}
+],"has_more":false,"cursor":null},"type":"event_records"}
 ```
+
+The genesis `previous_hash` is all zeros. Sequences are contiguous; `strata event verify-chain` checks density and hash linkage. Note the two clocks: the event's own `timestamp` is microsecond wall-clock; the outer `version`/`timestamp` is the logical commit clock.
+
+## Vector — embeddings with a metric
+
+A collection fixes a `dimension` and a distance `metric`. Metrics accepted at create time:
+
+| Metric | Value |
+|--------|-------|
+| Cosine similarity (default) | `cosine` |
+| Euclidean | `euclidean` |
+| Dot product | `dot-product` |
+
+Vector components are 32-bit floats — values are stored and returned at `f32` precision (note the rounding below). Each vector may carry a metadata object.
+
+```console
+$ strata --db ./db vector collection create docs 4
+{"count":0,"dimension":4,"metric":"cosine","name":"docs"}
+
+$ strata --db ./db vector upsert docs a '[0.1,0.2,0.3,0.4]' --metadata '{"kind":"note"}'
+created a applied=true
+
+$ strata --db ./db --json vector get docs a
+{"data":{"data":{"embedding":[0.10000000149011612,0.20000000298023224,0.30000001192092896,0.4000000059604645],
+  "metadata":{"kind":"note"}},"key":"a","vector_revision":1,"timestamp":5,"version":5},"type":"vector_data"}
+
+$ strata --db ./db --json vector query docs '[0.1,0.2,0.3,0.4]' --k 3
+{"data":[{"key":"a","metadata":{"kind":"note"},"score":1.0}],"type":"vector_matches"}
+```
+
+Components can be a JSON array, comma-separated floats, or `@path`. A dimension mismatch is rejected:
+
+```console
+$ strata --db ./db --json vector upsert docs b '[1,2]'
+{"error":{"class":"invalid_argument","code":"invalid_argument.engine.vector_dimension",
+  "message":"vector dimension mismatch: expected 4, got 2", …}}
+```
+
+The collection create surface exposes `dimension` and `metric` only; there is no per-collection storage-dtype selection on the CLI in this release.
+
+Search filters are explicit and AND-composed, and **only equality is supported**. Each condition names a `field`, the op `eq`, and an adjacently-tagged scalar `value` (tag `string`, `number`, or `bool`):
+
+```console
+$ strata --db ./db --json vector query docs '[0.1,0.9]' \
+    --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"en"}}]}'
+{"data":[{"key":"a","metadata":{"lang":"en"},"score":1.0}],"type":"vector_matches"}
+```
+
+A bare `{"lang":"en"}` is rejected (`missing field conditions`), and any op other than `eq` is rejected (`unknown variant …, expected eq`).
+
+## Graph — nodes and typed edges
+
+A graph holds nodes (an id plus an optional properties object) and edges (a source, an `edge_type`, a destination, an optional `weight`, and optional properties).
+
+```console
+$ strata --db ./db graph create deps
+$ strata --db ./db graph add-node deps core --properties '{"lang":"rust"}'
+$ strata --db ./db graph add-node deps cli
+$ strata --db ./db graph add-edge deps cli depends_on core --weight 2.5
+
+$ strata --db ./db --json graph get-node deps core
+{"data":{"graph":"deps","node_id":"core","properties":{"lang":"rust"},"version":4,"timestamp":4},"type":"graph_node_result"}
+
+$ strata --db ./db --json graph get-edge deps cli depends_on core
+{"data":{"graph":"deps","src":"cli","edge_type":"depends_on","dst":"core","weight":2.5,"version":6,"timestamp":6},"type":"graph_edge_result"}
+```
+
+`graph neighbors` walks a node's edges with `direction` `outgoing` (default), `incoming`, or `both`, and returns each neighbor's edge and node together. Edge weight is optional; omit it for an unweighted edge.
+
+## Write receipts
+
+Every mutating command returns the same receipt shape. A representative write under `--json`:
+
+```json
+{"data":{
+  "commit":{"version":3,"timestamp":3,"put_count":1,"delete_count":0,"durable":false},
+  "effect":{"applied":true,"kind":"created","matched":false,"affected_count":1},
+  "key":"Z3JlZXRpbmc="
+},"type":"write_result"}
+```
+
+`durable` reflects whether the commit reached disk (`false` in cache mode). `effect.kind` reports `created`, updated, or deleted; `applied` says whether the write changed anything.
+
+## See also
+
+- Store guides: [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store), [Vector](/docs/guides/vector-store), [Event Log](/docs/guides/event-log).
+- [API Quick Reference](/docs/reference/api-quick-reference) and [CLI Reference](/docs/reference/cli).
+- [Error Reference](/docs/reference/error-reference) — the structured error model.

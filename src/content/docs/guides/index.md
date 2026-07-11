@@ -1,26 +1,52 @@
 ---
 title: "Guides"
 section: "guides"
+description: "Task-focused walkthroughs for every StrataDB capability and platform surface."
+source: "strata-core@v1.0.0"
 ---
 
 
-Detailed walkthroughs for each StrataDB feature.
+Each guide is a hands-on walkthrough you can follow against a running database.
+Every command and output shown was produced by the shipped `strata` binary.
 
-## Per-Primitive Guides
+If you are new, start with [Your First Database](/docs/getting-started/first-database),
+then come back here for depth on the surface you need.
 
-- **[KV Store](kv-store)** — key-value operations, prefix filtering, versioned reads
-- **[Event Log](event-log)** — append-only event streams, reading by type
-- **[State Cell](state-cell)** — mutable state with CAS, coordination patterns
-- **[JSON Store](json-store)** — structured documents with path-level access
-- **[Vector Store](vector-store)** — collections, similarity search, metadata filtering
-- **[Branch Management](branch-management)** — creating, switching, listing, and deleting branches
-- **[Spaces](spaces)** — organizing data within branches using spaces
+## Data primitives
 
-## Cross-Cutting Guides
+Strata stores five kinds of data over one branch-aware storage substrate.
 
-- **[Sessions and Transactions](sessions-and-transactions)** — multi-operation atomicity
-- **[Search](search)** — hybrid keyword + semantic search
-- **[Database Configuration](database-configuration)** — opening methods, durability modes
-- **[Branch Bundles](branch-bundles)** — exporting and importing branches
-- **[Error Handling](error-handling)** — error categories and patterns
-- **[Observability](observability)** — structured logging with `tracing` subsystem targets
+- [KV Store](/docs/guides/kv-store) — keys and values, prefix listing, versioned reads.
+- [JSON Store](/docs/guides/json-store) — structured documents with path-level access.
+- [Vector Store](/docs/guides/vector-store) — collections, similarity search, metadata filters.
+- [Event Log](/docs/guides/event-log) — append-only event streams read by type or range.
+- [Graph](/docs/guides/graph) — nodes, edges, and graph-core traversal.
+
+## Platform
+
+Surfaces that apply across every primitive: history, isolation, configuration,
+failures, and health.
+
+- [Branch Management](/docs/guides/branch-management) — list, create empty branches, fork from the tip or a past point, and delete.
+- [Spaces](/docs/guides/spaces) — organize data into named product spaces within a branch.
+- [Database Configuration](/docs/guides/database-configuration) — the `strata config` verbs and hub URL resolution.
+- [Error Handling](/docs/guides/error-handling) — the coded error model, retry policy, and JSON error shape.
+- [Observability](/docs/guides/observability) — `ping`, `info`, `health`, `metrics`, `describe`, and `doctor`.
+
+## Integration
+
+Connect Strata to models, columnar tooling, shared datasets, and agents.
+
+- [Inference](/docs/guides/inference) — run local GGUF models and cloud providers.
+- [Arrow](/docs/guides/arrow) — import and export data as Apache Arrow.
+- [Cloning Datasets](/docs/guides/cloning-datasets) — clone a dataset from a hub into a local database.
+- [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface and Model Context Protocol server.
+
+## Reference
+
+When you want the exhaustive surface rather than a walkthrough:
+
+- [CLI Reference](/docs/reference/cli) — every command and flag.
+- [Command Reference](/docs/reference/command-reference) — the raw serialized command catalog.
+- [Error Reference](/docs/reference/error-reference) — the full code registry.
+- [Configuration Reference](/docs/reference/configuration-reference) — every configurable key.

@@ -1,167 +1,132 @@
 ---
 title: "Troubleshooting"
+description: "Real failure modes, the error codes they carry, and how to diagnose them."
+source: "strata-core@v1.0.0"
 ---
 
 
-Common issues and their solutions.
+Every StrataDB failure carries a stable code. Read the code, not the prose, and
+these situations resolve quickly.
 
-## Data Not Visible After Writing
+## Start with `strata doctor`
 
-**Symptom:** You wrote data with `kv put` but `kv get` returns `(nil)`.
+`strata doctor` is the first diagnostic. With no argument it checks the
+installation; give it a database path and it also tries to open it and reports
+what it finds. It exits non-zero when something needs attention, so it is safe
+to script.
 
-**Likely cause:** You are on a different branch or space than where you wrote the data.
-
-**Fix:** Check your current branch and space — the prompt shows them:
-
-```
-strata:default/default>
-       ^^^^^^^  ^^^^^^^
-       branch   space
-```
-
-All data in StrataDB is branch-scoped and space-scoped. Data written in one branch is invisible from another. See [Branches](/docs/concepts/branches).
-
-## TransactionConflict Error
-
-**Symptom:** `TransactionConflict` error when committing a transaction.
-
-**Cause:** Another transaction modified data that your transaction read between your begin and commit.
-
-**Fix:** Retry the entire transaction:
-
-```
-$ strata --db ./data
-strata:default/default> begin
-OK
-strata:default/default> kv put key value
-(version) 1
-strata:default/default> commit
-(error) TransactionConflict: key was modified by another transaction
-strata:default/default> begin
-OK
-strata:default/default> kv put key value
-(version) 1
-strata:default/default> commit
-OK
-```
-
-In scripts, use a retry loop:
+A healthy run reports `path_ok: true` and an empty `issues` array. When a
+database will not open, `doctor` says so and names the code (output abbreviated):
 
 ```bash
-for attempt in 1 2 3 4 5; do
-    strata --db ./data <<'EOF' && break
-begin
-kv put key value
-commit
-EOF
-    echo "Conflict on attempt $attempt, retrying..."
-done
+strata ./mydb doctor
 ```
 
-See [Transactions](/docs/concepts/transactions).
-
-## DimensionMismatch Error
-
-**Symptom:** `DimensionMismatch` error when upserting a vector.
-
-**Cause:** The vector you are inserting has a different number of dimensions than the collection was created with.
-
-**Fix:** Ensure your vector length matches the collection's dimension:
-
-```
-$ strata --cache
-strata:default/default> vector create col 384 --metric cosine
-OK
-strata:default/default> vector upsert col key [0.0,0.0,...,0.0]
-OK
-```
-
-The vector must have exactly the same number of elements as the collection's dimension (384 in this example).
-
-## Cannot Delete Current Branch
-
-**Symptom:** `ConstraintViolation` error when deleting a branch.
-
-**Cause:** You are trying to delete the branch you are currently on, or the "default" branch.
-
-**Fix:** Switch to a different branch before deleting:
-
-```
-$ strata --cache
-strata:my-branch/default> use default
-strata:default/default> branch del my-branch
-OK
+```text
+{
+  "database": {
+    "exists": true,
+    "open_ok": false,
+    "path": "./mydb"
+  },
+  "issues": [
+    {
+      "code": "unavailable.engine.persistence",
+      "hint": "Retry after the local persistence layer is available."
+    }
+  ],
+  "path_ok": true,
+  "platform": "linux-x86_64"
+}
 ```
 
-The "default" branch cannot be deleted.
+## How to read an error
 
-## BranchNotFound When Switching
+Failures print a `<class>.<area>.<detail>` code, a one-line hint, and a
+reference URL:
 
-**Symptom:** `BranchNotFound` error when running `use`.
-
-**Cause:** The branch doesn't exist yet.
-
-**Fix:** Create it first:
-
-```
-strata:default/default> branch create my-branch
-OK
-strata:default/default> use my-branch
-strata:my-branch/default>
+```text
+not_found.engine.branch: source branch `nonesuch` does not exist (err_local_37433bfb_000001)
+  hint: Check that the requested branch, space, collection, graph, document, key, or model exists.
+  ref: https://stratadb.org/e/not_found.engine.branch
 ```
 
-## BranchExists When Creating
+The **class** (the first segment) tells you how to react: `not_found`,
+`invalid_argument`, and `already_exists` mean fix the request;
+`failed_precondition` means the database is in a state that blocks the
+operation; `unavailable` means retry after the underlying layer recovers;
+`corruption` means stop and inspect. Open the `ref` URL — the same
+`/e/<code>` page — for the details, or look any code up offline with
+`strata agents errors --json`. Add `--json` to any command to get the same
+information as a structured envelope. Recover by code, never by message text.
 
-**Symptom:** `BranchExists` error when running `branch create`.
+## `command not found` after install
 
-**Cause:** A branch with that name already exists.
+If your shell prints `strata: command not found`, the binary is installed but
+not on your `PATH` for this shell. Open a new terminal (the installer edits your
+shell profile), or follow the PATH steps in
+[Installation](/docs/getting-started/installation). `strata doctor` reports
+`path_ok` once the binary is reachable.
 
-**Fix:** Check existence first, or ignore the error:
+## No database specified
 
-```bash
-# Shell: ignore the error if branch already exists
-strata --cache branch create my-branch 2>/dev/null || true
+```text
+error: [invalid_argument.cli.no_database]: no database specified
+  hint: pass a path (strata ./mydb kv put …), set STRATA_DB, or use --cache for ephemeral
 ```
 
-```
-$ strata --cache
-strata:default/default> branch exists my-branch
-true
-```
+StrataDB never opens the current directory implicitly. Pass a path
+(`strata ./mydb …`), set `STRATA_DB`, or use `--cache` for an ephemeral
+database. This is the `invalid_argument.cli.no_database` code — CLI usage errors
+like it print a plain `error:` line, exit with status 2, and are not in the
+`/e/` registry, so look them up by reading the printed hint.
 
-## Event Append Fails
+## The database will not open
 
-**Symptom:** Error when running `event append`.
+A path that is not a directory, a directory the process cannot read or write,
+or a database whose files were altered underneath it all surface as
+[`unavailable.engine.persistence`](/e/unavailable.engine.persistence):
 
-**Cause:** Event payloads must be JSON objects. Passing a plain string or number will fail.
-
-**Fix:** Wrap your data in a JSON object:
-
-```
-$ strata --cache
-strata:default/default> event append log '{"message":"hello"}'
-(seq) 1
+```text
+unavailable.engine.persistence: persistence lower layer is unavailable (err_local_010d5985_000001)
+  hint: Retry after the local persistence layer is available.
+  ref: https://stratadb.org/e/unavailable.engine.persistence
 ```
 
-## CollectionNotFound for Vectors
+Check that the path points at a database directory you own and can write, that
+no other process is holding it, and that the disk is not full. `strata <path>
+doctor` confirms whether the open succeeds — the path is a global argument, so
+it comes before the subcommand. Treat a database directory as one
+unit — do not edit or remove files inside it by hand.
 
-**Symptom:** `CollectionNotFound` error when upserting or searching vectors.
+## Opening a pre-V1 database
 
-**Cause:** The vector collection hasn't been created yet, or you are on a different branch.
+Databases created before the V1 line are rejected on open with
+[`failed_precondition.engine.layout_version`](/e/failed_precondition.engine.layout_version),
+class `failed_precondition`. From the registry, its message is "The database
+layout is incompatible with this runtime," and its hint is to open the database
+with a compatible version. This line does not migrate pre-V1 development
+databases — create a fresh database and reload your data. Look the code up with
+`strata agents errors --json`.
 
-**Fix:** Create the collection first in the current branch:
+## Durability and recovery failures
 
-```
-$ strata --cache
-strata:default/default> vector create my-collection 384 --metric cosine
-OK
-```
+If the storage layer cannot make a write durable, the writer stops rather than
+report a false success, and operations surface in the `unavailable` class
+(`unavailable.engine.persistence` and related codes) with a retry-after-recovery
+hint. Recovery is explicit: fix the underlying condition — free space,
+permissions, a healthy disk — and reopen the database.
 
-Collections are branch-scoped. Creating a collection in one branch doesn't make it available in another.
+If stored data fails validation while recovering, you get
+[`corruption.engine.persistence_recovery`](/e/corruption.engine.persistence_recovery),
+whose hint is blunt: "Stop writing to the database and inspect recovery
+diagnostics before continuing." Do exactly that — take a copy of the directory
+and inspect it before any further writes.
 
-## Getting Help
+## Getting more help
 
-If your issue isn't listed here:
-- Check the [FAQ](faq)
-- Check the [Error Reference](/docs/reference/error-reference) for your specific error variant
-- File an issue at [GitHub Issues](https://github.com/stratadb-labs/strata-core/issues)
+- [FAQ](/docs/faq) — what changed in this line and why.
+- [Error reference](/docs/reference/error-reference) — every code with its class
+  and meaning.
+- [Observability guide](/docs/guides/observability) — health and metrics
+  surfaces beyond `doctor`.

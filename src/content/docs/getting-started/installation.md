@@ -1,6 +1,8 @@
 ---
 title: "Installation"
 section: "getting-started"
+description: "Install the strata CLI with the installer script, Homebrew, or from source."
+source: "strata-core@v1.0.0"
 ---
 
 
@@ -104,4 +106,4 @@ those yourself if you want a clean slate.
 ## Next
 
 - [Your First Database](first-database) — hands-on tutorial
-- [Concepts](/docs/concepts/index) — understand the mental model
+- [Concepts](/docs/concepts) — understand the mental model

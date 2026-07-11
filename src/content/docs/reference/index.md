@@ -1,21 +1,20 @@
 ---
 title: "Reference"
 section: "reference"
+description: "Exact specifications for the strata CLI, its command surface, configuration, errors, value types, and MCP server."
+source: "strata-core@v1.0.0"
 ---
 
-Complete specifications for the StrataDB API.
+Precise, verified specifications for the `strata` binary and the database it opens. These pages describe exactly what the shipping CLI does.
 
-## SDK & Interface References
+## Pages
 
-- **[CLI Reference](cli)** — Interactive command-line interface
-- **[MCP Server Reference](mcp)** — Model Context Protocol server for AI assistants
-- **[Python SDK Reference](python-sdk)** — Native Python bindings via PyO3
-- **[Node.js SDK Reference](node-sdk)** — Native Node.js bindings via NAPI-RS
+- **[CLI](/docs/reference/cli)** — invoking `strata`: targeting a database, global options, output formats, and the interactive REPL.
+- **[Command Reference](/docs/reference/command-reference)** — every command in every family, with its syntax and a one-line description.
+- **[API Quick Reference](/docs/reference/api-quick-reference)** — a one-page cheat sheet of the most common operation per capability.
+- **[Configuration Reference](/docs/reference/configuration-reference)** — database options, durability, and the resolved hub configuration.
+- **[Error Reference](/docs/reference/error-reference)** — the error model and the public error-code registry.
+- **[Value Type Reference](/docs/reference/value-type-reference)** — the value types stored and returned across capabilities.
+- **[MCP Server](/docs/reference/mcp)** — the Model Context Protocol server that exposes the database to agents.
 
-## Core API References
-
-- **[API Quick Reference](api-quick-reference)** — every `Strata` method at a glance
-- **[Command Reference](command-reference)** — the `Command` and `Output` enums
-- **[Value Type Reference](value-type-reference)** — all 8 variants, all conversions
-- **[Error Reference](error-reference)** — every error variant and when it occurs
-- **[Configuration Reference](configuration-reference)** — durability modes and database options
+The Node and Python SDKs are in progress; their references will be generated from the same command index that will eventually generate these pages.

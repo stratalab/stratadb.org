@@ -1,195 +1,140 @@
 ---
-title: "Spaces Guide"
+title: "Spaces"
 section: "guides"
+description: "Group data into named product spaces within a branch, and manage them with the space verbs."
+source: "strata-core@v1.0.0"
 ---
 
 
-Spaces are an organizational layer within branches. Each branch contains one or more spaces, and each space has its own independent instance of every primitive (KV, Event, State, JSON, Vector). Think of spaces like schemas in PostgreSQL — they organize data within a database (branch) without creating full isolation boundaries.
+A product space is a named partition of data inside a branch. Spaces and
+branches are Strata's two organizing dimensions, not data types of their own:
+your data always lives in one of the five capabilities — KV, JSON, events,
+vectors, and graphs — while branches isolate history across forks and spaces
+scope which slice of that data you see within a branch. Every branch has a
+`default` space, and you can add more to keep unrelated data apart — one space
+per tenant, per agent session, or per dataset. This guide covers the four space
+verbs: `list`, `create`, `exists`, and `delete`.
 
-## Command Overview
+Examples use a durable database at `./mydb`. Pass `--space <name>` on any command
+to target a space; omit it to use `default`.
 
-| Command | Syntax | Returns |
-|---------|--------|---------|
-| `use` | `use <branch> [space]` | Switches branch and/or space |
-| `space list` | `space list` | All space names in current branch |
-| `space create` | `space create <name>` | Creates a space |
-| `space del` | `space del <name> [--force]` | Deletes a space |
-| `space exists` | `space exists <name>` | Whether the space exists |
+## The default space
 
-## Default Space
-
-Every branch starts with a `default` space. When you open the CLI, all operations target this space automatically. You never need to create or switch to it explicitly.
-
-```
-$ strata --cache
-strata:default/default> kv put key value
-(version) 1
-strata:default/default> event append log '{"msg":"hello"}'
-(seq) 1
-```
-
-The `default` space cannot be deleted.
-
-## Creating and Switching Spaces
-
-Use `use <branch> <space>` to switch to a space. Spaces are auto-registered on first write — no explicit create step is needed:
-
-```
-$ strata --cache
-strata:default/default> use default conversations
-strata:default/conversations> kv put msg_001 hello
-(version) 1
-strata:default/conversations> use default tool-results
-strata:default/tool-results> kv put task_42 done
-(version) 1
-strata:default/tool-results> space list
-- conversations
-- default
-- tool-results
-```
-
-You can also create a space explicitly:
-
-```
-strata:default/default> space create my-space
-OK
-```
-
-## Data Isolation Between Spaces
-
-Each space has its own independent data. The same key in different spaces refers to different values:
-
-```
-$ strata --cache
-strata:default/default> kv put config default-config
-(version) 1
-strata:default/default> use default experiments
-strata:default/experiments> kv put config experiment-config
-(version) 1
-strata:default/experiments> use default
-strata:default/default> kv get config
-"default-config"
-strata:default/default> use default experiments
-strata:default/experiments> kv get config
-"experiment-config"
-```
-
-This applies to all primitives — events, state cells, JSON documents, and vector collections are all space-scoped.
-
-## Cross-Space Transactions
-
-Transactions can span multiple spaces within the same branch. This is useful when you need atomic operations across organizational boundaries:
-
-```
-$ strata --cache
-strata:default/default> begin
-OK
-strata:default/default> use default billing
-strata:default/billing> kv put credits 99
-(version) 1
-strata:default/billing> use default api-logs
-strata:default/api-logs> event append api_call '{"endpoint":"/search"}'
-(seq) 1
-strata:default/api-logs> commit
-OK
-```
-
-## Space Naming Rules
-
-Space names follow these conventions:
-
-| Rule | Details |
-|------|---------|
-| **Start with** | Lowercase letter `[a-z]` |
-| **Allowed characters** | Lowercase letters, digits, hyphens, underscores `[a-z0-9_-]` |
-| **Max length** | 64 characters |
-| **Reserved prefix** | `_system_` (reserved for internal use) |
-| **Reserved name** | `default` (cannot be deleted) |
-
-Valid names: `conversations`, `tool-results`, `agent_memory_v2`
-
-Invalid names: `Conversations` (uppercase), `123-invalid` (starts with digit), `_system_internal` (reserved prefix)
-
-## Deleting Spaces
-
-Delete a space with `space del` (must be empty) or `space del --force` (deletes all data):
-
-```
-$ strata --cache
-strata:default/default> use default temp
-strata:default/temp> kv put key value
-(version) 1
-strata:default/temp> use default
-strata:default/default> space del temp
-(error) space is non-empty
-strata:default/default> space del temp --force
-OK
-```
-
-The `default` space cannot be deleted.
-
-## Common Patterns
-
-### Agent Memory Organization
-
-```
-$ strata --db ./data
-strata:default/default> use default conversations
-strata:default/conversations> event append user_message '{"content":"What is the weather?"}'
-(seq) 1
-strata:default/conversations> event append tool_call '{"tool":"weather_api"}'
-(seq) 2
-strata:default/conversations> use default tool-results
-strata:default/tool-results> kv put weather_api:call_1 '{"temp":72,"conditions":"sunny"}'
-(version) 1
-strata:default/tool-results> use default user-context
-strata:default/user-context> state set preferences '{"units":"fahrenheit"}'
-(version) 1
-```
-
-### Multi-Tenant Data
+A fresh database reports exactly one space:
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-for tenant in acme-corp globex initech; do
-    strata --db ./data --space "$tenant" kv put config '{"plan":"enterprise"}'
-    strata --db ./data --space "$tenant" vector create docs 384 --metric cosine
-done
-
-strata --db ./data space list
+strata ./mydb space list
 ```
 
-### Experiment Tracking
-
-```
-$ strata --db ./data
-strata:default/default> use default hyperparams
-strata:default/hyperparams> kv put config '{"lr":0.001,"epochs":10}'
-(version) 1
-strata:default/hyperparams> use default experiment-001
-strata:default/experiment-001> kv put metrics '{"loss":0.42,"accuracy":0.87}'
-(version) 1
-strata:default/experiment-001> use default experiment-002
-strata:default/experiment-002> kv put metrics '{"loss":0.38,"accuracy":0.89}'
-(version) 1
+```text
+default
 ```
 
-## Spaces vs Branches
+With `--json`, the list arrives as an envelope with a continuation cursor:
 
-| | Branches | Spaces |
-|--|----------|--------|
-| **Purpose** | Isolation | Organization |
-| **Data visibility** | Fully isolated | Fully visible within branch |
-| **Transactions** | Cannot span branches | Can span spaces |
-| **Analogy** | Git branches | PostgreSQL schemas |
-| **Use case** | Separate experiments, sessions | Organize data within a session |
+```bash
+strata --json ./mydb space list
+```
 
-Use branches when you need full data isolation. Use spaces when you need to organize related data within a single branch.
+```text
+{"data":{"cursor":null,"has_more":false,"items":["default"]},"type":"space_list"}
+```
+
+## Create a space
+
+`space create <name>` registers a new space:
+
+```bash
+strata ./mydb space create analytics
+```
+
+```text
+created analytics applied=true
+```
+
+## Check existence
+
+`space exists <name>` prints a bare boolean — handy in scripts:
+
+```bash
+strata ./mydb space exists analytics   # true
+strata ./mydb space exists ghost       # false
+```
+
+## How spaces scope data
+
+Each space holds its own independent instance of every primitive. The same key
+in two spaces refers to two different values. Write `report` in `analytics`, and
+the `default` space does not see it:
+
+```bash
+strata ./mydb --space analytics kv put report q3
+strata ./mydb --space analytics kv get report   # q3
+strata ./mydb kv get report                      # (nil)
+```
+
+Counts confirm the isolation — `kv count` returns `1` in `analytics` and `0` in
+`default`. This applies to every primitive: KV, JSON, vectors, events, and
+graphs are all space-scoped.
+
+## Delete a space
+
+`space delete <name>` drops a space. By default it refuses to delete a space
+that still holds visible data:
+
+```bash
+strata ./mydb space delete analytics
+```
+
+```text
+failed_precondition.engine.space_not_empty: product space `analytics` contains visible data; retry with force=true to delete it (err_local_33f20156_000001)
+  hint: Reload the current state and retry the operation against the latest version.
+  ref: https://stratadb.org/e/failed_precondition.engine.space_not_empty
+```
+
+Pass `--force` to delete the space and its visible data together:
+
+```bash
+strata ./mydb space delete analytics --force
+```
+
+```text
+deleted analytics applied=true
+```
+
+Deleting an empty space needs no flag. Deleting a space that does not exist is a
+no-op — it reports `applied=false` and exits zero rather than failing:
+
+```bash
+strata ./mydb space delete ghost
+```
+
+```text
+not_found ghost applied=false
+```
+
+The default space cannot be deleted:
+
+```bash
+strata ./mydb space delete default
+```
+
+```text
+invalid_argument.engine.space_delete_default: default product space cannot be deleted (err_local_35ac8288_000001)
+  hint: Correct the request input and retry the operation.
+  ref: https://stratadb.org/e/invalid_argument.engine.space_delete_default
+```
+
+## Spaces or branches?
+
+Reach for a space when you want to keep related data organized inside one line
+of history — tenants, sessions, or datasets that live and version together.
+Reach for a [branch](/docs/guides/branch-management) when you want an isolated
+copy of history you can fork, time-travel, and discard. The two compose: a
+branch contains spaces, and forking a branch carries its spaces along.
 
 ## Next
 
-- [KV Store](kv-store) — key-value operations
-- [Branch Management](branch-management) — branch isolation
-- [Sessions and Transactions](sessions-and-transactions) — cross-space atomicity
+- [Branch Management](/docs/guides/branch-management) — isolate history with forks.
+- [KV Store](/docs/guides/kv-store) — the primitive used in these examples.
+- [Concepts: Primitives](/docs/concepts/primitives) — how the five data types relate.

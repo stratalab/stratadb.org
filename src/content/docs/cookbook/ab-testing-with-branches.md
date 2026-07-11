@@ -1,117 +1,132 @@
 ---
 title: "A/B Testing with Branches"
 section: "cookbook"
+description: "Fork one branch per variant, run each strategy in isolation, and compare the results without them touching each other."
+source: "strata-core@v1.0.0"
 ---
 
+Goal: run two agent strategies side by side and compare them, with each variant's
+writes fully isolated from the other and from your baseline.
 
-This recipe shows how to use branches to compare different agent strategies side by side.
+Prerequisites: the `strata` binary on your PATH, and `jq` for the compact fork
+output. Commands write to a durable directory (`./ab.db`) that each invocation
+reopens.
 
-## Pattern
+## 1. Seed a shared baseline
 
-1. Create one branch per variant (strategy A, strategy B)
-2. Run each strategy in its own isolated branch
-3. Compare the results by reading from each branch
-
-## Implementation
-
-```bash
-#!/bin/bash
-set -euo pipefail
-
-DB="--db ./data"
-
-# Create branches for each variant
-strata $DB branch create variant-a
-strata $DB branch create variant-b
-
-# === Run Strategy A ===
-strata $DB --branch variant-a kv put config:strategy conservative
-strata $DB --branch variant-a kv put config:temperature 0.3
-
-for i in $(seq 0 4); do
-    strata $DB --branch variant-a event append action "{\"step\":$i,\"strategy\":\"conservative\",\"action\":\"careful_action\"}"
-done
-strata $DB --branch variant-a kv put result:score 85
-strata $DB --branch variant-a state set status completed
-
-# === Run Strategy B ===
-strata $DB --branch variant-b kv put config:strategy aggressive
-strata $DB --branch variant-b kv put config:temperature 0.9
-
-for i in $(seq 0 7); do
-    strata $DB --branch variant-b event append action "{\"step\":$i,\"strategy\":\"aggressive\",\"action\":\"bold_action\"}"
-done
-strata $DB --branch variant-b kv put result:score 92
-strata $DB --branch variant-b state set status completed
-
-# === Compare Results ===
-SCORE_A=$(strata $DB --branch variant-a --raw kv get result:score)
-SCORE_B=$(strata $DB --branch variant-b --raw kv get result:score)
-EVENTS_A=$(strata $DB --branch variant-a event len)
-EVENTS_B=$(strata $DB --branch variant-b event len)
-STRATEGY_A=$(strata $DB --branch variant-a --raw kv get config:strategy)
-STRATEGY_B=$(strata $DB --branch variant-b --raw kv get config:strategy)
-
-echo "=== A/B Test Results ==="
-echo "Variant A ($STRATEGY_A): score=$SCORE_A, actions=$EVENTS_A"
-echo "Variant B ($STRATEGY_B): score=$SCORE_B, actions=$EVENTS_B"
-
-if [ "$SCORE_A" -gt "$SCORE_B" ]; then
-    echo "Winner: variant-a"
-else
-    echo "Winner: variant-b"
-fi
-```
-
-## Scaling to Many Variants
+Anything written before you fork is inherited by every variant.
 
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-DB="--db ./data"
-VARIANTS=("low:0.1" "medium:0.5" "high:0.9")
-
-# Run each variant
-for variant in "${VARIANTS[@]}"; do
-    name="${variant%%:*}"
-    temp="${variant##*:}"
-    branch="variant-$name"
-
-    strata $DB branch create "$branch"
-    strata $DB --branch "$branch" kv put config:temperature "$temp"
-    # ... run the agent ...
-    strata $DB --branch "$branch" kv put result:score 0  # placeholder
-done
-
-# Compare all variants
-best_score=0
-best_variant=""
-
-for variant in "${VARIANTS[@]}"; do
-    name="${variant%%:*}"
-    branch="variant-$name"
-    score=$(strata $DB --branch "$branch" --raw kv get result:score)
-    echo "Variant $name: score=$score"
-    if [ "$score" -gt "$best_score" ]; then
-        best_score=$score
-        best_variant=$name
-    fi
-done
-
-echo "Best variant: $best_variant (score: $best_score)"
-
-# Clean up losing variants
-for variant in "${VARIANTS[@]}"; do
-    name="${variant%%:*}"
-    if [ "$name" != "$best_variant" ]; then
-        strata $DB branch del "variant-$name"
-    fi
-done
+strata ./ab.db kv put prompt:system "You are a helpful assistant."
 ```
 
-## See Also
+```text
+created prompt:system applied=true
+```
 
-- [Branches Concept](/docs/concepts/branches) — data isolation model
-- [Branch Management Guide](/docs/guides/branch-management) — creating and managing branches
-- [Agent State Management](agent-state-management) — full session pattern
+## 2. Fork one branch per variant
+
+A fork is a cheap copy-on-write branch. Both start from the baseline at the same
+version.
+
+```bash
+strata ./ab.db branch fork default variant-a --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
+strata ./ab.db branch fork default variant-b --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
+```
+
+```text
+{"name":"variant-a","forked_from":"default","at_version":3}
+{"name":"variant-b","forked_from":"default","at_version":3}
+```
+
+## 3. Run each variant on its own branch
+
+Pass `--branch` to target a variant. Here A runs cooler and produces two answers;
+B runs hotter and produces three.
+
+```bash
+strata ./ab.db kv put config:temperature 0.2 --branch variant-a
+strata ./ab.db event append answer '{"variant":"a","tokens":180}' --branch variant-a
+strata ./ab.db event append answer '{"variant":"a","tokens":210}' --branch variant-a
+strata ./ab.db kv put score 74 --branch variant-a
+
+strata ./ab.db kv put config:temperature 0.9 --branch variant-b
+strata ./ab.db event append answer '{"variant":"b","tokens":320}' --branch variant-b
+strata ./ab.db event append answer '{"variant":"b","tokens":295}' --branch variant-b
+strata ./ab.db event append answer '{"variant":"b","tokens":410}' --branch variant-b
+strata ./ab.db kv put score 88 --branch variant-b
+```
+
+```text
+created config:temperature applied=true
+created applied=true
+created applied=true
+created score applied=true
+created config:temperature applied=true
+created applied=true
+created applied=true
+created applied=true
+created score applied=true
+```
+
+## 4. Compare the branches
+
+Read each variant's score and answer count directly.
+
+```bash
+strata ./ab.db --raw kv get score --branch variant-a
+strata ./ab.db event len --branch variant-a
+strata ./ab.db --raw kv get score --branch variant-b
+strata ./ab.db event len --branch variant-b
+```
+
+```text
+74
+2
+88
+3
+```
+
+## 5. Confirm the baseline is untouched
+
+The per-variant config never leaked back to `default`.
+
+```bash
+strata ./ab.db kv exists config:temperature
+```
+
+```text
+false
+```
+
+## 6. Promote the winner
+
+There is no branch-merge command. To fold the winning variant into `default`, you
+replay its writes there — read the winner's values and put them on `default`.
+Variant B scored higher (88 vs 74), so promote it.
+
+```bash
+strata ./ab.db kv put config:temperature "$(strata ./ab.db --raw kv get config:temperature --branch variant-b)"
+strata ./ab.db kv put score "$(strata ./ab.db --raw kv get score --branch variant-b)"
+strata ./ab.db --raw kv get config:temperature
+strata ./ab.db --raw kv get score
+```
+
+```text
+created config:temperature applied=true
+created score applied=true
+0.9
+88
+```
+
+## Why this works
+
+Each fork is an isolated [branch](/docs/concepts/branches): writes on `variant-a`
+and `variant-b` never see each other, and neither disturbs `default`. Because a
+fork shares the parent's history until it diverges, the baseline you seed in step
+1 is visible in both variants for free — no cleanup of half-written state on a
+shared branch. Promotion is a deliberate replay of the winner's writes onto
+`default`, not an automatic merge, so you decide exactly what graduates. See the
+[branch management guide](/docs/guides/branch-management) for the full lifecycle,
+the [KV store guide](/docs/guides/kv-store) for value reads, and the
+[event log guide](/docs/guides/event-log) for per-branch action counts.

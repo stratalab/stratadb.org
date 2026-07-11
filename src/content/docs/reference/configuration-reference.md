@@ -1,122 +1,124 @@
 ---
 title: "Configuration Reference"
 section: "reference"
+description: "Everything the strata binary lets you configure: config verbs, the config file, known keys, environment variables, hub resolution, and open options."
+source: "strata-core@v1.0.0"
 ---
 
+> **Interim page.** Maintained by hand until it is generated from the resolved command index (IDL). Where this page and `strata agents commands --json` disagree, the command index wins.
 
-## Config File: `strata.toml`
+Strata's configurable surface is deliberately small. There is one global config file with one user key, a handful of environment variables, and per-invocation flags. Everything below is verified against the binary.
 
-StrataDB uses a config file in the data directory. On first `Strata::open()`, a default `strata.toml` is created automatically. To change settings, edit the file and restart.
+## `strata config` verbs
 
-```toml
-# Strata database configuration
-#
-# Durability mode: "standard" (default) or "always"
-#   "standard" = periodic fsync (~100ms), may lose last interval on crash
-#   "always"   = fsync every commit, zero data loss
-durability = "standard"
+```console
+$ strata config --help
 ```
 
-### Config Fields
+| Verb | Purpose |
+|------|---------|
+| `strata config path` | Print the global config file path. |
+| `strata config show` | Print the resolved hub configuration and which layer supplied it. |
+| `strata config get` | Print the sanitized config. |
+| `strata config get-key <KEY>` | Print one sanitized value (`hub.url` reads the user config). |
+| `strata config set <KEY> <VALUE>` | Set a user-config key in the global config. |
+| `strata config unset <KEY>` | Remove a user-config key from the global config. |
 
-| Field | Type | Default | Values | Description |
-|-------|------|---------|--------|-------------|
-| `durability` | string | `"standard"` | `"standard"`, `"always"` | WAL sync policy |
+## Config file
 
-### Behavior
+`strata config path` reports the file location, which honors `XDG_CONFIG_HOME`:
 
-- Created automatically with defaults on first `Strata::open()` if not present
-- Parsed on every `open()` call
-- Invalid config returns an error (database does not open)
-- Cache mode (`Strata::cache()`) has no config file (no data directory)
+```console
+$ strata config path
+{"path":"/home/you/.config/strata/config.toml"}
+```
 
-## Durability Modes
+`strata config set` writes TOML. After setting `hub.url` the file contains:
 
-| Mode | Config Value | Description | Data Loss on Crash |
-|------|-------------|-------------|-------------------|
-| **Cache** | *(in-memory only)* | No persistence | All data |
-| **Standard** | `"standard"` | Periodic fsync (~100ms / ~1000 writes) | Last ~100ms |
-| **Always** | `"always"` | Immediate fsync per commit | None |
+```toml
+[hub]
+url = "https://your-hub.example/"
+```
 
-Default: `"standard"`
+The file is created on first `set`; `unset` removes the key.
 
-## Opening Methods
+## Known keys
 
-| Method | Durability | Disk Files | Use Case |
-|--------|-----------|------------|----------|
-| `Strata::open(path)` | Per `strata.toml` | Yes | Production |
-| `Strata::cache()` | Cache (in-memory) | No | Testing |
+The only user-config key in this release is `hub.url` — the address of the dataset hub used by `strata clone`. `strata config show` reports the resolved value and its source:
 
-## Database Info
+```console
+$ strata config show
+{"hub.url":"https://hub.stratahub.io/","source":"built-in default"}
+```
 
-The `DatabaseInfo` struct returned by `db.info()`:
+No other user-writable config keys are exposed by the binary. Durability, cache sizing, and similar engine behavior are not surfaced as config-file keys on the CLI in this release — if you need them, drive the database through the SDK.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `version` | `String` | StrataDB version |
-| `uptime_secs` | `u64` | Seconds since database opened |
-| `branch_count` | `u64` | Number of branches |
-| `total_keys` | `u64` | Total key count across all primitives |
+## Hub URL resolution
 
-## Distance Metrics (Vector Store)
+The hub address is resolved from four layers, highest precedence first. `strata config show` names the winning layer in its `source` field.
 
-| Metric | Enum Value | Description |
-|--------|-----------|-------------|
-| Cosine | `DistanceMetric::Cosine` | Cosine similarity (default) |
-| Euclidean | `DistanceMetric::Euclidean` | L2 distance |
-| Dot Product | `DistanceMetric::DotProduct` | Inner product |
+| Precedence | Layer | `source` shown | Notes |
+|-----------:|-------|----------------|-------|
+| 1 | `--hub <URL>` flag | (per invocation) | On `strata clone`; overrides env and config files for that call. |
+| 2 | `STRATA_HUB_URL` env | `STRATA_HUB_URL` | Overrides the config file. |
+| 3 | Config file `hub.url` | the config file path | Set with `strata config set hub.url …`. |
+| 4 | Built-in default | `built-in default` | `https://hub.stratahub.io/`. |
 
-## Branch Status
+Observed precedence — the environment variable wins over the file:
 
-| Status | Enum Value | Description |
-|--------|-----------|-------------|
-| Active | `BranchStatus::Active` | Currently in use |
+```console
+$ STRATA_HUB_URL=https://env.example/ strata config show
+{"hub.url":"https://env.example/","source":"STRATA_HUB_URL"}
+```
 
-## Transaction Options
+## Environment variables
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `read_only` | `bool` | `false` | If true, transaction only reads (no writes) |
+Honored by the **binary**:
 
-## Metadata Filter Operations (Vector Search)
+| Variable | Effect |
+|----------|--------|
+| `STRATA_DB` | Default database path when no `[DB]` argument, `--db`, or `--cache` is given. The no-database error explicitly suggests it. |
+| `STRATA_HOME` | Overrides the Strata home directory that `strata init` prepares. |
+| `STRATA_HUB_URL` | Overrides the config-file hub address (layer 2 above). |
+| `XDG_CONFIG_HOME` | Relocates the config file (`$XDG_CONFIG_HOME/strata/config.toml`). |
 
-| Operation | Enum Value | Description |
-|-----------|-----------|-------------|
-| Equal | `FilterOp::Eq` | Field equals value |
-| Not Equal | `FilterOp::Ne` | Field does not equal value |
-| Greater Than | `FilterOp::Gt` | Field > value |
-| Greater or Equal | `FilterOp::Gte` | Field >= value |
-| Less Than | `FilterOp::Lt` | Field < value |
-| Less or Equal | `FilterOp::Lte` | Field <= value |
-| In | `FilterOp::In` | Field is in set |
-| Contains | `FilterOp::Contains` | Field contains value |
+Honored by the **install script only** (not the binary):
 
-## Retention Policies
+| Variable | Effect |
+|----------|--------|
+| `STRATA_VERSION` | Pin the version the installer downloads. |
+| `STRATA_INSTALL_DIR` | Choose where the installer places the binary. |
 
-| Policy | Enum Value | Description |
-|--------|-----------|-------------|
-| Keep All | `RetentionPolicyInfo::KeepAll` | No version pruning (default) |
-| Keep Last N | `RetentionPolicyInfo::KeepLast { count }` | Keep only the last N versions |
-| Keep For Duration | `RetentionPolicyInfo::KeepFor { duration_secs }` | Keep versions within time window |
+## Database open options (CLI)
 
-## Performance Targets
+Every command opens a database through the top-level options:
 
-| Metric | Target |
-|--------|--------|
-| InMemory put | <3 us |
-| InMemory throughput (1 thread) | 250K ops/sec |
-| InMemory throughput (4 threads) | 800K+ ops/sec |
-| Buffered put | <30 us |
-| Buffered throughput | 50K ops/sec |
-| Fast path read | <10 us |
-| Vector search (10K vectors) | <50 ms |
-| Vector insert | <100 us |
+| Option | Meaning |
+|--------|---------|
+| `[DB]` (positional) | Durable database path. |
+| `--db <PATH>` | Durable database path. Cannot be combined with the positional form. |
+| `--cache` | Open an in-memory (non-durable) database for this process. |
+| `--branch <BRANCH>` | Default branch for commands that accept one. |
+| `--space <SPACE>` | Product space for commands that accept one. |
+| `--json` | Emit compact JSON. |
+| `--raw` | Emit script-friendly raw output where possible. |
 
-## Workspace Feature Flags
+A command with no durable path, no `--db`, no `--cache`, and no `STRATA_DB` refuses:
 
-| Feature | Description |
-|---------|-------------|
-| `default` | Core database functionality |
-| `perf-trace` | Per-layer timing instrumentation |
-| `comparison-benchmarks` | Enable SOTA comparison benchmarks (redb, LMDB, SQLite) |
-| `usearch-enabled` | Enable USearch for vector comparisons (requires C++ tools) |
+```console
+$ strata info
+error: [invalid_argument.cli.no_database]: no database specified
+  hint: pass a path (strata ./mydb kv put …), set STRATA_DB, or use --cache for ephemeral
+```
+
+## Could not verify
+
+- No config-file keys other than `hub.url` are exposed by the binary; durability mode is not a CLI config key in this release.
+- `STRATA_VERSION` and `STRATA_INSTALL_DIR` are installer variables and were not exercised here beyond their presence in the install script.
+
+## See also
+
+- [Database Configuration guide](/docs/guides/database-configuration) — choosing durable vs. cache, and open options.
+- [Cloning Datasets guide](/docs/guides/cloning-datasets) — where `hub.url` and `--hub` are used.
+- [CLI Reference](/docs/reference/cli) and [Command Reference](/docs/reference/command-reference).
+- [Error Reference](/docs/reference/error-reference) — the structured error model.

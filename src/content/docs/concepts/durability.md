@@ -1,98 +1,104 @@
 ---
 title: "Durability"
 section: "concepts"
+description: "A durable database is backed by a write-ahead log and recovers on reopen; a cache database is pure in-memory and writes nothing to disk."
+source: "strata-core@v1.0.0"
 ---
 
+StrataDB has two ways to hold data, and you choose between them when you open the database: a **durable** database backed by disk, or a **cache** database that lives entirely in memory. There is no in-between mode to configure and no per-write durability flag — durability is a property of the database you opened.
 
-StrataDB offers three durability modes that trade off between speed and crash safety. You choose the mode when opening the database.
+## Durable databases
 
-## The Three Modes
+Point the CLI at a path and you get a durable database. It is created on first use and reopened every time after:
 
-| Mode | Latency | Throughput | Data Loss on Crash | Use Case |
-|------|---------|------------|-------------------|----------|
-| **Ephemeral** | <3 us | 250K+ ops/sec | All data | Testing, ephemeral workloads |
-| **Buffered** | <30 us | 50K+ ops/sec | Last ~100ms | Production default |
-| **Strict** | ~2 ms | ~500 ops/sec | None | Financial, audit-critical |
-
-### Ephemeral (None)
-
-No persistence at all. Data exists only in memory and is lost when the process exits. Use `Strata::cache()` for this mode.
-
-- Fastest possible performance
-- No disk I/O
-- Use for testing, benchmarks, and ephemeral agent sessions
-
-### Buffered (Batched)
-
-Writes go to a Write-Ahead Log (WAL) but `fsync` is batched — the OS is asked to flush to disk periodically (every ~100ms or ~1000 writes, whichever comes first).
-
-- The default production mode
-- If the process crashes, the OS may not have flushed the last batch of writes
-- On restart, recovery replays the WAL to restore committed state
-- Acceptable for most AI agent workloads where losing 100ms of work is tolerable
-
-### Strict
-
-Every commit triggers an immediate `fsync` to disk. The commit call does not return until data is durably stored.
-
-- Slowest but safest
-- Zero data loss even on power failure
-- Use when every operation matters (financial records, audit logs)
-
-## Write-Ahead Log (WAL)
-
-Regardless of durability mode, all writes follow the WAL protocol:
-
-1. **Write to WAL** — the change is recorded in the log file before anything else
-2. **Apply to memory** — the in-memory data structures are updated
-3. **Acknowledge** — the operation returns success
-
-This ensures that committed data can always be recovered from the WAL, even if the in-memory state is lost.
-
-### WAL Entry Format
-
-Each entry is self-describing and integrity-checked:
-
-```
-[length: 4 bytes][type: 1 byte][payload: N bytes][crc32: 4 bytes]
+```bash
+strata ./my-db kv put greeting hello
 ```
 
-CRC32 checksums detect corruption from bit flips, partial writes, and disk errors.
+`info` reports what you have:
 
-## Snapshots
+```text
+$ strata ./my-db info
+{
+  "durable": true,
+  "target": "durable_local",
+  "open": true,
+  ...
+}
+```
 
-Snapshots are periodic full-state captures that speed up recovery. Instead of replaying the entire WAL from the beginning, recovery loads the latest snapshot and replays only the WAL entries after it.
+On disk, a durable database is a directory of a few subdirectories:
 
-Benefits:
-- **Bounded recovery time** — recovery is O(WAL entries since last snapshot), not O(total history)
-- **WAL truncation** — entries before the snapshot can be removed, keeping disk usage bounded
+```text
+$ ls ./my-db
+locks  manifest  wal
+```
 
-## Crash Recovery
+- **`wal`** — the write-ahead log. Every commit is written here before it is acknowledged.
+- **`manifest`** — the record of the database's structure and committed state.
+- **`locks`** — guards against two processes opening the same database at once.
 
-When a database opens, if a WAL file exists, StrataDB automatically runs recovery:
+### Write-ahead log and recovery
 
-1. Load the latest snapshot (if any)
-2. Read all WAL entries after the snapshot
-3. Group entries by transaction ID
-4. Apply only committed transactions (those with a `CommitTxn` entry)
-5. Discard incomplete transactions (the process crashed mid-transaction)
-6. Preserve exact version numbers from the WAL
+Durable writes follow a write-ahead protocol: the change is appended to the WAL and made durable, and only then does the write return success. Because the log records committed state before you see an acknowledgement, a durable database can rebuild itself after a crash. Recovery happens automatically the next time you open the path — you do not run a separate repair step:
 
-Recovery is:
-- **Deterministic** — same WAL + same snapshot = same state, always
-- **Idempotent** — running recovery twice produces the same result
-- **Prefix-consistent** — no partial transactions are visible
+```text
+$ strata ./my-db kv put persisted yes
+created persisted applied=true
+# a brand-new process, later:
+$ strata ./my-db kv get persisted
+yes
+```
 
-## Choosing a Mode
+The value survives because it was in the WAL before the first process exited.
 
-For most applications, **Buffered** is the right choice. It provides a good balance of performance and durability. Consider:
+### Halt on fsync failure
 
-- **Testing?** → No Durability (`Strata::cache()`)
-- **Production agent workloads?** → Buffered (default)
-- **Cannot lose any data?** → Strict
-- **Unsure?** → Start with Buffered and switch to Strict if needed
+Durability is only meaningful if a successful write is actually on disk. If the operating system cannot flush the WAL — an `fsync` failure — the writer **halts** rather than acknowledging writes it cannot guarantee. It will not silently continue accepting data it might lose. You recover by resolving the underlying disk problem and reopening the database, which replays the log up to the last write it could prove was durable. This is a deliberate trade: StrataDB would rather stop than lie about durability.
+
+## Cache databases
+
+Pass `--cache` and the database lives only in memory. Nothing is ever written to disk — no WAL, no manifest, no lock files:
+
+```text
+$ strata --cache info
+{
+  "durable": false,
+  "target": "cache",
+  ...
+}
+```
+
+You can confirm it leaves no trace. Run a cache write in an empty directory and the directory stays empty:
+
+```text
+$ strata --cache kv put x y
+created x applied=true
+$ ls
+# (nothing)
+```
+
+Two consequences follow from being purely in-memory:
+
+- **Data does not persist.** Each `--cache` process starts empty and forgets everything when it exits. Two separate `strata --cache` commands do not share state.
+- **There is nothing to recover.** Cache mode has no WAL, snapshot, or lock objects by design, so there is no crash recovery — the data simply was never on disk.
+
+Cache mode is the right choice for tests, one-off experiments, ephemeral agent scratch space, and running in environments where you do not want to touch the filesystem.
+
+## Choosing a mode
+
+| You want to… | Use |
+|--------------|-----|
+| Keep data across restarts | A durable database (`strata ./path …`) |
+| Guarantee committed writes survive a crash | A durable database — writes are WAL-backed |
+| Run a fast, throwaway experiment | A cache database (`strata --cache …`) |
+| Avoid writing anything to disk | A cache database |
+
+When in doubt, use a durable database. The cost of the write-ahead log is small, and you get recovery for free.
 
 ## Next
 
-- [Database Configuration Guide](/docs/guides/database-configuration) — how to configure durability modes
-- [Architecture: Durability and Recovery](/architecture/durability-and-recovery) — deep dive into WAL format, snapshots, and recovery internals
+- [Commits](/docs/concepts/commits) — the `durable` flag on each write receipt
+- [Database Configuration](/docs/guides/database-configuration) — opening, targeting, and inspecting a database
+- [Observability](/docs/guides/observability) — `info`, `health`, and `doctor`
+- [Troubleshooting](/docs/troubleshooting) — recovery and lock issues
