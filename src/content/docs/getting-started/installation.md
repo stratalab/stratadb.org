@@ -6,18 +6,38 @@ section: "getting-started"
 
 ## Install the CLI
 
-### From crates.io (recommended)
+### Installer script (recommended)
 
 ```bash
-cargo install strata-cli
+curl -fsSL https://stratadb.org/install.sh | sh
+```
+
+The installer downloads the latest release for your platform, verifies its
+SHA-256 checksum against the release manifest, installs the binary to
+`~/.strata/bin`, and adds that directory to your shell's PATH.
+
+Two environment variables override the defaults:
+
+```bash
+# Pin a specific version instead of latest
+curl -fsSL https://stratadb.org/install.sh | STRATA_VERSION=<version> sh
+
+# Install somewhere else
+curl -fsSL https://stratadb.org/install.sh | STRATA_INSTALL_DIR=$HOME/bin sh
+```
+
+### Homebrew
+
+```bash
+brew install stratalab/tap/strata
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/stratadb-labs/strata-core.git
+git clone https://github.com/stratalab/strata-core.git
 cd strata-core
-cargo build --release
+cargo build --release -p strata-cli
 ```
 
 The binary is located at `target/release/strata`.
@@ -43,24 +63,43 @@ Run a quick command to confirm the CLI is working:
 strata --cache ping
 ```
 
-Expected output:
-
-```
-PONG
-```
+Expected output is `pong` followed by the installed version.
 
 You can also try a quick interactive session:
 
 ```
 $ strata --cache
 strata:default/default> kv put hello world
-(version) 1
+created hello applied=true
 strata:default/default> kv get hello
-"world"
+world
 strata:default/default> quit
 ```
 
 If you see the output above, you are ready to go. Continue to [Your First Database](first-database) for a complete tutorial.
+
+## Uninstall
+
+If you installed with the installer script, remove the binary directory and
+the PATH line the installer added:
+
+```bash
+rm -rf ~/.strata/bin
+```
+
+(Use your `STRATA_INSTALL_DIR` if you overrode the default.) Then delete the
+`# Strata` block from your shell config — `~/.zshrc`, `~/.bashrc`,
+`~/.config/fish/config.fish`, or `~/.profile`.
+
+If you installed with Homebrew:
+
+```bash
+brew uninstall strata
+```
+
+Uninstalling removes only the binary. Your databases stay wherever you created
+them, and the global config remains at `~/.config/strata/config.toml` — delete
+those yourself if you want a clean slate.
 
 ## Next
 
