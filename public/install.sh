@@ -5,6 +5,12 @@
 # Environment overrides:
 #   STRATA_VERSION      install a specific version (e.g. 1.0.0) instead of latest
 #   STRATA_INSTALL_DIR  install directory (default: ~/.strata/bin)
+#
+# Uninstall:
+#   rm -rf ~/.strata/bin    (or your STRATA_INSTALL_DIR)
+#   then remove the "# Strata" PATH block from your shell config
+#   (~/.zshrc, ~/.bashrc, ~/.config/fish/config.fish, or ~/.profile).
+#   Databases and ~/.config/strata/config.toml are never touched.
 set -eu
 
 REPO="stratalab/strata-core"
