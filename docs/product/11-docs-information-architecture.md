@@ -39,47 +39,55 @@ that premise and it is worth recording why:
   `/architecture` whitepapers** (they still document the removed `state` primitive and
   public transactions, and omit `graph`).
 
-**Decision (Ani, 2026-07-14): evolve the spine.** Keep the proven progression; make four
-high-leverage structural moves the research demands (§4). Do not clean-sheet.
+**Decision (Ani, 2026-07-14): evolve the spine.** Keep the proven progression; make the
+structural moves the research demands (§4). Do not clean-sheet.
 
 ## 3. Top-level sections
 
-The `/docs` tree has nine sections. Order is the reader's journey — quick success, then
-understanding, then depth, then lookup — with the agent surface and internals as first-class
-destinations rather than footnotes.
+The `/docs` tree has eleven sections, ordered by the reader's journey — evaluate, succeed,
+understand, then depth and lookup. The first nine are the reading spine; **Architecture** and
+**Resources** are the advanced/reference tier the sidebar renders last.
 
 ```
-1  Get Started          install → a real result in <60s
-2  Concepts             the mental model + the differentiators, taught
-3  Working with Data    one uniform section per primitive + how they combine   ← the restructure
-4  Guides               cross-cutting, operational how-to
-5  Cookbook             end-to-end, agent-forward recipes
-6  Reference            generated from the IDL — a distinct, drift-guarded surface
-7  For AI Agents        the machine surface as a destination                    ← new, first-class
-8  Architecture         rebuilt V1 internals (the "whitepapers")
-9  Resources            FAQ · troubleshooting · comparisons · changelog · roadmap
+1   Why Strata          what it is, when to use it, vs. the alternatives            ← new
+2   Get Started         install → a real result in <60s
+3   Concepts            the mental model + the differentiators, taught
+4   Working with Data   one uniform section per data primitive + how they combine   ← the restructure
+5   Inference           the built-in model capability, its own front door           ← its own section
+6   Guides              cross-cutting, operational how-to
+7   Cookbook            end-to-end, agent-forward recipes
+8   Reference           generated from the IDL — a distinct, drift-guarded surface
+9   For AI Agents       the machine surface as a destination                        ← new, first-class
+10  Architecture        rebuilt V1 internals (the "whitepapers")
+11  Resources           FAQ · troubleshooting · changelog · roadmap
 ```
 
 `SECTION_ORDER` (in `src/lib/docsNav.ts`) becomes:
-`getting-started → concepts → data → guides → cookbook → reference → agents → architecture
-→ resources`.
+`why-strata → getting-started → concepts → data → inference → guides → cookbook → reference
+→ agents → architecture → resources`.
 
-## 4. The four structural moves (vs. today)
+## 4. The structural moves (vs. today)
 
-1. **Split per-capability from cross-cutting** (→ §3 "Working with Data"). Today the
-   primitives (`kv-store`, `vector-store`, …) are flat guide pages intermixed with
-   operational guides (`branch-management`, `spaces`). The research's primary
-   anti-fragmentation weapon is a **uniform per-capability template** so all six primitives
-   read identically. Per-primitive how-tos move under their primitive; operational how-tos
-   stay in Guides.
-2. **Add the "Combining primitives" spine** (→ §3). The page a multi-model database lives or
-   dies on: without it, Strata reads like six bolted-on databases. Absent today.
-3. **Promote the agent surface to a first-class section** (→ §7 "For AI Agents"). Strata's
+1. **A "Why Strata" front door** (→ §5.1). A short evaluate-first section — what it is, when
+   to use it (and when not), and honest comparisons vs SQLite/DuckDB/Redis/vector DBs. Serves
+   the evaluator before the builder (SQLite's "About / Appropriate Uses" pattern).
+2. **Split per-capability from cross-cutting** (→ §5.4 "Working with Data"). Today the
+   primitives (`kv-store`, `vector-store`, …) are flat guide pages intermixed with operational
+   guides (`branch-management`, `spaces`). A **uniform per-primitive template** makes all five
+   data primitives read identically; per-primitive how-tos move under their primitive,
+   operational how-tos stay in Guides.
+3. **Add the "Combining primitives" spine** (→ §5.4). The page a multi-model database lives or
+   dies on; without it, Strata reads like six bolted-on databases. Absent today. It bridges
+   data *and* inference (RAG, autoembed).
+4. **Inference is its own section** (→ §5.5), not a data primitive. It is a compute capability
+   that operates on data; a front door elevates a core differentiator and keeps "Working with
+   Data" honestly about the five stored primitives.
+5. **Promote the agent surface to a first-class section** (→ §5.9 "For AI Agents"). Strata's
    primary audience includes coding agents (00 §3). The best agent-facing docs (Cloudflare,
-   Pinecone, Stripe) enumerate every machine surface — MCP, llms.txt, `.md` mirrors, the
-   spec — in one destination. Strata already ships most of these; they just are not a place
-   you can go. This deepens, not contradicts, 01 §7 (which specs the surfaces themselves).
-4. **Regenerate Reference from the IDL and rebuild Architecture** (→ §6, §8). Retire the
+   Pinecone, Stripe) enumerate every machine surface — MCP, llms.txt, `.md` mirrors, the spec
+   — in one destination. Strata already ships most; they just are not a place you can go.
+   Deepens, not contradicts, 01 §7.
+6. **Regenerate Reference from the IDL and rebuild Architecture** (→ §5.8, §5.10). Retire the
    seven hand-written reference pages (09 anti-pattern #1); rewrite the whitepapers for V1.
 
 ## 5. Section-by-section structure
@@ -87,51 +95,65 @@ destinations rather than footnotes.
 Topics, not pages. `[G]` = generated from strata-core (09 §1); everything else is narrative
 authored here with `source:` frontmatter.
 
-### 5.1 Get Started
-Why Strata (one screen) · Installation · Your first database (one flow: open → KV put →
-JSON set → vector upsert + query → read) · Quickstart: Python SDK · Quickstart: CLI ·
-Quickstart: AI agents. Metric: time-to-first-successful-query. The first page carries a
-copy-paste install and a runnable snippet; nothing is gated behind Concepts.
+### 5.1 Why Strata
+What Strata is (one paragraph) · The differentiators (multi-model in one embedded file;
+branches & time-travel; built-in inference; agent-native) · When to use it — and when not
+(honest boundaries) · Comparisons (vs SQLite / DuckDB / Redis / vector DBs). Serves the
+evaluator (P2/P3) before the builder; honest advocacy, cleanly separated from reference
+(SQLite's "About / Appropriate Uses / When to use" pattern).
 
-### 5.2 Concepts (Explanation)
+### 5.2 Get Started
+Installation · Your first database (one flow: open → KV put → JSON set → vector upsert +
+query → read) · Quickstart: Python SDK · Quickstart: CLI · Quickstart: AI agents. Metric:
+time-to-first-successful-query. The first page carries a copy-paste install and a runnable
+snippet; nothing is gated behind Concepts.
+
+### 5.3 Concepts (Explanation)
 Embedded architecture (in-process, no server; cache vs durable; the SQLite/DuckDB analogy) ·
 The multi-model data model (five primitives over one branch-aware MVCC store; when to use
-which) · Branches · Time travel · Spaces · Commits, versions & durability · The inference
-model (local + cloud; autoembedding; derived/shadow state) · StrataHub & clone artifacts ·
-Errors & diagnostics (the `class.area.detail` contract).
+which) · Branches · Time travel · Spaces · Commits, versions & durability · StrataHub &
+clone artifacts · Errors & diagnostics (the `class.area.detail` contract). (The inference
+*model* is taught in §5.5.)
 
-### 5.3 Working with Data
-**Per-primitive template — identical shape for all six:** Overview → How-to guides →
-Reference (link to §6). Sections: **Key-Value · JSON documents · Vectors · Events · Graph
-· Inference**. Plus **▸ Combining primitives**: RAG · semantic search · knowledge graphs ·
-time-travel across primitives · autoembedding pipelines.
+### 5.4 Working with Data
+**Per-primitive template — identical shape for all five:** Overview → How-to guides →
+Reference (link to §5.8). Sections: **Key-Value · JSON documents · Vectors · Events ·
+Graph**. Plus **▸ Combining primitives**: RAG · semantic search · knowledge graphs ·
+time-travel across primitives · autoembedding pipelines (these bridge into §5.5 Inference).
 
-### 5.4 Guides (cross-cutting how-to)
+### 5.5 Inference
+Overview (the inference model: local GGUF + cloud providers; a compute capability over your
+data) · Chat / generation · Embeddings · Reranking · Local models (pull, cache, runtime) ·
+Providers & keys (BYOK) · Tools & structured outputs · Autoembedding & derived state ·
+Reference (link to §5.8). Its own section because it is a capability, not a stored primitive;
+it is the bridge the "Combining primitives" spine leans on.
+
+### 5.6 Guides (cross-cutting how-to)
 Branching workflows (fork · A/B · merge) · Time-travel patterns · Cloning datasets from a
 hub · Configuration & tuning (memory budget, buffers, compaction; cache vs durable) · Error
 handling · Observability (metrics/health/describe) · Bulk import/export (Arrow/Parquet) ·
 Embedding & deploying (in-app, edge, wasm/browser) · Migrating from SQLite / DuckDB / Redis.
 
-### 5.5 Cookbook (end-to-end recipes)
+### 5.7 Cookbook (end-to-end recipes)
 Agent memory across sessions · Multi-agent coordination · RAG over your documents · A/B
 testing with branches · Deterministic replay · (grows with real use cases). Agent-forward,
 per 00's dual-loop.
 
-### 5.6 Reference `[G]`
+### 5.8 Reference `[G]`
 Commands, by family (kv · json · vector · event · graph · branch · space · admin · arrow ·
 inference) — the 117 generated pages with CLI/wire/Python tabs · CLI reference · Python SDK
 reference · Errors (`/e/<code>`, 204 codes) · Configuration keys · Value types / schemas.
 All generated; a distinct surface; narrative points in, reference links back out. Never
 inlined into a guide or tutorial.
 
-### 5.7 For AI Agents
+### 5.9 For AI Agents
 How agents use Strata (an embedded DB driven via SDK/CLI/MCP) · MCP server (`strata mcp
 serve`, the tools, client config) · Machine-readable docs (`llms.txt`, `llms-full.txt`,
 per-page `.md` mirrors, "copy as markdown") · The command index & IDL (the published spec)
 · `agents_guide` (`stratadb.agents_guide()` + `strata agents guide`) · Building agents on
-Strata (patterns; links into §5).
+Strata (patterns; links into §5.7).
 
-### 5.8 Architecture (rebuilt for V1)
+### 5.10 Architecture (rebuilt for V1)
 The layered stack (core → storage → engine → intelligence → inference) · Storage engine
 (L1–L9, the MVCC KV substrate, segments, compaction) · Durability & recovery · Concurrency
 model · Storage format spec · Per-primitive internals (how vectors/graph/etc. layer over
@@ -139,27 +161,28 @@ the KV substrate). **Delete** `state-primitive`, `session-transaction-completene
 `graph`; fix the "7 crates" claim. SQLite's "Technical & Design" pattern: honest internals,
 cleanly separated from reference and advocacy.
 
-### 5.9 Resources
-FAQ · Troubleshooting · Comparisons (vs SQLite / DuckDB / Redis / vector DBs — honest
-advocacy, cleanly separated per SQLite) · Changelog · Roadmap.
+### 5.11 Resources
+FAQ · Troubleshooting · Changelog · Roadmap. (Comparisons live in §5.1 Why Strata.)
 
 ## 6. Rules that keep it coherent
 
-- **Routing rule.** Primitive-specific how-to → under that primitive in §5.3; cross-primitive
-  or operational how-to → §5.4 Guides. (Task-based entry, topic-based lookup, layered.)
+- **Routing rule.** Primitive-specific how-to → under that primitive in §5.4 (or §5.5 for
+  inference); cross-primitive or operational how-to → §5.6 Guides. (Task-based entry,
+  topic-based lookup, layered.)
 - **Reference is generated and separate.** One source of truth (the IDL) so it cannot drift;
   narrative cross-links into it, never duplicates it (09 anti-pattern #1).
 - **One page, one job** (Diátaxis). No tutorial/how-to/reference/explanation mixing on a page.
 - **No empty shelves** (01 §4). The sidebar generator points only at pages that exist; a
   section appears when its first page lands.
-- **Consistent per-capability template.** The six primitives are predictable precisely
-  because their internal shape is identical.
+- **Consistent per-capability template.** The five primitives are predictable precisely
+  because their internal shape is identical; Inference (§5.5) follows the same Overview →
+  How-to → Reference shape.
 
 ## 7. Mechanics & open gaps
 
 1. **Sidebar generator needs two-level nesting.** `src/lib/docsNav.ts` groups by top
-   directory only; §5.3 needs sub-sections per primitive (`data/vectors/…`). Small change to
-   the generator + `SECTION_ORDER`/`SECTION_TITLES`/`PREFERRED`.
+   directory only; §5.4 needs sub-sections per primitive (`data/vectors/…`) and §5.5 has
+   sub-topics. Small change to the generator + `SECTION_ORDER`/`SECTION_TITLES`/`PREFERRED`.
 2. **Reference comes from the fetch-from-release pipeline** (10 §3, *not yet built*): pull the
    strata-core docs bundle + `command-index.json` from the release tag in `release.json`,
    never from `main`. This is the largest net-new plumbing; strata-core's generator side
@@ -180,10 +203,11 @@ advocacy, cleanly separated per SQLite) · Changelog · Roadmap.
   SDKs → Operate, Concepts woven in, agent surfaces published alongside — observed across
   SQLite, DuckDB, Redis, MongoDB, Turso, Prisma, Supabase, Stripe, Anthropic, Chroma,
   Pinecone.
-- **Patterns adopted:** copy-paste first-success on page one (DuckDB/embedded); uniform
-  per-capability template + a "combine capabilities" spine (Redis/Supabase/Chroma —
-  anti-fragmentation); generated reference as a distinct, drift-proof surface woven by links
-  (Stripe/Prisma); agent surface as an enumerated destination (Cloudflare "Docs for agents").
+- **Patterns adopted:** an evaluate-first "About/Appropriate Uses" front door (SQLite);
+  copy-paste first-success on page one (DuckDB/embedded); uniform per-capability template +
+  a "combine capabilities" spine (Redis/Supabase/Chroma — anti-fragmentation); generated
+  reference as a distinct, drift-proof surface woven by links (Stripe/Prisma); agent surface
+  as an enumerated destination (Cloudflare "Docs for agents").
 - **Pitfalls avoided:** reference-as-tutorial; Diátaxis-as-rigid-nav; capability
   fragmentation; generated/narrative drift; orphaned pages; advocacy bleeding into reference;
   no machine surface for agents.
@@ -196,12 +220,10 @@ advocacy, cleanly separated per SQLite) · Changelog · Roadmap.
 3. Then: the sidebar-generator change (§7.1), the reference fetch pipeline (§7.2), and
    narrative authoring.
 
-## 10. Open questions
+## 10. Resolved (2026-07-14)
 
-- **Naming.** "Working with Data" vs "Data" vs "Capabilities"; "Concepts" vs "Learn";
-  "Cookbook" vs "Recipes." (Recommendation: keep "Concepts"/"Cookbook" — established and
-  scannable; "Working with Data" for the umbrella.)
-- **Primitive vs. capability framing for Inference.** Inference sits in §5.3 alongside the
-  five data primitives, but it is a capability, not a stored primitive. Keep it there for
-  discoverability, or split a "Capabilities" umbrella from a "Primitives" umbrella?
-- **Comparisons placement.** §5.9 Resources vs. a Get-Started "Why Strata" sub-page vs. both.
+- **Umbrella name:** "Working with Data" (verb-forward, task-oriented; over "Data" /
+  "Capabilities").
+- **Inference:** its own top-level section (§5.5), not inside the data umbrella — a capability,
+  not a stored primitive.
+- **Comparisons:** live in §5.1 Why Strata (the evaluate-first front door), not Resources.
