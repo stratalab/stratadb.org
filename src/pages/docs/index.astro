@@ -1,0 +1,204 @@
+---
+// The docs front door — a designed landing (big navigational blocks, search
+// first, one live proof), not a prose page. The machine mirror of this page
+// stays at /docs/index.md from the content collection.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DocsSearch from '../../components/chrome/DocsSearch.astro';
+
+// The "do" row: the three fastest paths to a working result.
+const start = [
+  {
+    title: 'Install the CLI',
+    desc: 'One binary. The install script, Homebrew, or build from source.',
+    href: '/docs/getting-started/installation',
+    cta: 'strata --cache ping',
+  },
+  {
+    title: 'Your first database',
+    desc: 'Create a durable database, write across primitives, fork a branch, read the past.',
+    href: '/docs/getting-started/first-database',
+    cta: 'strata ./mydb kv put greeting hello',
+  },
+  {
+    title: 'Python SDK',
+    desc: 'The engine in your process — pip install stratadb, no server, no toolchain.',
+    href: '/docs/python',
+    cta: 'db = stratadb.open("./mydb")',
+  },
+];
+
+// Working with Data — each primitive wears its own hue (the same tokens the
+// rest of the site uses for these five).
+const primitives = [
+  { title: 'Key-value', desc: 'Opaque values by key, versioned.', href: '/docs/data/key-value', hue: 'var(--color-strata-kv)' },
+  { title: 'JSON documents', desc: 'Read and write inside documents by path.', href: '/docs/data/json', hue: 'var(--color-strata-json)' },
+  { title: 'Vectors', desc: 'Similarity search with metadata filters.', href: '/docs/data/vectors', hue: 'var(--color-strata-vector)' },
+  { title: 'Events', desc: 'Append-only, hash-chained history.', href: '/docs/data/events', hue: 'var(--color-strata-event)' },
+  { title: 'Graph', desc: 'Nodes, edges, analytics, and an ontology.', href: '/docs/data/graph', hue: 'var(--color-strata-graph)' },
+  { title: 'Combining primitives', desc: 'RAG, semantic search, knowledge graphs — one substrate.', href: '/docs/data/combining-primitives', hue: 'var(--color-terracotta-500)' },
+];
+
+const sections = [
+  { title: 'Why Strata', desc: 'What it is, when to use it, honest comparisons.', href: '/docs/why-strata' },
+  { title: 'Concepts', desc: 'Branches, commits, time travel, durability — the mental model.', href: '/docs/concepts' },
+  { title: 'Inference', desc: 'Chat, embeddings, and reranking with your own keys.', href: '/docs/inference' },
+  { title: 'Guides', desc: 'Branching workflows, configuration, deploying, migrating.', href: '/docs/guides' },
+  { title: 'Cookbook', desc: 'End-to-end recipes, every command verified.', href: '/docs/cookbook' },
+  { title: 'For AI agents', desc: 'MCP server, machine catalogs, the self-describing binary.', href: '/docs/agents' },
+  { title: 'Reference', desc: 'Every command, generated from the IDL — plus errors and configuration.', href: '/docs/reference' },
+  { title: 'Architecture', desc: 'How V1 is built — storage, durability, capabilities.', href: '/architecture' },
+  { title: 'FAQ & troubleshooting', desc: 'Answers, failure modes, and the codes they carry.', href: '/docs/faq' },
+];
+
+// Real transcript (strata 1.0.0): fork isolation, condensed receipt.
+const transcript = [
+  { cmd: 'strata ./demo kv put plan v1', out: ['created plan applied=true'] },
+  { cmd: 'strata ./demo branch fork default risky', out: ['{ "name": "risky", "parent": { "name": "default", "fork_version": 3 }, "status": "active" }'] },
+  { cmd: 'strata ./demo --branch risky kv put plan v2-experimental', out: ['updated plan applied=true'] },
+  { cmd: 'strata ./demo --branch risky kv get plan', out: ['v2-experimental'] },
+  { cmd: 'strata ./demo kv get plan', out: ['v1'] },
+];
+---
+
+<BaseLayout
+  title="Documentation — StrataDB"
+  description="StrataDB documentation: an embedded multi-model database with branches, time travel, and built-in inference."
+>
+  <div class="mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
+    <!-- Hero: title, claim, search as the front door -->
+    <header class="mx-auto max-w-2xl text-center">
+      <h1 class="text-title font-semibold text-ink-hi">Documentation</h1>
+      <p class="mt-4 text-body-lg text-ink-mid">
+        One embedded database — five data primitives, git-style branches, time
+        travel, and built-in inference. Everything on these pages was run
+        against the shipped binary.
+      </p>
+      <button
+        type="button"
+        class="docs-search-trigger mt-8 flex w-full items-center gap-3 rounded-(--radius-card) border border-line bg-panel px-5 py-3.5 text-left text-body text-ink-low transition-colors duration-200 hover:border-line-hover hover:text-ink-mid"
+        aria-label="Search docs"
+      >
+        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
+        </svg>
+        <span>Search the docs…</span>
+        <kbd class="ml-auto rounded border border-line px-2 py-0.5 font-mono text-mono-sm">/</kbd>
+      </button>
+    </header>
+
+    <!-- Start here: the do row -->
+    <section class="mt-16" aria-label="Start here">
+      <div class="grid gap-4 md:grid-cols-3">
+        {
+          start.map((card) => (
+            <a
+              href={card.href}
+              class="group rounded-(--radius-card) border border-line bg-panel p-6 transition-colors duration-200 hover:border-line-hover"
+            >
+              <h2 class="text-body font-semibold text-ink-hi">{card.title}</h2>
+              <p class="mt-2 text-small text-ink-mid">{card.desc}</p>
+              <p class="mt-4 truncate font-mono text-mono-sm text-ink-low transition-colors duration-200 group-hover:text-terracotta-500">
+                {card.cta}
+              </p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- The proof strip: a real fork, and the real engine in the browser -->
+    <section class="mt-16" aria-label="Try it">
+      <div class="grid overflow-hidden rounded-(--radius-frame) border border-line lg:grid-cols-[1fr_16rem]">
+        <div class="bg-inset p-6 font-mono text-mono-sm leading-relaxed">
+          {
+            transcript.map((step) => (
+              <div class="mb-1.5">
+                <p class="text-ink-mid">
+                  <span class="select-none text-ink-low">$ </span>
+                  {step.cmd.includes('risky') ? (
+                    <Fragment>
+                      {step.cmd.split('risky').map((part, i, arr) => (
+                        <Fragment>
+                          {part}
+                          {i < arr.length - 1 && <span class="text-terracotta-500">risky</span>}
+                        </Fragment>
+                      ))}
+                    </Fragment>
+                  ) : (
+                    step.cmd
+                  )}
+                </p>
+                {step.out.map((line) => (
+                  <p class="text-ink-low">{line}</p>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+        <div class="flex flex-col justify-center gap-3 border-t border-line bg-panel p-6 lg:border-l lg:border-t-0">
+          <h2 class="text-body font-semibold text-ink-hi">A fork is isolation</h2>
+          <p class="text-small text-ink-mid">
+            Two branches, two truths, one database. This transcript is from a
+            real run — and the same engine compiles to WebAssembly.
+          </p>
+          <a
+            href="/playground"
+            class="mt-1 font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+          >
+            Run it in your browser →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Working with data: the primitives, wearing their hues -->
+    <section class="mt-16" aria-label="Working with data">
+      <h2 class="text-eyebrow font-medium uppercase text-ink-low">Working with data</h2>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          primitives.map((card) => (
+            <a
+              href={card.href}
+              class="group rounded-(--radius-card) border border-line bg-panel p-5 transition-colors duration-200 hover:border-line-hover"
+              style={`border-left: 2px solid ${card.hue}`}
+            >
+              <h3 class="text-body font-semibold text-ink-hi">{card.title}</h3>
+              <p class="mt-1.5 text-small text-ink-mid">{card.desc}</p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Everything else -->
+    <section class="mt-16" aria-label="All sections">
+      <h2 class="text-eyebrow font-medium uppercase text-ink-low">Browse the docs</h2>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          sections.map((card) => (
+            <a
+              href={card.href}
+              class="group rounded-(--radius-card) border border-line p-5 transition-colors duration-200 hover:border-line-hover hover:bg-panel"
+            >
+              <h3 class="text-body font-semibold text-ink-hi">{card.title}</h3>
+              <p class="mt-1.5 text-small text-ink-mid">{card.desc}</p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- The machine surface, quiet and mono -->
+    <section class="mt-16 rounded-(--radius-card) border border-line bg-panel px-6 py-5" aria-label="For machines">
+      <p class="font-mono text-mono-sm text-ink-low">
+        agents: <a href="/llms.txt" class="text-ink-mid hover:text-ink-hi">llms.txt</a>
+        · <a href="/llms-full.txt" class="text-ink-mid hover:text-ink-hi">llms-full.txt</a>
+        · append <span class="text-ink-mid">.md</span> to any docs URL for CommonMark
+        · <a href="/e/" class="text-ink-mid hover:text-ink-hi">/e/ error registry</a>
+        · <a href="/docs/agents" class="text-ink-mid hover:text-ink-hi">the full agent surface →</a>
+      </p>
+    </section>
+  </div>
+  <DocsSearch />
+</BaseLayout>

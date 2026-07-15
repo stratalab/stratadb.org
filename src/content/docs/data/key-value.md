@@ -173,6 +173,25 @@ The full verb list is in the [CLI reference](/docs/reference/cli). To batch many
 writes into one shared commit, use the raw `command` path or MCP tools; the CLI
 `kv` verbs operate on one key at a time.
 
+## From Python
+
+The same surface, from the [Python SDK](/docs/python) — values are bytes, a
+miss returns `None`:
+
+```python
+import stratadb
+
+db = stratadb.open("./mydb")
+db.kv.put("setting", "v1")
+db.kv.get("setting")        # b"v1"
+db.kv.exists("setting")     # True
+db.kv.count()               # 1
+db.close()
+```
+
+See [namespaces](/docs/python/namespaces) for scans, history, batches, and
+`as_of` reads.
+
 ## Reference
 
 Every key-value command — parameters, returns, errors, and runnable CLI/wire/Python

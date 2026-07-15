@@ -6,7 +6,10 @@ source: "strata-core@v1.0.0"
 ---
 
 
-New to StrataDB? Take these three steps in order.
+New to StrataDB? Take these three steps in order. (Still deciding whether it
+fits your problem? Start with [Why Strata](/docs/why-strata) — what it is,
+[when to use it](/docs/why-strata/when-to-use), and
+[how it compares](/docs/why-strata/comparisons).)
 
 1. **[Installation](/docs/getting-started/installation)** — install the `strata`
    CLI and confirm it runs.

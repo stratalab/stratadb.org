@@ -27,7 +27,7 @@ branches, the same versioning, and the same durability guarantees.
   data until you change something. See [Branches](/docs/concepts/branches).
 - **Time travel.** Every write returns a commit with a timestamp. Pass that
   value back to any read with `--as-of` to see the data as it was at that
-  commit. See [Commits](/docs/concepts/commits).
+  commit. See [Time travel](/docs/concepts/time-travel).
 - **Durable or in-memory.** Point StrataDB at a directory and it persists
   through a write-ahead log; run it with `--cache` and nothing touches disk.
   See [Durability](/docs/concepts/durability).
@@ -40,49 +40,73 @@ branches, the same versioning, and the same durability guarantees.
 
 | I want to… | Go to |
 |---|---|
+| Decide whether StrataDB fits my problem | [Why Strata](/docs/why-strata) |
 | Install the CLI | [Installation](/docs/getting-started/installation) |
 | Create a database and run real commands | [Your first database](/docs/getting-started/first-database) |
+| Use it from Python | [Python SDK](/docs/python) |
 | Wire StrataDB into a coding agent | [For AI agents](/docs/agents) |
-| Understand the mental model | [Concepts](/docs/concepts/branches) |
-| Learn one capability in depth | [Guides](/docs/data/key-value) |
-| Build a real pattern | [Cookbook](/docs/cookbook/agent-state-management) |
-| Look up a command or error | [Reference](/docs/reference/cli) |
+| Understand the mental model | [Concepts](/docs/concepts) |
+| Learn one data primitive in depth | [Working with data](/docs/data/key-value) |
+| Build a real pattern | [Cookbook](/docs/cookbook) |
+| Look up a command or error | [Reference](/docs/reference) |
 
 ## Section map
 
-- **[Getting started](/docs/getting-started/installation)** — install the CLI,
-  create your [first database](/docs/getting-started/first-database), and set up
-  the [agent front door](/docs/agents).
-- **[Concepts](/docs/concepts/branches)** — the ideas you build on:
-  [branches](/docs/concepts/branches), [commits](/docs/concepts/commits),
-  [durability](/docs/concepts/durability),
-  [primitives](/docs/concepts/primitives), and
-  [value types](/docs/concepts/value-types).
-- **[Guides](/docs/data/key-value)** — one capability at a time:
-  [KV](/docs/data/key-value), [JSON](/docs/data/json),
-  [event log](/docs/data/events), [vectors](/docs/data/vectors),
-  [graph](/docs/data/graph), plus cross-cutting guides on
-  [branch management](/docs/guides/branching-workflows),
-  [spaces](/docs/guides/spaces),
+- **[Why Strata](/docs/why-strata)** — what it is,
+  [when to use it (and when not)](/docs/why-strata/when-to-use), and
+  [honest comparisons](/docs/why-strata/comparisons) vs SQLite, DuckDB, Redis,
+  Postgres, and vector databases.
+- **[Getting started](/docs/getting-started)** — [install the
+  CLI](/docs/getting-started/installation) and create your
+  [first database](/docs/getting-started/first-database).
+- **[Concepts](/docs/concepts)** — the mental model:
+  [embedded architecture](/docs/concepts/embedded-architecture),
+  [primitives](/docs/concepts/primitives), [branches](/docs/concepts/branches),
+  [time travel](/docs/concepts/time-travel), [commits](/docs/concepts/commits),
+  [durability](/docs/concepts/durability), [spaces](/docs/concepts/spaces),
+  [value types](/docs/concepts/value-types),
+  [hub and clone](/docs/concepts/hub-and-clone), and
+  [errors](/docs/concepts/errors).
+- **[Working with data](/docs/data/key-value)** — one primitive at a time:
+  [key-value](/docs/data/key-value), [JSON](/docs/data/json),
+  [events](/docs/data/events), [vectors](/docs/data/vectors), and
+  [graph](/docs/data/graph), plus
+  [combining primitives](/docs/data/combining-primitives).
+- **[Inference](/docs/inference)** — chat, embeddings, and reranking over cloud
+  providers with [your own keys](/docs/inference/providers-and-keys), or
+  [local models](/docs/inference/local-models).
+- **[Guides](/docs/guides)** — cross-cutting how-to:
+  [branching workflows](/docs/guides/branching-workflows),
+  [time travel](/docs/guides/time-travel), [spaces](/docs/guides/spaces),
   [configuration](/docs/guides/configuration),
   [observability](/docs/guides/observability),
   [error handling](/docs/guides/error-handling),
-  [agents and MCP](/docs/agents),
+  [import/export](/docs/guides/import-export),
   [cloning datasets](/docs/guides/cloning-datasets),
-  [Arrow](/docs/guides/import-export), and [inference](/docs/inference).
-- **[Cookbook](/docs/cookbook/agent-state-management)** — end-to-end patterns:
+  [migrating](/docs/guides/migrating), and [deploying](/docs/guides/deploying).
+- **[Cookbook](/docs/cookbook)** — end-to-end patterns:
   [agent state](/docs/cookbook/agent-state-management),
   [multi-agent coordination](/docs/cookbook/multi-agent-coordination),
   [RAG with vectors](/docs/cookbook/rag-with-vectors),
   [deterministic replay](/docs/cookbook/deterministic-replay), and
   [A/B testing with branches](/docs/cookbook/ab-testing-with-branches).
-- **[Reference](/docs/reference/cli)** — precise surfaces:
-  [CLI](/docs/reference/cli),
-  [command reference](/docs/reference/command-reference),
-  [API quick reference](/docs/reference/api-quick-reference),
+- **[Python SDK](/docs/python)** — [install the
+  wheel](/docs/python/installation), the
+  [namespace surface](/docs/python/namespaces),
+  [typed errors](/docs/python/errors), [inference](/docs/python/inference), and
+  [agent helpers](/docs/python/agents).
+- **[For AI agents](/docs/agents)** — the [MCP
+  server](/docs/agents/mcp-server), the
+  [self-describing binary](/docs/agents/agents-guide), the
+  [machine-readable catalogs](/docs/agents/command-index), and
+  [machine docs](/docs/agents/machine-docs).
+- **[Reference](/docs/reference)** — the generated command reference by family,
+  the [CLI](/docs/reference/cli),
   [configuration](/docs/reference/configuration-reference),
-  [value types](/docs/reference/value-type-reference),
-  [errors](/docs/reference/error-reference), and [MCP](/docs/agents/mcp-server).
+  [value types](/docs/reference/value-type-reference), and
+  [errors](/docs/reference/error-reference).
+- **[Architecture](/architecture)** — how V1 is built: the layered stack, the
+  storage substrate, durability and recovery, and the capability model.
 
 Stuck? Check the [FAQ](/docs/faq) or
 [Troubleshooting](/docs/troubleshooting).

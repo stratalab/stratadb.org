@@ -1,0 +1,133 @@
+---
+// Docs search: a Pagefind-backed modal. The index is produced by `pagefind
+// --site dist` in postbuild, so search works on the deployed site (and in
+// `astro preview`); in `astro dev` the modal explains itself instead.
+// Render once per page (DocsLayout). Any element with the class
+// `docs-search-trigger` opens it; so do `/` and Cmd/Ctrl+K.
+// Loaded lazily — no JS cost until the user opens it.
+---
+
+<div
+  id="docs-search-modal"
+  class="fixed inset-0 z-[60] hidden items-start justify-center bg-void/70 p-4 pt-[12vh] backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Search documentation"
+>
+  <div class="w-full max-w-xl rounded-(--radius-card) border border-line bg-raised shadow-2xl">
+    <div class="flex items-center gap-3 border-b border-line px-4">
+      <svg class="h-4 w-4 shrink-0 text-ink-low" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
+      </svg>
+      <input
+        id="docs-search-input"
+        type="search"
+        placeholder="Search the docs…"
+        autocomplete="off"
+        class="w-full bg-transparent py-3.5 text-body text-ink-hi placeholder:text-ink-low focus:outline-none"
+      />
+      <kbd class="rounded border border-line px-1.5 py-0.5 font-mono text-mono-sm text-ink-low">esc</kbd>
+    </div>
+    <div id="docs-search-results" class="max-h-[50vh] overflow-y-auto p-2">
+      <p class="px-3 py-6 text-center text-small text-ink-low">Type to search.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  type PagefindResult = {
+    data: () => Promise<{
+      url: string;
+      excerpt: string;
+      meta: { title?: string };
+    }>;
+  };
+  type Pagefind = {
+    debouncedSearch: (q: string) => Promise<{ results: PagefindResult[] } | null>;
+  };
+
+  const modal = document.getElementById('docs-search-modal');
+  const input = document.getElementById('docs-search-input') as HTMLInputElement | null;
+  const resultsEl = document.getElementById('docs-search-results');
+
+  let pagefind: Pagefind | null = null;
+  let loadFailed = false;
+
+  async function ensurePagefind(): Promise<Pagefind | null> {
+    if (pagefind || loadFailed) return pagefind;
+    try {
+      // Produced by postbuild; not a bundler-resolvable module (the variable
+      // specifier keeps astro check from trying to resolve it).
+      const pagefindUrl = '/pagefind/pagefind.js';
+      pagefind = (await import(/* @vite-ignore */ pagefindUrl)) as unknown as Pagefind;
+    } catch {
+      loadFailed = true;
+      if (resultsEl)
+        resultsEl.innerHTML =
+          '<p class="px-3 py-6 text-center text-small text-ink-low">Search index not built — run <code>npm run build && npm run preview</code>.</p>';
+    }
+    return pagefind;
+  }
+
+  function open() {
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    input?.focus();
+    void ensurePagefind();
+  }
+  function close() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  document.querySelectorAll('.docs-search-trigger').forEach((btn) => btn.addEventListener('click', open));
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    const target = e.target as HTMLElement | null;
+    const typing =
+      !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+    if (e.key === 'Escape') close();
+    else if ((e.key === '/' && !typing) || ((e.metaKey || e.ctrlKey) && e.key === 'k')) {
+      e.preventDefault();
+      open();
+    }
+  });
+
+  const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  let seq = 0;
+  input?.addEventListener('input', async () => {
+    const q = input.value.trim();
+    const mine = ++seq;
+    if (!resultsEl) return;
+    if (!q) {
+      resultsEl.innerHTML = '<p class="px-3 py-6 text-center text-small text-ink-low">Type to search.</p>';
+      return;
+    }
+    const pf = await ensurePagefind();
+    if (!pf) return;
+    const search = await pf.debouncedSearch(q);
+    if (!search || mine !== seq) return; // superseded by a newer keystroke
+    if (!search.results.length) {
+      resultsEl.innerHTML = `<p class="px-3 py-6 text-center text-small text-ink-low">No results for “${escapeHtml(q)}”.</p>`;
+      return;
+    }
+    const top = await Promise.all(search.results.slice(0, 10).map((r) => r.data()));
+    if (mine !== seq) return;
+    // Pagefind excerpts are pre-sanitized (plain text + <mark> only).
+    resultsEl.innerHTML = top
+      .map(
+        (d) => `
+        <a href="${d.url}" class="block rounded-(--radius-control) px-3 py-2.5 hover:bg-inset">
+          <span class="block text-small text-ink-hi">${escapeHtml(d.meta.title ?? d.url)}</span>
+          <span class="mt-0.5 block text-mono-sm text-ink-low [&_mark]:bg-transparent [&_mark]:text-terracotta-500">${d.excerpt}</span>
+        </a>`
+      )
+      .join('');
+  });
+</script>

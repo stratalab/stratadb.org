@@ -32,13 +32,18 @@ const RELEASE_JSON = join(ROOT, 'src/data/release.json');
 const ASSET = 'strata-idl-docs.tar.gz';
 const REPO = 'https://github.com/stratalab/strata-core';
 
-// The generated command families (top-level dirs under generated/docs/). Their
-// pages ship links as `/docs/<family>/...`; we render them under the Reference
-// section, so rewrite to `/docs/reference/<family>/...`.
-const FAMILIES = [
-  'kv', 'json', 'vector', 'event', 'graph',
-  'branch', 'space', 'admin', 'arrow', 'inference',
-];
+// The generated command families are DISCOVERED from the bundle (every
+// top-level dir under generated/docs/), so a family added in strata-core
+// flows through with no edit here. Their pages ship links as
+// `/docs/<family>/...`; we render them under the Reference section, so
+// rewrite to `/docs/reference/<family>/...`.
+async function discoverFamilies(srcDocs) {
+  const entries = await readdir(srcDocs, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+}
 
 async function version() {
   try {
@@ -77,14 +82,12 @@ async function resolveSource() {
 }
 
 // Rewrite generated `/docs/<family>/` links to the Reference section.
-function rewriteLinks(md) {
-  return md.replace(
-    /\]\(\/docs\/(kv|json|vector|event|graph|branch|space|admin|arrow|inference)\//g,
-    '](/docs/reference/$1/'
-  );
+function makeLinkRewriter(families) {
+  const pattern = new RegExp(`\\]\\(/docs/(${families.join('|')})/`, 'g');
+  return (md) => md.replace(pattern, '](/docs/reference/$1/');
 }
 
-async function stageFamily(srcDocs, family) {
+async function stageFamily(srcDocs, family, rewriteLinks) {
   const srcDir = join(srcDocs, family);
   if (!existsSync(srcDir)) return 0;
   const outDir = join(REFERENCE_DIR, family);
@@ -105,20 +108,26 @@ async function main() {
   const source = await resolveSource();
   if (!source || source.error) {
     console.warn(
-      `fetch-docs: ${source?.error ?? 'no source'}; keeping the staged reference floor`
+      `fetch-docs: ${source?.error ?? 'no source'}; keeping the committed reference floor`
     );
     return;
   }
   const srcDocs = join(source.dir, 'docs');
+  const families = await discoverFamilies(srcDocs);
+  const rewriteLinks = makeLinkRewriter(families);
 
-  // Clean-rebuild only the generated families (leave interim hand-written pages).
-  for (const family of FAMILIES) {
-    await rm(join(REFERENCE_DIR, family), { recursive: true, force: true });
-  }
+  // Clean-rebuild the generated families. Every directory under reference/ is
+  // staged (hand-written interim pages are top-level files), so removing all
+  // directories also drops a family the bundle no longer ships.
   await mkdir(REFERENCE_DIR, { recursive: true });
+  for (const entry of await readdir(REFERENCE_DIR, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      await rm(join(REFERENCE_DIR, entry.name), { recursive: true, force: true });
+    }
+  }
 
   let total = 0;
-  for (const family of FAMILIES) total += await stageFamily(srcDocs, family);
+  for (const family of families) total += await stageFamily(srcDocs, family, rewriteLinks);
 
   const indexSrc = join(source.dir, 'command-index.json');
   if (existsSync(indexSrc)) {

@@ -11,6 +11,18 @@ const isActive = (href: string) => currentPath === href || currentPath === `${hr
 
 <nav class="hidden w-60 shrink-0 lg:block" aria-label="Documentation">
   <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4">
+    <button
+      type="button"
+      class="docs-search-trigger mb-6 flex w-full items-center gap-2 rounded-(--radius-control) border border-line px-3 py-2 text-small text-ink-low transition-colors duration-200 hover:border-line-hover hover:text-ink-mid"
+      aria-label="Search docs"
+    >
+      <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
+      </svg>
+      <span>Search docs</span>
+      <kbd class="ml-auto rounded border border-line px-1.5 font-mono text-mono-sm">/</kbd>
+    </button>
     {
       sections.map((section) => (
         <div class="mb-7">

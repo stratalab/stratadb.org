@@ -68,7 +68,7 @@ strata ./mydb event get 0
 
 The first event links to an all-zero `previous_hash`. Reading a sequence that
 does not exist is not an error — it returns null and exits zero. `event exists
-<sequence>` returns `true`/`false`, and `event len` counts visible events.
+<sequence>` returns `true`/`false`, and `event count` counts visible events.
 
 ## List, filter by type
 
@@ -146,7 +146,7 @@ the offending sequence.
 
 The log is branch-scoped — each branch has its own sequence. Fork a branch to
 record a separate stream of events without touching the parent, and pass
-`--as-of` to any read verb (including `event len`) to see the log as of an
+`--as-of` to any read verb (including `event count`) to see the log as of an
 earlier commit. See [Branches](/docs/concepts/branches) and
 [Commits](/docs/concepts/commits).
 
@@ -171,6 +171,25 @@ Recover by code, never by message — see
 For a worked pattern, see
 [deterministic replay](/docs/cookbook/deterministic-replay). The full verb list
 is in the [CLI reference](/docs/reference/cli).
+
+## From Python
+
+The same surface, from the [Python SDK](/docs/python) — note the count method
+is `len()`:
+
+```python
+import stratadb
+
+db = stratadb.open("./mydb")
+record = db.events.append("deploy", {"ok": True})
+record.sequence      # 0
+db.events.len()      # 1
+db.events.verify_chain()
+db.close()
+```
+
+See [namespaces](/docs/python/namespaces) for ranges, type filters, and
+`as_of` reads.
 
 ## Reference
 

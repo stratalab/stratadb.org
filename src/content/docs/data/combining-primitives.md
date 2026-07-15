@@ -34,21 +34,21 @@ search hit resolves straight back to its source.
 
 ```bash
 # Source of truth: the document, addressable by field.
-strata ./kb.strata json set doc:42 '$' \
+strata ./kb json set doc:42 '$' \
   '{"title":"Branching model","body":"Strata forks are copy-on-write…","tags":["branches"]}'
 
 # Derived: an embedding for the same key, in a collection sized to your model.
-strata ./kb.strata vector collection create chunks 384 --metric cosine
-strata ./kb.strata vector upsert chunks doc:42 "@doc42.vec" --metadata '{"doc":"doc:42"}'
+strata ./kb vector collection create chunks 384 --metric cosine
+strata ./kb vector upsert chunks doc:42 "@doc42.vec" --metadata '{"doc":"doc:42"}'
 ```
 
 At query time you embed the question, search the collection, then read each hit's
 document back:
 
 ```bash
-strata ./kb.strata vector query chunks "@query.vec" -k 5
+strata ./kb vector query chunks "@query.vec" -k 5
 # → doc:42, doc:17, …  (keys + scores)
-strata ./kb.strata json get doc:42 '$'
+strata ./kb json get doc:42 '$'
 # → the authoritative document to feed the model
 ```
 
@@ -65,10 +65,10 @@ tenant, document type — while the authoritative fields still live in the JSON
 document.
 
 ```bash
-strata ./kb.strata vector upsert chunks doc:42 "@doc42.vec" \
+strata ./kb vector upsert chunks doc:42 "@doc42.vec" \
   --metadata '{"lang":"en","year":2024,"doc":"doc:42"}'
 
-strata ./kb.strata vector query chunks "@query.vec" -k 10 \
+strata ./kb vector query chunks "@query.vec" -k 10 \
   --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"en"}}]}'
 ```
 
@@ -85,14 +85,14 @@ by node id and you get **hybrid retrieval**: find entry points by similarity, th
 traverse the graph to expand context.
 
 ```bash
-strata ./kg.strata graph create org
-strata ./kg.strata graph add-node org alice --properties '{"name":"Alice","role":"eng"}'
-strata ./kg.strata graph add-node org bob   --properties '{"name":"Bob","role":"eng"}'
-strata ./kg.strata graph add-edge org alice reports_to bob
+strata ./kg graph create org
+strata ./kg graph add-node org alice --properties '{"name":"Alice","role":"eng"}'
+strata ./kg graph add-node org bob   --properties '{"name":"Bob","role":"eng"}'
+strata ./kg graph add-edge org alice reports_to bob
 
 # Embeddings keyed by node id, so a similarity hit names a graph node.
-strata ./kg.strata vector collection create people 384 --metric cosine
-strata ./kg.strata vector upsert people alice "@alice.vec"
+strata ./kg vector collection create people 384 --metric cosine
+strata ./kg vector upsert people alice "@alice.vec"
 ```
 
 Search the collection to find the closest node, then walk its neighbourhood — or
@@ -100,8 +100,8 @@ run [analytics](/docs/data/graph#analytics) like PageRank or connected component
 over the same branch-consistent snapshot:
 
 ```bash
-strata ./kg.strata vector query people "@query.vec" -k 1     # → alice
-strata ./kg.strata graph neighbors org alice --direction both
+strata ./kg vector query people "@query.vec" -k 1     # → alice
+strata ./kg graph neighbors org alice --direction both
 ```
 
 ## Event-sourced state
@@ -113,8 +113,8 @@ in place. Because both are versioned on the same clock, you can always reconcile
 the two — or rebuild state by replaying the log.
 
 ```bash
-strata ./ledger.strata event append account.credited '{"acct":"A1","amount":100}'
-strata ./ledger.strata json set account:A1 '$.balance' 100
+strata ./ledger event append account.credited '{"acct":"A1","amount":100}'
+strata ./ledger json set account:A1 '$.balance' 100
 ```
 
 If the materialised balance is ever in doubt, the events are the authority: read
@@ -131,10 +131,10 @@ entire database** at that commit:
 
 ```bash
 # Whatever the timestamp of an earlier commit was — say 12:
-strata ./app.strata --as-of 12 json get user:1 '$'
-strata ./app.strata --as-of 12 vector query chunks "@q.vec" -k 5
-strata ./app.strata --as-of 12 event range 0
-strata ./app.strata --as-of 12 graph meta org
+strata ./app --as-of 12 json get user:1 '$'
+strata ./app --as-of 12 vector query chunks "@q.vec" -k 5
+strata ./app --as-of 12 event range 0
+strata ./app --as-of 12 graph meta org
 ```
 
 Each command reads the document, the embeddings, the events, and the graph as

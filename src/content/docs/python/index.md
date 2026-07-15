@@ -32,8 +32,8 @@ models come from a companion wheel (`stratadb[cuda]`). See
 ```python
 import stratadb
 
-db = stratadb.Strata("./app-data")      # durable (creates if absent)
-# db = stratadb.Strata(cache=True)      # ephemeral, in-memory
+db = stratadb.open("./app-data")      # durable (creates if absent)
+# db = stratadb.open(cache=True)      # ephemeral, in-memory
 
 # Key-value — values are bytes; str is encoded as UTF-8
 db.kv.put("greeting", "hello")
@@ -54,17 +54,18 @@ hits = db.vectors.query("notes", [0.1, 0.2, 0.3], k=5,
 db.events.append("signup", {"user": "ada"})
 db.graphs.create("social")
 db.graphs.add_node("social", "ada")
+db.graphs.add_node("social", "grace")   # both endpoints must exist first
 db.graphs.add_edge("social", "ada", "follows", "grace")
 
 db.close()   # or use it as a context manager (below)
 ```
 
-`Strata()` **never opens the current directory implicitly** — pass a path, set
-`STRATA_DB` (`stratadb.Strata.from_env()`), or use `cache=True`, or it raises
+`stratadb.open()` **never opens the current directory implicitly** — pass a path, set
+`STRATA_DB` (`stratadb.from_env()`), or use `cache=True`, or it raises
 `InvalidArgumentError`. It is also a context manager:
 
 ```python
-with stratadb.Strata("./app-data") as db:
+with stratadb.open("./app-data") as db:
     db.kv.put("k", "v")
 ```
 

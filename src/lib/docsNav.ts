@@ -60,12 +60,16 @@ const PREFERRED: Record<string, string[]> = {
 };
 
 // Generated command-reference families (staged under reference/<family>/ by
-// scripts/fetch-docs.mjs). Order = the IDL family order; titles are readable.
-const REFERENCE_FAMILIES = ['kv', 'json', 'vector', 'event', 'graph', 'branch', 'space', 'admin', 'arrow', 'inference'];
+// scripts/fetch-docs.mjs). The list is DISCOVERED from the staged content so a
+// new family can never silently vanish from the sidebar; this order ranks the
+// known ones, and anything undiscovered-but-staged appends alphabetically.
+const FAMILY_ORDER = ['kv', 'json', 'vector', 'event', 'graph', 'branch', 'space', 'admin', 'arrow', 'inference'];
 const FAMILY_TITLES: Record<string, string> = {
   kv: 'Key-Value', json: 'JSON', vector: 'Vectors', event: 'Events', graph: 'Graph',
   branch: 'Branches', space: 'Spaces', admin: 'Admin', arrow: 'Arrow', inference: 'Inference',
 };
+const familyTitle = (family: string) =>
+  FAMILY_TITLES[family] ?? family.charAt(0).toUpperCase() + family.slice(1);
 
 const hrefFor = (slug: string, dir: string) =>
   slug.endsWith('/index') || slug === 'index' ? `/docs/${dir}` : `/docs/${slug}`;
@@ -73,22 +77,34 @@ const hrefFor = (slug: string, dir: string) =>
 type Doc = Awaited<ReturnType<typeof getCollection<'docs'>>>[number];
 
 // Reference nests: hand-written cross-cutting pages (CLI, errors, …) as flat
-// items; each generated command family as a sub-group.
+// items; each generated command family as a sub-group. Families are whatever
+// the staged content actually contains (slug depth ≥ 2 under reference/).
 function referenceSection(entries: Doc[]): NavSection {
-  const family = new Set(REFERENCE_FAMILIES);
+  const discovered = new Set<string>();
+  for (const entry of entries) {
+    const parts = entry.slug.split('/');
+    // reference/<family>/<op...> — a family index alone (depth 2) does not
+    // make a family; only real command pages (depth ≥ 3) do.
+    if (parts.length >= 3) discovered.add(parts[1]);
+  }
+  const families = [
+    ...FAMILY_ORDER.filter((fam) => discovered.has(fam)),
+    ...[...discovered].filter((fam) => !FAMILY_ORDER.includes(fam)).sort(),
+  ];
+  const familySet = new Set(families);
+
   const topLevel = entries.filter((e) => {
     const parts = e.slug.split('/');
-    return parts.length === 1 || (parts.length === 2 && !family.has(parts[1]));
+    return parts.length === 1 || (parts.length === 2 && !familySet.has(parts[1]));
   });
   const groups: NavGroup[] = [];
-  for (const fam of REFERENCE_FAMILIES) {
+  for (const fam of families) {
     const commands = entries
       .filter((e) => e.slug.startsWith(`reference/${fam}/`))
       .sort((a, b) => a.data.title.localeCompare(b.data.title));
     const index = entries.find((e) => e.slug === `reference/${fam}`);
-    if (!commands.length && !index) continue;
     groups.push({
-      title: FAMILY_TITLES[fam] ?? fam,
+      title: familyTitle(fam),
       href: index ? `/docs/reference/${fam}` : undefined,
       items: commands.map((e) => ({ title: e.data.title, href: `/docs/${e.slug}` })),
     });

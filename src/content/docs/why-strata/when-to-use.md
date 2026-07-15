@@ -1,11 +1,11 @@
 ---
-title: "When to use Strata"
+title: "When to use StrataDB"
 section: "why-strata"
-description: "The workloads Strata is built for, and the honest boundaries — what it deliberately is not."
+description: "The workloads StrataDB is built for, and the honest boundaries — what it deliberately is not."
 source: "strata-core@v1.0.0"
 ---
 
-Strata is opinionated about what it is good at. This page is the honest version:
+StrataDB is opinionated about what it is good at. This page is the honest version:
 where it fits, and where it does not.
 
 ## Good fits
@@ -34,17 +34,17 @@ where it fits, and where it does not.
 
 - **Primary relational application data.** If your data is fundamentally
   relational and you need SQL, joins, and a mature query planner, use Postgres or
-  SQLite. Strata complements a relational store; it does not replace one.
-- **A shared network cache.** Strata is embedded and in-process — there is **no
+  SQLite. StrataDB complements a relational store; it does not replace one.
+- **A shared network cache.** StrataDB is embedded and in-process — there is **no
   server or network mode** in this line. For a cache shared across many
   processes or machines, use Redis.
-- **Cross-machine sync or fleet coordination.** A Strata database is a local
+- **Cross-machine sync or fleet coordination.** A StrataDB database is a local
   directory. Sharing prepared datasets is done by
   [cloning from a hub](/docs/concepts/hub-and-clone); live multi-writer sync
   across machines is out of scope for this line.
 - **Merging divergent branches.** Branching is fork-and-replay, not
   fork-and-merge — there is no merge command. If your workflow depends on merging
-  two independently-edited branches back together, Strata does not do that today.
+  two independently-edited branches back together, StrataDB does not do that today.
 
 ## The honest boundaries
 
@@ -53,13 +53,14 @@ A few capabilities are deliberately out of this line, so you are not surprised:
 - **No local model execution in the released binary.** Inference runs through
   cloud providers by default; local GGUF execution is a build-time feature. See
   [Inference](/docs/inference).
-- **No Python/Node SDK yet.** The supported surfaces today are the `strata` CLI
-  and its [MCP server](/docs/agents/mcp-server); language SDKs are post-V1.
+- **No Node SDK yet.** The supported surfaces today are the `strata` CLI, its
+  [MCP server](/docs/agents/mcp-server), and the
+  [Python SDK](/docs/python) (`stratadb` on PyPI); a Node SDK is post-V1.
 - **No standalone search surface.** Vector similarity search is here; the broader
   search product and its optimizer are deferred.
 
 When a fit is marginal, the deciding question is usually: *do you need
-branch-isolated, versioned, multi-model state?* If yes, Strata earns its place
+branch-isolated, versioned, multi-model state?* If yes, StrataDB earns its place
 alongside your primary store. If no, a single-purpose tool is probably simpler.
 
 See [Comparisons](/docs/why-strata/comparisons) for the head-to-head.

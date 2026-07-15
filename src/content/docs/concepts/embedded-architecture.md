@@ -1,11 +1,11 @@
 ---
 title: "Embedded architecture"
 section: "concepts"
-description: "Strata runs in-process against a local directory — no server, no port. What that means for how you deploy and reason about it."
+description: "StrataDB runs in-process against a local directory — no server, no port. What that means for how you deploy and reason about it."
 source: "strata-core@v1.0.0"
 ---
 
-Strata is **embedded**: it runs inside your process, against a local directory,
+StrataDB is **embedded**: it runs inside your process, against a local directory,
 in the same spirit as SQLite or DuckDB. There is no daemon to start, no port to
 open, no connection pool to manage. You point the CLI (or an MCP client, or —
 later — an SDK) at a directory and it opens the database in-process. This page
@@ -14,7 +14,7 @@ explains what that model means; the durability mechanics are in
 
 ## In-process, not a server
 
-A traditional database is a server you connect to over a socket. Strata is a
+A traditional database is a server you connect to over a socket. StrataDB is a
 **library plus a binary that embeds it**. The database lives and dies with the
 process that opens it, and it talks to your code directly rather than over a
 network. The consequences are the point:
@@ -32,12 +32,12 @@ network. The consequences are the point:
   service.
 
 The closest analogy is SQLite: an application-embedded database that is a file on
-disk, not a service on a host. Strata keeps that shape and layers branches, time
+disk, not a service on a host. StrataDB keeps that shape and layers branches, time
 travel, and five data primitives on top.
 
 ## Two modes: durable and cache
 
-An embedded database still has to decide whether data outlives the process. Strata
+An embedded database still has to decide whether data outlives the process. StrataDB
 has two modes, chosen at open time:
 
 - **Durable** — the default for any named path. Writes go through a write-ahead
@@ -70,5 +70,5 @@ copying it — or, for curated datasets, [cloning from a hub](/docs/concepts/hub
 - [Durability](/docs/concepts/durability) — the write-ahead log, recovery, and
   choosing durable vs cache.
 - [Branches](/docs/concepts/branches) — the isolation model layered on top.
-- [When to use Strata](/docs/why-strata/when-to-use) — where the embedded model
+- [When to use StrataDB](/docs/why-strata/when-to-use) — where the embedded model
   fits and where it does not.

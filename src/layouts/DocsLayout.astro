@@ -1,31 +1,104 @@
 ---
 // Docs reading experience, re-skinned with tokens (Phase 5). Prose is owned by
 // strata-core (synced); this layout owns presentation only.
+// Wave A additions: mobile nav, Pagefind search, right-rail ToC, prev/next,
+// copy buttons on code blocks.
 import BaseLayout from './BaseLayout.astro';
 import DocsSidebar from '../components/chrome/DocsSidebar.astro';
+import DocsMobileNav from '../components/chrome/DocsMobileNav.astro';
+import DocsSearch from '../components/chrome/DocsSearch.astro';
 import { docsNav } from '../lib/docsNav';
+import type { NavItem } from '../lib/docsNav';
 
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
 interface Props {
   title: string;
   description?: string;
   mdHref?: string;
+  headings?: Heading[];
 }
-const { title, description, mdHref } = Astro.props;
+const { title, description, mdHref, headings = [] } = Astro.props;
 const sections = await docsNav();
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
+
+// On-this-page rail: h2/h3 only, and only when there is something to navigate.
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = toc.length >= 2;
+
+// Prev/next: the sidebar order, flattened (sections, then each section's
+// nested groups). The generated reference families ride along naturally.
+const flat: NavItem[] = sections.flatMap((s) => [
+  ...s.items,
+  ...(s.groups ?? []).flatMap((g) => [
+    ...(g.href ? [{ title: g.title, href: g.href }] : []),
+    ...g.items,
+  ]),
+]);
+const here = flat.findIndex((i) => i.href === currentPath || `${i.href}/` === currentPath);
+const prev = here > 0 ? flat[here - 1] : undefined;
+const next = here !== -1 && here < flat.length - 1 ? flat[here + 1] : undefined;
 ---
 
 <BaseLayout title={`${title} — StrataDB Docs`} description={description}>
-  <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4">
+  <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4 xl:max-w-[86rem]">
     <div class="flex gap-12">
       <DocsSidebar sections={sections} currentPath={currentPath} />
-      <article class="min-w-0 flex-1">
-        <div class="prose-docs">
-          <slot />
+      <div class="min-w-0 flex-1">
+        <div class="flex items-start gap-3 lg:hidden">
+          <div class="min-w-0 flex-1">
+            <DocsMobileNav sections={sections} currentPath={currentPath} />
+          </div>
+          <button
+            type="button"
+            class="docs-search-trigger rounded-(--radius-control) border border-line p-3 text-ink-low transition-colors duration-200 hover:border-line-hover hover:text-ink-mid"
+            aria-label="Search docs"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
+            </svg>
+          </button>
         </div>
+        <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+          <div class="prose-docs">
+            <slot />
+          </div>
+        </article>
+        {
+          (prev || next) && (
+            <nav class="mt-16 flex gap-4 border-t border-line pt-6" aria-label="Sequential">
+              {prev && (
+                <a
+                  href={prev.href}
+                  class="group flex-1 rounded-(--radius-control) border border-line px-4 py-3 transition-colors duration-200 hover:border-line-hover"
+                >
+                  <span class="block text-eyebrow uppercase text-ink-low">← Previous</span>
+                  <span class="mt-1 block text-small text-ink-mid transition-colors duration-200 group-hover:text-ink-hi">
+                    {prev.title}
+                  </span>
+                </a>
+              )}
+              {next && (
+                <a
+                  href={next.href}
+                  class="group flex-1 rounded-(--radius-control) border border-line px-4 py-3 text-right transition-colors duration-200 hover:border-line-hover"
+                >
+                  <span class="block text-eyebrow uppercase text-ink-low">Next →</span>
+                  <span class="mt-1 block text-small text-ink-mid transition-colors duration-200 group-hover:text-ink-hi">
+                    {next.title}
+                  </span>
+                </a>
+              )}
+            </nav>
+          )
+        }
         {
           mdHref && (
-            <p class="mt-16 border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
+            <p class="mt-8 border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
               agents: this page as markdown →{' '}
               <a href={mdHref} class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">
                 {mdHref}
@@ -33,7 +106,100 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '');
             </p>
           )
         }
-      </article>
+      </div>
+      {
+        showToc && (
+          <nav class="hidden w-52 shrink-0 xl:block" aria-label="On this page">
+            <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+              <h3 class="mb-2.5 text-eyebrow font-medium uppercase text-ink-low">On this page</h3>
+              <ul id="docs-toc" class="space-y-px border-l border-line">
+                {toc.map((h) => (
+                  <li>
+                    <a
+                      href={`#${h.slug}`}
+                      data-toc-slug={h.slug}
+                      class:list={[
+                        '-ml-px block border-l-2 border-transparent py-1 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi',
+                        h.depth === 3 ? 'pl-7' : 'pl-4',
+                      ]}
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+        )
+      }
     </div>
   </div>
+  <DocsSearch />
 </BaseLayout>
+
+<script>
+  // Copy buttons on rendered code blocks. Shiki blocks scroll horizontally, so
+  // each <pre> gets a relative wrapper and the button sits on the wrapper.
+  document.querySelectorAll<HTMLPreElement>('.prose-docs pre').forEach((pre) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'group/code relative';
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className =
+      'absolute right-2.5 top-2.5 rounded-(--radius-control) border border-line bg-raised p-1.5 text-ink-low opacity-0 transition-opacity duration-200 hover:text-ink-hi focus-visible:opacity-100 group-hover/code:opacity-100';
+    btn.setAttribute('aria-label', 'Copy code');
+    const copyIcon =
+      '<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>';
+    const doneIcon =
+      '<svg class="h-3.5 w-3.5 text-ok" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20 6L9 17l-5-5"></path></svg>';
+    btn.innerHTML = copyIcon;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText.replace(/\n$/, ''));
+        btn.innerHTML = doneIcon;
+        setTimeout(() => {
+          btn.innerHTML = copyIcon;
+        }, 1500);
+      } catch {
+        /* clipboard unavailable (permissions/insecure context) — leave as-is */
+      }
+    });
+    wrapper.appendChild(btn);
+  });
+
+  // ToC scroll-spy: highlight the heading currently at the top of the viewport.
+  const tocLinks = document.querySelectorAll<HTMLAnchorElement>('#docs-toc a[data-toc-slug]');
+  if (tocLinks.length) {
+    const bySlug = new Map<string, HTMLAnchorElement>();
+    tocLinks.forEach((a) => bySlug.set(a.dataset.tocSlug ?? '', a));
+    const headings = [...bySlug.keys()]
+      .map((slug) => document.getElementById(slug))
+      .filter((el): el is HTMLElement => !!el);
+
+    const activate = (slug: string) => {
+      tocLinks.forEach((a) => {
+        const on = a.dataset.tocSlug === slug;
+        a.classList.toggle('border-terracotta-500', on);
+        a.classList.toggle('border-transparent', !on);
+        a.classList.toggle('text-ink-hi', on);
+        a.classList.toggle('text-ink-mid', !on);
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            activate(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
+    );
+    headings.forEach((h) => observer.observe(h));
+  }
+</script>

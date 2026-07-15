@@ -9,7 +9,7 @@ Task-oriented recipes for building agent systems on Strata. Each one is a short
 sequence of real commands with the exact output you should see. Follow the steps
 in order and you land on the same results.
 
-Every recipe writes to a durable database directory (for example `./ab.db`) that
+Every recipe writes to a durable database directory (for example `./ab`) that
 each command reopens. The `--cache` flag is single-process only — separate
 invocations do not share an in-memory database — so multi-step recipes keep the
 database on disk.

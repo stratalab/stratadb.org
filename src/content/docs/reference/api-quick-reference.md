@@ -40,7 +40,7 @@ strata ./my-db json list --prefix user:
 
 ```bash
 strata ./my-db event append signup '{"user":"ada"}'   # created applied=true
-strata ./my-db event len                              # 1
+strata ./my-db event count                              # 1
 strata ./my-db event get 0                            # sequences start at 0
 strata ./my-db event by-type signup
 ```

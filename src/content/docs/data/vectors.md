@@ -32,6 +32,9 @@ strata ./mydb vector collection list
 {"count":0,"dimension":4,"metric":"cosine","name":"docs"}
 ```
 
+Both commands print the same collection record — the first line is `create`
+echoing the new collection, the second is `list` showing it.
+
 `vector collection stats <name>` reports the same facts for one collection, and
 `vector collection delete <name>` removes it.
 
@@ -161,6 +164,23 @@ Strata does not generate embeddings inside the vector primitive — you supply t
 floats. For end-to-end retrieval that embeds text for you, see
 [RAG with vectors](/docs/cookbook/rag-with-vectors). The full verb list is in the
 [CLI reference](/docs/reference/cli).
+
+## From Python
+
+The same surface, from the [Python SDK](/docs/python):
+
+```python
+import stratadb
+
+db = stratadb.open("./mydb")
+db.vectors.create_collection("docs", dimension=4)
+db.vectors.upsert("docs", "a", [1.0, 0.0, 0.0, 0.0], metadata={"tag": "x"})
+db.vectors.query("docs", [1.0, 0.0, 0.0, 0.0], k=1)
+# [VectorMatch(key='a', score=1.0, metadata={'tag': 'x'})]
+db.close()
+```
+
+See [namespaces](/docs/python/namespaces) for metadata filters and patches.
 
 ## Reference
 
