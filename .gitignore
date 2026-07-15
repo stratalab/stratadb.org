@@ -26,3 +26,17 @@ Thumbs.db
 
 # misc
 *.local
+
+# IDL-generated reference — staged at build time by scripts/fetch-docs.mjs
+# (source of truth is the strata-core release, docs sourcing policy §1).
+/src/content/docs/reference/kv/
+/src/content/docs/reference/json/
+/src/content/docs/reference/vector/
+/src/content/docs/reference/event/
+/src/content/docs/reference/graph/
+/src/content/docs/reference/branch/
+/src/content/docs/reference/space/
+/src/content/docs/reference/admin/
+/src/content/docs/reference/arrow/
+/src/content/docs/reference/inference/
+/src/data/command-index.json
