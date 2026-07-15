@@ -46,6 +46,12 @@ const PREFERRED: Record<string, string[]> = {
   data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
   // Inference: the model overview, then the cloud and local enabling pages.
   inference: ['inference', 'inference/providers-and-keys', 'inference/local-models'],
+  // Guides: cross-cutting how-to, grouped history → operating → moving data → shipping.
+  guides: [
+    'guides', 'guides/branching-workflows', 'guides/time-travel', 'guides/spaces',
+    'guides/configuration', 'guides/error-handling', 'guides/observability',
+    'guides/import-export', 'guides/cloning-datasets', 'guides/migrating', 'guides/deploying',
+  ],
   // For AI Agents: the front door, then guide/index/mcp/machine-docs.
   agents: ['agents', 'agents/agents-guide', 'agents/command-index', 'agents/mcp-server', 'agents/machine-docs'],
 };

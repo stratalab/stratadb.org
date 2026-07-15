@@ -62,14 +62,14 @@ branches, the same versioning, and the same durability guarantees.
   [KV](/docs/data/key-value), [JSON](/docs/data/json),
   [event log](/docs/data/events), [vectors](/docs/data/vectors),
   [graph](/docs/data/graph), plus cross-cutting guides on
-  [branch management](/docs/guides/branch-management),
+  [branch management](/docs/guides/branching-workflows),
   [spaces](/docs/guides/spaces),
-  [configuration](/docs/guides/database-configuration),
+  [configuration](/docs/guides/configuration),
   [observability](/docs/guides/observability),
   [error handling](/docs/guides/error-handling),
   [agents and MCP](/docs/agents),
   [cloning datasets](/docs/guides/cloning-datasets),
-  [Arrow](/docs/guides/arrow), and [inference](/docs/inference).
+  [Arrow](/docs/guides/import-export), and [inference](/docs/inference).
 - **[Cookbook](/docs/cookbook/agent-state-management)** — end-to-end patterns:
   [agent state](/docs/cookbook/agent-state-management),
   [multi-agent coordination](/docs/cookbook/multi-agent-coordination),

@@ -84,21 +84,23 @@ from the FAQ instead. Hero copy is a marketing-page fix, out of this wave's scop
 | `inference/tools-structured-outputs` | new | deferred — needs a live-model transcript; the G-series surface (tools/tool_choice/json_schema/logprobs) exists in the CLI |
 | ~~`inference/autoembedding`~~ | **deferred** | the feature is **not implemented in V1** (0 refs to autoembed/shadow-vector in engine/intelligence); CLAUDE.md invariants 24–26 reserve the architecture only. Ship the page with the feature. §4 Combining reframed to the explicit embed-then-upsert flow. |
 
-### 6 · Guides `[N]` — cross-cutting only
+### 6 · Guides `[N]` — cross-cutting only — **done** (wave 6)
 | Page | Action | Source / notes |
 |---|---|---|
-| `guides/index` | keep | reframe: cross-cutting how-to only |
-| `guides/branching-workflows` | keep | from `guides/branch-management` |
-| `guides/time-travel` | new | historical-read patterns |
+| `guides/index` | **done** | reframed to cross-cutting only; grouped history / operating / moving data / shipping; per-primitive pointer → §4 |
+| `guides/branching-workflows` | **done** | renamed from `guides/branch-management` |
+| `guides/time-travel` | **done** | historical-read patterns (how-to counterpart to `concepts/time-travel`) |
 | `guides/cloning-datasets` | keep | |
-| `guides/configuration` | keep | from `guides/database-configuration` |
+| `guides/configuration` | **done** | renamed from `guides/database-configuration` |
 | `guides/error-handling` | keep | |
 | `guides/observability` | keep | |
-| `guides/import-export` | keep | from `guides/arrow` |
-| `guides/spaces` | keep | the how-to (concept → §3) |
-| `guides/deploying` | new | in-app · edge · wasm/browser |
-| `guides/migrating` | new | from SQLite / DuckDB / Redis |
-| ~~`guides/kv-store` … `graph`, `inference`, `agents-and-mcp`~~ | move | → §4 / §5 / §7 |
+| `guides/import-export` | **done** | renamed from `guides/arrow` |
+| `guides/spaces` | keep | the how-to (concept now in §3) |
+| `guides/deploying` | **done** | embedded model, bundle/clone, wasm/browser (playground is real); edge as an honest direction, not a turnkey recipe |
+| `guides/migrating` | **done** | SQLite / DuckDB / Redis via `arrow import` (real path — targets kv/json/vector); no auto schema translation, stated plainly |
+
+All three renames repointed site-wide. `guides/kv-store … graph`, `inference`,
+`agents-and-mcp` already moved in waves 2/3/4.
 
 ### 7 · For AI Agents `[N]` — **done** (wave 4)
 | Page | Action | Source / notes |

@@ -228,7 +228,7 @@ strata ./org.strata graph nodes-by-type org Person
 
 - [Primitives](/docs/concepts/primitives) — how graphs sit alongside the other capabilities
 - [Branches](/docs/concepts/branches) and [Commits](/docs/concepts/commits) — the isolation and time-travel model
-- [Arrow](/docs/guides/arrow) — export a graph's nodes and edges to Parquet, CSV, or JSON lines
+- [Arrow](/docs/guides/import-export) — export a graph's nodes and edges to Parquet, CSV, or JSON lines
 - [Error Handling](/docs/guides/error-handling) — reading structured error codes
 
 ## Reference

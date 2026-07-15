@@ -129,5 +129,5 @@ On a cloned database, `remote` reports the origin instead — the hub and datase
 
 - [Configuration Reference](/docs/reference/configuration-reference) — every config key and resolution layer
 - [Branches](/docs/concepts/branches) — cloning a specific branch, and branching a clone locally
-- [Arrow](/docs/guides/arrow) — moving individual primitives as files instead of whole datasets
+- [Arrow](/docs/guides/import-export) — moving individual primitives as files instead of whole datasets
 - [Error Handling](/docs/guides/error-handling) — reading structured error codes

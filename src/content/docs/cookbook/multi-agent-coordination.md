@@ -116,5 +116,5 @@ reads — and when you want an agent's result to graduate to the shared branch, 
 replay its writes there, as shown in
 [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches).
 [Spaces](/docs/guides/spaces) add an orthogonal partition for keeping independent
-runs apart, and the [branch management guide](/docs/guides/branch-management)
+runs apart, and the [branch management guide](/docs/guides/branching-workflows)
 covers forking and deleting agent branches.

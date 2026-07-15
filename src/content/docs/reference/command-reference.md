@@ -48,7 +48,7 @@ The five data capabilities are KV, JSON, event log, vector, and graph. Branches 
 | `strata config path` | Print the global strata config file path. |
 | `strata config show` | Print the resolved hub configuration and which layer supplied it. |
 
-See the [Configuration Reference](/docs/reference/configuration-reference) and [Database Configuration](/docs/guides/database-configuration).
+See the [Configuration Reference](/docs/reference/configuration-reference) and [Database Configuration](/docs/guides/configuration).
 
 ## Cloning
 
@@ -86,7 +86,7 @@ See [Agents and MCP](/docs/agents) and the [MCP Server Reference](/docs/agents/m
 | `strata branch fork <SOURCE> <BRANCH>` | Fork a branch. `--version <V>` or `--timestamp <T>` forks from a retained source point. |
 | `strata branch delete <BRANCH>` | Delete a branch. |
 
-See [Branches](/docs/concepts/branches) and [Branch Management](/docs/guides/branch-management).
+See [Branches](/docs/concepts/branches) and [Branch Management](/docs/guides/branching-workflows).
 
 ## Space
 
@@ -237,7 +237,7 @@ See [Graph](/docs/data/graph).
 | `strata arrow import <FILE_PATH> --target <kv\|json\|vector>` | Import an Arrow-compatible file. `--format <parquet\|csv\|jsonl>`, `--key-column`, `--value-column`, `--collection`. |
 | `strata arrow export <PATH> --primitive <kv\|json\|event\|vector\|graph> --format <parquet\|csv\|jsonl>` | Export a primitive to a file. `--prefix`, `--limit`, `--collection`, `--graph`, `--event-type`. Graph exports use `<PATH>` as a stem for node and edge files. |
 
-See [Arrow](/docs/guides/arrow).
+See [Arrow](/docs/guides/import-export).
 
 ## Inference
 

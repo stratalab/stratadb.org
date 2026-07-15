@@ -129,12 +129,12 @@ invalid_argument.engine.space_delete_default: default product space cannot be de
 
 Reach for a space when you want to keep related data organized inside one line
 of history — tenants, sessions, or datasets that live and version together.
-Reach for a [branch](/docs/guides/branch-management) when you want an isolated
+Reach for a [branch](/docs/guides/branching-workflows) when you want an isolated
 copy of history you can fork, time-travel, and discard. The two compose: a
 branch contains spaces, and forking a branch carries its spaces along.
 
 ## Next
 
-- [Branch Management](/docs/guides/branch-management) — isolate history with forks.
+- [Branch Management](/docs/guides/branching-workflows) — isolate history with forks.
 - [KV Store](/docs/data/key-value) — the primitive used in these examples.
 - [Concepts: Primitives](/docs/concepts/primitives) — how the five data types relate.

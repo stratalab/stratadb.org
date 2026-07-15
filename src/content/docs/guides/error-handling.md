@@ -105,4 +105,4 @@ retrying.
 
 - [Error Reference](/docs/reference/error-reference) — the full code registry.
 - [Observability](/docs/guides/observability) — check health before and after failures.
-- [Branch Management](/docs/guides/branch-management) — the refusals shown here in context.
+- [Branch Management](/docs/guides/branching-workflows) — the refusals shown here in context.

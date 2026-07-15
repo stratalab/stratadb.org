@@ -1,5 +1,5 @@
 ---
-title: "Database Configuration"
+title: "Configuration"
 section: "guides"
 description: "Read a database's config, manage the global hub setting, and understand hub URL resolution."
 source: "strata-core@v1.0.0"

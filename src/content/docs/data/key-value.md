@@ -126,7 +126,7 @@ strata ./mydb kv get doc                        # final
 
 Merging a branch back is strict: it refuses when both sides changed
 concurrently. See [Branches](/docs/concepts/branches) and
-[Branch Management](/docs/guides/branch-management).
+[Branch Management](/docs/guides/branching-workflows).
 
 ## Deleting
 

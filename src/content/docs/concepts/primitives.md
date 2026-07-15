@@ -58,7 +58,7 @@ Within a single branch, you can partition primitives into **spaces** — every o
 
 ## Beyond the five
 
-Two more capabilities sit alongside the primitives but are not data types of their own: [Arrow](/docs/guides/arrow) import/export moves rows in and out in columnar batches, and [inference](/docs/inference) runs local and cloud models. Both operate on the primitives above rather than storing a distinct shape.
+Two more capabilities sit alongside the primitives but are not data types of their own: [Arrow](/docs/guides/import-export) import/export moves rows in and out in columnar batches, and [inference](/docs/inference) runs local and cloud models. Both operate on the primitives above rather than storing a distinct shape.
 
 ## Next
 

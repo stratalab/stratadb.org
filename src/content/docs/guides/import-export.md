@@ -1,5 +1,5 @@
 ---
-title: "Arrow Import and Export"
+title: "Import & export"
 section: "guides"
 description: "Move data in and out of a database as Parquet, CSV, or JSON lines using the arrow import and export commands."
 source: "strata-core@v1.0.0"

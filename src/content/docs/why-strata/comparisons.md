@@ -15,7 +15,7 @@ Here is where it overlaps and where it differs.
 | System | Shape | Overlap with Strata | Where they differ |
 |--------|-------|---------------------|-------------------|
 | **SQLite** | Embedded relational | In-process, single-directory, zero-config | SQLite is relational with SQL and joins; Strata is multi-model with branches and time travel, and is not a SQL database |
-| **DuckDB** | Embedded analytical (OLAP) | In-process, embedded, columnar via [Arrow](/docs/guides/arrow) import/export | DuckDB is built for analytical SQL over columnar data; Strata is built for branched, versioned operational state across five primitives |
+| **DuckDB** | Embedded analytical (OLAP) | In-process, embedded, columnar via [Arrow](/docs/guides/import-export) import/export | DuckDB is built for analytical SQL over columnar data; Strata is built for branched, versioned operational state across five primitives |
 | **Redis** | In-memory data structures, networked | KV and structured values, a fast in-memory ([cache](/docs/concepts/durability)) mode | Redis is a networked server shared across processes; Strata is embedded with no server, and adds durable branches and history |
 | **Postgres** | Client-server relational | Durable, structured data; JSON support | Postgres is a full relational server; Strata is embedded, non-relational, and branch/versioned. Use Postgres for primary relational data |
 | **Vector databases** (Pinecone, Chroma, LanceDB, …) | Similarity search | Vector collections with metadata filters and similarity [query](/docs/data/vectors) | Dedicated vector DBs specialize in scale and index tuning; Strata puts vectors alongside KV, JSON, events, and graph on one branched substrate |
@@ -34,7 +34,7 @@ planner, a networked cache, a purpose-built vector index at massive scale).
 - Need **SQL, joins, relational integrity**? Use SQLite (embedded) or Postgres
   (server). Strata complements them for the multi-model, branched slice.
 - Need **analytical queries over big columnar data**? Use DuckDB. Move data
-  between the two with [Arrow](/docs/guides/arrow).
+  between the two with [Arrow](/docs/guides/import-export).
 - Need a **shared cache across processes/machines**? Use Redis. Strata's
   [cache mode](/docs/concepts/durability) is in-process, not networked.
 - Need **billion-scale, heavily-tuned vector search as the whole product**? A

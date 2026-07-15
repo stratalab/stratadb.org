@@ -1,5 +1,5 @@
 ---
-title: "Branch Management"
+title: "Branching workflows"
 section: "guides"
 description: "List, read, create, fork, and delete branches, and understand the fork-and-refuse merge model."
 source: "strata-core@v1.0.0"
