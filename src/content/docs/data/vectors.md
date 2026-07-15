@@ -165,6 +165,23 @@ floats. For end-to-end retrieval that embeds text for you, see
 [RAG with vectors](/docs/cookbook/rag-with-vectors). The full verb list is in the
 [CLI reference](/docs/reference/cli).
 
+## From Python
+
+The same surface, from the [Python SDK](/docs/python):
+
+```python
+import stratadb
+
+db = stratadb.Strata("./mydb")
+db.vectors.create_collection("docs", dimension=4)
+db.vectors.upsert("docs", "a", [1.0, 0.0, 0.0, 0.0], metadata={"tag": "x"})
+db.vectors.query("docs", [1.0, 0.0, 0.0, 0.0], k=1)
+# [VectorMatch(key='a', score=1.0, metadata={'tag': 'x'})]
+db.close()
+```
+
+See [namespaces](/docs/python/namespaces) for metadata filters and patches.
+
 ## Reference
 
 Every vector command — parameters, returns, errors, and runnable CLI/wire/Python

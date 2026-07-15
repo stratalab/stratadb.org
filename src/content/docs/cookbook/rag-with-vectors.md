@@ -10,7 +10,7 @@ alongside their source text, then find the nearest documents to a query and pull
 back the text to feed a model.
 
 Prerequisites: the `strata` binary on your PATH, and `jq` to read match metadata.
-Commands write to a durable directory (`./rag.db`) that each invocation reopens.
+Commands write to a durable directory (`./rag`) that each invocation reopens.
 The vectors below are tiny and explicit so the recipe is self-contained; see the
 note at the end on generating real embeddings.
 
@@ -19,7 +19,7 @@ note at the end on generating real embeddings.
 Fix the embedding dimension and distance metric up front.
 
 ```bash
-strata ./rag.db vector collection create notes 4 --metric cosine
+strata ./rag vector collection create notes 4 --metric cosine
 ```
 
 ```text
@@ -32,12 +32,12 @@ Upsert one vector per document, tagging each with a `text_key` in metadata that
 points at the KV row holding its full text. Store that text in KV.
 
 ```bash
-strata ./rag.db vector upsert notes note-1 '[1,0,0,0]' --metadata '{"text_key":"src:note-1"}'
-strata ./rag.db vector upsert notes note-2 '[0,1,0,0]' --metadata '{"text_key":"src:note-2"}'
-strata ./rag.db vector upsert notes note-3 '[0,0,1,0]' --metadata '{"text_key":"src:note-3"}'
-strata ./rag.db kv put src:note-1 "Branches fork cheaply and isolate writes."
-strata ./rag.db kv put src:note-2 "The event log is an append-only journal."
-strata ./rag.db kv put src:note-3 "Vectors support cosine, euclidean, and dot-product."
+strata ./rag vector upsert notes note-1 '[1,0,0,0]' --metadata '{"text_key":"src:note-1"}'
+strata ./rag vector upsert notes note-2 '[0,1,0,0]' --metadata '{"text_key":"src:note-2"}'
+strata ./rag vector upsert notes note-3 '[0,0,1,0]' --metadata '{"text_key":"src:note-3"}'
+strata ./rag kv put src:note-1 "Branches fork cheaply and isolate writes."
+strata ./rag kv put src:note-2 "The event log is an append-only journal."
+strata ./rag kv put src:note-3 "Vectors support cosine, euclidean, and dot-product."
 ```
 
 ```text
@@ -54,7 +54,7 @@ created src:note-3 applied=true
 Search returns the nearest keys with similarity scores, best first.
 
 ```bash
-strata ./rag.db vector query notes '[0.9,0.2,0.1,0]' -k 2
+strata ./rag vector query notes '[0.9,0.2,0.1,0]' -k 2
 ```
 
 ```text
@@ -68,9 +68,9 @@ Read each match's `text_key` from its metadata, then pull the row from KV. This 
 the context you hand to your generation step.
 
 ```bash
-strata ./rag.db --json vector query notes '[0.9,0.2,0.1,0]' -k 2 \
+strata ./rag --json vector query notes '[0.9,0.2,0.1,0]' -k 2 \
   | jq -r '.data[].metadata.text_key' \
-  | while read -r tk; do printf '%s\t%s\n' "$tk" "$(strata ./rag.db --raw kv get "$tk")"; done
+  | while read -r tk; do printf '%s\t%s\n' "$tk" "$(strata ./rag --raw kv get "$tk")"; done
 ```
 
 ```text

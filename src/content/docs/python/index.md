@@ -54,6 +54,7 @@ hits = db.vectors.query("notes", [0.1, 0.2, 0.3], k=5,
 db.events.append("signup", {"user": "ada"})
 db.graphs.create("social")
 db.graphs.add_node("social", "ada")
+db.graphs.add_node("social", "grace")   # both endpoints must exist first
 db.graphs.add_edge("social", "ada", "follows", "grace")
 
 db.close()   # or use it as a context manager (below)

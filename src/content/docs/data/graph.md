@@ -7,16 +7,16 @@ source: "strata-core@v1.0.0"
 
 The graph capability stores directed, typed, optionally weighted edges between property-bearing nodes. It sits on the same branch-aware storage as every other capability, so graphs fork, time-travel, and isolate per branch and [space](/docs/guides/spaces) like the rest. This guide walks the full command surface — structure, traversal, bulk loading, analytics, and the ontology — against one worked example.
 
-The examples target a durable database at `./social.strata`. Graph commands emit JSON by default; add `--raw` for one-object-per-line output that is easier to pipe.
+The examples target a durable database at `./social`. Graph commands emit JSON by default; add `--raw` for one-object-per-line output that is easier to pipe.
 
 ## Graphs
 
 A database holds many named graphs. Create one, list them, read its metadata, and delete it:
 
 ```bash
-strata ./social.strata graph create social
-strata ./social.strata graph list
-strata ./social.strata graph meta social
+strata ./social graph create social
+strata ./social graph list
+strata ./social graph meta social
 ```
 
 ```text
@@ -38,8 +38,8 @@ strata ./social.strata graph meta social
 A node has an id and optional JSON properties. `add-node` inserts or replaces:
 
 ```bash
-strata ./social.strata graph add-node social alice --properties '{"name":"Alice","role":"eng"}'
-strata ./social.strata graph get-node social alice
+strata ./social graph add-node social alice --properties '{"name":"Alice","role":"eng"}'
+strata ./social graph get-node social alice
 ```
 
 ```text
@@ -62,8 +62,8 @@ Pass `--properties-file <path>` to read the JSON from a file instead of the comm
 An edge connects two existing nodes under an edge type, with an optional weight and properties:
 
 ```bash
-strata ./social.strata graph add-edge social alice follows bob --weight 1.0 --properties '{"since":2021}'
-strata ./social.strata graph get-edge social alice follows bob
+strata ./social graph add-edge social alice follows bob --weight 1.0 --properties '{"since":2021}'
+strata ./social graph get-edge social alice follows bob
 ```
 
 ```text
@@ -88,7 +88,7 @@ Both endpoints must already exist; writing an edge to a missing node fails with 
 `graph neighbors` walks a node's edges. `--direction` is `outgoing` (default), `incoming`, or `both`; `--edge-type` filters by type, and `--limit`/`--cursor` paginate:
 
 ```bash
-strata ./social.strata --raw graph neighbors social alice --direction outgoing
+strata ./social --raw graph neighbors social alice --direction outgoing
 ```
 
 ```text
@@ -102,7 +102,7 @@ Each row carries the traversed edge and the neighbor node in full, so you rarely
 For loading many nodes and edges, `bulk-insert` ingests a JSON payload in chunked commits. Nodes use the key `node_id`; edges use `src`, `edge_type`, `dst`, and optional `weight`/`properties`:
 
 ```bash
-strata ./social.strata graph bulk-insert loaded \
+strata ./social graph bulk-insert loaded \
   --data '{"nodes":[{"node_id":"n1","properties":{"kind":"a"}},{"node_id":"n2"},{"node_id":"n3"}],"edges":[{"src":"n1","edge_type":"link","dst":"n2","weight":1.0},{"src":"n2","edge_type":"link","dst":"n3"}]}'
 ```
 
@@ -127,7 +127,7 @@ The example graph below has two components — a follow cycle among `alice`, `bo
 Weakly connected components (`wcc`) label each node with its component representative:
 
 ```bash
-strata ./social.strata graph wcc social
+strata ./social graph wcc social
 ```
 
 ```text
@@ -141,7 +141,7 @@ strata ./social.strata graph wcc social
 Local clustering coefficients (`lcc`), shortest-path distances from a source (`sssp`, with `--direction`), and PageRank (`pagerank`, with `--damping`, `--max-iterations`, `--tolerance`, and `--personalization` seed weights) all return per-node maps:
 
 ```bash
-strata ./social.strata graph pagerank social
+strata ./social graph pagerank social
 ```
 
 ```text
@@ -156,7 +156,7 @@ strata ./social.strata graph pagerank social
 Community detection by label propagation (`cdlp`, with `--max-iterations` and `--direction`) returns a label per node. A bounded breadth-first traversal (`bfs`) returns visited nodes, per-node depths, and the traversed edges:
 
 ```bash
-strata ./social.strata graph bfs social alice
+strata ./social graph bfs social alice
 ```
 
 ```text
@@ -175,22 +175,22 @@ strata ./social.strata graph bfs social alice
 
 A graph can carry an ontology: declared object types and link types. While the ontology is a **draft**, you add and redraft types freely; nothing is enforced. When you **freeze** it, subsequent writes validate against it.
 
-This section starts a fresh database at `./org.strata` with a graph named `org`, so the typed examples don't collide with the untyped `social` graph above.
+This section starts a fresh database at `./org` with a graph named `org`, so the typed examples don't collide with the untyped `social` graph above.
 
 ```bash
-strata ./org.strata graph ontology define-object-type org Person \
+strata ./org graph ontology define-object-type org Person \
   --properties '{"name":{"value_type":"string","required":true},"level":{"value_type":"integer","required":false}}'
-strata ./org.strata graph ontology define-object-type org Team \
+strata ./org graph ontology define-object-type org Team \
   --properties '{"name":{"value_type":"string","required":true}}'
-strata ./org.strata graph ontology define-link-type org member_of Person Team --cardinality many-to-one
+strata ./org graph ontology define-link-type org member_of Person Team --cardinality many-to-one
 ```
 
 A link type names its source and target object types; `--cardinality` is an optional hint. `graph ontology get <graph>` prints the status and every declared type; `graph ontology delete-object-type` / `delete-link-type` remove draft types. Add typed nodes with `--type`, then freeze:
 
 ```bash
-strata ./org.strata graph add-node org p1 --type Person --properties '{"name":"Alice","level":5}'
-strata ./org.strata graph add-node org t1 --type Team --properties '{"name":"Platform"}'
-strata ./org.strata graph ontology freeze org
+strata ./org graph add-node org p1 --type Person --properties '{"name":"Alice","level":5}'
+strata ./org graph add-node org t1 --type Team --properties '{"name":"Platform"}'
+strata ./org graph ontology freeze org
 ```
 
 ```text
@@ -207,7 +207,7 @@ strata ./org.strata graph ontology freeze org
 After freezing, a node declaring an undeclared type is rejected:
 
 ```bash
-strata ./org.strata graph add-node org x1 --type Robot --properties '{"name":"R2"}'
+strata ./org graph add-node org x1 --type Robot --properties '{"name":"R2"}'
 ```
 
 ```text
@@ -219,7 +219,7 @@ failed_precondition.engine.graph_ontology_node_type: node object type `Robot` is
 `graph ontology summary <graph>` adds per-type usage counts (nodes per object type, edges per link type), and `graph nodes-by-type <graph> <ObjectType>` lists the nodes declaring a given type:
 
 ```bash
-strata ./org.strata graph nodes-by-type org Person
+strata ./org graph nodes-by-type org Person
 ```
 
 ```text
@@ -232,6 +232,26 @@ strata ./org.strata graph nodes-by-type org Person
 - [Branches](/docs/concepts/branches) and [Commits](/docs/concepts/commits) — the isolation and time-travel model
 - [Arrow](/docs/guides/import-export) — export a graph's nodes and edges to Parquet, CSV, or JSON lines
 - [Error Handling](/docs/guides/error-handling) — reading structured error codes
+
+## From Python
+
+The same surface, from the [Python SDK](/docs/python) — endpoints must exist
+before an edge, exactly as on the CLI:
+
+```python
+import stratadb
+
+db = stratadb.Strata("./social")
+db.graphs.create("social")
+db.graphs.add_node("social", "alice")
+db.graphs.add_node("social", "bob")
+db.graphs.add_edge("social", "alice", "follows", "bob")
+db.graphs.neighbors("social", "alice")   # Page of GraphNeighborHit rows
+db.close()
+```
+
+See [namespaces](/docs/python/namespaces) for traversal, analytics, and the
+ontology surface.
 
 ## Reference
 

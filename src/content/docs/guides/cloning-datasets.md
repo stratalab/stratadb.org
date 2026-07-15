@@ -12,7 +12,7 @@ source: "strata-core@v1.0.0"
 Give `clone` a dataset slug and, optionally, a destination directory:
 
 ```bash
-strata clone wikipedia-embeddings ./wiki.strata
+strata clone wikipedia-embeddings ./wiki
 ```
 
 The destination is optional; without it the clone lands in `./<dataset>.strata`. `--branch <name>` fetches a specific branch instead of the dataset's default branch. The clone resolves a hub, requests `<hub>/v1/datasets/<slug>`, and writes the database locally.
@@ -88,7 +88,7 @@ strata --cache config path
 An invalid or empty `--hub` value is rejected before any network call:
 
 ```bash
-strata clone demo ./demo.strata --hub not-a-url
+strata clone demo ./demo --hub not-a-url
 ```
 
 ```text
@@ -100,7 +100,7 @@ failed_precondition.executor.hub_url: --hub: not a valid URL: relative URL witho
 A reachable-URL but unreachable host surfaces a transport error, marked retryable:
 
 ```bash
-strata clone demo ./demo.strata --hub http://127.0.0.1:1/
+strata clone demo ./demo --hub http://127.0.0.1:1/
 ```
 
 ```text
@@ -114,7 +114,7 @@ unavailable.executor.hub_transport: hub transport failed: network error (retryab
 `strata remote` reports where a database was cloned from. A database you created yourself has no origin:
 
 ```bash
-strata ./fresh.strata remote
+strata ./fresh remote
 ```
 
 ```text

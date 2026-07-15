@@ -67,6 +67,18 @@ db.kv.get("k", as_of=receipt.commit.timestamp)   # b"v1"  (historical)
 The same `as_of` works across every namespace, giving a consistent snapshot of
 the whole database at that commit.
 
+`history` returns the full version trail for a key, newest first — including
+tombstones for deletes:
+
+```python
+db.kv.history("k")
+```
+
+```text
+[HistoryItem(timestamp=7, tombstone=False, version=7, value=b'v2'),
+ HistoryItem(timestamp=6, tombstone=False, version=6, value=b'v1')]
+```
+
 ## Scoped views: `db.at()`
 
 `db.at(branch=..., space=...)` returns a **cheap scoped view** over the same
@@ -74,10 +86,11 @@ handle — every call through it targets that branch and space, without changing
 the base handle:
 
 ```python
-db.branches.fork("main", "experiment")     # copy-on-write branch
+db.branches.fork("default", "experiment")   # copy-on-write fork of the default branch
 exp = db.at(branch="experiment")
-exp.kv.put("k", "only-on-experiment")       # written on the fork
-db.kv.get("k")                              # None on main — isolated
+exp.kv.put("k2", "only-on-experiment")      # written on the fork
+exp.kv.get("k2")                            # b"only-on-experiment"
+db.kv.get("k2")                             # None on default — isolated
 ```
 
 Views compose with spaces the same way: `db.at(space="analytics")`.

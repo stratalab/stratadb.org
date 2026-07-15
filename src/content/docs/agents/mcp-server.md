@@ -17,14 +17,14 @@ The server opens a database the same way every command does — it needs a durab
 path, `--cache`, or `STRATA_DB`.
 
 ```bash
-strata ./my-db.strata mcp serve   # durable, positional path
-strata --db ./my-db.strata mcp serve
+strata ./my-db mcp serve   # durable, positional path
+strata --db ./my-db mcp serve
 strata --cache mcp serve          # ephemeral, in-memory
 ```
 
 With no target it refuses with `invalid_argument.cli.no_database`:
 
-```console
+```text
 $ strata mcp serve
 error: [invalid_argument.cli.no_database]: no database specified
   hint: pass a path (strata ./mydb kv put …), set STRATA_DB, or use --cache for ephemeral
@@ -41,7 +41,7 @@ printf '%s\n%s\n%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"1.0"}}}' \
   '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
-  | strata ./agent.strata mcp serve
+  | strata ./agent mcp serve
 ```
 
 The `initialize` result advertises the tools capability and carries an
@@ -122,7 +122,7 @@ arguments:
   "mcpServers": {
     "strata": {
       "command": "strata",
-      "args": ["/absolute/path/to/my-db.strata", "mcp", "serve"]
+      "args": ["/absolute/path/to/my-db", "mcp", "serve"]
     }
   }
 }

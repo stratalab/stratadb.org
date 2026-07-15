@@ -190,6 +190,23 @@ Match on the code, not the message — see
 See the [CLI reference](/docs/reference/cli) for the full verb list and
 [value types](/docs/concepts/value-types) for how JSON values are represented.
 
+## From Python
+
+The same surface, from the [Python SDK](/docs/python) — documents are Python
+objects, addressed by path:
+
+```python
+import stratadb
+
+db = stratadb.Strata("./mydb")
+db.json.set("user:1", "$", {"name": "Ada", "age": 36})
+db.json.get("user:1", "$.name")   # "Ada"
+db.close()
+```
+
+See [namespaces](/docs/python/namespaces) for indexes, history, and `as_of`
+reads.
+
 ## Reference
 
 Every JSON command — parameters, returns, errors, and runnable CLI/wire/Python

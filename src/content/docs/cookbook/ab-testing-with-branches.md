@@ -9,7 +9,7 @@ Goal: run two agent strategies side by side and compare them, with each variant'
 writes fully isolated from the other and from your baseline.
 
 Prerequisites: the `strata` binary on your PATH, and `jq` for the compact fork
-output. Commands write to a durable directory (`./ab.db`) that each invocation
+output. Commands write to a durable directory (`./ab`) that each invocation
 reopens.
 
 ## 1. Seed a shared baseline
@@ -17,7 +17,7 @@ reopens.
 Anything written before you fork is inherited by every variant.
 
 ```bash
-strata ./ab.db kv put prompt:system "You are a helpful assistant."
+strata ./ab kv put prompt:system "You are a helpful assistant."
 ```
 
 ```text
@@ -30,8 +30,8 @@ A fork is a cheap copy-on-write branch. Both start from the baseline at the same
 version.
 
 ```bash
-strata ./ab.db branch fork default variant-a --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
-strata ./ab.db branch fork default variant-b --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
+strata ./ab branch fork default variant-a --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
+strata ./ab branch fork default variant-b --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
 ```
 
 ```text
@@ -45,16 +45,16 @@ Pass `--branch` to target a variant. Here A runs cooler and produces two answers
 B runs hotter and produces three.
 
 ```bash
-strata ./ab.db kv put config:temperature 0.2 --branch variant-a
-strata ./ab.db event append answer '{"variant":"a","tokens":180}' --branch variant-a
-strata ./ab.db event append answer '{"variant":"a","tokens":210}' --branch variant-a
-strata ./ab.db kv put score 74 --branch variant-a
+strata ./ab kv put config:temperature 0.2 --branch variant-a
+strata ./ab event append answer '{"variant":"a","tokens":180}' --branch variant-a
+strata ./ab event append answer '{"variant":"a","tokens":210}' --branch variant-a
+strata ./ab kv put score 74 --branch variant-a
 
-strata ./ab.db kv put config:temperature 0.9 --branch variant-b
-strata ./ab.db event append answer '{"variant":"b","tokens":320}' --branch variant-b
-strata ./ab.db event append answer '{"variant":"b","tokens":295}' --branch variant-b
-strata ./ab.db event append answer '{"variant":"b","tokens":410}' --branch variant-b
-strata ./ab.db kv put score 88 --branch variant-b
+strata ./ab kv put config:temperature 0.9 --branch variant-b
+strata ./ab event append answer '{"variant":"b","tokens":320}' --branch variant-b
+strata ./ab event append answer '{"variant":"b","tokens":295}' --branch variant-b
+strata ./ab event append answer '{"variant":"b","tokens":410}' --branch variant-b
+strata ./ab kv put score 88 --branch variant-b
 ```
 
 ```text
@@ -74,10 +74,10 @@ created score applied=true
 Read each variant's score and answer count directly.
 
 ```bash
-strata ./ab.db --raw kv get score --branch variant-a
-strata ./ab.db event count --branch variant-a
-strata ./ab.db --raw kv get score --branch variant-b
-strata ./ab.db event count --branch variant-b
+strata ./ab --raw kv get score --branch variant-a
+strata ./ab event count --branch variant-a
+strata ./ab --raw kv get score --branch variant-b
+strata ./ab event count --branch variant-b
 ```
 
 ```text
@@ -92,7 +92,7 @@ strata ./ab.db event count --branch variant-b
 The per-variant config never leaked back to `default`.
 
 ```bash
-strata ./ab.db kv exists config:temperature
+strata ./ab kv exists config:temperature
 ```
 
 ```text
@@ -106,10 +106,10 @@ replay its writes there — read the winner's values and put them on `default`.
 Variant B scored higher (88 vs 74), so promote it.
 
 ```bash
-strata ./ab.db kv put config:temperature "$(strata ./ab.db --raw kv get config:temperature --branch variant-b)"
-strata ./ab.db kv put score "$(strata ./ab.db --raw kv get score --branch variant-b)"
-strata ./ab.db --raw kv get config:temperature
-strata ./ab.db --raw kv get score
+strata ./ab kv put config:temperature "$(strata ./ab --raw kv get config:temperature --branch variant-b)"
+strata ./ab kv put score "$(strata ./ab --raw kv get score --branch variant-b)"
+strata ./ab --raw kv get config:temperature
+strata ./ab --raw kv get score
 ```
 
 ```text

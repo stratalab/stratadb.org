@@ -12,7 +12,7 @@ The `arrow` commands move data between a database and columnar files. Export sna
 `arrow export` takes a `--primitive`, a `--format`, and an output path:
 
 ```bash
-strata ./users.strata arrow export --primitive kv --format csv ./users.csv
+strata ./users arrow export --primitive kv --format csv ./users.csv
 ```
 
 ```text
@@ -41,7 +41,7 @@ Narrow an export with the optional flags: `--prefix` restricts by key, document,
 A graph has two row shapes, so a graph export treats the path as a stem and writes a nodes file and an edges file:
 
 ```bash
-strata ./social.strata arrow export --primitive graph --graph social --format csv ./social
+strata ./social arrow export --primitive graph --graph social --format csv ./social
 ```
 
 ```text
@@ -59,7 +59,7 @@ strata ./social.strata arrow export --primitive graph --graph social --format cs
 `arrow import` takes a `--target` primitive and an input file:
 
 ```bash
-strata ./restored.strata arrow import --target kv ./users.csv
+strata ./restored arrow import --target kv ./users.csv
 ```
 
 ```text
@@ -75,7 +75,7 @@ strata ./restored.strata arrow import --target kv ./users.csv
 `--target` accepts `kv`, `json`, and `vector`. The format is inferred from the file, or state it explicitly with `--format <parquet|csv|jsonl>`. The round trip is faithful — the keys and values written above read straight back:
 
 ```bash
-strata ./restored.strata kv get user:2
+strata ./restored kv get user:2
 ```
 
 ```text
@@ -93,7 +93,7 @@ By default the importer expects the same column layout that export produces. Whe
 For example, importing exported JSON-lines documents by naming the key and document columns explicitly:
 
 ```bash
-strata ./docs.strata arrow import --target json --key-column key --value-column document ./docs.jsonl
+strata ./docs arrow import --target json --key-column key --value-column document ./docs.jsonl
 ```
 
 ```text
