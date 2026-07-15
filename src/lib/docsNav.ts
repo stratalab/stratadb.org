@@ -19,7 +19,7 @@ export interface NavSection {
   groups?: NavGroup[];
 }
 
-const SECTION_ORDER = ['getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference'];
+const SECTION_ORDER = ['getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference', 'agents'];
 const SECTION_TITLES: Record<string, string> = {
   'getting-started': 'Getting Started',
   concepts: 'Concepts',
@@ -28,6 +28,7 @@ const SECTION_TITLES: Record<string, string> = {
   guides: 'Guides',
   cookbook: 'Cookbook',
   reference: 'Reference',
+  agents: 'For AI Agents',
 };
 // Curated ordering where narrative order matters; everything else alphabetical.
 const PREFERRED: Record<string, string[]> = {
@@ -37,6 +38,8 @@ const PREFERRED: Record<string, string[]> = {
   data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
   // Inference: the model overview, then the cloud and local enabling pages.
   inference: ['inference', 'inference/providers-and-keys', 'inference/local-models'],
+  // For AI Agents: the front door, then guide/index/mcp/machine-docs.
+  agents: ['agents', 'agents/agents-guide', 'agents/command-index', 'agents/mcp-server', 'agents/machine-docs'],
 };
 
 // Generated command-reference families (staged under reference/<family>/ by

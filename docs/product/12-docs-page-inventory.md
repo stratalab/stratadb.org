@@ -96,14 +96,16 @@ render from the release bundle (`Doc 11 §7.2`).
 | `guides/migrating` | new | from SQLite / DuckDB / Redis |
 | ~~`guides/kv-store` … `graph`, `inference`, `agents-and-mcp`~~ | move | → §4 / §5 / §7 |
 
-### 7 · For AI Agents `[N]`
+### 7 · For AI Agents `[N]` — **done** (wave 4)
 | Page | Action | Source / notes |
 |---|---|---|
-| `agents/index` — how agents use Strata | move | from `getting-started/for-agents` + `guides/agents-and-mcp` |
-| `agents/mcp-server` | move | from `reference/mcp` + `guides/agents-and-mcp` |
-| `agents/machine-docs` | new | llms.txt · llms-full.txt · `.md` mirrors · copy-as-markdown |
-| `agents/command-index` | new | the published spec / IDL |
-| `agents/agents-guide` | new | `stratadb.agents_guide()` + `strata agents guide` |
+| `agents/index` — how agents use Strata | **done** | moved from `getting-started/for-agents`; absorbed the guide's overview + onboarding; DB-targeting front and centre |
+| `agents/mcp-server` | **done** | moved from `reference/mcp`; merged the guide's MCP walkthrough (handshake + 20-tool table + wire-vs-flag gotcha) |
+| `agents/agents-guide` | **done** | `strata agents guide` + `stratadb.agents_guide()` + the `strata_guide` tool — one guide, three front doors |
+| `agents/command-index` | **done** | `strata agents commands --json` + `strata agents errors --json` — the machine catalogs = the IDL behind the reference |
+| `agents/machine-docs` | **done** | llms.txt · llms-full.txt · `.md` mirrors (append `.md`) · `/e/` registry. NB: **no copy-as-markdown button exists** — the `.md` mirror is the mechanism |
+
+`guides/agents-and-mcp` retired (content split into `agents/index` + `agents/mcp-server`). All 3 old paths (`getting-started/for-agents`, `guides/agents-and-mcp`, `reference/mcp`) repointed site-wide + in `llms.txt`; Reference and Guides landings de-listed MCP/agents.
 
 ### 8 · Reference `[G]` (generated — the pipeline renders these)
 | Family | Pages | Source |

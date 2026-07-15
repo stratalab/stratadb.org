@@ -74,7 +74,7 @@ See [Cloning Datasets](/docs/guides/cloning-datasets).
 |--------|-------------|
 | `strata mcp serve` | Serve MCP over stdio (newline-delimited JSON-RPC; logs on stderr). |
 
-See [Agents and MCP](/docs/guides/agents-and-mcp) and the [MCP Server Reference](/docs/reference/mcp).
+See [Agents and MCP](/docs/agents) and the [MCP Server Reference](/docs/agents/mcp-server).
 
 ## Branch
 

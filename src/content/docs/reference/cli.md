@@ -170,4 +170,4 @@ The recognized-but-refused verbs are `begin`, `commit`, `rollback`, `txn`, `sear
 - [API Quick Reference](/docs/reference/api-quick-reference) — the common operation per capability.
 - [Configuration Reference](/docs/reference/configuration-reference) — database and hub configuration.
 - [Error Reference](/docs/reference/error-reference) — the error model.
-- [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface and MCP server.
+- [Agents and MCP](/docs/agents) — the self-describing surface and MCP server.

@@ -13,7 +13,7 @@ New to StrataDB? Take these three steps in order.
 2. **[Your first database](/docs/getting-started/first-database)** — create a
    durable database, work in the REPL and one-shot forms, write across the KV
    and JSON capabilities, fork a branch, and read an earlier version.
-3. **[For AI agents](/docs/getting-started/for-agents)** — if you are wiring
+3. **[For AI agents](/docs/agents)** — if you are wiring
    StrataDB into a coding agent or an MCP client, start here for the integration
    recipe.
 

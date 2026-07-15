@@ -114,8 +114,8 @@ can run a subprocess or speak MCP can drive it now.
 
 The Model Context Protocol server is built into the binary — run
 `strata <db> mcp serve`; there is no separate package to install. See
-[For AI agents](/docs/getting-started/for-agents) and
-[Agents and MCP](/docs/guides/agents-and-mcp).
+[For AI agents](/docs/agents) and
+[Agents and MCP](/docs/agents).
 
 ## Still stuck?
 

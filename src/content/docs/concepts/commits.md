@@ -62,7 +62,7 @@ Deletes are commits too. A delete writes a **tombstone** rather than erasing his
 
 ## Batches: itemwise with a shared commit
 
-A batch applies many items in one call. Batches are part of the command surface used by the SDKs, the [MCP tools](/docs/guides/agents-and-mcp), and the raw command path — not a bare CLI verb — so the semantics below are what you get from those callers. StrataDB's batches are **itemwise**: you get one positional result per input item, and the outer status summarizes whether all, some, or none succeeded. Valid items that the engine applies together share one commit.
+A batch applies many items in one call. Batches are part of the command surface used by the SDKs, the [MCP tools](/docs/agents), and the raw command path — not a bare CLI verb — so the semantics below are what you get from those callers. StrataDB's batches are **itemwise**: you get one positional result per input item, and the outer status summarizes whether all, some, or none succeeded. Valid items that the engine applies together share one commit.
 
 Putting two keys in a single batch, both land at the same `version` and `timestamp`:
 

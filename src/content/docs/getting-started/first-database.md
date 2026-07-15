@@ -249,4 +249,4 @@ target.
   [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store),
   [event log](/docs/guides/event-log), [vectors](/docs/guides/vector-store),
   [graph](/docs/guides/graph).
-- [For AI agents](/docs/getting-started/for-agents) — wire this into an agent.
+- [For AI agents](/docs/agents) — wire this into an agent.

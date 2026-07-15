@@ -182,4 +182,4 @@ needs attention, which makes it a natural preflight check in scripts and CI.
 
 - [Error Handling](/docs/guides/error-handling) — decode failures when a check goes red.
 - [Database Configuration](/docs/guides/database-configuration) — read a database's config.
-- [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface behind these facts.
+- [Agents and MCP](/docs/agents) — the self-describing surface behind these facts.

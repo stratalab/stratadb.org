@@ -108,7 +108,7 @@ code. Those prerequisites, and how to satisfy them, are on the two pages below.
 ## Related
 
 - [Vectors](/docs/data/vectors) — where embeddings are stored and searched
-- [Agents and MCP](/docs/guides/agents-and-mcp) — exposing the database to model-driven agents
+- [Agents and MCP](/docs/agents) — exposing the database to model-driven agents
 - [Error Handling](/docs/guides/error-handling) — reading structured error codes
 
 ## Reference
