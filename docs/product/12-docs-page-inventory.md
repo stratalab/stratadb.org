@@ -125,16 +125,24 @@ All three renames repointed site-wide. `guides/kv-store … graph`, `inference`,
 | `reference/mcp` | move | → §7 `agents/mcp-server` |
 | `reference/index` | keep | Reference landing |
 
-### 9 · Architecture `[N]` — **rebuild all for V1** (currently v0.12.5)
-| Page | Action | Source / notes |
+### 9 · Architecture `[N]` — **done** (wave 7): consolidated 17 v0.12.5 pages → 8 V1 whitepapers
+| Page (V1) | Action | Source / notes |
 |---|---|---|
-| `architecture/index` (layered stack) | rebuild | fix the "7 crates" claim → core→storage→engine→intelligence→inference |
-| `storage-engine` · `durability-and-recovery` · `concurrency-model` | rebuild | |
-| `storage-format-spec` | new | frozen at M3, golden vectors |
-| `crate-structure` · `version-semantics` · `error-propagation` · `boundary-conditions` · `concurrency-invariants` · `durability-modes` | rebuild | consolidate as needed |
-| `kv-` · `json-` · `event-` · `vector-` · `branch-primitive` | rebuild | per-primitive internals |
-| `graph-primitive` | new | the fifth primitive was never documented |
-| ~~`state-primitive`~~, ~~`session-transaction-completeness`~~ | retire | features removed in V1 |
+| `architecture/index` (overview) | **done** | rebuilt to the five-layer stack + "engine owns meaning, storage owns mechanics" + a map |
+| `layered-stack` | **done** | the 5 crates, responsibilities, CI-enforced dependency rules (absorbs `crate-structure`) |
+| `storage-substrate` | **done** | generic rows, the single MVCC branch-aware primitive, the L1–L9 stack, backend portability (from `storage-architecture.md`; replaces `storage-engine`) |
+| `durability-and-recovery` | **done** | StorageMode × DurabilityPolicy (cache/standard/always), WAL halt-on-fsync, deterministic recovery, frozen format (absorbs `durability-modes` + `storage-format-spec`) |
+| `commits-and-versioning` | **done** | auto-commit, commit units, per-branch version→timestamp timeline, itemwise batches, no public transactions (absorbs `concurrency-model` + `concurrency-invariants` + `version-semantics`) |
+| `data-capabilities` | **done** | one row → six capabilities, the capability contract, graph's dual role, derived state (from `engine-architecture.md`; absorbs the 5 per-primitive pages + the new graph internals) |
+| `runtime-modes` | **done** | durable/cache/read-only/IPC + the resource-profile model (absorbs `boundary-conditions`) |
+| `errors-and-diagnostics` | **done** | storage mechanics → engine public errors; observability; redaction (replaces `error-propagation`) |
+| ~~`state-primitive`~~, ~~`session-transaction-completeness`~~, + 13 other v0.12.5 pages | **retired** | removed features / stale internals; DashMap "ShardedStore", OCC/CAS, bundles all gone |
+
+Consolidated per Doc 12's "consolidate as needed": 17 stale pages → 8 V1 whitepapers,
+organized by the five-layer stack rather than the old per-primitive layout. Two
+deepest pages (storage-substrate, data-capabilities) written by source-grounded
+subagents against `storage-architecture.md` / `engine-architecture.md`; merge/
+cherry-pick framing softened to V1's strict-refusal reality (no merge command).
 
 ### 10/11 · Resources `[N]`
 | Page | Action | Source / notes |

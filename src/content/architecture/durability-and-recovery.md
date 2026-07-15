@@ -1,174 +1,88 @@
 ---
-title: "Durability and Recovery"
+title: "Durability and recovery"
+description: "Two storage modes, two durability policies, a write-ahead log that halts on fsync failure, and deterministic recovery on open."
+order: 3
 ---
 
+StrataDB's durability is designed to be honest and testable: a committed write
+survives an ordinary process crash, recovery is deterministic, and the failure
+modes are typed rather than silent. This page covers the model; the row store it
+protects is [the storage substrate](/architecture/storage-substrate).
 
-This document describes how StrataDB persists data and recovers from crashes.
+## Two axes: storage mode and durability policy
 
-## Write-Ahead Log (WAL)
+Durability is expressed as two independent axes, not a single dial:
 
-All data changes are first written to the WAL before being applied to the in-memory store. This ensures that committed transactions can be recovered after a crash.
-
-### WAL Entry Types
-
-| Entry | Type Tag | Description |
-|-------|----------|-------------|
-| `BeginTxn` | 0x01 | Start of a transaction |
-| `Write` | 0x02 | Key-value write with version |
-| `Delete` | 0x03 | Key deletion with version |
-| `CommitTxn` | 0x04 | Transaction committed |
-| `AbortTxn` | 0x05 | Transaction aborted |
-| `Checkpoint` | 0x06 | Snapshot boundary marker |
-| `JsonCreate` | 0x20 | JSON document creation |
-| `JsonSet` | 0x21 | JSON path-level update |
-| `JsonDelete` | 0x22 | JSON field deletion |
-| `JsonDestroy` | 0x23 | Entire JSON document deletion |
-| `VectorCollectionCreate` | 0x70 | Vector collection creation |
-| `VectorCollectionDelete` | 0x71 | Vector collection deletion |
-| `VectorUpsert` | 0x72 | Vector insert/update |
-| `VectorDelete` | 0x73 | Vector deletion |
-
-### Binary Format
-
-Each WAL entry is encoded as:
-
-```
-+-------------------+-------------------+-------------------+-------------------+
-| Length (4 bytes)  | Type Tag (1 byte) | Payload (N bytes) | CRC32 (4 bytes)  |
-+-------------------+-------------------+-------------------+-------------------+
+```text
+StorageMode      = Cache | Durable
+DurabilityPolicy = Standard | Always   (only meaningful when Durable)
 ```
 
-- **Length** — total size of the entry (type + payload + CRC32)
-- **Type tag** — identifies the entry type, enables forward compatibility
-- **Payload** — bincode-serialized entry data
-- **CRC32** — checksum of type tag + payload, detects corruption
+The three product modes fall out of that:
 
-### Durability Modes
+- **`cache`** — an ephemeral *storage mode*. No write-ahead log, no crash
+  durability, no durable files at all. Cache still allocates versions, records
+  commit timestamps, and maintains branch state in memory; it simply promises
+  nothing across a restart.
+- **`standard`** — a durable storage mode with a WAL-backed crash-recovery path and
+  background or periodic durability barriers. It has a bounded crash-loss window
+  set by its configured interval and the backend's capabilities.
+- **`always`** — the same durable storage mode with a force-durability barrier
+  before *each* committed write is acknowledged. No crash-loss window, at the cost
+  of a sync per commit.
 
-| Mode | Behavior |
-|------|----------|
-| None | No WAL writes (in-memory only) |
-| Batched | WAL writes buffered, fsync every ~100ms or ~1000 writes |
-| Strict | Immediate fsync after every commit |
+A runtime may switch between `standard` and `always` where the backend supports
+both. Moving into or out of `cache` is not a durability-policy switch — it is a
+different storage mode entirely.
 
-## Snapshots
+## What "committed" means
 
-Snapshots are periodic full-state captures written to disk.
+Durable mode defines committed precisely: a write counts as committed once its
+commit unit is durable according to the active policy, and it becomes visible at
+that point. Everything the substrate persists — the WAL, snapshots, the manifest,
+and table blocks — is written with **one uniform codec**, and the durable format
+is frozen and guarded by golden vectors, so a database written by one build reads
+identically in another.
 
-### Snapshot File Format
+## The write-ahead log
 
-```
-+---------------------------+
-| Magic: "INMEM_SNAP" (10B) |
-+---------------------------+
-| Format Version (4B)       |
-+---------------------------+
-| Timestamp (8B)            |
-+---------------------------+
-| WAL Offset (8B)           |
-+---------------------------+
-| Transaction Count (8B)    |
-+---------------------------+
-| Primitive Count (1B)      |
-+---------------------------+
-| Primitive Section 1       |
-|   Type ID (1B)            |
-|   Data Length (8B)         |
-|   Data (N bytes)           |
-+---------------------------+
-| ... more sections ...     |
-+---------------------------+
-| CRC32 (4B)                |
-+---------------------------+
-```
+Durable writes go through a write-ahead log first. The WAL is what makes crash
+recovery possible: a commit is appended and made durable there before its effects
+are considered committed. The WAL has one non-negotiable rule:
 
-### Primitive IDs
+> **The WAL writer halts on fsync failure.** If the log cannot be made durable,
+> the writer stops rather than pretending the write succeeded.
 
-| Primitive | ID |
-|-----------|----|
-| KV | 1 |
-| JSON | 2 |
-| Event | 3 |
-| State | 4 |
-| Branch | 6 |
-| Vector | 7 |
+A halt is not a silent degradation — it surfaces, and the database is resumed
+through an explicit recovery path, never by best-effort guessing.
 
-### Snapshot Benefits
+## Recovery on open
 
-- **Bounded recovery time** — replay only WAL entries after the snapshot
-- **WAL truncation** — entries before the snapshot can be removed
-- **Atomic writes** — snapshots use temp file + rename for crash safety
+Opening a durable database runs **deterministic recovery before it serves any
+traffic**. Recovery replays the durable log and manifest to reconstruct the last
+consistent committed state, accepts the writes that were fully committed, and
+rejects torn or partial state at the tail. Because recovery is deterministic, the
+same on-disk bytes always recover to the same state — which is exactly what makes
+crash recovery testable under fault injection (torn writes, failed syncs, stale
+manifests, checksum failures).
 
-## Recovery Flow
+Corruption, an incompatible on-disk format, an unsupported backend, a permission
+error, or an IO failure each surface as a **typed** open failure rather than a
+crash or a wrong answer — see [errors and diagnostics](/architecture/errors-and-diagnostics).
 
-When a database opens and finds existing WAL/snapshot files:
+## Maintenance is internal
 
-```
-1. Load latest snapshot (if any)
-   └── Restores all primitives to snapshot state
+Flush, compaction, checkpointing, and retention are lifecycle *mechanics*, not
+product workflows. They run under engine-owned policy with observable status, so
+a normal user never issues a manual `flush`, `compact`, or `checkpoint` command.
+The details of how they run are the substrate's concern; what the product exposes
+is health, metrics, and durability counters.
 
-2. Read WAL entries after snapshot's WAL offset
-   └── Parses entries, validates CRC32
+## Cache is deliberately different
 
-3. Group entries by transaction ID
-   └── Builds per-transaction operation lists
-
-4. Apply committed transactions only
-   ├── Transactions with CommitTxn → apply
-   └── Transactions without CommitTxn → discard (crashed mid-txn)
-
-5. Restore version counters
-   └── Preserves exact version numbers from WAL
-```
-
-### Recovery Properties
-
-- **Deterministic** — same WAL + same snapshot always produces the same state
-- **Idempotent** — running recovery again produces identical results
-- **Prefix-consistent** — no partial transactions are visible
-- **All primitives** — KV, JSON, Event, State, Branch, and Vector are all recovered
-
-## Branch Bundles
-
-Branch bundles package a single branch's data into a portable archive.
-
-### Bundle Format
-
-```
-<branch_id>.branchbundle.tar.zst
-  branchbundle/
-    MANIFEST.json     # Format version (1), xxh3 file checksums
-    BRANCH.json          # Branch metadata (id, status, tags, timestamps)
-    WAL.branchlog     # Binary WAL entries for this branch
-```
-
-### WAL.branchlog Format
-
-```
-Header (16 bytes):
-  Magic: "STRATA_WAL" (10 bytes)
-  Version: u16 (2 bytes)
-  Entry Count: u32 (4 bytes)
-
-Per entry:
-  Length: u32 (4 bytes)
-  Data: bincode-serialized WALEntry (N bytes)
-  CRC32: u32 (4 bytes)
-```
-
-### Import Process
-
-1. Decompress and untar the archive
-2. Validate MANIFEST checksums
-3. Parse BRANCH.json for branch metadata
-4. Read WAL.branchlog entries
-5. Replay entries into the target database (same as crash recovery)
-
-## Design Principles
-
-1. **WAL-first** — all changes go through WAL before memory
-2. **CRC32 everywhere** — every entry and snapshot has checksums
-3. **Atomic writes** — snapshots and bundles use temp file + rename
-4. **Branch isolation** — all WAL entries include branch_id for filtering
-5. **Forward compatibility** — type tags allow skipping unknown entry types
-
+Cache mode is not "durable but weaker" — it is a different storage mode with no
+durable services at all. It creates no WAL, manifest, snapshot, checkpoint, or
+durable table objects, and info and health output make the distinction visible so
+a cache database is never mistaken for a durable one. See
+[runtime modes](/architecture/runtime-modes) and the
+[durability concept](/docs/concepts/durability) for the product-level view.
