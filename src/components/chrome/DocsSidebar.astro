@@ -15,23 +15,63 @@ const isActive = (href: string) => currentPath === href || currentPath === `${hr
       sections.map((section) => (
         <div class="mb-7">
           <h3 class="mb-2.5 text-eyebrow font-medium uppercase text-ink-low">{section.title}</h3>
-          <ul class="space-y-px border-l border-line">
-            {section.items.map((item) => (
-              <li>
-                <a
-                  href={item.href}
-                  class:list={[
-                    '-ml-px block border-l-2 py-1.5 pl-4 text-small transition-colors duration-200',
-                    isActive(item.href)
-                      ? 'border-terracotta-500 text-ink-hi'
-                      : 'border-transparent text-ink-mid hover:border-line-hover hover:text-ink-hi',
-                  ]}
-                >
-                  {item.title}
-                </a>
-              </li>
-            ))}
-          </ul>
+          {section.items.length > 0 && (
+            <ul class="space-y-px border-l border-line">
+              {section.items.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    class:list={[
+                      '-ml-px block border-l-2 py-1.5 pl-4 text-small transition-colors duration-200',
+                      isActive(item.href)
+                        ? 'border-terracotta-500 text-ink-hi'
+                        : 'border-transparent text-ink-mid hover:border-line-hover hover:text-ink-hi',
+                    ]}
+                  >
+                    {item.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          {/* Nested groups (generated command families) — collapsible, open on the active family */}
+          {section.groups?.map((group) => {
+            const groupActive =
+              (group.href && isActive(group.href)) || group.items.some((i) => isActive(i.href));
+            return (
+              <details open={groupActive} class="mt-2 group/fam">
+                <summary class="flex cursor-pointer list-none items-center gap-1.5 py-1 text-small text-ink-mid hover:text-ink-hi">
+                  <span class="text-ink-low transition-transform duration-200 group-open/fam:rotate-90">
+                    ›
+                  </span>
+                  {group.href ? (
+                    <a href={group.href} class:list={[isActive(group.href) ? 'text-ink-hi' : '']}>
+                      {group.title}
+                    </a>
+                  ) : (
+                    <span>{group.title}</span>
+                  )}
+                </summary>
+                <ul class="ml-2 space-y-px border-l border-line">
+                  {group.items.map((item) => (
+                    <li>
+                      <a
+                        href={item.href}
+                        class:list={[
+                          '-ml-px block border-l-2 py-1 pl-4 text-small transition-colors duration-200',
+                          isActive(item.href)
+                            ? 'border-terracotta-500 text-ink-hi'
+                            : 'border-transparent text-ink-mid hover:border-line-hover hover:text-ink-hi',
+                        ]}
+                      >
+                        {item.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            );
+          })}
         </div>
       ))
     }
