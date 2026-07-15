@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Draft** (gate: Ani sign-off) |
+| Status | **Signed off** (2026-07-14) |
 | Owner | Ani (product) · Claude (drafting) |
 | Last updated | 2026-07-14 |
 | Upstream | 00-prd.md (personas, dual-loop), 01-ia-content-strategy.md (site nav, agent posture), 09-docs-sourcing-policy.md (reference-vs-narrative), 10-docs-v1-rebuild-plan.md (generation pipeline) |

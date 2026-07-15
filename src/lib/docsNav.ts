@@ -19,10 +19,11 @@ export interface NavSection {
   groups?: NavGroup[];
 }
 
-const SECTION_ORDER = ['getting-started', 'concepts', 'guides', 'cookbook', 'reference'];
+const SECTION_ORDER = ['getting-started', 'concepts', 'data', 'guides', 'cookbook', 'reference'];
 const SECTION_TITLES: Record<string, string> = {
   'getting-started': 'Getting Started',
   concepts: 'Concepts',
+  data: 'Working with Data',
   guides: 'Guides',
   cookbook: 'Cookbook',
   reference: 'Reference',
@@ -31,6 +32,8 @@ const SECTION_TITLES: Record<string, string> = {
 const PREFERRED: Record<string, string[]> = {
   // NB: Astro collapses "<dir>/index" slugs to "<dir>"
   'getting-started': ['getting-started', 'getting-started/installation', 'getting-started/first-database', 'getting-started/for-agents'],
+  // Working with Data: the five primitives in substrate order, then the cross-cutting spine.
+  data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
 };
 
 // Generated command-reference families (staged under reference/<family>/ by

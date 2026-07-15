@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Draft** (gate: Ani sign-off) |
+| Status | **Signed off** (2026-07-14) |
 | Owner | Ani (product) · Claude (drafting) |
 | Last updated | 2026-07-14 |
 | Upstream | 11-docs-information-architecture.md (the 11 sections), 09-docs-sourcing-policy.md (N vs G), 10-docs-v1-rebuild-plan.md (current pages) |

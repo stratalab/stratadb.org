@@ -1,6 +1,6 @@
 ---
-title: "JSON Document Store"
-section: "guides"
+title: "JSON documents"
+section: "data"
 description: "Store JSON documents, read and update them by path, and index fields."
 source: "strata-core@v1.0.0"
 ---
@@ -174,10 +174,15 @@ Match on the code, not the message — see
 
 - Use **JSON** when you address fields inside a document by path or index by
   field.
-- Use [KV](/docs/guides/kv-store) for opaque values with no structure to query.
-- Use [Vectors](/docs/guides/vector-store) for similarity search.
-- Use the [Event Log](/docs/guides/event-log) for an append-only, ordered
+- Use [KV](/docs/data/key-value) for opaque values with no structure to query.
+- Use [Vectors](/docs/data/vectors) for similarity search.
+- Use the [Event Log](/docs/data/events) for an append-only, ordered
   history.
 
 See the [CLI reference](/docs/reference/cli) for the full verb list and
 [value types](/docs/concepts/value-types) for how JSON values are represented.
+
+## Reference
+
+Every JSON command — parameters, returns, errors, and runnable CLI/wire/Python
+examples — is in the generated [JSON command reference](/docs/reference/json).

@@ -1,6 +1,6 @@
 ---
-title: "Event Log"
-section: "guides"
+title: "Events"
+section: "data"
 description: "Append hash-linked events and read them back by sequence, type, or time."
 source: "strata-core@v1.0.0"
 ---
@@ -164,10 +164,15 @@ Recover by code, never by message — see
 
 - Use the **event log** when order and integrity matter and you only ever
   append.
-- Use [KV](/docs/guides/kv-store) or [JSON](/docs/guides/json-store) for mutable
+- Use [KV](/docs/data/key-value) or [JSON](/docs/data/json) for mutable
   state you overwrite in place.
-- Use [Vectors](/docs/guides/vector-store) for similarity search.
+- Use [Vectors](/docs/data/vectors) for similarity search.
 
 For a worked pattern, see
 [deterministic replay](/docs/cookbook/deterministic-replay). The full verb list
 is in the [CLI reference](/docs/reference/cli).
+
+## Reference
+
+Every event command — parameters, returns, errors, and runnable CLI/wire/Python
+examples — is in the generated [Event command reference](/docs/reference/event).

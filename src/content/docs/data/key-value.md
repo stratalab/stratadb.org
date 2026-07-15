@@ -1,6 +1,6 @@
 ---
-title: "Key-Value Store"
-section: "guides"
+title: "Key-Value"
+section: "data"
 description: "Store, read, version, and scan raw byte values with the KV primitive."
 source: "strata-core@v1.0.0"
 ---
@@ -163,12 +163,17 @@ Recover by code, never by message text. See
 ## When to use KV vs other primitives
 
 - Use **KV** for opaque values keyed by a string, with no structure to query.
-- Use [JSON](/docs/guides/json-store) when you need to read or update fields
+- Use [JSON](/docs/data/json) when you need to read or update fields
   inside a document by path, or index by field.
-- Use [Vectors](/docs/guides/vector-store) for similarity search over embeddings.
-- Use the [Event Log](/docs/guides/event-log) for an ordered, hash-linked,
+- Use [Vectors](/docs/data/vectors) for similarity search over embeddings.
+- Use the [Event Log](/docs/data/events) for an ordered, hash-linked,
   append-only history.
 
 The full verb list is in the [CLI reference](/docs/reference/cli). To batch many
 writes into one shared commit, use the raw `command` path or MCP tools; the CLI
 `kv` verbs operate on one key at a time.
+
+## Reference
+
+Every key-value command — parameters, returns, errors, and runnable CLI/wire/Python
+examples — is in the generated [Key-Value command reference](/docs/reference/kv).

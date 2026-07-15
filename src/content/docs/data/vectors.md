@@ -1,6 +1,6 @@
 ---
-title: "Vector Store"
-section: "guides"
+title: "Vectors"
+section: "data"
 description: "Create collections, upsert embeddings with metadata, and run similarity search."
 source: "strata-core@v1.0.0"
 ---
@@ -153,11 +153,16 @@ Recover by code — see [error handling](/docs/guides/error-handling).
 ## When to use vectors vs other primitives
 
 - Use **vectors** for similarity search over embeddings.
-- Use [JSON](/docs/guides/json-store) for structured records you query by field.
-- Use [KV](/docs/guides/kv-store) for opaque keyed values.
-- Use the [Event Log](/docs/guides/event-log) for ordered, append-only history.
+- Use [JSON](/docs/data/json) for structured records you query by field.
+- Use [KV](/docs/data/key-value) for opaque keyed values.
+- Use the [Event Log](/docs/data/events) for ordered, append-only history.
 
 Strata does not generate embeddings inside the vector primitive — you supply the
 floats. For end-to-end retrieval that embeds text for you, see
 [RAG with vectors](/docs/cookbook/rag-with-vectors). The full verb list is in the
 [CLI reference](/docs/reference/cli).
+
+## Reference
+
+Every vector command — parameters, returns, errors, and runnable CLI/wire/Python
+examples — is in the generated [Vector command reference](/docs/reference/vector).

@@ -1,6 +1,6 @@
 ---
-title: "Graph Guide"
-section: "guides"
+title: "Graph"
+section: "data"
 description: "Create graphs, manage nodes and edges, declare an ontology, and run built-in graph analytics from the CLI."
 source: "strata-core@v1.0.0"
 ---
@@ -230,4 +230,8 @@ strata ./org.strata graph nodes-by-type org Person
 - [Branches](/docs/concepts/branches) and [Commits](/docs/concepts/commits) — the isolation and time-travel model
 - [Arrow](/docs/guides/arrow) — export a graph's nodes and edges to Parquet, CSV, or JSON lines
 - [Error Handling](/docs/guides/error-handling) — reading structured error codes
-- [Command Reference](/docs/reference/command-reference) — every verb and flag
+
+## Reference
+
+Every graph command — parameters, returns, errors, and runnable CLI/wire/Python
+examples — is in the generated [Graph command reference](/docs/reference/graph).
