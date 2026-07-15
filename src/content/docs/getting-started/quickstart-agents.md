@@ -1,7 +1,7 @@
 ---
 title: "Quickstart: AI agents"
 section: "getting-started"
-description: "Teach a coding agent StrataDB in one step — install the skill, or let the wheel and binary describe themselves."
+description: "Teach a coding agent StrataDB in one step — Claude Code, Cursor, or Codex — or let the wheel and binary describe themselves."
 source: "strata-core@v1.0.0"
 ---
 
@@ -31,6 +31,31 @@ primitive, branch isolation, `as_of` reads, the error contract, and inference
 — version-stamped from the installed binary. Claude Code loads it
 automatically whenever a session touches Strata. Re-running is idempotent;
 it refuses to overwrite a file you've edited unless you pass `--force`.
+
+### Cursor and Codex too
+
+One flag installs for every major coding agent, each via its native surface:
+
+```bash
+strata agents skill --write --for all
+```
+
+```text
+{
+  "written": [
+    {"agent": "claude", "path": ".claude/skills/strata/SKILL.md", "state": "created", "next": null},
+    {"agent": "cursor", "path": ".cursor/rules/strata.mdc", "state": "created", "next": null},
+    {"agent": "codex", "path": "AGENTS.md", "state": "appended", "next": null}
+  ]
+}
+```
+
+Cursor gets an MDC rule with the same trigger description (`alwaysApply:
+false`, attached when a session touches Strata). Codex reads the repo's
+`AGENTS.md`, so the playbook lands there between `<!-- strata-skill:start -->`
+markers — Strata owns the marked region, never the rest of your file, and
+re-runs update it in place. `--for claude`, `--for cursor`, and `--for codex`
+target one agent at a time.
 
 The same text ships inside the Python wheel, so an agent (or a setup script)
 can install it without the CLI:
