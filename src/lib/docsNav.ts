@@ -36,7 +36,7 @@ const SECTION_TITLES: Record<string, string> = {
 const PREFERRED: Record<string, string[]> = {
   // NB: Astro collapses "<dir>/index" slugs to "<dir>"
   'why-strata': ['why-strata', 'why-strata/when-to-use', 'why-strata/comparisons'],
-  'getting-started': ['getting-started', 'getting-started/installation', 'getting-started/first-database', 'getting-started/for-agents'],
+  'getting-started': ['getting-started', 'getting-started/installation', 'getting-started/first-database', 'getting-started/quickstart-agents'],
   // Concepts in pedagogical order: the model, then history/isolation, organizing, the contract.
   concepts: [
     'concepts', 'concepts/embedded-architecture', 'concepts/primitives', 'concepts/value-types',

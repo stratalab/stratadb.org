@@ -11,7 +11,10 @@ command to drop onboarding notes into a repo, and an MCP server that exposes the
 core verbs as tools. Everything an agent needs is generated from the installed
 binary's own metadata, so it can never drift from what your binary actually does.
 
-This page orients you; the rest of the section goes deep.
+This page orients you; the rest of the section goes deep. In a hurry? The
+[agent quickstart](/docs/getting-started/quickstart-agents) is the one-step
+version: `strata agents skill --write` installs the Claude Code skill into
+your repo.
 
 ## Target a database explicitly
 
