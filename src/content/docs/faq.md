@@ -106,9 +106,11 @@ feature. The model catalog commands work either way. See
 
 ### Is there a Python or Node SDK?
 
-Not in this line yet. The Python and Node SDKs land as post-V1 work. Today the
-supported surfaces are the `strata` CLI and its MCP server. Any language that
-can run a subprocess or speak MCP can drive it now.
+The **Python SDK** (`stratadb`) links the engine in your process and speaks the
+same command surface, value shapes, and error codes as the CLI — see the
+[Python SDK](/docs/python) section. Its V1 wheels are rolling out to PyPI. A Node
+SDK is later work. Beyond those, the `strata` CLI and its MCP server mean any
+language that can run a subprocess or speak MCP can drive Strata today.
 
 ### How do I use it from an AI agent?
 

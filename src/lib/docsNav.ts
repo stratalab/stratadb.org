@@ -19,7 +19,7 @@ export interface NavSection {
   groups?: NavGroup[];
 }
 
-const SECTION_ORDER = ['why-strata', 'getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference', 'agents'];
+const SECTION_ORDER = ['why-strata', 'getting-started', 'concepts', 'data', 'inference', 'guides', 'python', 'cookbook', 'reference', 'agents'];
 const SECTION_TITLES: Record<string, string> = {
   'why-strata': 'Why Strata',
   'getting-started': 'Getting Started',
@@ -27,6 +27,7 @@ const SECTION_TITLES: Record<string, string> = {
   data: 'Working with Data',
   inference: 'Inference',
   guides: 'Guides',
+  python: 'Python SDK',
   cookbook: 'Cookbook',
   reference: 'Reference',
   agents: 'For AI Agents',
@@ -46,6 +47,8 @@ const PREFERRED: Record<string, string[]> = {
   data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
   // Inference: the model overview, then the cloud and local enabling pages.
   inference: ['inference', 'inference/providers-and-keys', 'inference/local-models'],
+  // Python SDK: overview → install → the API surface → integration.
+  python: ['python', 'python/installation', 'python/namespaces', 'python/inference', 'python/errors', 'python/agents'],
   // Guides: cross-cutting how-to, grouped history → operating → moving data → shipping.
   guides: [
     'guides', 'guides/branching-workflows', 'guides/time-travel', 'guides/spaces',
