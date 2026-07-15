@@ -180,7 +180,7 @@ is `len()`:
 ```python
 import stratadb
 
-db = stratadb.Strata("./mydb")
+db = stratadb.open("./mydb")
 record = db.events.append("deploy", {"ok": True})
 record.sequence      # 0
 db.events.len()      # 1

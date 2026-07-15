@@ -198,7 +198,7 @@ objects, addressed by path:
 ```python
 import stratadb
 
-db = stratadb.Strata("./mydb")
+db = stratadb.open("./mydb")
 db.json.set("user:1", "$", {"name": "Ada", "age": 36})
 db.json.get("user:1", "$.name")   # "Ada"
 db.close()

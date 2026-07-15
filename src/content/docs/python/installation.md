@@ -48,7 +48,7 @@ setup.
 import stratadb
 
 print(stratadb.__version__)              # the installed engine/SDK version
-with stratadb.Strata(cache=True) as db:  # ephemeral, no files touched
+with stratadb.open(cache=True) as db:  # ephemeral, no files touched
     db.kv.put("k", "v")
     assert db.kv.get("k") == b"v"
 ```

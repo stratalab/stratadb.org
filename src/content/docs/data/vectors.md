@@ -172,7 +172,7 @@ The same surface, from the [Python SDK](/docs/python):
 ```python
 import stratadb
 
-db = stratadb.Strata("./mydb")
+db = stratadb.open("./mydb")
 db.vectors.create_collection("docs", dimension=4)
 db.vectors.upsert("docs", "a", [1.0, 0.0, 0.0, 0.0], metadata={"tag": "x"})
 db.vectors.query("docs", [1.0, 0.0, 0.0, 0.0], k=1)

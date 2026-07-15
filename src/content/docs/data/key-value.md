@@ -181,7 +181,7 @@ miss returns `None`:
 ```python
 import stratadb
 
-db = stratadb.Strata("./mydb")
+db = stratadb.open("./mydb")
 db.kv.put("setting", "v1")
 db.kv.get("setting")        # b"v1"
 db.kv.exists("setting")     # True

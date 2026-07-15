@@ -241,7 +241,7 @@ before an edge, exactly as on the CLI:
 ```python
 import stratadb
 
-db = stratadb.Strata("./social")
+db = stratadb.open("./social")
 db.graphs.create("social")
 db.graphs.add_node("social", "alice")
 db.graphs.add_node("social", "bob")
