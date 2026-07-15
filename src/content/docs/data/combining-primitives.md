@@ -144,17 +144,19 @@ time: fork a branch, change documents, embeddings, and graph independently, and
 the parent keeps its own consistent timeline. [Commits](/docs/concepts/commits)
 explains the clock in detail.
 
-## Autoembedding
+## Producing embeddings
 
-The RAG and semantic-search patterns above assume you produce embeddings
-yourself. **Autoembedding** closes that loop: you write text to a source row and
-the engine keeps a *shadow vector* — an engine-owned derived row — up to date for
-you. The intelligence layer decides *what* to embed and which model to use; the
-engine owns the derived row and detects a model mismatch at retrieval time
-(surfacing `failed_precondition.embedding_model_mismatch`). The source row stays
-authoritative — the shadow vector only accelerates retrieval. This is an
-inference-layer capability rather than a stored primitive; see
-[Inference](/docs/guides/inference) for enabling it end to end.
+The RAG and semantic-search patterns above have you produce embeddings yourself:
+call [`inference embed`](/docs/inference#the-operations) (or your own model) and
+`vector upsert` the result under the same key as the source row. That explicit
+embed-then-upsert flow is the supported path in this release, and it keeps the
+boundary clear — the source row is authoritative; the vector only accelerates
+retrieval.
+
+Strata's architecture reserves **autoembedding** — engine-owned derived vectors
+kept in sync as you write text, so retrieval stays fresh without a manual embed
+step, with the source row still authoritative. That capability is not yet exposed
+in this release. See [Inference](/docs/inference) for the model surface today.
 
 ## Where next
 

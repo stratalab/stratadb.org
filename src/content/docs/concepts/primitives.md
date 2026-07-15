@@ -65,7 +65,7 @@ Spaces group related data inside a branch; branches are the isolation boundary b
 
 ## Beyond the five
 
-Two more capabilities sit alongside the primitives but are not data types of their own: [Arrow](/docs/guides/arrow) import/export moves rows in and out in columnar batches, and [inference](/docs/guides/inference) runs local and cloud models. Both operate on the primitives above rather than storing a distinct shape.
+Two more capabilities sit alongside the primitives but are not data types of their own: [Arrow](/docs/guides/arrow) import/export moves rows in and out in columnar batches, and [inference](/docs/inference) runs local and cloud models. Both operate on the primitives above rather than storing a distinct shape.
 
 ## Next
 

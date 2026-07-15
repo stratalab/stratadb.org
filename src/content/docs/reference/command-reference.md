@@ -263,7 +263,7 @@ See [Arrow](/docs/guides/arrow).
 | `strata inference unload [MODEL]` | Unload one cached model, or all cached models when the spec is omitted. |
 | `strata inference cache-status` | Show runtime model-cache diagnostics. |
 
-See [Inference](/docs/guides/inference).
+See [Inference](/docs/inference).
 
 ## Raw command escape hatch
 

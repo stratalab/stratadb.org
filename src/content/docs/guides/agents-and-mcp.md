@@ -135,6 +135,6 @@ One thing to watch when calling tools by hand: wire values are not always spelle
 ## Related
 
 - [MCP Reference](/docs/reference/mcp) — the protocol-level detail behind this walkthrough
-- [Inference](/docs/guides/inference) — running the models that drive an agent
+- [Inference](/docs/inference) — running the models that drive an agent
 - [Command Reference](/docs/reference/command-reference) — the verbs the catalogs enumerate
 - [Error Reference](/docs/reference/error-reference) — the codes `agents errors` returns

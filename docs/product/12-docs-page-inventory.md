@@ -73,12 +73,12 @@ render from the release bundle (`Doc 11 §7.2`).
 ### 5 · Inference `[N]` — its own section; links to `[G]` §8 `reference/inference`
 | Page | Action | Source / notes |
 |---|---|---|
-| `inference/index` (the inference model) | move | from `guides/inference` |
-| `inference/chat` · `embeddings` · `reranking` | new | split from the guide as it grows |
-| `inference/local-models` | new | pull/cache/runtime; the `[cuda]` companion note |
-| `inference/providers-and-keys` | new | BYOK; reuse `guides/*` key content |
-| `inference/tools-structured-outputs` | new | |
-| `inference/autoembedding` | new | bridges into §4 Combining |
+| `inference/index` (the inference model) | **done** | moved from `guides/inference`; reframed as capability + catalog + operations + section map |
+| `inference/providers-and-keys` | **done** | BYOK; 3 providers, env vars + `strata config set <p>.api_key`, resolution order, acquisition URLs |
+| `inference/local-models` | **done** | pull/cache/runtime + local build feature + CPU/`[cuda]` note |
+| `inference/chat` · `embeddings` · `reranking` | new | deferred — "split from the guide as it grows"; operations live in `inference/index` for now |
+| `inference/tools-structured-outputs` | new | deferred — needs a live-model transcript; the G-series surface (tools/tool_choice/json_schema/logprobs) exists in the CLI |
+| ~~`inference/autoembedding`~~ | **deferred** | the feature is **not implemented in V1** (0 refs to autoembed/shadow-vector in engine/intelligence); CLAUDE.md invariants 24–26 reserve the architecture only. Ship the page with the feature. §4 Combining reframed to the explicit embed-then-upsert flow. |
 
 ### 6 · Guides `[N]` — cross-cutting only
 | Page | Action | Source / notes |

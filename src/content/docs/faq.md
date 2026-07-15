@@ -100,7 +100,7 @@ Not with the released binary. The shipped build executes inference through
 cloud providers (Anthropic, OpenAI, Google — bring an API key); local GGUF
 execution is compiled in only when the binary is built with the local
 feature. The model catalog commands work either way. See
-[Inference](/docs/guides/inference).
+[Inference](/docs/inference).
 
 ## Language SDKs and MCP
 

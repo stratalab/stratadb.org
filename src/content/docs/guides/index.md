@@ -35,9 +35,9 @@ failures, and health.
 
 ## Integration
 
-Connect Strata to models, columnar tooling, shared datasets, and agents.
+Connect Strata to columnar tooling, shared datasets, and agents. Running models
+has its own section — see [Inference](/docs/inference).
 
-- [Inference](/docs/guides/inference) — run local GGUF models and cloud providers.
 - [Arrow](/docs/guides/arrow) — import and export data as Apache Arrow.
 - [Cloning Datasets](/docs/guides/cloning-datasets) — clone a dataset from a hub into a local database.
 - [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface and Model Context Protocol server.

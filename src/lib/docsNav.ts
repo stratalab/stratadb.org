@@ -19,11 +19,12 @@ export interface NavSection {
   groups?: NavGroup[];
 }
 
-const SECTION_ORDER = ['getting-started', 'concepts', 'data', 'guides', 'cookbook', 'reference'];
+const SECTION_ORDER = ['getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference'];
 const SECTION_TITLES: Record<string, string> = {
   'getting-started': 'Getting Started',
   concepts: 'Concepts',
   data: 'Working with Data',
+  inference: 'Inference',
   guides: 'Guides',
   cookbook: 'Cookbook',
   reference: 'Reference',
@@ -34,6 +35,8 @@ const PREFERRED: Record<string, string[]> = {
   'getting-started': ['getting-started', 'getting-started/installation', 'getting-started/first-database', 'getting-started/for-agents'],
   // Working with Data: the five primitives in substrate order, then the cross-cutting spine.
   data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
+  // Inference: the model overview, then the cloud and local enabling pages.
+  inference: ['inference', 'inference/providers-and-keys', 'inference/local-models'],
 };
 
 // Generated command-reference families (staged under reference/<family>/ by

@@ -104,5 +104,5 @@ database and stay consistent. Keeping the authoritative text in
 [KV](/docs/guides/kv-store) and only the embedding in the
 [vector store](/docs/guides/vector-store) means search accelerates retrieval
 without becoming the system of record. When you add local or cloud inference, the
-[inference guide](/docs/guides/inference) shows how `embed` output feeds the same
+[inference guide](/docs/inference) shows how `embed` output feeds the same
 upsert and query commands used here.

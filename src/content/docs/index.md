@@ -69,7 +69,7 @@ branches, the same versioning, and the same durability guarantees.
   [error handling](/docs/guides/error-handling),
   [agents and MCP](/docs/guides/agents-and-mcp),
   [cloning datasets](/docs/guides/cloning-datasets),
-  [Arrow](/docs/guides/arrow), and [inference](/docs/guides/inference).
+  [Arrow](/docs/guides/arrow), and [inference](/docs/inference).
 - **[Cookbook](/docs/cookbook/agent-state-management)** — end-to-end patterns:
   [agent state](/docs/cookbook/agent-state-management),
   [multi-agent coordination](/docs/cookbook/multi-agent-coordination),
