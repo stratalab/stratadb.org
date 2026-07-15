@@ -41,7 +41,7 @@ error: [invalid_argument.cli.no_database]: no database specified
 
 A handful of commands need no database at all — `strata init`, `strata agents guide`, `strata config path`, and the like.
 
-See [Database Configuration](/docs/guides/database-configuration) for what durable and cache mode mean, and [Durability](/docs/concepts/durability) for the underlying model.
+See [Database Configuration](/docs/guides/configuration) for what durable and cache mode mean, and [Durability](/docs/concepts/durability) for the underlying model.
 
 ## Global options
 
@@ -59,7 +59,7 @@ These appear before the command. `--branch` and `--space` are also accepted afte
 | `-h, --help` | Print help |
 | `-V, --version` | Print the version |
 
-Branches and spaces are the two organizing dimensions of a database. See [Branches](/docs/concepts/branches), [Branch Management](/docs/guides/branch-management), and [Spaces](/docs/guides/spaces).
+Branches and spaces are the two organizing dimensions of a database. See [Branches](/docs/concepts/branches), [Branch Management](/docs/guides/branching-workflows), and [Spaces](/docs/guides/spaces).
 
 ## Output formats
 
@@ -170,4 +170,4 @@ The recognized-but-refused verbs are `begin`, `commit`, `rollback`, `txn`, `sear
 - [API Quick Reference](/docs/reference/api-quick-reference) — the common operation per capability.
 - [Configuration Reference](/docs/reference/configuration-reference) — database and hub configuration.
 - [Error Reference](/docs/reference/error-reference) — the error model.
-- [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface and MCP server.
+- [Agents and MCP](/docs/agents) — the self-describing surface and MCP server.

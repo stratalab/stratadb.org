@@ -111,10 +111,10 @@ unrelated task
 Coordination here is by isolation and aggregation. Each agent owns a private
 [branch](/docs/concepts/branches), so concurrent work cannot conflict; you gather
 outcomes by reading each branch. Strata has no branch-merge step, so the pattern
-is a shared append-only [event journal](/docs/guides/event-log) plus per-branch
+is a shared append-only [event journal](/docs/data/events) plus per-branch
 reads — and when you want an agent's result to graduate to the shared branch, you
 replay its writes there, as shown in
 [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches).
 [Spaces](/docs/guides/spaces) add an orthogonal partition for keeping independent
-runs apart, and the [branch management guide](/docs/guides/branch-management)
+runs apart, and the [branch management guide](/docs/guides/branching-workflows)
 covers forking and deleting agent branches.

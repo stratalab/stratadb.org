@@ -6,24 +6,98 @@ export interface NavItem {
   title: string;
   href: string;
 }
+// A nested group within a section — used for the generated command reference,
+// where each family (kv, vector, …) is a sub-tree (Doc 11 §7.1).
+export interface NavGroup {
+  title: string;
+  href?: string;
+  items: NavItem[];
+}
 export interface NavSection {
   title: string;
   items: NavItem[];
+  groups?: NavGroup[];
 }
 
-const SECTION_ORDER = ['getting-started', 'concepts', 'guides', 'cookbook', 'reference'];
+const SECTION_ORDER = ['why-strata', 'getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference', 'agents'];
 const SECTION_TITLES: Record<string, string> = {
+  'why-strata': 'Why Strata',
   'getting-started': 'Getting Started',
   concepts: 'Concepts',
+  data: 'Working with Data',
+  inference: 'Inference',
   guides: 'Guides',
   cookbook: 'Cookbook',
   reference: 'Reference',
+  agents: 'For AI Agents',
 };
 // Curated ordering where narrative order matters; everything else alphabetical.
 const PREFERRED: Record<string, string[]> = {
   // NB: Astro collapses "<dir>/index" slugs to "<dir>"
+  'why-strata': ['why-strata', 'why-strata/when-to-use', 'why-strata/comparisons'],
   'getting-started': ['getting-started', 'getting-started/installation', 'getting-started/first-database', 'getting-started/for-agents'],
+  // Concepts in pedagogical order: the model, then history/isolation, organizing, the contract.
+  concepts: [
+    'concepts', 'concepts/embedded-architecture', 'concepts/primitives', 'concepts/value-types',
+    'concepts/branches', 'concepts/commits', 'concepts/time-travel', 'concepts/durability',
+    'concepts/spaces', 'concepts/hub-and-clone', 'concepts/errors',
+  ],
+  // Working with Data: the five primitives in substrate order, then the cross-cutting spine.
+  data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
+  // Inference: the model overview, then the cloud and local enabling pages.
+  inference: ['inference', 'inference/providers-and-keys', 'inference/local-models'],
+  // Guides: cross-cutting how-to, grouped history → operating → moving data → shipping.
+  guides: [
+    'guides', 'guides/branching-workflows', 'guides/time-travel', 'guides/spaces',
+    'guides/configuration', 'guides/error-handling', 'guides/observability',
+    'guides/import-export', 'guides/cloning-datasets', 'guides/migrating', 'guides/deploying',
+  ],
+  // For AI Agents: the front door, then guide/index/mcp/machine-docs.
+  agents: ['agents', 'agents/agents-guide', 'agents/command-index', 'agents/mcp-server', 'agents/machine-docs'],
 };
+
+// Generated command-reference families (staged under reference/<family>/ by
+// scripts/fetch-docs.mjs). Order = the IDL family order; titles are readable.
+const REFERENCE_FAMILIES = ['kv', 'json', 'vector', 'event', 'graph', 'branch', 'space', 'admin', 'arrow', 'inference'];
+const FAMILY_TITLES: Record<string, string> = {
+  kv: 'Key-Value', json: 'JSON', vector: 'Vectors', event: 'Events', graph: 'Graph',
+  branch: 'Branches', space: 'Spaces', admin: 'Admin', arrow: 'Arrow', inference: 'Inference',
+};
+
+const hrefFor = (slug: string, dir: string) =>
+  slug.endsWith('/index') || slug === 'index' ? `/docs/${dir}` : `/docs/${slug}`;
+
+type Doc = Awaited<ReturnType<typeof getCollection<'docs'>>>[number];
+
+// Reference nests: hand-written cross-cutting pages (CLI, errors, …) as flat
+// items; each generated command family as a sub-group.
+function referenceSection(entries: Doc[]): NavSection {
+  const family = new Set(REFERENCE_FAMILIES);
+  const topLevel = entries.filter((e) => {
+    const parts = e.slug.split('/');
+    return parts.length === 1 || (parts.length === 2 && !family.has(parts[1]));
+  });
+  const groups: NavGroup[] = [];
+  for (const fam of REFERENCE_FAMILIES) {
+    const commands = entries
+      .filter((e) => e.slug.startsWith(`reference/${fam}/`))
+      .sort((a, b) => a.data.title.localeCompare(b.data.title));
+    const index = entries.find((e) => e.slug === `reference/${fam}`);
+    if (!commands.length && !index) continue;
+    groups.push({
+      title: FAMILY_TITLES[fam] ?? fam,
+      href: index ? `/docs/reference/${fam}` : undefined,
+      items: commands.map((e) => ({ title: e.data.title, href: `/docs/${e.slug}` })),
+    });
+  }
+  return {
+    title: SECTION_TITLES.reference,
+    items: topLevel
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+      .map((e) => ({ title: e.data.title, href: hrefFor(e.slug, 'reference') })),
+    groups: groups.length ? groups : undefined,
+  };
+}
 
 export async function docsNav(): Promise<NavSection[]> {
   const docs = await getCollection('docs');
@@ -32,6 +106,12 @@ export async function docsNav(): Promise<NavSection[]> {
   for (const dir of SECTION_ORDER) {
     const entries = docs.filter((d) => d.slug.startsWith(`${dir}/`) || d.slug === dir);
     if (!entries.length) continue;
+
+    if (dir === 'reference') {
+      sections.push(referenceSection(entries));
+      continue;
+    }
+
     const preferred = PREFERRED[dir] ?? [];
     entries.sort((a, b) => {
       const pa = preferred.indexOf(a.slug);
@@ -41,10 +121,7 @@ export async function docsNav(): Promise<NavSection[]> {
     });
     sections.push({
       title: SECTION_TITLES[dir] ?? dir,
-      items: entries.map((e) => ({
-        title: e.data.title,
-        href: e.slug.endsWith('/index') || e.slug === 'index' ? `/docs/${dir}` : `/docs/${e.slug}`,
-      })),
+      items: entries.map((e) => ({ title: e.data.title, href: hrefFor(e.slug, dir) })),
     });
   }
 

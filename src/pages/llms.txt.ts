@@ -10,10 +10,10 @@ const BODY = `# StrataDB
 > core, MCP server built into the binary. Apache-2.0. v${release.version}.
 
 ## Start here
-- [For AI agents — integration recipe](https://stratadb.org/docs/getting-started/for-agents.md)
+- [For AI agents — integration recipe](https://stratadb.org/docs/agents.md)
 - [Installation](https://stratadb.org/docs/getting-started/installation.md)
 - [API quick reference](https://stratadb.org/docs/reference/api-quick-reference.md)
-- [MCP server reference](https://stratadb.org/docs/reference/mcp.md)
+- [MCP server reference](https://stratadb.org/docs/agents/mcp-server.md)
 - [Concepts: branches](https://stratadb.org/docs/concepts/branches.md)
 - [Error code registry](https://stratadb.org/e/)
 

@@ -48,7 +48,7 @@ The five data capabilities are KV, JSON, event log, vector, and graph. Branches 
 | `strata config path` | Print the global strata config file path. |
 | `strata config show` | Print the resolved hub configuration and which layer supplied it. |
 
-See the [Configuration Reference](/docs/reference/configuration-reference) and [Database Configuration](/docs/guides/database-configuration).
+See the [Configuration Reference](/docs/reference/configuration-reference) and [Database Configuration](/docs/guides/configuration).
 
 ## Cloning
 
@@ -74,7 +74,7 @@ See [Cloning Datasets](/docs/guides/cloning-datasets).
 |--------|-------------|
 | `strata mcp serve` | Serve MCP over stdio (newline-delimited JSON-RPC; logs on stderr). |
 
-See [Agents and MCP](/docs/guides/agents-and-mcp) and the [MCP Server Reference](/docs/reference/mcp).
+See [Agents and MCP](/docs/agents) and the [MCP Server Reference](/docs/agents/mcp-server).
 
 ## Branch
 
@@ -86,7 +86,7 @@ See [Agents and MCP](/docs/guides/agents-and-mcp) and the [MCP Server Reference]
 | `strata branch fork <SOURCE> <BRANCH>` | Fork a branch. `--version <V>` or `--timestamp <T>` forks from a retained source point. |
 | `strata branch delete <BRANCH>` | Delete a branch. |
 
-See [Branches](/docs/concepts/branches) and [Branch Management](/docs/guides/branch-management).
+See [Branches](/docs/concepts/branches) and [Branch Management](/docs/guides/branching-workflows).
 
 ## Space
 
@@ -113,7 +113,7 @@ See [Spaces](/docs/guides/spaces).
 | `strata kv count` | Count keys. `--prefix`. |
 | `strata kv sample` | Sample rows. `--prefix`, `--count`. |
 
-See [KV Store](/docs/guides/kv-store).
+See [KV Store](/docs/data/key-value).
 
 ## JSON
 
@@ -136,7 +136,7 @@ See [KV Store](/docs/guides/kv-store).
 | `strata json index drop <NAME>` | Drop an index. |
 | `strata json index list` | List indexes. |
 
-See [JSON Store](/docs/guides/json-store).
+See [JSON Store](/docs/data/json).
 
 ## Vector
 
@@ -165,7 +165,7 @@ See [JSON Store](/docs/guides/json-store).
 | `strata vector query <COLLECTION> [QUERY]` | Search vectors. `-k/--k` (default 10), `--filter`/`--filter-file`, `--diagnostics`. |
 | `strata vector count <COLLECTION>` | Count vectors. |
 
-See [Vector Store](/docs/guides/vector-store).
+See [Vector Store](/docs/data/vectors).
 
 ## Event
 
@@ -182,7 +182,7 @@ See [Vector Store](/docs/guides/vector-store).
 | `strata event range-time <START_TS>` | Read events by timestamp range. `--end-ts`, `--limit`, `--direction`, `--event-type`. |
 | `strata event verify-chain` | Verify sequence density and hash linkage. |
 
-See [Event Log](/docs/guides/event-log).
+See [Event Log](/docs/data/events).
 
 ## Graph
 
@@ -228,7 +228,7 @@ See [Event Log](/docs/guides/event-log).
 | `strata graph bulk-insert <GRAPH>` | Ingest nodes and edges from JSON in chunked commits. `--data`/`--file`, `--chunk-size`. |
 | `strata graph bfs <GRAPH> <START>` | Run a bounded breadth-first traversal. `--max-depth`, `--max-nodes`, `--edge-type` (repeatable), `--direction`. |
 
-See [Graph](/docs/guides/graph).
+See [Graph](/docs/data/graph).
 
 ## Arrow
 
@@ -237,7 +237,7 @@ See [Graph](/docs/guides/graph).
 | `strata arrow import <FILE_PATH> --target <kv\|json\|vector>` | Import an Arrow-compatible file. `--format <parquet\|csv\|jsonl>`, `--key-column`, `--value-column`, `--collection`. |
 | `strata arrow export <PATH> --primitive <kv\|json\|event\|vector\|graph> --format <parquet\|csv\|jsonl>` | Export a primitive to a file. `--prefix`, `--limit`, `--collection`, `--graph`, `--event-type`. Graph exports use `<PATH>` as a stem for node and edge files. |
 
-See [Arrow](/docs/guides/arrow).
+See [Arrow](/docs/guides/import-export).
 
 ## Inference
 
@@ -263,7 +263,7 @@ See [Arrow](/docs/guides/arrow).
 | `strata inference unload [MODEL]` | Unload one cached model, or all cached models when the spec is omitted. |
 | `strata inference cache-status` | Show runtime model-cache diagnostics. |
 
-See [Inference](/docs/guides/inference).
+See [Inference](/docs/inference).
 
 ## Raw command escape hatch
 

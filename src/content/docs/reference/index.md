@@ -15,6 +15,7 @@ Precise, verified specifications for the `strata` binary and the database it ope
 - **[Configuration Reference](/docs/reference/configuration-reference)** — database options, durability, and the resolved hub configuration.
 - **[Error Reference](/docs/reference/error-reference)** — the error model and the public error-code registry.
 - **[Value Type Reference](/docs/reference/value-type-reference)** — the value types stored and returned across capabilities.
-- **[MCP Server](/docs/reference/mcp)** — the Model Context Protocol server that exposes the database to agents.
+
+The Model Context Protocol server now lives in [For AI agents](/docs/agents/mcp-server).
 
 The Node and Python SDKs are in progress; their references will be generated from the same command index that will eventually generate these pages.

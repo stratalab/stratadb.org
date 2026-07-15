@@ -124,5 +124,5 @@ strata:experiment/default>
 ## Next
 
 - [Commits](/docs/concepts/commits) — how writes on a branch become versioned and durable
-- [Branch Management Guide](/docs/guides/branch-management) — the full branch API
+- [Branch Management Guide](/docs/guides/branching-workflows) — the full branch API
 - [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches) and [Multi-Agent Coordination](/docs/cookbook/multi-agent-coordination) — worked patterns

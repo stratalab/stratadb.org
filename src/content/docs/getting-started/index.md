@@ -13,7 +13,7 @@ New to StrataDB? Take these three steps in order.
 2. **[Your first database](/docs/getting-started/first-database)** — create a
    durable database, work in the REPL and one-shot forms, write across the KV
    and JSON capabilities, fork a branch, and read an earlier version.
-3. **[For AI agents](/docs/getting-started/for-agents)** — if you are wiring
+3. **[For AI agents](/docs/agents)** — if you are wiring
    StrataDB into a coding agent or an MCP client, start here for the integration
    recipe.
 
@@ -48,7 +48,7 @@ run the built-in MCP server.
 Once the moves feel familiar, read [Concepts](/docs/concepts/branches) to
 understand [branches](/docs/concepts/branches), [commits](/docs/concepts/commits),
 and [durability](/docs/concepts/durability). Then use the
-[Guides](/docs/guides/kv-store) to go deep on one capability at a time, and the
+[Guides](/docs/data/key-value) to go deep on one capability at a time, and the
 [Cookbook](/docs/cookbook/agent-state-management) for end-to-end patterns.
 
 If something breaks, [Troubleshooting](/docs/troubleshooting) lists real failure

@@ -95,9 +95,9 @@ strata ./agent.db --raw json get agent '$' --as-of 9
 ## Why this works
 
 Each primitive carries its own version history, so you never overwrite the past —
-you append to it. Config lives in [KV](/docs/guides/kv-store), evolving memory in
-a [JSON document](/docs/guides/json-store), and every action in the
-[event log](/docs/guides/event-log). Because reads accept a
+you append to it. Config lives in [KV](/docs/data/key-value), evolving memory in
+a [JSON document](/docs/data/json), and every action in the
+[event log](/docs/data/events). Because reads accept a
 [commit](/docs/concepts/commits) timestamp via `--as-of`, "what did the agent
 know at step 1" is one query, not a reconstruction. When you need to branch from
 an earlier point rather than just read it, fork the branch at that version — see

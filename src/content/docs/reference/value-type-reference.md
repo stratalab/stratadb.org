@@ -169,6 +169,6 @@ Every mutating command returns the same receipt shape. A representative write un
 
 ## See also
 
-- Store guides: [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store), [Vector](/docs/guides/vector-store), [Event Log](/docs/guides/event-log).
+- Store guides: [KV](/docs/data/key-value), [JSON](/docs/data/json), [Vector](/docs/data/vectors), [Event Log](/docs/data/events).
 - [API Quick Reference](/docs/reference/api-quick-reference) and [CLI Reference](/docs/reference/cli).
 - [Error Reference](/docs/reference/error-reference) — the structured error model.

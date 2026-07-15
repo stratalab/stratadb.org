@@ -1,52 +1,46 @@
 ---
 title: "Guides"
 section: "guides"
-description: "Task-focused walkthroughs for every StrataDB capability and platform surface."
+description: "Cross-cutting how-to: branching, time travel, spaces, configuration, import/export, deployment, and migration — the surfaces that apply across every primitive."
 source: "strata-core@v1.0.0"
 ---
 
+These guides are the **cross-cutting** how-to — the surfaces that apply across
+every capability rather than to one data shape. Each is a hands-on walkthrough
+you can follow against a running database; every command and output shown was
+produced by the shipped `strata` binary.
 
-Each guide is a hands-on walkthrough you can follow against a running database.
-Every command and output shown was produced by the shipped `strata` binary.
+Looking for a specific data primitive? Those live in
+[Working with Data](/docs/data/key-value). Running models is
+[Inference](/docs/inference); driving Strata from an agent is
+[For AI agents](/docs/agents). If you are brand new, start with
+[Your first database](/docs/getting-started/first-database).
 
-If you are new, start with [Your First Database](/docs/getting-started/first-database),
-then come back here for depth on the surface you need.
+## History and isolation
 
-## Data primitives
-
-Strata stores five kinds of data over one branch-aware storage substrate.
-
-- [KV Store](/docs/guides/kv-store) — keys and values, prefix listing, versioned reads.
-- [JSON Store](/docs/guides/json-store) — structured documents with path-level access.
-- [Vector Store](/docs/guides/vector-store) — collections, similarity search, metadata filters.
-- [Event Log](/docs/guides/event-log) — append-only event streams read by type or range.
-- [Graph](/docs/guides/graph) — nodes, edges, and graph-core traversal.
-
-## Platform
-
-Surfaces that apply across every primitive: history, isolation, configuration,
-failures, and health.
-
-- [Branch Management](/docs/guides/branch-management) — list, create empty branches, fork from the tip or a past point, and delete.
+- [Branching workflows](/docs/guides/branching-workflows) — list, create empty branches, fork from the tip or a past point, and delete.
+- [Time travel](/docs/guides/time-travel) — read the past with `--as-of`, list history, and reproduce state at a point in time.
 - [Spaces](/docs/guides/spaces) — organize data into named product spaces within a branch.
-- [Database Configuration](/docs/guides/database-configuration) — the `strata config` verbs and hub URL resolution.
-- [Error Handling](/docs/guides/error-handling) — the coded error model, retry policy, and JSON error shape.
+
+## Operating a database
+
+- [Configuration](/docs/guides/configuration) — the `strata config` verbs and hub URL resolution.
+- [Error handling](/docs/guides/error-handling) — the coded error model, retry policy, and JSON error shape.
 - [Observability](/docs/guides/observability) — `ping`, `info`, `health`, `metrics`, `describe`, and `doctor`.
 
-## Integration
+## Moving data in and out
 
-Connect Strata to models, columnar tooling, shared datasets, and agents.
+- [Import & export](/docs/guides/import-export) — move primitives to and from Parquet, CSV, and JSON lines.
+- [Cloning datasets](/docs/guides/cloning-datasets) — clone a prepared dataset from a hub into a local database.
+- [Migrating](/docs/guides/migrating) — bring data over from SQLite, DuckDB, or Redis.
 
-- [Inference](/docs/guides/inference) — run local GGUF models and cloud providers.
-- [Arrow](/docs/guides/arrow) — import and export data as Apache Arrow.
-- [Cloning Datasets](/docs/guides/cloning-datasets) — clone a dataset from a hub into a local database.
-- [Agents and MCP](/docs/guides/agents-and-mcp) — the self-describing surface and Model Context Protocol server.
+## Shipping it
+
+- [Deploying](/docs/guides/deploying) — embed in an app, run in the browser, and target the edge.
 
 ## Reference
 
-When you want the exhaustive surface rather than a walkthrough:
-
-- [CLI Reference](/docs/reference/cli) — every command and flag.
-- [Command Reference](/docs/reference/command-reference) — the raw serialized command catalog.
-- [Error Reference](/docs/reference/error-reference) — the full code registry.
-- [Configuration Reference](/docs/reference/configuration-reference) — every configurable key.
+When you want the exhaustive surface rather than a walkthrough, see the
+[CLI reference](/docs/reference/cli), the generated
+[command reference](/docs/reference/kv), and the
+[error reference](/docs/reference/error-reference).

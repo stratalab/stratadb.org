@@ -118,7 +118,7 @@ error: [invalid_argument.cli.no_database]: no database specified
 
 ## See also
 
-- [Database Configuration guide](/docs/guides/database-configuration) — choosing durable vs. cache, and open options.
+- [Database Configuration guide](/docs/guides/configuration) — choosing durable vs. cache, and open options.
 - [Cloning Datasets guide](/docs/guides/cloning-datasets) — where `hub.url` and `--hub` are used.
 - [CLI Reference](/docs/reference/cli) and [Command Reference](/docs/reference/command-reference).
 - [Error Reference](/docs/reference/error-reference) — the structured error model.

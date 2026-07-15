@@ -245,8 +245,8 @@ target.
 
 - [Concepts: branches](/docs/concepts/branches) and
   [commits](/docs/concepts/commits) — the model behind fork and `--as-of`.
-- [Guides](/docs/guides/kv-store) — each capability in depth:
-  [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store),
-  [event log](/docs/guides/event-log), [vectors](/docs/guides/vector-store),
-  [graph](/docs/guides/graph).
-- [For AI agents](/docs/getting-started/for-agents) — wire this into an agent.
+- [Guides](/docs/data/key-value) — each capability in depth:
+  [KV](/docs/data/key-value), [JSON](/docs/data/json),
+  [event log](/docs/data/events), [vectors](/docs/data/vectors),
+  [graph](/docs/data/graph).
+- [For AI agents](/docs/agents) — wire this into an agent.

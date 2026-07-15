@@ -99,6 +99,6 @@ When in doubt, use a durable database. The cost of the write-ahead log is small,
 ## Next
 
 - [Commits](/docs/concepts/commits) — the `durable` flag on each write receipt
-- [Database Configuration](/docs/guides/database-configuration) — opening, targeting, and inspecting a database
+- [Database Configuration](/docs/guides/configuration) — opening, targeting, and inspecting a database
 - [Observability](/docs/guides/observability) — `info`, `health`, and `doctor`
 - [Troubleshooting](/docs/troubleshooting) — recovery and lock issues

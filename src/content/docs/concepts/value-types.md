@@ -101,4 +101,4 @@ The rule of thumb: **KV is bytes, everything else is structured.** Reach for KV 
 
 - [Primitives](/docs/concepts/primitives) — the five capabilities in full
 - [Value Type Reference](/docs/reference/value-type-reference) — the complete specification
-- [KV Store](/docs/guides/kv-store) and [JSON Store](/docs/guides/json-store) — the two value models in practice
+- [KV Store](/docs/data/key-value) and [JSON Store](/docs/data/json) — the two value models in practice

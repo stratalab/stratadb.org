@@ -124,4 +124,4 @@ strata agents errors --json      # the public error-code registry
 strata ./my-db mcp serve         # Model Context Protocol over stdio
 ```
 
-See [Agents and MCP](/docs/guides/agents-and-mcp) and the [MCP Server Reference](/docs/reference/mcp).
+See [Agents and MCP](/docs/agents) and the [MCP Server Reference](/docs/agents/mcp-server).

@@ -92,7 +92,7 @@ shows where a database was cloned from. See
 Vector similarity search is here — create a collection and run `vector query`.
 The broader standalone search surface and its optimizer are deferred beyond this
 line; the substrate for them is in place. See
-[Vectors](/docs/guides/vector-store).
+[Vectors](/docs/data/vectors).
 
 ### Can it run local models?
 
@@ -100,7 +100,7 @@ Not with the released binary. The shipped build executes inference through
 cloud providers (Anthropic, OpenAI, Google — bring an API key); local GGUF
 execution is compiled in only when the binary is built with the local
 feature. The model catalog commands work either way. See
-[Inference](/docs/guides/inference).
+[Inference](/docs/inference).
 
 ## Language SDKs and MCP
 
@@ -114,8 +114,8 @@ can run a subprocess or speak MCP can drive it now.
 
 The Model Context Protocol server is built into the binary — run
 `strata <db> mcp serve`; there is no separate package to install. See
-[For AI agents](/docs/getting-started/for-agents) and
-[Agents and MCP](/docs/guides/agents-and-mcp).
+[For AI agents](/docs/agents) and
+[Agents and MCP](/docs/agents).
 
 ## Still stuck?
 

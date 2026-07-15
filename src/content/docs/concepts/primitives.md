@@ -11,11 +11,11 @@ StrataDB gives you **five data primitives**, each shaped for a different job rat
 
 | Primitive | Shape | Best for |
 |-----------|-------|----------|
-| **[KV](/docs/guides/kv-store)** | key → bytes | Working memory, config, scratchpads |
-| **[JSON](/docs/guides/json-store)** | key → JSON document with path access | Structured records, conversation state |
-| **[Event log](/docs/guides/event-log)** | append-only, hash-linked sequence of typed events | Audit trails, tool-call history, decision logs |
-| **[Vector](/docs/guides/vector-store)** | collections of keyed embeddings with metadata | Similarity search, RAG context, agent memory |
-| **[Graph](/docs/guides/graph)** | typed nodes and weighted, typed edges | Relationships, knowledge graphs, traversal |
+| **[KV](/docs/data/key-value)** | key → bytes | Working memory, config, scratchpads |
+| **[JSON](/docs/data/json)** | key → JSON document with path access | Structured records, conversation state |
+| **[Event log](/docs/data/events)** | append-only, hash-linked sequence of typed events | Audit trails, tool-call history, decision logs |
+| **[Vector](/docs/data/vectors)** | collections of keyed embeddings with metadata | Similarity search, RAG context, agent memory |
+| **[Graph](/docs/data/graph)** | typed nodes and weighted, typed edges | Relationships, knowledge graphs, traversal |
 
 A database reports exactly these capabilities. `describe` lists them and their current counts:
 
@@ -54,20 +54,13 @@ There is no general-purpose "state cell" primitive — coordination values live 
 
 ## Spaces: organizing within a branch
 
-Within a single branch, you can partition primitives into **spaces**. A space is an organizational namespace — every operation targets the `default` space unless you pass `--space <name>` or switch spaces in the REPL. A database reports its spaces alongside its branches:
-
-```text
-$ strata ./db describe
-{ "branches": ["default"], "spaces": ["default"], ... }
-```
-
-Spaces group related data inside a branch; branches are the isolation boundary between unrelated data. Reach for a branch when you need isolation, and a space when you just need tidy organization within it. See the [Spaces guide](/docs/guides/spaces).
+Within a single branch, you can partition primitives into **spaces** — every operation targets the `default` space unless you pass `--space <name>`. Spaces group related data inside a branch; branches are the isolation boundary between unrelated data. See the [Spaces concept](/docs/concepts/spaces) for the model and the [Spaces guide](/docs/guides/spaces) for the verbs.
 
 ## Beyond the five
 
-Two more capabilities sit alongside the primitives but are not data types of their own: [Arrow](/docs/guides/arrow) import/export moves rows in and out in columnar batches, and [inference](/docs/guides/inference) runs local and cloud models. Both operate on the primitives above rather than storing a distinct shape.
+Two more capabilities sit alongside the primitives but are not data types of their own: [Arrow](/docs/guides/import-export) import/export moves rows in and out in columnar batches, and [inference](/docs/inference) runs local and cloud models. Both operate on the primitives above rather than storing a distinct shape.
 
 ## Next
 
 - [Value Types](/docs/concepts/value-types) — what a value actually is in each primitive
-- [Guides](/docs/guides/kv-store) — per-primitive API walkthroughs
+- [Guides](/docs/data/key-value) — per-primitive API walkthroughs

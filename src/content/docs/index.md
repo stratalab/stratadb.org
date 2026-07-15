@@ -34,7 +34,7 @@ branches, the same versioning, and the same durability guarantees.
 - **Built for agents.** The binary describes itself — a usage guide, a command
   catalog, and an error registry are all emitted from the running binary — and
   it speaks the Model Context Protocol over stdio. See
-  [For AI agents](/docs/getting-started/for-agents).
+  [For AI agents](/docs/agents).
 
 ## Start here
 
@@ -42,9 +42,9 @@ branches, the same versioning, and the same durability guarantees.
 |---|---|
 | Install the CLI | [Installation](/docs/getting-started/installation) |
 | Create a database and run real commands | [Your first database](/docs/getting-started/first-database) |
-| Wire StrataDB into a coding agent | [For AI agents](/docs/getting-started/for-agents) |
+| Wire StrataDB into a coding agent | [For AI agents](/docs/agents) |
 | Understand the mental model | [Concepts](/docs/concepts/branches) |
-| Learn one capability in depth | [Guides](/docs/guides/kv-store) |
+| Learn one capability in depth | [Guides](/docs/data/key-value) |
 | Build a real pattern | [Cookbook](/docs/cookbook/agent-state-management) |
 | Look up a command or error | [Reference](/docs/reference/cli) |
 
@@ -52,24 +52,24 @@ branches, the same versioning, and the same durability guarantees.
 
 - **[Getting started](/docs/getting-started/installation)** — install the CLI,
   create your [first database](/docs/getting-started/first-database), and set up
-  the [agent front door](/docs/getting-started/for-agents).
+  the [agent front door](/docs/agents).
 - **[Concepts](/docs/concepts/branches)** — the ideas you build on:
   [branches](/docs/concepts/branches), [commits](/docs/concepts/commits),
   [durability](/docs/concepts/durability),
   [primitives](/docs/concepts/primitives), and
   [value types](/docs/concepts/value-types).
-- **[Guides](/docs/guides/kv-store)** — one capability at a time:
-  [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store),
-  [event log](/docs/guides/event-log), [vectors](/docs/guides/vector-store),
-  [graph](/docs/guides/graph), plus cross-cutting guides on
-  [branch management](/docs/guides/branch-management),
+- **[Guides](/docs/data/key-value)** — one capability at a time:
+  [KV](/docs/data/key-value), [JSON](/docs/data/json),
+  [event log](/docs/data/events), [vectors](/docs/data/vectors),
+  [graph](/docs/data/graph), plus cross-cutting guides on
+  [branch management](/docs/guides/branching-workflows),
   [spaces](/docs/guides/spaces),
-  [configuration](/docs/guides/database-configuration),
+  [configuration](/docs/guides/configuration),
   [observability](/docs/guides/observability),
   [error handling](/docs/guides/error-handling),
-  [agents and MCP](/docs/guides/agents-and-mcp),
+  [agents and MCP](/docs/agents),
   [cloning datasets](/docs/guides/cloning-datasets),
-  [Arrow](/docs/guides/arrow), and [inference](/docs/guides/inference).
+  [Arrow](/docs/guides/import-export), and [inference](/docs/inference).
 - **[Cookbook](/docs/cookbook/agent-state-management)** — end-to-end patterns:
   [agent state](/docs/cookbook/agent-state-management),
   [multi-agent coordination](/docs/cookbook/multi-agent-coordination),
@@ -82,7 +82,7 @@ branches, the same versioning, and the same durability guarantees.
   [API quick reference](/docs/reference/api-quick-reference),
   [configuration](/docs/reference/configuration-reference),
   [value types](/docs/reference/value-type-reference),
-  [errors](/docs/reference/error-reference), and [MCP](/docs/reference/mcp).
+  [errors](/docs/reference/error-reference), and [MCP](/docs/agents/mcp-server).
 
 Stuck? Check the [FAQ](/docs/faq) or
 [Troubleshooting](/docs/troubleshooting).
