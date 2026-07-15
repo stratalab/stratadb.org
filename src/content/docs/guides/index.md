@@ -16,11 +16,11 @@ then come back here for depth on the surface you need.
 
 Strata stores five kinds of data over one branch-aware storage substrate.
 
-- [KV Store](/docs/guides/kv-store) — keys and values, prefix listing, versioned reads.
-- [JSON Store](/docs/guides/json-store) — structured documents with path-level access.
-- [Vector Store](/docs/guides/vector-store) — collections, similarity search, metadata filters.
-- [Event Log](/docs/guides/event-log) — append-only event streams read by type or range.
-- [Graph](/docs/guides/graph) — nodes, edges, and graph-core traversal.
+- [KV Store](/docs/data/key-value) — keys and values, prefix listing, versioned reads.
+- [JSON Store](/docs/data/json) — structured documents with path-level access.
+- [Vector Store](/docs/data/vectors) — collections, similarity search, metadata filters.
+- [Event Log](/docs/data/events) — append-only event streams read by type or range.
+- [Graph](/docs/data/graph) — nodes, edges, and graph-core traversal.
 
 ## Platform
 

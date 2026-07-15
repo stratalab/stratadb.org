@@ -44,7 +44,7 @@ branches, the same versioning, and the same durability guarantees.
 | Create a database and run real commands | [Your first database](/docs/getting-started/first-database) |
 | Wire StrataDB into a coding agent | [For AI agents](/docs/agents) |
 | Understand the mental model | [Concepts](/docs/concepts/branches) |
-| Learn one capability in depth | [Guides](/docs/guides/kv-store) |
+| Learn one capability in depth | [Guides](/docs/data/key-value) |
 | Build a real pattern | [Cookbook](/docs/cookbook/agent-state-management) |
 | Look up a command or error | [Reference](/docs/reference/cli) |
 
@@ -58,10 +58,10 @@ branches, the same versioning, and the same durability guarantees.
   [durability](/docs/concepts/durability),
   [primitives](/docs/concepts/primitives), and
   [value types](/docs/concepts/value-types).
-- **[Guides](/docs/guides/kv-store)** — one capability at a time:
-  [KV](/docs/guides/kv-store), [JSON](/docs/guides/json-store),
-  [event log](/docs/guides/event-log), [vectors](/docs/guides/vector-store),
-  [graph](/docs/guides/graph), plus cross-cutting guides on
+- **[Guides](/docs/data/key-value)** — one capability at a time:
+  [KV](/docs/data/key-value), [JSON](/docs/data/json),
+  [event log](/docs/data/events), [vectors](/docs/data/vectors),
+  [graph](/docs/data/graph), plus cross-cutting guides on
   [branch management](/docs/guides/branch-management),
   [spaces](/docs/guides/spaces),
   [configuration](/docs/guides/database-configuration),

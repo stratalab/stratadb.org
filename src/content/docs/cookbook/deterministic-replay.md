@@ -91,7 +91,7 @@ The `replay` branch reads the historical `option 2`; `default` keeps the current
 ## Why this works
 
 Nondeterminism only breaks reproducibility if it is thrown away. Recording each
-input in the [event log](/docs/guides/event-log) turns the run into a replayable
+input in the [event log](/docs/data/events) turns the run into a replayable
 transcript, and hash linkage lets you prove it is unaltered. Every write also
 gets a monotonic [commit](/docs/concepts/commits) version, so forking a
 [branch](/docs/concepts/branches) at that version rebuilds the exact state the

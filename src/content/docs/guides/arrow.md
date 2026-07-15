@@ -110,7 +110,7 @@ strata ./docs.strata arrow import --target json --key-column key --value-column 
 
 ## Related
 
-- [KV Store](/docs/guides/kv-store), [JSON Store](/docs/guides/json-store), and [Vector Store](/docs/guides/vector-store) — the import targets
-- [Graph](/docs/guides/graph) — the node and edge model behind a graph export
+- [KV Store](/docs/data/key-value), [JSON Store](/docs/data/json), and [Vector Store](/docs/data/vectors) — the import targets
+- [Graph](/docs/data/graph) — the node and edge model behind a graph export
 - [Cloning Datasets](/docs/guides/cloning-datasets) — pulling a whole prepared database instead of a file
 - [Command Reference](/docs/reference/command-reference) — every verb and flag

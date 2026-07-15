@@ -113,7 +113,7 @@ See [Spaces](/docs/guides/spaces).
 | `strata kv count` | Count keys. `--prefix`. |
 | `strata kv sample` | Sample rows. `--prefix`, `--count`. |
 
-See [KV Store](/docs/guides/kv-store).
+See [KV Store](/docs/data/key-value).
 
 ## JSON
 
@@ -136,7 +136,7 @@ See [KV Store](/docs/guides/kv-store).
 | `strata json index drop <NAME>` | Drop an index. |
 | `strata json index list` | List indexes. |
 
-See [JSON Store](/docs/guides/json-store).
+See [JSON Store](/docs/data/json).
 
 ## Vector
 
@@ -165,7 +165,7 @@ See [JSON Store](/docs/guides/json-store).
 | `strata vector query <COLLECTION> [QUERY]` | Search vectors. `-k/--k` (default 10), `--filter`/`--filter-file`, `--diagnostics`. |
 | `strata vector count <COLLECTION>` | Count vectors. |
 
-See [Vector Store](/docs/guides/vector-store).
+See [Vector Store](/docs/data/vectors).
 
 ## Event
 
@@ -182,7 +182,7 @@ See [Vector Store](/docs/guides/vector-store).
 | `strata event range-time <START_TS>` | Read events by timestamp range. `--end-ts`, `--limit`, `--direction`, `--event-type`. |
 | `strata event verify-chain` | Verify sequence density and hash linkage. |
 
-See [Event Log](/docs/guides/event-log).
+See [Event Log](/docs/data/events).
 
 ## Graph
 
@@ -228,7 +228,7 @@ See [Event Log](/docs/guides/event-log).
 | `strata graph bulk-insert <GRAPH>` | Ingest nodes and edges from JSON in chunked commits. `--data`/`--file`, `--chunk-size`. |
 | `strata graph bfs <GRAPH> <START>` | Run a bounded breadth-first traversal. `--max-depth`, `--max-nodes`, `--edge-type` (repeatable), `--direction`. |
 
-See [Graph](/docs/guides/graph).
+See [Graph](/docs/data/graph).
 
 ## Arrow
 

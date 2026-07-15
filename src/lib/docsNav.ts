@@ -19,8 +19,9 @@ export interface NavSection {
   groups?: NavGroup[];
 }
 
-const SECTION_ORDER = ['getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference', 'agents'];
+const SECTION_ORDER = ['why-strata', 'getting-started', 'concepts', 'data', 'inference', 'guides', 'cookbook', 'reference', 'agents'];
 const SECTION_TITLES: Record<string, string> = {
+  'why-strata': 'Why Strata',
   'getting-started': 'Getting Started',
   concepts: 'Concepts',
   data: 'Working with Data',
@@ -33,7 +34,14 @@ const SECTION_TITLES: Record<string, string> = {
 // Curated ordering where narrative order matters; everything else alphabetical.
 const PREFERRED: Record<string, string[]> = {
   // NB: Astro collapses "<dir>/index" slugs to "<dir>"
+  'why-strata': ['why-strata', 'why-strata/when-to-use', 'why-strata/comparisons'],
   'getting-started': ['getting-started', 'getting-started/installation', 'getting-started/first-database', 'getting-started/for-agents'],
+  // Concepts in pedagogical order: the model, then history/isolation, organizing, the contract.
+  concepts: [
+    'concepts', 'concepts/embedded-architecture', 'concepts/primitives', 'concepts/value-types',
+    'concepts/branches', 'concepts/commits', 'concepts/time-travel', 'concepts/durability',
+    'concepts/spaces', 'concepts/hub-and-clone', 'concepts/errors',
+  ],
   // Working with Data: the five primitives in substrate order, then the cross-cutting spine.
   data: ['data/key-value', 'data/json', 'data/vectors', 'data/events', 'data/graph', 'data/combining-primitives'],
   // Inference: the model overview, then the cloud and local enabling pages.

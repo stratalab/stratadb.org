@@ -48,7 +48,7 @@ run the built-in MCP server.
 Once the moves feel familiar, read [Concepts](/docs/concepts/branches) to
 understand [branches](/docs/concepts/branches), [commits](/docs/concepts/commits),
 and [durability](/docs/concepts/durability). Then use the
-[Guides](/docs/guides/kv-store) to go deep on one capability at a time, and the
+[Guides](/docs/data/key-value) to go deep on one capability at a time, and the
 [Cookbook](/docs/cookbook/agent-state-management) for end-to-end patterns.
 
 If something breaks, [Troubleshooting](/docs/troubleshooting) lists real failure

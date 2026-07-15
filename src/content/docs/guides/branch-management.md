@@ -165,5 +165,5 @@ path today.
 ## Next
 
 - [Spaces](/docs/guides/spaces) — organize data within a branch.
-- [KV Store](/docs/guides/kv-store) — versioned reads and `--as-of` time travel.
+- [KV Store](/docs/data/key-value) — versioned reads and `--as-of` time travel.
 - [Concepts: Branches](/docs/concepts/branches) — the model behind these verbs.

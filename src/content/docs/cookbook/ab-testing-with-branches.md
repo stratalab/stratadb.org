@@ -128,5 +128,5 @@ fork shares the parent's history until it diverges, the baseline you seed in ste
 shared branch. Promotion is a deliberate replay of the winner's writes onto
 `default`, not an automatic merge, so you decide exactly what graduates. See the
 [branch management guide](/docs/guides/branch-management) for the full lifecycle,
-the [KV store guide](/docs/guides/kv-store) for value reads, and the
-[event log guide](/docs/guides/event-log) for per-branch action counts.
+the [KV store guide](/docs/data/key-value) for value reads, and the
+[event log guide](/docs/data/events) for per-branch action counts.

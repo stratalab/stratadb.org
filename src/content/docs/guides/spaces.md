@@ -136,5 +136,5 @@ branch contains spaces, and forking a branch carries its spaces along.
 ## Next
 
 - [Branch Management](/docs/guides/branch-management) — isolate history with forks.
-- [KV Store](/docs/guides/kv-store) — the primitive used in these examples.
+- [KV Store](/docs/data/key-value) — the primitive used in these examples.
 - [Concepts: Primitives](/docs/concepts/primitives) — how the five data types relate.

@@ -92,7 +92,7 @@ shows where a database was cloned from. See
 Vector similarity search is here — create a collection and run `vector query`.
 The broader standalone search surface and its optimizer are deferred beyond this
 line; the substrate for them is in place. See
-[Vectors](/docs/guides/vector-store).
+[Vectors](/docs/data/vectors).
 
 ### Can it run local models?
 

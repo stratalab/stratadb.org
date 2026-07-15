@@ -29,12 +29,12 @@ render from the release bundle (`Doc 11 §7.2`).
 
 ## 2. Per-section map
 
-### 1 · Why Strata `[N]`
+### 1 · Why Strata `[N]` — **done** (wave 5)
 | Page | Action | Source / notes |
 |---|---|---|
-| `why-strata/index` — what Strata is | new | pull the one-screen framing from the landing hero |
-| `why-strata/when-to-use` | new | appropriate uses + honest boundaries (SQLite "Appropriate Uses") |
-| `why-strata/comparisons` | new | vs SQLite / DuckDB / Redis / vector DBs (moved out of Resources) |
+| `why-strata/index` — what Strata is | **done** | one-screen framing from the FAQ (NOT the landing hero — hero overpromises diff/merge/cherry-pick/search, none of which ship) |
+| `why-strata/when-to-use` | **done** | good fits + poor fits + honest boundaries, from the FAQ |
+| `why-strata/comparisons` | **done** | vs SQLite / DuckDB / Redis / Postgres / vector DBs, at-a-glance table + prose |
 
 ### 2 · Get Started `[N]`
 | Page | Action | Source / notes |
@@ -45,20 +45,24 @@ render from the release bundle (`Doc 11 §7.2`).
 | `getting-started/quickstart-cli` | new | CLI first-success |
 | `getting-started/quickstart-agents` | new | short; links into §7 (full surface there) |
 
-### 3 · Concepts `[N]`
+### 3 · Concepts `[N]` — gaps closed (wave 5)
 | Page | Action | Source / notes |
 |---|---|---|
-| `concepts/index` | keep | |
-| `concepts/embedded-architecture` | new | in-process, cache vs durable, the SQLite/DuckDB analogy |
-| `concepts/primitives` | keep | → "the multi-model data model" |
+| `concepts/index` | **updated** | regrouped into model / history+isolation / organizing / contract; lists all 10 |
+| `concepts/embedded-architecture` | **done** | in-process, no-server, one-writer, durable vs cache, the directory-as-a-unit |
+| `concepts/primitives` | keep | trimmed the inline Spaces section to a pointer (concepts/spaces is the authority) |
 | `concepts/branches` | keep | |
-| `concepts/time-travel` | new | split the read-history story out of branches/commits |
-| `concepts/spaces` | move | the *concept* (how-to stays in §6); from `guides/spaces` |
-| `concepts/commits` | keep | commits, versions & durability |
+| `concepts/time-travel` | **done** | commit clock, `--as-of` across all five, fork-at-time, retention boundary, commit-vs-event-time |
+| `concepts/spaces` | **done** | the *concept* (how-to stays in `guides/spaces`); the two-dimensions model |
+| `concepts/commits` | keep | |
 | `concepts/durability` | keep | |
 | `concepts/value-types` | keep | |
-| `concepts/hub-and-clone` | new | StrataHub & clone artifacts |
-| `concepts/errors` | new | the `class.area.detail` contract |
+| `concepts/hub-and-clone` | **done** | hub, clone artifacts (replace bundles), provenance via `remote` |
+| `concepts/errors` | **done** | the `class.area.detail` contract, recover-by-code, fixed taxonomy, redaction |
+
+**Landing-hero drift flagged:** `src/pages/index.astro` hero tagline claims
+"diff, merge, cherry-pick … and search" — none ship in V1. Why-Strata sourced
+from the FAQ instead. Hero copy is a marketing-page fix, out of this wave's scope.
 
 ### 4 · Working with Data `[N]` — uniform per-primitive; each links to `[G]` §8 reference
 | Page | Action | Source / notes |
