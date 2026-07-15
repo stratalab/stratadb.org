@@ -75,7 +75,7 @@ A coordinator reads each agent's branch and the shared journal.
 ```bash
 strata ./team.db --raw kv get result --branch agent-a
 strata ./team.db --raw kv get result --branch agent-b
-strata ./team.db event len
+strata ./team.db event count
 strata ./team.db event range 0 --json | jq -c '.data.items[] | {seq: .event.sequence, payload: .event.payload}'
 ```
 

@@ -53,8 +53,9 @@ A few capabilities are deliberately out of this line, so you are not surprised:
 - **No local model execution in the released binary.** Inference runs through
   cloud providers by default; local GGUF execution is a build-time feature. See
   [Inference](/docs/inference).
-- **No Python/Node SDK yet.** The supported surfaces today are the `strata` CLI
-  and its [MCP server](/docs/agents/mcp-server); language SDKs are post-V1.
+- **No Node SDK yet.** The supported surfaces today are the `strata` CLI, its
+  [MCP server](/docs/agents/mcp-server), and the
+  [Python SDK](/docs/python) (`stratadb` on PyPI); a Node SDK is post-V1.
 - **No standalone search surface.** Vector similarity search is here; the broader
   search product and its optimizer are deferred.
 

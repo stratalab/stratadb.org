@@ -124,7 +124,6 @@ Index a field to accelerate retrieval over it. `json index create <name>
 
 ```bash
 strata ./mydb json index create by_age '$.age' --index-type numeric
-strata ./mydb json index list
 ```
 
 ```text
@@ -136,6 +135,15 @@ strata ./mydb json index list
   "name": "by_age",
   "space": "default"
 }
+```
+
+`json index list` then shows the index, one compact record per line:
+
+```bash
+strata ./mydb json index list
+```
+
+```text
 {"created_timestamp":9,"created_version":9,"field_path":"age","index_type":"numeric","name":"by_age","space":"default"}
 ```
 

@@ -65,7 +65,21 @@ Run a quick command to confirm the CLI is working:
 strata --cache ping
 ```
 
-Expected output is `pong` followed by the installed version.
+```text
+pong 1.0.0
+```
+
+If something looks off, run the built-in diagnostic:
+
+```bash
+strata doctor
+```
+
+It reports the binary version, platform, Strata home, and PATH visibility —
+and, when pointed at a database directory, a health summary. Every finding
+carries an error code and a fix hint, and the command exits non-zero when
+anything is wrong. [Troubleshooting](/docs/troubleshooting) starts from its
+output.
 
 You can also try a quick interactive session:
 

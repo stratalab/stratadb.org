@@ -75,9 +75,9 @@ Read each variant's score and answer count directly.
 
 ```bash
 strata ./ab.db --raw kv get score --branch variant-a
-strata ./ab.db event len --branch variant-a
+strata ./ab.db event count --branch variant-a
 strata ./ab.db --raw kv get score --branch variant-b
-strata ./ab.db event len --branch variant-b
+strata ./ab.db event count --branch variant-b
 ```
 
 ```text

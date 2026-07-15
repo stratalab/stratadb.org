@@ -174,7 +174,7 @@ See [Vector Store](/docs/data/vectors).
 | `strata event append <EVENT_TYPE> [PAYLOAD]` | Append one event (payload JSON or `@path`; `-f/--file`). |
 | `strata event get <SEQUENCE>` | Read one event. Sequences start at 0. |
 | `strata event exists <SEQUENCE>` | Check event existence. |
-| `strata event len` | Count visible events. |
+| `strata event count` | Count visible events. |
 | `strata event list` | List events. `--event-type`, `--limit`, `--after-sequence`. |
 | `strata event types` | List event types. |
 | `strata event by-type <EVENT_TYPE>` | List events by type. `--limit`, `--after-sequence`. |

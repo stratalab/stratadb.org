@@ -32,6 +32,9 @@ strata ./mydb vector collection list
 {"count":0,"dimension":4,"metric":"cosine","name":"docs"}
 ```
 
+Both commands print the same collection record — the first line is `create`
+echoing the new collection, the second is `list` showing it.
+
 `vector collection stats <name>` reports the same facts for one collection, and
 `vector collection delete <name>` removes it.
 

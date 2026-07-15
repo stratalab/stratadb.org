@@ -19,9 +19,9 @@ for a hands-on tour.
 ### Is it a server?
 
 No. StrataDB is embedded and in-process, like SQLite or DuckDB. You do not start
-a daemon, open a port, or manage a connection pool — you point the CLI (or,
-later, an SDK) at a directory and it opens the database in-process. There is no
-network mode in this line.
+a daemon, open a port, or manage a connection pool — you point the CLI or the
+[Python SDK](/docs/python) at a directory and it opens the database in-process.
+There is no network mode in this line.
 
 ### Is it a replacement for Postgres or Redis?
 

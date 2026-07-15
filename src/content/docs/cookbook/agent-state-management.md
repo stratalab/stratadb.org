@@ -61,7 +61,7 @@ Each `json set` prints `updated agent applied=true`; each `event append` prints
 ```bash
 strata ./agent.db --raw kv get config:model
 strata ./agent.db --raw json get agent '$'
-strata ./agent.db event len
+strata ./agent.db event count
 ```
 
 ```text

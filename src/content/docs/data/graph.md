@@ -175,6 +175,8 @@ strata ./social.strata graph bfs social alice
 
 A graph can carry an ontology: declared object types and link types. While the ontology is a **draft**, you add and redraft types freely; nothing is enforced. When you **freeze** it, subsequent writes validate against it.
 
+This section starts a fresh database at `./org.strata` with a graph named `org`, so the typed examples don't collide with the untyped `social` graph above.
+
 ```bash
 strata ./org.strata graph ontology define-object-type org Person \
   --properties '{"name":{"value_type":"string","required":true},"level":{"value_type":"integer","required":false}}'
