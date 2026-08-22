@@ -124,8 +124,9 @@ strata ./mydb kv get doc --branch experiment   # branched
 strata ./mydb kv get doc                        # final
 ```
 
-Merging a branch back is strict: it refuses when both sides changed
-concurrently. See [Branches](/docs/concepts/branches) and
+Branches diverge freely — this release has no merge command. To bring KV
+writes from one branch onto another, re-apply them on the target. See
+[Branches](/docs/concepts/branches) and
 [Branch Management](/docs/guides/branching-workflows).
 
 ## Deleting
