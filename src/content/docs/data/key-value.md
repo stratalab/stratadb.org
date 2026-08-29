@@ -2,7 +2,7 @@
 title: "Key-Value"
 section: "data"
 description: "Store, read, version, and scan raw byte values with the KV primitive."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 The KV store maps a byte key to a byte value. It is the simplest of the five
@@ -124,9 +124,11 @@ strata ./mydb kv get doc --branch experiment   # branched
 strata ./mydb kv get doc                        # final
 ```
 
-Branches diverge freely — this release has no merge command. To bring KV
-writes from one branch onto another, re-apply them on the target. See
-[Branches](/docs/concepts/branches) and
+To fold KV writes from one branch onto another, promote them with
+`branch merge <source> <target>` — a single atomic commit that carries the
+source's key-value, JSON, and vector changes. By default it refuses divergent
+conflicts (`--strategy strict`); `--strategy source-wins` takes the source's
+side. See [Branches](/docs/concepts/branches) and
 [Branch Management](/docs/guides/branching-workflows).
 
 ## Deleting

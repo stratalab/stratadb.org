@@ -2,7 +2,7 @@
 title: "When to use StrataDB"
 section: "why-strata"
 description: "The workloads StrataDB is built for, and the honest boundaries — what it deliberately is not."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 StrataDB is opinionated about what it is good at. This page is the honest version:
@@ -42,9 +42,12 @@ where it fits, and where it does not.
   directory. Sharing prepared datasets is done by
   [cloning from a hub](/docs/concepts/hub-and-clone); live multi-writer sync
   across machines is out of scope for this line.
-- **Merging divergent branches.** Branching is fork-and-replay, not
-  fork-and-merge — there is no merge command. If your workflow depends on merging
-  two independently-edited branches back together, StrataDB does not do that today.
+- **Git-style automatic merge resolution.** `branch merge` promotes one branch's
+  KV, JSON, and vector changes onto another, but under the default `strict`
+  strategy it refuses when both sides changed the same entity rather than
+  auto-resolving, and it does not merge event or graph data. If you need
+  three-way conflict resolution across divergent edits, resolve it in your
+  application (or take the source side with `--strategy source-wins`).
 
 ## The honest boundaries
 

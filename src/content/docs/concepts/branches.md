@@ -2,7 +2,7 @@
 title: "Branches"
 section: "concepts"
 description: "Branches are the isolation model: every value lives in a branch, forks are cheap, and writes on one branch stay invisible to another."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 A **branch** is an isolated namespace for data. Every value in StrataDB lives inside a branch, and every capability — KV, JSON, event log, vectors, graphs — is branch-aware. Branches are how you keep one agent session, experiment, or tenant from seeing another's data, without copying the whole database.
@@ -93,7 +93,25 @@ v2
 
 - The `default` branch cannot be deleted. Attempting it fails with `invalid_argument.engine.branch_delete`.
 - Cross-branch references are rejected — you cannot point an operation at data in a branch other than the one it targets.
-- There is no merge command in this release. Branches diverge freely; to bring work from one branch onto another, re-apply (replay) the writes you want on the target. This release ships forking, isolated writes, and deletion, and leaves merge to a future surface.
+- Promotion is deliberate, never a silent auto-resolve: `branch merge` refuses divergent conflicts under the default `strict` strategy (`conflict.engine.promotion`) rather than guessing a winner. See [Comparing and promoting branches](#comparing-and-promoting-branches).
+
+## Comparing and promoting branches
+
+Diverged branches are not a dead end. Three verbs inspect and reconcile them:
+
+- `branch diff <a> <b>` reports what differs between two branches across every capability — KV, JSON, vectors, events, and graphs — grouped by space, as entries added, removed, or modified. It is read-only and directional from `a` to `b`.
+- `branch preview <source> <target>` runs a three-way comparison from the fork point and reports the conflicts a promotion would hit, without touching either branch.
+- `branch merge <source> <target>` promotes the source's changes into the target as a single atomic commit, leaving the source unchanged.
+
+```bash
+strata ./db branch diff default experiment
+strata ./db branch preview experiment default
+strata ./db branch merge experiment default
+```
+
+Promotion applies to KV, JSON, and vector data (with their collection configs). Event streams and graphs are compared but never merged — divergent append-only and structural data cannot be three-way merged — so a promotion leaves them untouched.
+
+By default (`--strategy strict`) a promotion refuses with `conflict.engine.promotion` and mutates nothing when both branches changed the same entity differently since the fork point. `--strategy source-wins` instead applies the source's value or tombstone for each conflict. Branches with no shared fork lineage are rejected with `invalid_argument.engine.branch_point`.
 
 ## Choosing a branch per command
 

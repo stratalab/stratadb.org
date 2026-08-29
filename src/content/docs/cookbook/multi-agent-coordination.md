@@ -2,7 +2,7 @@
 title: "Multi-Agent Coordination"
 section: "cookbook"
 description: "Give each agent an isolated branch, share an append-only event journal, and separate independent runs with spaces."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Goal: let several agents work in parallel without stepping on each other, then
@@ -110,10 +110,10 @@ unrelated task
 
 Coordination here is by isolation and aggregation. Each agent owns a private
 [branch](/docs/concepts/branches), so concurrent work cannot conflict; you gather
-outcomes by reading each branch. Strata has no branch-merge step, so the pattern
-is a shared append-only [event journal](/docs/data/events) plus per-branch
-reads — and when you want an agent's result to graduate to the shared branch, you
-replay its writes there, as shown in
+outcomes by reading each branch. A shared append-only
+[event journal](/docs/data/events) plus per-branch reads keep the runs
+observable — and when you want an agent's KV, JSON, or vector result to graduate
+to the shared branch, promote it with `branch merge`, as shown in
 [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches).
 [Spaces](/docs/guides/spaces) add an orthogonal partition for keeping independent
 runs apart, and the [branch management guide](/docs/guides/branching-workflows)

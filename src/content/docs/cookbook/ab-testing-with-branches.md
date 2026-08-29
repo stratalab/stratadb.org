@@ -2,7 +2,7 @@
 title: "A/B Testing with Branches"
 section: "cookbook"
 description: "Fork one branch per variant, run each strategy in isolation, and compare the results without them touching each other."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Goal: run two agent strategies side by side and compare them, with each variant's
@@ -101,23 +101,33 @@ false
 
 ## 6. Promote the winner
 
-There is no branch-merge command. To fold the winning variant into `default`, you
-replay its writes there — read the winner's values and put them on `default`.
-Variant B scored higher (88 vs 74), so promote it.
+Variant B scored higher (88 vs 74), so fold it into `default` with `branch merge`.
+Promotion carries the variant's KV, JSON, and vector writes onto the target as a
+single atomic commit; the source branch is left unchanged.
 
 ```bash
-strata ./ab kv put config:temperature "$(strata ./ab --raw kv get config:temperature --branch variant-b)"
-strata ./ab kv put score "$(strata ./ab --raw kv get score --branch variant-b)"
+strata ./ab branch merge variant-b default
+```
+
+The promotion reports the keys it applied — `config:temperature` and `score` —
+with no conflicts, because `default` never received any per-variant config
+(step 5) and so nothing diverged. Read them back on `default`:
+
+```bash
 strata ./ab --raw kv get config:temperature
 strata ./ab --raw kv get score
 ```
 
 ```text
-created config:temperature applied=true
-created score applied=true
 0.9
 88
 ```
+
+Had both branches changed the same key differently since the fork, the default
+`strict` strategy would refuse with `conflict.engine.promotion` and leave
+`default` untouched; `--strategy source-wins` would take the winner's side
+instead. The variant's event stream stays on its own branch — events are
+compared, never promoted — so `default` keeps an empty log.
 
 ## Why this works
 
@@ -125,8 +135,9 @@ Each fork is an isolated [branch](/docs/concepts/branches): writes on `variant-a
 and `variant-b` never see each other, and neither disturbs `default`. Because a
 fork shares the parent's history until it diverges, the baseline you seed in step
 1 is visible in both variants for free — no cleanup of half-written state on a
-shared branch. Promotion is a deliberate replay of the winner's writes onto
-`default`, not an automatic merge, so you decide exactly what graduates. See the
+shared branch. Promotion with `branch merge` is deliberate and atomic — it folds
+the winner's KV, JSON, and vector writes onto `default` in one commit and refuses
+divergent conflicts by default, so you decide exactly what graduates. See the
 [branch management guide](/docs/guides/branching-workflows) for the full lifecycle,
 the [KV store guide](/docs/data/key-value) for value reads, and the
 [event log guide](/docs/data/events) for per-branch action counts.

@@ -1,16 +1,17 @@
 ---
 title: "Branching workflows"
 section: "guides"
-description: "List, read, create, fork, and delete branches, and understand the fork-and-refuse merge model."
-source: "strata-core@v1.0.0"
+description: "List, read, create, fork, diff, preview, promote, and delete branches, and understand the promotion model."
+source: "strata-core@v1.1.0"
 ---
 
 
 A branch is an isolated line of history. Every primitive is branch-aware, forks
 are cheap, and writes on one branch are invisible to every other branch until
 you fork again. For the mental model, see
-[Concepts: Branches](/docs/concepts/branches). This guide covers the five branch
-verbs on the CLI: `list`, `get`, `create`, `fork`, and `delete`.
+[Concepts: Branches](/docs/concepts/branches). This guide covers the branch
+verbs on the CLI: `list`, `get`, `create`, `fork`, `diff`, `preview`, `merge`,
+and `delete`.
 
 Examples use a durable database at `./mydb`. Every branch command also accepts
 `--branch`, `--space`, and `--json`.
@@ -153,14 +154,48 @@ Branch operations fail with stable codes, not prose. Recover by code — see
 - Forking at a version or timestamp outside retained history →
   [`history_unavailable.engine.persistence_history`](/e/history_unavailable.engine.persistence_history).
 
-## Merging
+## Compare, preview, and promote
 
-This release exposes no `branch merge` command. Combine work by forking and
-re-applying writes on the target branch. When merge does run inside the engine,
-it strictly refuses branches whose history has diverged rather than guessing a
-resolution, so there is no silent last-writer-wins. Fork-based workflows —
-review a change on a fork, then replay it onto `default` — are the supported
-path today.
+Diverged branches can be inspected and reconciled with three verbs. All are
+directional and take branch names positionally.
+
+`branch diff <a> <b>` reports what differs between two branches across every
+capability — KV, JSON, vectors, events, and graph nodes, edges, and ontology —
+grouped by space, as entries `added` on `b`, `removed` relative to `a`, and
+`modified` on both. It is read-only:
+
+```bash
+strata ./mydb branch diff default review
+```
+
+`branch preview <source> <target>` runs a three-way comparison from the fork
+point and reports the conflicts a promotion would hit, mutating neither branch.
+Each conflict reports what the chosen `--strategy` would do:
+
+```bash
+strata ./mydb branch preview review default
+```
+
+`branch merge <source> <target>` promotes the source's changes into the target as
+a single atomic commit, leaving the source unchanged:
+
+```bash
+strata ./mydb branch merge review default
+```
+
+Promotion applies to key-value, JSON, and vector data (with their collection
+configs). Event streams and graphs are compared but never merged — divergent
+append-only and structural data cannot be three-way merged — so a promotion
+leaves them untouched.
+
+The default `--strategy strict` refuses with
+[`conflict.engine.promotion`](/e/conflict.engine.promotion) and mutates nothing
+when both branches changed the same entity differently since the fork point.
+`--strategy source-wins` applies the source side's value or tombstone for each
+such conflict and reports every overwritten or deleted target entry. A promotion
+that applies nothing writes no commit. Branches with no shared fork lineage are
+rejected with
+[`invalid_argument.engine.branch_point`](/e/invalid_argument.engine.branch_point).
 
 ## Next
 

@@ -1,7 +1,7 @@
 ---
 title: "Frequently Asked Questions"
 description: "What StrataDB is and isn't, how it stores data, and what changed in the V1 line."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 
@@ -59,9 +59,11 @@ The mental model is the same: fork a branch, get an isolated line of data, and
 writes on the fork are invisible to its parent. A fork is cheap because it
 shares the parent's data until you change something (copy-on-write), and every
 write is a commit you can read back with `--as-of`. Where it differs from git:
-this release has no merge command. You fork, isolate, and time-travel; you do not
-merge two divergent branches back together. The workflow is fork-and-replay, not
-fork-and-merge. See [Branches](/docs/concepts/branches) and
+merge is a deliberate promotion, not a symmetric three-way with automatic
+conflict resolution. `branch merge` folds one branch's KV, JSON, and vector
+changes onto another as a single atomic commit, refusing divergent conflicts by
+default rather than guessing; event streams and graphs are compared but not
+merged. See [Branches](/docs/concepts/branches) and
 [Commits](/docs/concepts/commits).
 
 ## What changed in this line
