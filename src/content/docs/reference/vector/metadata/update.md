@@ -1,13 +1,13 @@
 ---
 title: "Update vector metadata"
 description: "Patch metadata for one vector."
-source: strata-core@1.0.0
+source: strata-core@1.1.0
 section: vector
 ---
 
 Applies a top-level metadata patch to one visible vector. Missing vectors return a no-op mutation acknowledgement.
 
-Successful mutations return an acknowledgement that identifies the affected target, the mutation effect, and commit facts when the operation changed stored state.
+Successful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.
 
 ## Examples
 

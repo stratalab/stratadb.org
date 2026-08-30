@@ -2,7 +2,7 @@
 title: "Python SDK"
 section: "python"
 description: "stratadb — the embedded Strata engine in your Python process, with typed namespaces over the same command surface as the CLI and MCP server."
-source: "strata-python@v1.0.0"
+source: "strata-python@v1.1.0"
 ---
 
 `stratadb` is the Python SDK for Strata: it links the engine **in your process**
@@ -12,7 +12,7 @@ server. It speaks the exact same command surface, value shapes, and
 and the [MCP server](/docs/agents/mcp-server), so learning one channel is
 learning all of them.
 
-> **Availability:** `stratadb` `1.0.0` is the V1 line, and its version tracks the
+> **Availability:** `stratadb` `1.1.0` is the V1 line, and its version tracks the
 > engine (`stratadb.__version__` equals the engine version). The V1 wheels are
 > rolling out to PyPI.
 

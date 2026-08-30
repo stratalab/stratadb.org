@@ -2,7 +2,7 @@
 title: "Deploying"
 section: "guides"
 description: "Ship StrataDB with your app: seed a database in your release build, copy it as a unit, containerize it, and expose it to agents."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Because StrataDB is [embedded](/docs/concepts/embedded-architecture), deploying
@@ -42,7 +42,7 @@ created catalog:1 applied=true
     "vector_collections": []
   },
   "target": "durable_local",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
 ```
 

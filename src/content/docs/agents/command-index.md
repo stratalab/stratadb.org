@@ -22,7 +22,7 @@ strata --cache agents commands --json
 ```
 
 ```text
-{"data":{"command_count":32,"commands":[{"access":"write","batch":"itemwise", ... }]}}
+{"data":{"command_count":130,"commands":[{"access":"write","batch":"itemwise", ... }]}}
 ```
 
 Each entry is fully described: its path, access mode (`read`/`write`), batch

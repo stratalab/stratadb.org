@@ -1,13 +1,13 @@
 ---
 title: "Delete JSON value"
 description: "Delete a whole JSON document or one path inside it."
-source: strata-core@1.0.0
+source: strata-core@1.1.0
 section: json
 ---
 
 Deletes the root path `$` to remove the whole document, or a nested path to remove one field or array element. Missing documents and paths produce a no-op delete acknowledgement rather than an error.
 
-Successful mutations return an acknowledgement that identifies the affected target, the mutation effect, and commit facts when the operation changed stored state.
+Successful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.
 
 ## Examples
 

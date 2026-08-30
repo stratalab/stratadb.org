@@ -1,13 +1,13 @@
 ---
 title: "Remove graph node"
 description: "Remove a graph node and its edges."
-source: strata-core@1.0.0
+source: strata-core@1.1.0
 section: graph
 ---
 
 Removes a node and every edge incident to it in one commit. Removing a node that does not exist is not an error: the acknowledgement reports `deleted: false`.
 
-Successful mutations return an acknowledgement that identifies the affected target, the mutation effect, and commit facts when the operation changed stored state.
+Successful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.
 
 ## Examples
 

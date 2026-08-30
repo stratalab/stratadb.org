@@ -2,7 +2,7 @@
 title: "Observability"
 section: "guides"
 description: "Check a database's liveness, facts, health, metrics, and installation with the read-only status commands."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 
@@ -21,7 +21,7 @@ strata ./mydb ping
 ```
 
 ```text
-pong 1.0.0
+pong 1.1.0
 ```
 
 ```bash
@@ -29,7 +29,7 @@ strata --json ./mydb ping
 ```
 
 ```text
-{"data":{"version":"1.0.0"},"type":"pong"}
+{"data":{"version":"1.1.0"},"type":"pong"}
 ```
 
 ## info — top-line facts
@@ -51,7 +51,7 @@ strata ./mydb info
   "open": true,
   "space_count": 1,
   "target": "durable_local",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
 ```
 
@@ -142,7 +142,7 @@ strata ./mydb describe
     "default"
   ],
   "target": "durable_local",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
 ```
 
@@ -158,7 +158,7 @@ strata doctor
 
 ```text
 {
-  "binary": "1.0.0",
+  "binary": "1.1.0",
   "database": null,
   "home": "~/.strata",
   "issues": [],

@@ -84,6 +84,9 @@ See [Agents and MCP](/docs/agents) and the [MCP Server Reference](/docs/agents/m
 | `strata branch get <BRANCH>` | Read one branch. |
 | `strata branch create <BRANCH>` | Create an empty root branch. |
 | `strata branch fork <SOURCE> <BRANCH>` | Fork a branch. `--version <V>` or `--timestamp <T>` forks from a retained source point. |
+| `strata branch diff <BRANCH_A> <BRANCH_B>` | Compare two branches across every capability. `--as-of <T>` compares as of a timestamp. |
+| `strata branch preview <SOURCE> <TARGET>` | Preview promoting source into target, reporting conflicts without mutating either. `--strategy strict\|source-wins`. |
+| `strata branch merge <SOURCE> <TARGET>` | Promote source's changes into target as one atomic commit. `--strategy strict\|source-wins`. |
 | `strata branch delete <BRANCH>` | Delete a branch. |
 
 See [Branches](/docs/concepts/branches) and [Branch Management](/docs/guides/branching-workflows).

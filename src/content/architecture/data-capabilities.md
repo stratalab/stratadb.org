@@ -1,20 +1,20 @@
 ---
 title: "Data capabilities"
-description: "How the engine turns one branch-aware MVCC row into six capabilities — KV, JSON, event, vector, graph, and branches — plus derived state."
+description: "How the engine turns one branch-aware MVCC row into five data capabilities — KV, JSON, event, vector, and graph — plus derived state."
 order: 5
 ---
 
 StrataDB has exactly one physical storage primitive: a branch-aware, versioned
-(MVCC) key–value row. KV, JSON, events, vectors, graph, and branches are not six
-storage engines bolted together — they are six *engine capabilities* layered over
-that one row. Storage persists bytes, versions, timestamps, and tombstones under
+(MVCC) key–value row. KV, JSON, events, vectors, and graph are not five
+storage engines bolted together — they are five *engine capabilities* layered over
+that one branch-aware row. Storage persists bytes, versions, timestamps, and tombstones under
 opaque space IDs. It does not know what a JSON document, an event log, a vector,
 or a graph edge *is*. All of that meaning lives in the engine. This page is the
 "engine owns semantics" story: how each capability is built over the same
 substrate, what each one declares, and how graph doubles as a relationship layer
 across every other capability.
 
-## One row, six capabilities
+## One row, five capabilities
 
 The engine sees a generic `Key`/`Value` MVCC substrate. KV, JSON, event, vector,
 and graph each build *typed* keys, values, indexes, and derived state over that
@@ -22,10 +22,10 @@ substrate. None of them is a peer storage engine, and none of them can reach
 around the engine to talk to storage directly — only the engine's persistence
 adapter imports storage at all.
 
-Branches are the sixth capability, but of a different kind: every row is already
-branch-tagged and versioned, so branching is the isolation-and-history dimension
-baked into the substrate itself. The other five are data *shapes*; branch is the
-axis they all vary along.
+Branches are not one of the five: they are the isolation-and-history *dimension*
+baked into the substrate itself — every row is already branch-tagged and
+versioned. The five capabilities are data *shapes*; branch is the axis they all
+vary along.
 
 ## What "engine owns semantics" means
 
@@ -88,7 +88,7 @@ not call a sibling capability's internals or hide cross-capability behavior insi
 its own CRUD methods. Cross-capability work is coordinated above the capabilities,
 never smuggled inside one.
 
-## Branches: the sixth capability
+## Branches: the branch-aware dimension
 
 Branching is a first-class product capability, not a copy utility. One canonical
 `BranchId` lives in core; the engine owns its derivation and the branch DAG. The
@@ -170,8 +170,8 @@ graph-aware expansion, result fusion, and temporal index-compatibility checks �
 are **engine services over the capability adapters**, not a seventh data
 capability. They consume each capability's search/text adapter and the control
 plane's recipes and manifests; they do not own authored capability data. That is
-why there are exactly six capabilities — KV, JSON, event, vector, graph, branch —
-and no more.
+why there are exactly five data capabilities — KV, JSON, event, vector, graph —
+over one branch-aware substrate, and no more.
 
 Errors raised at every boundary above use structured `<class>.<area>.<detail>`
 codes — opening a pre-V1 database, an embedding-model mismatch during retrieval,

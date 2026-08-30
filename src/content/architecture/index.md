@@ -31,7 +31,7 @@ that organizes everything else is this:
   checkpoints, compaction, retention, and recovery. It knows *nothing* about KV,
   JSON, events, vectors, or graphs. See [the storage substrate](/architecture/storage-substrate).
 - **engine** — the database-semantics layer. Branches, versions, time travel, the
-  six data capabilities, derived state, commit and batch semantics, public errors,
+  five data capabilities, derived state, commit and batch semantics, public errors,
   and the command boundary all live here. See [data capabilities](/architecture/data-capabilities).
 - **intelligence** — database-aware retrieval and AI orchestration: recipes, query
   expansion, reranking, RAG, and explanation provenance. It consumes the engine
@@ -65,7 +65,7 @@ versioning, time travel, and durability the same way — see
   semantics, the commit timeline, batches, and why there are no manual
   transactions.
 - **[Data capabilities](/architecture/data-capabilities)** — how the engine turns
-  one row into six capabilities, and graph's dual role.
+  one row into five capabilities, and graph's dual role.
 - **[Runtime modes](/architecture/runtime-modes)** — durable, cache, read-only, and
   IPC access, plus the one-binary resource-profile model.
 - **[Errors and diagnostics](/architecture/errors-and-diagnostics)** — how storage

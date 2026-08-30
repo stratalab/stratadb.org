@@ -2,7 +2,7 @@
 title: "Installation"
 section: "getting-started"
 description: "Install the strata CLI with the installer script, Homebrew, or from source."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 
@@ -36,6 +36,8 @@ brew install stratalab/tap/strata
 
 ### From source
 
+Requires Rust 1.91 or newer.
+
 ```bash
 git clone https://github.com/stratalab/strata-core.git
 cd strata-core
@@ -66,7 +68,7 @@ strata --cache ping
 ```
 
 ```text
-pong 1.0.0
+pong 1.1.0
 ```
 
 If something looks off, run the built-in diagnostic:

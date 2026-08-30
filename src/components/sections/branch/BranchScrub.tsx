@@ -43,15 +43,15 @@ const HEAD = {
 // The accumulated session (left terminal). Lines flash in with their act,
 // then dim into history.
 const SESSION: { act: number; cmd?: string; out?: string; branch?: string }[] = [
-  { act: 0, cmd: 'branch create risky', branch: 'main' },
+  { act: 0, cmd: 'branch fork default risky', branch: 'default' },
   { act: 0, out: 'OK' },
   { act: 1, cmd: 'json set portfolio $.strategy "aggressive"', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.stocks 80', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.bonds 15', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.cash 5', branch: 'risky' },
-  { act: 2, cmd: 'branch diff risky', branch: 'main' },
+  { act: 2, cmd: 'branch diff default risky', branch: 'default' },
   { act: 2, out: '4 keys changed' },
-  { act: 3, cmd: 'branch merge risky', branch: 'main' },
+  { act: 3, cmd: 'branch merge risky default', branch: 'default' },
   { act: 3, out: 'merged' },
 ];
 
@@ -169,7 +169,7 @@ function DiffCard({ visible }: { visible: Driver }) {
       style={{ opacity: visible, scale, visibility: visOf(visible), boxShadow: 'var(--shadow-float)' }}
     >
       <div className="flex h-11 items-center gap-2.5 border-b border-line px-5">
-        <span className="font-mono text-mono-body text-ink-mid">branch diff risky</span>
+        <span className="font-mono text-mono-body text-ink-mid">branch diff default risky</span>
         <span className="ml-auto font-mono text-mono-sm text-ok">4 keys</span>
       </div>
       <div className="bg-inset p-6 font-mono text-mono-body leading-8">

@@ -1,7 +1,7 @@
 ---
 title: "Import Arrow file"
 description: "Import an Arrow-compatible file into a product primitive."
-source: strata-core@1.0.0
+source: strata-core@1.1.0
 section: arrow
 ---
 
@@ -40,6 +40,7 @@ $ strata kv get greeting
 | `collection` | `string` | no | Target vector collection for vector imports. |
 | `file_path` | `string` | yes | Input file path. |
 | `format` | `ArrowFileFormat` | no | Input file format. Defaults to extension detection. |
+| `graph` | `string` | no | Target graph for graph imports. |
 | `key_column` | `string` | no | Optional key column override. |
 | `target` | `ArrowImportTarget` | yes | Product primitive to import into. |
 | `value_column` | `string` | no | Optional value, document, or embedding column override. |

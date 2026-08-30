@@ -13,27 +13,27 @@ const SCENARIOS = [
   {
     name: 'hero (set-piece A)',
     exchanges: [
-      ['kv put greeting "hello"', '(version) 1'],
-      ['branch create experiment', 'OK'],
-      // fork-side write happens on the experiment branch in the demo; the CLI
-      // session equivalent uses an explicit branch context where supported.
+      ['kv put greeting hello', 'created greeting applied=true'],
+      ['branch create experiment', '"name": "experiment"'],
+      // A key that was never written reads back as nil.
       ['kv get config.theme', '(nil)'],
     ],
   },
   {
     name: 'branching (verb set)',
     exchanges: [
-      ['branch create risky', 'OK'],
-      ['branch diff risky', ''],
-      ['branch delete risky', 'OK'],
+      ['branch create risky', '"name": "risky"'],
+      // diff is directional and takes two branch names.
+      ['branch diff default risky', '"branch_a": "default"'],
+      ['branch delete risky', 'deleted applied=true'],
     ],
   },
   {
     name: 'install (first write)',
     exchanges: [
-      ['kv put hello world', '(version) 1'],
-      ['kv get hello', '"world"'],
-      ['ping', 'PONG'],
+      ['kv put hello world', 'created hello applied=true'],
+      ['kv get hello', 'world'],
+      ['ping', 'pong'],
     ],
   },
 ];

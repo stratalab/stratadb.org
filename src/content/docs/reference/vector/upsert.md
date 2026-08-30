@@ -1,13 +1,13 @@
 ---
 title: "Upsert vector"
 description: "Insert or replace one vector."
-source: strata-core@1.0.0
+source: strata-core@1.1.0
 section: vector
 ---
 
 Upserts one vector key with a dense embedding and optional metadata. The vector dimension must match the collection configuration.
 
-Successful mutations return an acknowledgement that identifies the affected target, the mutation effect, and commit facts when the operation changed stored state.
+Successful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.
 
 ## Examples
 
@@ -36,7 +36,7 @@ $ strata vector exists docs a
 | `collection` | `string` | yes | Collection name. |
 | `key` | `string` | yes | Vector key. |
 | `metadata` | `any` | no | Optional metadata. |
-| `vector` | `number[]` | yes | Dense embedding. |
+| `vector` | `number[]` | yes | Dense embedding. Accepted at wire (f64) precision and narrowed to the stored f32; a value that underflows or overflows f32 is rejected. |
 
 Plus the optional scope: `branch` and `space` (default to the session branch and the `"default"` space).
 

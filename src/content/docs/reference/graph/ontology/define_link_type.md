@@ -1,13 +1,13 @@
 ---
 title: "Define graph link type"
 description: "Define a graph link type."
-source: strata-core@1.0.0
+source: strata-core@1.1.0
 section: graph
 ---
 
 Declares a link type in the graph's ontology: a name, its source and target object types, an optional cardinality hint (for example `many-to-one`), and property definitions. Source and target must name declared object types by the time the ontology is frozen. After freezing, this command fails with `failed_precondition.engine.graph_ontology_frozen`.
 
-Successful mutations return an acknowledgement that identifies the affected target, the mutation effect, and commit facts when the operation changed stored state.
+Successful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.
 
 ## Examples
 
@@ -35,7 +35,7 @@ $ strata graph ontology get g
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| `cardinality` | `string` | no | Optional cardinality hint (e.g. `one-to-many`). |
+| `cardinality` | `string` | no | Optional cardinality: one of `one-to-one`, `one-to-many`, `many-to-one`, or `many-to-many`. Unknown values are rejected. |
 | `graph` | `string` | yes | Graph name. |
 | `name` | `string` | yes | Link type name. |
 | `properties` | `object` | no | Declared properties by name. |

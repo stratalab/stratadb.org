@@ -50,10 +50,10 @@ const CLI_LINES = [
   { text: '$ curl -fsSL stratadb.org/install.sh | sh', cmd: true, dim: true },
   { text: '' },
   { text: '$ strata --cache', cmd: true },
-  { text: 'strata:main › kv put hello world' },
-  { text: '(version) 1', dim: true },
-  { text: 'strata:main › kv get hello' },
-  { text: '"world"', dim: true },
+  { text: 'strata:default/default › kv put hello world' },
+  { text: 'created hello applied=true', dim: true },
+  { text: 'strata:default/default › kv get hello' },
+  { text: 'world', dim: true },
 ];
 
 const MCP_JSON = [
