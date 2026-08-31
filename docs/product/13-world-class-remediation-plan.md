@@ -206,9 +206,10 @@ Problems:
 - The landing page reads as a feature tour, not a product argument. Branching,
   primitives, time travel, and inference are separate set pieces, but the user is
   not guided through a single increasing model of the product.
-- The homepage ends before the handoff. `Resources` and `InstallClose` exist but
-  are not rendered, so the page does not resolve into install, docs,
-  architecture, changelog, or agent surfaces.
+- The homepage handoff should be direct. A separate Resources junction adds
+  another decision layer after the capability story; the page should close on
+  install and let nav/footer carry docs, architecture, changelog, and agent
+  surfaces.
 - Navigation is underpowered. Desktop nav exposes only Docs, while Architecture,
   Changelog, Playground, and agent surfaces are discoverable only indirectly.
 - Important objects move between modes without a stable mental model. The user
@@ -405,8 +406,8 @@ Tasks:
 - Done: rebuilt Native Inference from a command transcript into a database
   workbench: capability check, records in the embedded file, embedding, ranking,
   and generation.
-- Done: re-enabled the final resources and install close so the page does
-  not end abruptly.
+- Done: kept the install close as the final handoff and cut the standalone
+  Resources junction so the page does not drift after the capability story.
 - Done: promoted current navigation surfaces: Docs, Architecture, Changelog, and
   Playground only if Playground remains part of the product.
 - Done: rationalized CTAs so each page has one primary action and a small number of
@@ -417,9 +418,9 @@ Tasks:
   for the landing page.
 - Done: repaired section-entry choreography after monitor testing. Branch pins
   below the nav/rule stack, Primitives keeps its title rail inside the centered
-  pinned viewport, Time Travel now stops in its own centered pinned frame, Native
-  Inference uses a centered non-sticky chapter frame, and primitive links select
-  in place instead of triggering a second scroll jump.
+  pinned viewport, Time Travel and Native Inference now stop in their own centered
+  pinned frames, and primitive links select in place instead of triggering a second
+  scroll jump.
 - Done: sharpened Section 3 from vague "rest lives beside it" language to the
   plain multi-modal data promise: store every kind of app data in one embedded
   database. Branching stays in Section 2; the primitive section should not

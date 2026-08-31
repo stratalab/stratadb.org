@@ -118,6 +118,38 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
   }
 }
 
+async function assertHomepageTimeTravelAnimation(page, viewport) {
+  const slider = page.locator('#time-travel [role="slider"]');
+  await slider.waitFor({ state: 'visible', timeout: 5_000 });
+  const initial = Number(await slider.getAttribute('aria-valuenow'));
+
+  await page.waitForFunction(
+    () =>
+      Number(
+        document.querySelector('#time-travel [role="slider"]')?.getAttribute('aria-valuenow'),
+      ) <= 60,
+    undefined,
+    { timeout: 3_500 },
+  );
+  const mid = Number(await slider.getAttribute('aria-valuenow'));
+
+  await page.waitForFunction(
+    () =>
+      Number(
+        document.querySelector('#time-travel [role="slider"]')?.getAttribute('aria-valuenow'),
+      ) >= 95,
+    undefined,
+    { timeout: 3_500 },
+  );
+  const returned = Number(await slider.getAttribute('aria-valuenow'));
+
+  if (initial < 95 || mid > 60 || returned < 95) {
+    throw new Error(
+      `${viewport.name} /: time-travel playhead did not animate now -> past -> now (${initial}, ${mid}, ${returned})`,
+    );
+  }
+}
+
 async function assertSectionRuleDocked(page, viewport, ruleId) {
   const metrics = await page.locator(`[data-section-rule="${ruleId}"]`).evaluate((el) => {
     const rect = el.getBoundingClientRect();
@@ -259,7 +291,7 @@ async function assertHomepageSectionBreaks(page, viewport) {
       'pinned',
     ],
     ['time-travel', 'time-travel', 'Read any past version of your data.', 'pinned'],
-    ['inference', 'native-inference', 'Inference is built in.', 'static'],
+    ['inference', 'native-inference', 'Inference is built in.', 'pinned'],
   ];
 
   for (const [sectionId, ruleId, title, mode] of sections) {
@@ -268,6 +300,9 @@ async function assertHomepageSectionBreaks(page, viewport) {
     await assertSectionTitleVisible(page, viewport, title, ruleId);
     if (viewport.width >= 1024 && sectionId !== 'branch') {
       await assertSectionTitleNotBunched(page, viewport, title, ruleId);
+    }
+    if (sectionId === 'time-travel') {
+      await assertHomepageTimeTravelAnimation(page, viewport);
     }
     await page.evaluate(() => window.scrollBy(0, Math.min(220, window.innerHeight * 0.22)));
     await page.waitForTimeout(120);

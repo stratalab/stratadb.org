@@ -2,7 +2,7 @@
 // Section 5 (04 §6 v3): "Inference is built in." The section now shows
 // native inference as database work: inspect a model, gather records, embed,
 // rank, and generate without adding a separate AI service layer. The copy and
-// demo share one centered chapter frame; this section does not hold scroll.
+// demo share one centered scroll-owned chapter frame.
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import InferenceDemo from './inference/InferenceDemo.tsx';
@@ -10,10 +10,10 @@ import InferenceDemo from './inference/InferenceDemo.tsx';
 const capabilities = ['embed', 'rank', 'generate', 'tokenize', 'model checks'];
 ---
 
-<section id="inference" class="relative min-h-[100svh] scroll-mt-16">
-  <SectionRule label="NATIVE INFERENCE" index="05" />
+<section id="inference" class="relative min-h-[100svh] scroll-mt-16 lg:h-[180svh]">
+  <SectionRule label="NATIVE INFERENCE" index="05" sticky />
   <div
-    class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:grid-cols-[minmax(17rem,0.28fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:py-0 xl:grid-cols-[minmax(19rem,0.35fr)_minmax(0,1fr)] xl:gap-16"
+    class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:sticky lg:top-[calc(4rem+1.625rem)] lg:h-[calc(100svh-5.625rem)] lg:min-h-0 lg:grid-cols-[minmax(17rem,0.28fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:py-0 xl:grid-cols-[minmax(19rem,0.35fr)_minmax(0,1fr)] xl:gap-16"
   >
     <div class="reveal max-w-[44rem] lg:max-w-none">
       <Heading size="title">Inference is built in.</Heading>

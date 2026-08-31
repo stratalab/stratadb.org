@@ -22,9 +22,9 @@ renders only if its path actually works.
 
 ## 0. Page skeleton
 
-**Seven sections** (restructured 2026-06-11 per Ani: hero + four capability sections +
-resources + install-close). Fixed 128/80 rhythm, 1120px container. Horizon glow at §1
-and §7 only. No scroll furniture.
+**Six sections** (restructured 2026-08-30 per Ani: hero + four capability sections +
+install-close). Fixed 128/80 rhythm, 1120px container. Horizon glow at §1 and §6 only.
+No scroll furniture.
 
 ```
 1 Hero                    feel       executor terminal (set-piece A)
@@ -32,8 +32,7 @@ and §7 only. No scroll furniture.
 3 Multi-primitive         believe    strata column (interactive)
 4 Time travel             believe    scroll-scrub — THE ONLY scrub piece
 5 Native inference        believe    native pipeline demo
-6 Resources               deepen     three quiet cards
-7 Install & start         act        five surfaces + the command close
+6 Install & start         act        five surfaces + the command close
 ```
 
 **The live hero (target architecture, scoped 2026-06-11).** The real engine powers
@@ -71,10 +70,10 @@ RULING SYSTEM — the page reads as one engineered document. Ours, quieter:)_
 
 Every section after the hero opens with a **SectionRule** band: a full-bleed hairline,
 and inside the 70rem column `+ ⟩ EYEBROW` (mono, registration mark, ember chevron) on
-the left and `[ NN / 07 ]` (current index in ember) on the right. The in-flow eyebrows
+the left and `[ NN / 06 ]` (current index in ember) on the right. The in-flow eyebrows
 are RETIRED — the label lives in the rule. Running order: 01 hero (unruled cover) ·
-02 BRANCH · 03 PRIMITIVES · 04 TIME TRAVEL · 05 NATIVE INFERENCE · 06 RESOURCES ·
-07 INSTALL. The same drafting voice recurs inside set-pieces: the primitives rail
+02 BRANCH · 03 PRIMITIVES · 04 TIME TRAVEL · 05 NATIVE INFERENCE · 06 INSTALL.
+The same drafting voice recurs inside set-pieces: the primitives rail
 numbers its layers (`01`–`05` mono), demo bodies sit on a barely-there dot grid
 (graph paper, rgba(255,255,255,0.04) at 22px), and the tabpanel closes with a ruled
 mono footer (`03 / 05 · json — documents with path-level writes`).
@@ -157,16 +156,20 @@ target the section boundary first; any richer state change, such as selecting
 
 **v7 (2026-08-30, Ani): section entry owns the frame.** Branch pins below the
 nav/rule stack instead of the viewport top. Primitives pairs its title rail and
-artifact in one centered pinned frame. Native Inference uses a centered
-non-sticky chapter frame, so old section labels do not blend into it. Primitive
-links and tabs select the matching view in place; they never call
-`window.scrollTo` after the browser lands at the hash target.
+artifact in one centered pinned frame. Primitive links and tabs select the matching
+view in place; they never call `window.scrollTo` after the browser lands at the hash
+target.
 
 **v8 (2026-08-30, Ani): Time Travel needs a stop.** Time Travel is scroll-owned
 again: its rule band docks under the nav and its head/instrument sit in one
 centered pinned frame. The instrument is still direct manipulation; the page
 stop exists to give the self-playing playhead enough time to be noticed during
 normal scrolling.
+
+**v9 (2026-08-30, Ani): all capability set pieces get a stop.** Native Inference
+now follows the same section-break contract as Branches, Primitives, and Time
+Travel: the rule docks, the copy and workbench stay centered in one pinned frame,
+and continued scroll gives the animation time to land before Install begins.
 
 Eyebrow `BRANCHES`; H2 **"Branch the whole database."**; intro: "Test agent
 writes, migrations, and risky data changes away from default. Compare the branch,
@@ -391,7 +394,8 @@ Capability chips beneath (mono pills): embed · rank · generate · tokenize · 
 checks.
 
 **Layout.** Head in the prose column; artifact on the 80rem stage with one quiet ember
-field. Native Inference remains a static centered chapter, not a scroll-owned stop.
+field. Native Inference is scroll-owned: the rule docks below the nav, and the copy
+plus workbench share a centered pinned frame.
 
 **The demo — five beats, one native inference layer (plays once ≥35%):**
 
@@ -407,28 +411,7 @@ field. Native Inference remains a static centered chapter, not a scroll-owned st
    Provider rail shows local GGUF, OpenAI, Anthropic, and Google as routes through the
    same layer. Reduced motion and SSR render the completed workbench.
 
-## 7. Section 6 — Resources
-
-**v2 (2026-06-12): the indexed catalog.** The three cards become three numbered
-hairline ROWS in the drafting voice (the supermemory-derived ruling system applied to
-content): mono numeral `01`–`03` · heading-scale title · body · mono metadata line ·
-arrow. Hover: ember numeral + arrow slide + faint raised wash. Still quiet — it is a
-junction, not a show — but structured like the rest of the document. **Render only
-what exists** (truth rule). H2 (small, `title` scale): **"Go deeper."** (eyebrow in
-the section rule).
-
-| Row                           | Copy                                                                                       | Meta                             | →                       |
-| ----------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------- | ----------------------- |
-| **01 Documentation**          | "Concepts, guides, and the full reference."                                                | concepts · guides · reference    | `/docs`                 |
-| **02 Examples & quickstarts** | "First database in thirty seconds; real patterns after that."                              | quickstarts · cookbook           | `/docs/getting-started` |
-| **03 Whitepapers**            | "The internals, written down: storage engine, concurrency model, durability and recovery." | storage · concurrency · recovery | `/architecture`         |
-
-Standard reveal. (Decided 2026-06-11: **the architecture deep-dives ARE the whitepaper
-collection** — long-form, technical, argued; the label is honest today. Future standalone
-papers join the same collection at `/architecture`. The Phase-4 re-skin of that section
-may lean into paper-style presentation accordingly.)
-
-## 8. Section 7 — Install & start
+## 7. Section 6 — Install & start
 
 **The act section: five surfaces, one product** — humans and agents install in the same
 place. Horizon glow, second and final use (60% hero opacity).
@@ -512,13 +495,15 @@ showcase section** (Foundry = an install surface; the dedicated `/foundry` page 
 pre-approved for when artifacts land) · **the performance section** (stat strip carries
 measured numbers; durability table + trust facts live in docs; one trust line in the
 close) · the standalone search section (absorbed into Native inference) · `60+ MCP
-Tools` stat (re-add in the MCP tab only if build-time verified — Open Q5).
+Tools` stat (re-add in the MCP tab only if build-time verified — Open Q5) · the
+standalone Resources / "Go deeper" section (the nav and install close now carry the
+handoff).
 
 ## Open questions
 
 **None. Signed off 2026-06-11** — all items resolved by Ani: hero H1 confirmed ·
 verb-led head slate approved (all six) · no brew tap, line dropped · seed dataset =
 curated fictional (authored in Phase 2; designed so every demo beat has a real answer in
-the data) · 404 wit kept · MCP tool count omitted · Resources before Install (page ends
-on the command) · **the architecture deep-dives are the whitepaper collection** — the
-card says Whitepapers from day one; future standalone papers join it.
+the data) · 404 wit kept · MCP tool count omitted · Resources section retired
+(2026-08-30; page ends on the command) · **the architecture deep-dives are the whitepaper
+collection** — future standalone papers join it.

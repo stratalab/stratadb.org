@@ -36,6 +36,7 @@ const fmtFull = (ts: number) => new Date(ts).toISOString().slice(0, 19).replace(
 const STOPS = [0, ...HISTORY.map((h) => pos(h.ts)), 1];
 
 export default function TimeScrubber() {
+  const cardRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(1); // playhead, normalized; init = now
   const [dragging, setDragging] = useState(false);
@@ -54,7 +55,7 @@ export default function TimeScrubber() {
   // Reduced motion skips the demo; the "← drag →" label still teaches.
   useEffect(() => {
     if (document.documentElement.dataset.motion === 'reduced') return;
-    const el = trackRef.current;
+    const el = cardRef.current;
     if (!el) return;
     let raf = 0;
     let cancelled = false;
@@ -64,13 +65,15 @@ export default function TimeScrubber() {
         io.disconnect();
         if (interactedRef.current) return;
         const easeInOut = (k: number) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+        const dip = HISTORY[1] ? pos(HISTORY[1].ts) : 0.5;
         const PHASES = [
-          { from: 1, to: 0.5, dur: 800, delay: 600 },
-          { from: 0.5, to: 0.5, dur: 600, delay: 0 },
-          { from: 0.5, to: 1, dur: 800, delay: 0 },
+          { from: 1, to: dip, dur: 800, delay: 420 },
+          { from: dip, to: dip, dur: 620, delay: 0 },
+          { from: dip, to: 1, dur: 800, delay: 0 },
         ];
         let pi = 0;
         let start: number | null = null;
+        setT(1);
         setDemoing(true);
         const step = (now: number) => {
           if (cancelled || interactedRef.current) {
@@ -96,7 +99,7 @@ export default function TimeScrubber() {
         };
         raf = requestAnimationFrame(step);
       },
-      { threshold: 0.5 },
+      { threshold: 0.35 },
     );
     io.observe(el);
     return () => {
@@ -146,6 +149,8 @@ export default function TimeScrubber() {
 
   return (
     <div
+      ref={cardRef}
+      data-time-scrubber
       className="overflow-hidden rounded-(--radius-frame)"
       style={{
         background: 'var(--color-panel)',

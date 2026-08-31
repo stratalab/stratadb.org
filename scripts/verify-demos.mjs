@@ -26,7 +26,7 @@ const REQUIRED = [
   },
   {
     file: 'src/pages/index.astro',
-    strings: ['<Hero />', '<Branching />', '<Resources />', '<InstallClose />'],
+    strings: ['<Hero />', '<Branching />', '<Inference />', '<InstallClose />'],
   },
   {
     file: 'src/lib/engine/heroScript.ts',

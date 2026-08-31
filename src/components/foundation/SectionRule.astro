@@ -11,7 +11,7 @@ interface Props {
   sticky?: boolean;
   class?: string;
 }
-const { label, index, total = '07', sticky = false, class: className = '' } = Astro.props;
+const { label, index, total = '06', sticky = false, class: className = '' } = Astro.props;
 const ruleId = label
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, '-')
