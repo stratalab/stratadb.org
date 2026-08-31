@@ -20,8 +20,11 @@ const REQUIRED = [
       '#primitive-json',
       '#primitive-vector',
       '#primitive-graph',
+      '#install',
       'data-primitive-link',
+      'data-install-mode',
       'strata:primitive-request',
+      'strata:install-mode-request',
     ],
   },
   {
@@ -107,7 +110,7 @@ const REQUIRED = [
   },
   {
     file: 'src/components/sections/install/InstallTabs.tsx',
-    strings: ['Library', 'CLI', 'For agents'],
+    strings: ['Library', 'CLI', 'Hub', 'For agents', 'strata clone iris ./iris'],
   },
 ];
 

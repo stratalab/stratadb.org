@@ -1,5 +1,5 @@
 // The act surface, v3 (04 §8, 2026-06-12) — the mem0.ai steal, by Ani's
-// call: INTEGRATION MODES first (Library · CLI · For agents), language
+// call: INTEGRATION MODES first (Library · CLI · Hub · For agents), language
 // pills inside the window chrome, and the code is a
 // COMPLETE numbered quickstart with step comments — a script you paste
 // and run, not a fragment. Copy-all in the corner; CLI keeps per-command
@@ -149,6 +149,41 @@ const CLI_LINES = [
   { text: 'world', dim: true },
 ];
 
+const HUB_COMMANDS = [
+  'strata clone iris ./iris',
+  'strata ./iris json history iris:35',
+  'strata ./iris remote',
+].join('\n');
+
+const HUB_LINES = [
+  { text: '$ strata clone iris ./iris', cmd: true },
+  { text: '# resolves the dataset and verifies every object' },
+  { text: '' },
+  { text: '$ strata ./iris json history iris:35', cmd: true },
+  { text: '# history keeps the curation correction' },
+  { text: '' },
+  { text: '$ strata ./iris remote', cmd: true },
+  { text: '# clone records Hub origin' },
+];
+
+const HUB_DATASETS = [
+  {
+    name: 'agent-memory-with-experiments',
+    body: 'Agent state, event trace, and retention-policy branches in one clone.',
+    meta: 'agents · events · branches',
+  },
+  {
+    name: 'movielens-100k',
+    body: 'A recommendation sandbox with JSON metadata and vector search ready.',
+    meta: 'vectors · json · retrieval',
+  },
+  {
+    name: 'ab-test-results',
+    body: 'Control and variant arms modeled as branches for direct comparison.',
+    meta: 'experiments · branches',
+  },
+];
+
 const MCP_JSON = [
   '{',
   '  "mcpServers": {',
@@ -175,6 +210,7 @@ const TOK_CLS: Record<string, string> = {
 const MODES = [
   { id: 'library', label: 'Library' },
   { id: 'cli', label: 'CLI' },
+  { id: 'hub', label: 'Hub' },
   { id: 'agents', label: 'For agents' },
 ] as const;
 type ModeId = (typeof MODES)[number]['id'];
@@ -182,6 +218,13 @@ type ModeId = (typeof MODES)[number]['id'];
 const MODE_ICONS: Record<ModeId, ReactNode> = {
   library: <path d="M8 6 4 12l4 6M16 6l4 6-4 6" />,
   cli: <path d="M4 17l6-5-6-5M13 19h7" />,
+  hub: (
+    <>
+      <path d="M6.5 9.5 12 6.2l5.5 3.3v6.6L12 19.4l-5.5-3.3Z" />
+      <path d="M7 9.8 12 12.8l5-3M12 12.8v5.8" />
+      <path d="M4.5 6.6 12 2.5l7.5 4.1" />
+    </>
+  ),
   agents: <path d="M12 3v3m0 12v3M3 12h3m12 0h3M7 7l2 2m6 6 2 2m0-10-2 2m-6 6-2 2" />,
 };
 
@@ -271,15 +314,79 @@ function NumberedScript({ script }: { script: Script }) {
   );
 }
 
+function HubPanel() {
+  return (
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="rounded-(--radius-card) border border-line bg-panel/70 p-4">
+        <div className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+          <span className="font-mono text-mono-body text-ink-hi">Strata Hub</span>
+          <span className="font-mono text-mono-sm text-terracotta-400">prepared databases</span>
+        </div>
+        <p className="mt-4 text-small text-ink-mid">
+          Start from useful data instead of an empty file. A clone becomes a normal local Strata
+          database: branch it, time-travel through it, run inference over it, and keep working
+          offline.
+        </p>
+        <div className="mt-4 space-y-2.5">
+          {HUB_DATASETS.map((dataset) => (
+            <div
+              key={dataset.name}
+              className="rounded-(--radius-control) border border-line bg-inset px-3 py-2.5"
+            >
+              <div className="font-mono text-mono-sm text-ink-hi">{dataset.name}</div>
+              <div className="mt-1 text-small text-ink-mid">{dataset.body}</div>
+              <div className="mt-1.5 font-mono text-mono-sm text-ink-low">{dataset.meta}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3 border-t border-line pt-4 text-small">
+          <a
+            href="/docs/guides/cloning-datasets"
+            className="text-terracotta-500 hover:text-terracotta-400"
+          >
+            Clone guide
+          </a>
+          <a href="/docs/concepts/hub-and-clone" className="text-ink-mid hover:text-ink-hi">
+            How Hub works
+          </a>
+        </div>
+      </div>
+
+      <pre className="overflow-x-auto rounded-(--radius-card) border border-line bg-inset p-4 font-mono text-mono-sm leading-7">
+        {HUB_LINES.map((line, i) =>
+          'cmd' in line && line.cmd ? (
+            <CmdLine key={i} text={line.text} />
+          ) : (
+            <div key={i} className="text-ink-low">
+              {line.text || ' '}
+            </div>
+          ),
+        )}
+      </pre>
+    </div>
+  );
+}
+
 export default function InstallTabs() {
   const [mode, setMode] = useState<ModeId>('library');
   const [lang, setLang] = useState<'py' | 'js'>('py');
 
   useEffect(() => {
-    const m = sessionStorage.getItem('install-mode') as ModeId | null;
-    if (m && MODES.some((t) => t.id === m)) setMode(m);
+    const applyMode = (id: string | null | undefined) => {
+      if (id && MODES.some((t) => t.id === id)) setMode(id as ModeId);
+    };
+
+    applyMode(sessionStorage.getItem('install-mode'));
     const l = sessionStorage.getItem('install-lang');
     if (l === 'py' || l === 'js') setLang(l);
+
+    const onInstallMode = (event: Event) => {
+      const requested = (event as CustomEvent<{ mode?: string }>).detail?.mode;
+      applyMode(requested);
+    };
+
+    window.addEventListener('strata:install-mode-request', onInstallMode);
+    return () => window.removeEventListener('strata:install-mode-request', onInstallMode);
   }, []);
 
   const selectMode = (id: ModeId) => {
@@ -305,7 +412,9 @@ export default function InstallTabs() {
         : 'quickstart.mjs'
       : mode === 'cli'
         ? 'terminal'
-        : 'mcp.json';
+        : mode === 'hub'
+          ? 'stratahub'
+          : 'mcp.json';
 
   return (
     <div>
@@ -392,6 +501,7 @@ export default function InstallTabs() {
               </span>
             )}
             {mode === 'library' && <CopyAllButton text={scriptText(script)} label="copy script" />}
+            {mode === 'hub' && <CopyAllButton text={HUB_COMMANDS} label="copy commands" />}
             {mode === 'agents' && <CopyAllButton text={MCP_JSON.join('\n')} label="copy config" />}
           </span>
         </div>
@@ -419,6 +529,8 @@ export default function InstallTabs() {
               )}
             </pre>
           )}
+
+          {mode === 'hub' && <HubPanel />}
 
           {mode === 'agents' && (
             <div>

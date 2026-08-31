@@ -11,13 +11,14 @@ import HorizonGlow from '../foundation/HorizonGlow.astro';
 import ForkingTerminal from './hero/ForkingTerminal.tsx';
 import release from '../../data/release.json';
 
-// The data-model index: every tile opens the surface that proves it.
+// The capability index: every tile opens the surface that proves it.
 // White at rest; the hover fill matches the primary browser CTA.
 const dataModel = [
   {
     label: 'KV',
     href: '#primitive-kv',
     primitive: 'kv',
+    installMode: undefined,
     ariaLabel: 'Open the key-value primitive demo',
     icon: '<circle class="dm-icon-fill" cx="7" cy="12" r="4"/><path d="M10.7 12h9.8"/><path d="M15.8 12v4M19 12v3"/>',
   },
@@ -25,6 +26,7 @@ const dataModel = [
     label: 'Event',
     href: '#primitive-event',
     primitive: 'event',
+    installMode: undefined,
     ariaLabel: 'Open the event log primitive demo',
     icon: '<path class="dm-icon-fill" d="M4 17.5h16v2H4z"/><path d="M4 13h3.5l1.9-6.2 3.5 11.6 2.3-7.1 1.6 3.4H20"/>',
   },
@@ -32,6 +34,7 @@ const dataModel = [
     label: 'JSON',
     href: '#primitive-json',
     primitive: 'json',
+    installMode: undefined,
     ariaLabel: 'Open the JSON primitive demo',
     icon: '<path d="M8.7 4.2c-1.7 0-2.5.9-2.5 2.7v2.2c0 1.4-.7 2.3-2 2.9 1.3.6 2 1.5 2 2.9v2.2c0 1.8.8 2.7 2.5 2.7"/><path d="M15.3 4.2c1.7 0 2.5.9 2.5 2.7v2.2c0 1.4.7 2.3 2 2.9-1.3.6-2 1.5-2 2.9v2.2c0 1.8-.8 2.7-2.5 2.7"/><circle class="dm-icon-fill" cx="12" cy="12" r="2"/>',
   },
@@ -39,6 +42,7 @@ const dataModel = [
     label: 'Vector',
     href: '#primitive-vector',
     primitive: 'vector',
+    installMode: undefined,
     ariaLabel: 'Open the vector primitive demo',
     icon: '<circle class="dm-icon-fill" cx="5.5" cy="18.5" r="2.1"/><path d="M7.2 16.8 18 6"/><path d="M12.2 5.8H18v5.8"/><path d="M5 7.2h4M14.5 18.2h4.5"/>',
   },
@@ -46,14 +50,25 @@ const dataModel = [
     label: 'Graph',
     href: '#primitive-graph',
     primitive: 'graph',
+    installMode: undefined,
     ariaLabel: 'Open the graph primitive demo',
     icon: '<path d="M7.2 16.2 11.5 7.8M14.1 7.3l3.1 6.6M8.5 17.7l7.1-1.4"/><circle class="dm-icon-fill" cx="6" cy="17.5" r="2.7"/><circle class="dm-icon-fill" cx="12.5" cy="6" r="2.7"/><circle class="dm-icon-fill" cx="18" cy="15.5" r="2.7"/>',
   },
   {
     label: 'AI',
     href: '#inference',
+    primitive: undefined,
+    installMode: undefined,
     ariaLabel: 'Jump to the native inference demo',
     icon: '<path class="dm-icon-fill" d="M11 3.2l1.8 5.1 5.1 1.8-5.1 1.8L11 17l-1.8-5.1-5.1-1.8 5.1-1.8z"/><path d="M18.4 14.5l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8z"/>',
+  },
+  {
+    label: 'Hub',
+    href: '#install',
+    primitive: undefined,
+    installMode: 'hub',
+    ariaLabel: 'Jump to the Strata Hub clone setup',
+    icon: '<path class="dm-icon-fill" d="M6.2 9.4 12 6l5.8 3.4v6.8L12 19.6l-5.8-3.4z"/><path d="M6.7 9.7 12 12.8l5.3-3.1M12 12.8v6.1"/><path d="M4 6.5 12 2l8 4.5"/>',
   },
 ];
 ---
@@ -177,7 +192,7 @@ const dataModel = [
 
       <nav
         class="mt-12 flex flex-wrap items-start justify-center gap-x-3 gap-y-4"
-        aria-label="Data model"
+        aria-label="Core capabilities"
       >
         {
           dataModel.map((item) => (
@@ -185,6 +200,7 @@ const dataModel = [
               href={item.href}
               class="dm-tile group"
               data-primitive-link={item.primitive}
+              data-install-mode={item.installMode}
               aria-label={item.ariaLabel}
             >
               <span class="dm-chip">
@@ -490,6 +506,37 @@ const dataModel = [
         window.dispatchEvent(
           new CustomEvent('strata:primitive-request', { detail: { primitive } }),
         );
+      }, 0);
+    });
+  }
+
+  const installLinks = document.querySelectorAll<HTMLAnchorElement>('[data-install-mode]');
+  for (const link of installLinks) {
+    link.addEventListener('click', (event) => {
+      const mode = link.dataset.installMode;
+      if (!mode) return;
+      event.preventDefault();
+      sessionStorage.setItem('install-mode', mode);
+
+      const install = document.getElementById('install');
+      if (install) {
+        const html = document.documentElement;
+        const previousScrollBehavior = html.style.scrollBehavior;
+        const header = document.querySelector('header');
+        const offset = header?.getBoundingClientRect().height ?? 0;
+        html.style.scrollBehavior = 'auto';
+        history.pushState(null, '', '#install');
+        window.scrollTo({
+          top: Math.round(window.scrollY + install.getBoundingClientRect().top - offset),
+          behavior: 'auto',
+        });
+        window.setTimeout(() => {
+          html.style.scrollBehavior = previousScrollBehavior;
+        }, 0);
+      }
+
+      window.setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('strata:install-mode-request', { detail: { mode } }));
       }, 0);
     });
   }

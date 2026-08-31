@@ -32,7 +32,7 @@ No scroll furniture.
 3 Multi-primitive         believe    strata column (interactive)
 4 Time travel             believe    scroll-scrub — THE ONLY scrub piece
 5 Native inference        believe    native pipeline demo
-6 Install & start         act        five surfaces + the command close
+6 Install & start         act        library, CLI, Hub, and agent paths
 ```
 
 **The live hero (target architecture, scoped 2026-06-11).** The real engine powers
@@ -413,8 +413,9 @@ plus workbench share a centered pinned frame.
 
 ## 7. Section 6 — Install & start
 
-**The act section: five surfaces, one product** — humans and agents install in the same
-place. Horizon glow, second and final use (60% hero opacity).
+**The act section: four paths, one local database** — humans install, clone from Hub,
+open the CLI, or hand setup to an agent in the same place. Horizon glow, second and
+final use (60% hero opacity).
 
 **v2 (2026-06-12): the act surface acts.** The tabs card wears the page's material
 (ember border, bloom, ember tab-row wash, graph-paper wells) — and **every command
@@ -447,19 +448,27 @@ numbers leave the landing page entirely, which also unblocks the benchmarks
 re-measurement cutover gate; `benchmarks.json` + StatStrip remain for the specimen
 and docs. Hero parallax census: glow 0.85× · terminal 1.0×.
 
+**v4 (2026-08-30, Ani): Strata Hub belongs in the adoption path.** Hub is not a
+generic resources junction. It solves the first-run problem: start from a prepared
+`.strata` dataset instead of an empty file, then work locally. The hero capability
+index gets a Hub tile that lands on Install and selects the Hub mode. The Install
+mode shows curated examples from the StrataHub repo and copyable `strata clone`
+commands, with internal links to the clone guide and hub concept page. Public
+`stratahub.io` / `hub.stratahub.io` CTAs stay out of the page until those hosts are
+publicly reachable.
+
 **Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
 _(same testable claim, imperative form; alternate held: "Thirty seconds to first
 write.")_
 
 Tabs (each renders only if its path works — truth rule):
 
-| Tab         | Content                                                                                                                                                                                                                                                                                |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Python**  | `pip install stratadb` + 4-line first-write snippet                                                                                                                                                                                                                                    |
-| **CLI**     | `cargo install strata-cli` · the curl chip (no brew — no tap exists, decided 2026-06-11) + first-write session: `strata --cache` → `kv put hello world` → `(version) 1` → `kv get hello` → `"world"`                                                                                   |
-| **Node**    | `npm install @stratadb/core` + snippet                                                                                                                                                                                                                                                 |
-| **Foundry** | "The desktop studio — browse keys, switch branches, diff and merge visually. macOS first." CTA per R1: **"Star strata-foundry"** → repo, auto-upgrades to **"Download Foundry"** when artifacts exist. Optional small static frame (R2 rules: real capabilities, target dark identity) |
-| **MCP**     | The agent door (absorbs the "For your agent" card): copyable MCP config (verified against the MCP reference) · `stratadb.org/llms.txt` in mono · "For AI agents →" `/docs/getting-started/for-agents`                                                                                  |
+| Tab            | Content                                                                                                                                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Library**    | Python and Node quickstart scripts: install, open one local database, write values, and read history.                                                                                                |
+| **CLI**        | `cargo install strata-cli` · the curl chip + first-write session: `strata --cache` → `kv put hello world` → `kv get hello`.                                                                          |
+| **Hub**        | Strata Hub as the cold-start path: copyable `strata clone iris ./iris`, curated examples (`agent-memory-with-experiments`, `movielens-100k`, `ab-test-results`), and links to clone/hub docs.       |
+| **For agents** | The agent door: copyable MCP config · `stratadb.org/llms.txt` in mono · "For AI agents →" `/docs/agents`.                                                                                            |
 
 Beneath the tabs, **the close** — the page's final statement:
 

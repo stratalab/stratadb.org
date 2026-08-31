@@ -118,6 +118,34 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
   }
 }
 
+async function assertHomepageHubInstallMode(page, viewport) {
+  await page.locator('[data-install-mode="hub"]').click();
+  await page.waitForFunction(() => window.location.hash === '#install', undefined, {
+    timeout: 5_000,
+  });
+
+  await page.locator('#mode-hub[aria-selected="true"]').waitFor({
+    state: 'visible',
+    timeout: 10_000,
+  });
+
+  const panelText = await page.locator('#install-panel').innerText();
+  const required = [
+    'Strata Hub',
+    'prepared databases',
+    'agent-memory-with-experiments',
+    'movielens-100k',
+    'strata clone iris ./iris',
+    'clone records Hub origin',
+  ];
+
+  for (const value of required) {
+    if (!panelText.includes(value)) {
+      throw new Error(`${viewport.name} /: Hub install mode is missing "${value}"`);
+    }
+  }
+}
+
 async function assertHomepageTimeTravelAnimation(page, viewport) {
   const slider = page.locator('#time-travel [role="slider"]');
   await slider.waitFor({ state: 'visible', timeout: 5_000 });
@@ -408,6 +436,7 @@ async function assertPage(browser, route, viewport) {
       await assertHomepageSectionBreaks(page, viewport);
       await assertHomepageInferenceWorkbench(page, viewport);
       await assertHomepagePrimitiveLinks(page, viewport);
+      await assertHomepageHubInstallMode(page, viewport);
     }
     if (consoleErrors.length > 0 || pageErrors.length > 0) {
       throw new Error(

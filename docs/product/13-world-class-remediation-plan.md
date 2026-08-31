@@ -128,7 +128,7 @@ overrides older signed-off planning notes where they conflict.
   verbs.
 - Working homepage proof chain: create data, fork a branch, change data, compare
   branches, merge or preview merge, read history, run model work over the stored
-  context, then install or open docs.
+  context, then install, clone a prepared dataset from Strata Hub, or open docs.
 
 ### Homepage H1
 
@@ -175,6 +175,10 @@ overrides older signed-off planning notes where they conflict.
   detokenize, local model management, capability, unload, and cache status.
 - MCP ships as `strata mcp serve` plus generated tool metadata. Treat it as an
   agent integration surface, not the product identity.
+- Strata Hub is a core adoption surface: `strata clone` pulls prepared datasets
+  into local databases, and `strata remote` reports the clone origin. Until
+  `stratahub.io` and `hub.stratahub.io` are publicly reachable, homepage links
+  should point to internal clone/hub docs instead of public Hub hosts.
 - Avoid broad "search" claims unless the copy specifies vector similarity search,
   docs search, or another shipped search path.
 
@@ -408,6 +412,8 @@ Tasks:
   and generation.
 - Done: kept the install close as the final handoff and cut the standalone
   Resources junction so the page does not drift after the capability story.
+- Done: brought Strata Hub into the final handoff as a first-class install mode:
+  clone a prepared dataset, then use it as an ordinary local Strata database.
 - Done: promoted current navigation surfaces: Docs, Architecture, Changelog, and
   Playground only if Playground remains part of the product.
 - Done: rationalized CTAs so each page has one primary action and a small number of
