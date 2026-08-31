@@ -7,6 +7,7 @@ export default tseslint.config(
   {
     ignores: [
       '.astro/**',
+      '.claude/worktrees/**',
       'dist/**',
       'node_modules/**',
       'public/playground/pkg/**',

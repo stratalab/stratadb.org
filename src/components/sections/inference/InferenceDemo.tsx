@@ -1,51 +1,20 @@
-// Section 5 demo (04 §6 v4, 2026-08-31): one simple AI loop.
-// The old workbench tried to prove every inference surface at once. This version
-// shows the product idea directly: records stay in Strata, AI runs beside them,
-// and the answer comes back grounded in the database.
+// Section 5 demo (04 §6 v6, 2026-08-31): a compact native inference loop.
+// The artifact avoids implementation inventory and shows one product idea:
+// records stay local, model work runs in the database layer, and the answer
+// returns with database context.
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { EASE, EMBER, INK, useBeats } from '../../shared/term';
 
-const RECORDS = [
-  {
-    kind: 'KV',
-    name: 'portfolio.value',
-    value: '111080',
-    tone: 'var(--color-strata-kv)',
-  },
-  {
-    kind: 'JSON',
-    name: 'allocation',
-    value: 'stocks 80 / bonds 15 / cash 5',
-    tone: 'var(--color-strata-json)',
-  },
-  {
-    kind: 'Event',
-    name: 'branch.merge',
-    value: 'clean merge at 16:55:03',
-    tone: 'var(--color-strata-event)',
-  },
-  {
-    kind: 'Vector',
-    name: 'notes.d1',
-    value: 'risky allocation merged',
-    tone: 'var(--color-strata-vector)',
-  },
-];
-
-const STEPS = [
-  ['read', 'records'],
-  ['embed', 'question'],
-  ['rank', 'context'],
-  ['generate', 'answer'],
-] as const;
+const SOURCES = ['KV', 'JSON', 'Event', 'Vector'];
+const OPS = ['read records', 'embed question', 'rank context', 'generate answer'];
 
 const ANSWER =
-  'The portfolio value moved from 98400 to 111080 after the branch merge changed the allocation to 80% stocks, 15% bonds, and 5% cash.';
+  'The portfolio value moved from 98400 to 111080 after the merge changed allocation to 80/15/5.';
 const ANSWER_WORDS = ANSWER.split(' ');
 
 function phaseFor(beat: number) {
-  return Math.min(beat, STEPS.length - 1);
+  return Math.min(beat, OPS.length - 1);
 }
 
 function AnswerText({ on, live }: { on: boolean; live: boolean }) {
@@ -67,7 +36,7 @@ function AnswerText({ on, live }: { on: boolean; live: boolean }) {
       i += 1;
       setCount(i);
       if (i >= ANSWER_WORDS.length) window.clearInterval(timer);
-    }, 42);
+    }, 48);
 
     return () => window.clearInterval(timer);
   }, [live, on]);
@@ -75,7 +44,7 @@ function AnswerText({ on, live }: { on: boolean; live: boolean }) {
   const streaming = live && on && count < ANSWER_WORDS.length;
 
   return (
-    <p className="min-h-[7.5rem] text-body text-ink-mid">
+    <p className="min-h-[5.25rem] text-body text-ink-mid">
       {ANSWER_WORDS.slice(0, count).join(' ')}
       {streaming && (
         <span
@@ -88,8 +57,8 @@ function AnswerText({ on, live }: { on: boolean; live: boolean }) {
 }
 
 function FlowLines({ phase }: { phase: number }) {
-  const recordsToAi = phase >= 1 ? 1 : 0;
-  const aiToAnswer = phase >= 3 ? 1 : 0;
+  const first = phase >= 1 ? 1 : 0;
+  const second = phase >= 3 ? 1 : 0;
 
   return (
     <svg
@@ -99,222 +68,183 @@ function FlowLines({ phase }: { phase: number }) {
       aria-hidden="true"
     >
       <motion.path
-        d="M 30 34 C 41 30 45 36 51 45"
+        d="M 28 50 C 38 50 41 50 48 50"
         fill="none"
-        stroke={EMBER(0.52)}
+        stroke={EMBER(0.46)}
         strokeLinecap="round"
-        strokeWidth="0.32"
+        strokeWidth="0.3"
         initial={false}
-        animate={{ pathLength: recordsToAi, opacity: recordsToAi ? 1 : 0 }}
-        transition={{ duration: 0.62, ease: EASE }}
+        animate={{ pathLength: first, opacity: first ? 1 : 0 }}
+        transition={{ duration: 0.58, ease: EASE }}
       />
       <motion.path
-        d="M 30 66 C 41 70 45 64 51 55"
-        fill="none"
-        stroke={EMBER(0.34)}
-        strokeLinecap="round"
-        strokeWidth="0.26"
-        initial={false}
-        animate={{ pathLength: recordsToAi, opacity: recordsToAi ? 1 : 0 }}
-        transition={{ duration: 0.62, delay: 0.08, ease: EASE }}
-      />
-      <motion.path
-        d="M 57 50 C 64 50 68 50 75 50"
+        d="M 58 50 C 66 50 70 50 78 50"
         fill="none"
         stroke={EMBER(0.56)}
         strokeLinecap="round"
-        strokeWidth="0.34"
+        strokeWidth="0.3"
         initial={false}
-        animate={{ pathLength: aiToAnswer, opacity: aiToAnswer ? 1 : 0 }}
-        transition={{ duration: 0.62, ease: EASE }}
+        animate={{ pathLength: second, opacity: second ? 1 : 0 }}
+        transition={{ duration: 0.58, ease: EASE }}
       />
-      <motion.circle
-        r="0.8"
+      <motion.rect
+        width="1.45"
+        height="1.45"
+        rx="0.18"
         fill={EMBER(0.95)}
         initial={false}
         animate={{
-          cx: recordsToAi ? 51 : 30,
-          cy: recordsToAi ? 45 : 34,
-          opacity: recordsToAi && !aiToAnswer ? 1 : 0,
+          x: first ? 47.25 : 27.25,
+          y: 49.25,
+          opacity: first && !second ? 1 : 0,
         }}
-        transition={{ duration: 0.7, ease: EASE }}
+        transition={{ duration: 0.64, ease: EASE }}
       />
-      <motion.circle
-        r="0.82"
+      <motion.rect
+        width="1.45"
+        height="1.45"
+        rx="0.18"
         fill={EMBER(0.98)}
         initial={false}
-        animate={{ cx: aiToAnswer ? 75 : 57, cy: 50, opacity: aiToAnswer ? 1 : 0 }}
-        transition={{ duration: 0.7, ease: EASE }}
+        animate={{ x: second ? 77.25 : 57.25, y: 49.25, opacity: second ? 1 : 0 }}
+        transition={{ duration: 0.64, ease: EASE }}
       />
     </svg>
   );
 }
 
-function RecordStack({ phase }: { phase: number }) {
-  return (
-    <section className="rounded-lg border border-line bg-panel/80 p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="font-mono text-mono-body text-ink-hi">database records</h3>
-        <span className="font-mono text-mono-sm text-ink-low">same file</span>
-      </div>
-      <div className="space-y-2.5">
-        {RECORDS.map((record, index) => {
-          const active = phase >= 1 || index === 0;
-
-          return (
-            <motion.div
-              key={record.name}
-              className="relative overflow-hidden rounded-(--radius-control) border px-3 py-2.5"
-              style={{
-                borderColor: active ? 'var(--color-line-hover)' : 'var(--color-line)',
-                background: active
-                  ? `color-mix(in srgb, ${record.tone} 4%, var(--color-panel))`
-                  : 'var(--color-panel)',
-              }}
-              initial={false}
-              animate={{ opacity: active ? 1 : 0.52, x: active ? 0 : -6 }}
-              transition={{
-                duration: 0.34,
-                delay: phase >= 1 ? index * 0.06 : 0,
-                ease: EASE,
-              }}
-            >
-              <span
-                className="absolute inset-y-0 left-0 w-px"
-                style={{ background: record.tone, opacity: active ? 0.9 : 0.28 }}
-                aria-hidden="true"
-              />
-              <div className="flex min-w-0 items-center gap-2">
-                <span
-                  className="rounded border border-line bg-inset px-1.5 py-0.5 font-mono text-mono-sm text-ink-mid"
-                  style={{ borderColor: active ? record.tone : 'var(--color-line)' }}
-                >
-                  {record.kind}
-                </span>
-                <span className="min-w-0 truncate font-mono text-mono-sm text-ink-hi">
-                  {record.name}
-                </span>
-              </div>
-              <p className="mt-1.5 truncate font-mono text-mono-sm text-ink-low">{record.value}</p>
-            </motion.div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function AiCore({ phase }: { phase: number }) {
-  const [, detail] = STEPS[phase];
+function RecordsNode({ phase }: { phase: number }) {
+  const active = phase >= 1;
 
   return (
-    <section className="flex flex-col items-center justify-center rounded-lg border border-line bg-raised/70 p-4 text-center">
-      <motion.div
-        className="flex aspect-square w-full max-w-[11rem] flex-col items-center justify-center rounded-full border"
-        style={{
-          borderColor: EMBER(0.36),
-          background: `radial-gradient(70% 80% at 50% 20%, ${EMBER(0.18)}, transparent 70%), var(--color-inset)`,
-          boxShadow: `0 0 78px -24px ${EMBER(0.62)}`,
-        }}
-        initial={false}
-        animate={{
-          scale: phase >= 1 && phase <= 3 ? [1, 1.035, 1] : 1,
-          borderColor: phase >= 1 ? EMBER(0.56) : EMBER(0.3),
-        }}
-        transition={{ duration: 0.72, ease: EASE }}
-      >
-        <span className="font-mono text-heading text-ink-hi">AI</span>
-        <span className="mt-1 font-mono text-mono-sm text-ink-low">built into Strata</span>
-      </motion.div>
-
-      <div className="mt-5 flex w-full flex-wrap justify-center gap-2">
-        {['embed', 'rank', 'generate'].map((op, index) => {
-          const active = phase >= index + 1;
-
-          return (
-            <motion.span
-              key={op}
-              className="rounded-(--radius-control) border px-2.5 py-1.5 font-mono text-mono-sm"
-              style={{
-                borderColor: active ? EMBER(0.36) : 'var(--color-line)',
-                background: active ? EMBER(0.08) : 'var(--color-panel)',
-                color: active ? 'var(--color-ink-hi)' : 'var(--color-ink-low)',
-              }}
-              initial={false}
-              animate={{ opacity: active ? 1 : 0.58, y: active ? 0 : 4 }}
-              transition={{ duration: 0.28, ease: EASE }}
-            >
-              {op}
-            </motion.span>
-          );
-        })}
-      </div>
-      <p className="mt-4 font-mono text-mono-sm text-terracotta-400">{detail}</p>
-    </section>
-  );
-}
-
-function AnswerCard({ phase, live }: { phase: number; live: boolean }) {
-  const answering = phase >= 3;
-
-  return (
-    <section className="rounded-lg border border-line bg-panel/80 p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="font-mono text-mono-body text-ink-hi">grounded answer</h3>
-        <span className="font-mono text-mono-sm text-ink-low">ranked context</span>
-      </div>
-      <div className="rounded-(--radius-control) border border-line bg-inset p-3">
-        <p className="font-mono text-mono-sm text-ink-low">ask</p>
-        <p className="mt-1 text-body text-ink-hi">Why did portfolio.value move?</p>
-      </div>
-      <div className="mt-3 rounded-(--radius-control) border border-line bg-panel p-3">
-        <div className="mb-2 flex items-center gap-2 font-mono text-mono-sm">
-          <span className="text-terracotta-300">generate</span>
-          <span className="text-ink-low">from database context</span>
-        </div>
-        <AnswerText on={answering} live={live} />
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2 font-mono text-mono-sm text-ink-low">
-        {['kv', 'json', 'event', 'vector'].map((source, index) => (
+    <motion.section
+      className="rounded-lg border border-line bg-panel/80 p-5"
+      initial={false}
+      animate={{ opacity: active ? 1 : 0.74 }}
+      transition={{ duration: 0.32, ease: EASE }}
+    >
+      <p className="font-mono text-mono-sm text-terracotta-400">records</p>
+      <h3 className="mt-2 text-heading text-ink-hi">Stored context</h3>
+      <div className="mt-5 grid grid-cols-2 gap-2">
+        {SOURCES.map((source, index) => (
           <motion.span
             key={source}
-            className="rounded-full border border-line bg-inset px-2.5 py-1"
+            className="rounded-(--radius-control) border border-line bg-inset px-3 py-2 text-center font-mono text-mono-sm text-ink-mid"
             initial={false}
-            animate={{ opacity: phase >= 2 ? 1 : 0.45, y: phase >= 2 ? 0 : 4 }}
-            transition={{
-              duration: 0.24,
-              delay: phase >= 2 ? index * 0.04 : 0,
-              ease: EASE,
-            }}
+            animate={{ opacity: active ? 1 : 0.52, y: active ? 0 : 4 }}
+            transition={{ duration: 0.24, delay: active ? index * 0.04 : 0, ease: EASE }}
           >
             {source}
           </motion.span>
         ))}
       </div>
+      <p className="mt-5 font-mono text-mono-sm text-ink-low">records stay local</p>
+    </motion.section>
+  );
+}
+
+function InferencePlane({ phase }: { phase: number }) {
+  return (
+    <section className="relative overflow-hidden rounded-lg border border-line bg-raised/70 p-5">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-80"
+        style={{
+          background: `linear-gradient(135deg, transparent, ${EMBER(0.07)} 48%, transparent 74%)`,
+        }}
+        aria-hidden="true"
+      />
+      <div className="relative flex min-h-[15.5rem] flex-col items-center justify-center">
+        <div className="relative h-[10rem] w-full max-w-[15rem]">
+          {[0, 1, 2].map((layer) => {
+            const active = phase >= layer + 1;
+
+            return (
+              <motion.div
+                key={layer}
+                className="absolute left-1/2 h-[3.45rem] w-[12.6rem] -translate-x-1/2 rotate-[-8deg] overflow-hidden rounded-[0.9rem] border"
+                style={{
+                  top: `${0.8 + layer * 1.55}rem`,
+                  zIndex: layer + 1,
+                  borderColor: active ? EMBER(0.58) : EMBER(0.22),
+                  background: `linear-gradient(135deg, ${EMBER(
+                    active ? 0.16 : 0.08,
+                  )}, rgb(var(--rgb-white) / 0.035) 46%, rgb(var(--rgb-black) / 0.2) 84%)`,
+                  boxShadow: active
+                    ? `0 22px 52px -34px ${EMBER(0.76)}, inset 0 1px 0 rgb(var(--rgb-white) / 0.12)`
+                    : 'inset 0 1px 0 rgb(var(--rgb-white) / 0.08)',
+                }}
+                initial={false}
+                animate={{ opacity: active ? 1 : 0.42 }}
+                transition={{ duration: 0.32, ease: EASE }}
+                aria-hidden="true"
+              >
+                <span className="absolute left-4 right-4 top-4 h-px bg-line" />
+                <span className="absolute left-4 right-7 top-7 h-px bg-line" />
+                <span
+                  className="absolute bottom-3 left-5 top-3 w-px"
+                  style={{ background: active ? EMBER(0.42) : 'var(--color-line)' }}
+                />
+                <motion.span
+                  className="absolute inset-y-0 w-8"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${EMBER(0.22)}, transparent)`,
+                  }}
+                  initial={false}
+                  animate={{
+                    x: active ? [18, 150, 18] : 18,
+                    opacity: active ? 0.9 : 0,
+                  }}
+                  transition={{ duration: 1.1, ease: EASE }}
+                />
+              </motion.div>
+            );
+          })}
+
+          <motion.div
+            className="absolute bottom-5 left-[16%] h-px w-[72%]"
+            style={{ background: EMBER(0.38), boxShadow: `0 0 28px ${EMBER(0.5)}` }}
+            initial={false}
+            animate={{ opacity: phase >= 1 ? 1 : 0.24, scaleX: phase >= 1 ? 1 : 0.72 }}
+            transition={{ duration: 0.48, ease: EASE }}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div className="text-center">
+          <p className="font-mono text-mono-sm text-terracotta-400">native</p>
+          <h3 className="mt-2 text-heading text-ink-hi">Inference layer</h3>
+          <motion.p
+            className="mt-4 font-mono text-mono-sm text-ink-mid"
+            key={OPS[phase]}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: EASE }}
+          >
+            {OPS[phase]}
+          </motion.p>
+        </div>
+      </div>
     </section>
   );
 }
 
-function StepRail({ phase }: { phase: number }) {
-  return (
-    <div className="mt-4 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4">
-      {STEPS.map(([label, detail], index) => {
-        const active = phase >= index;
+function AnswerNode({ phase, live }: { phase: number; live: boolean }) {
+  const answering = phase >= 3;
 
-        return (
-          <motion.div
-            key={label}
-            className="bg-panel px-4 py-3"
-            initial={false}
-            animate={{ opacity: active ? 1 : 0.5 }}
-            transition={{ duration: 0.24, ease: EASE }}
-          >
-            <p className="font-mono text-mono-sm text-terracotta-400">{label}</p>
-            <p className="mt-1 font-mono text-mono-sm text-ink-low">{detail}</p>
-          </motion.div>
-        );
-      })}
-    </div>
+  return (
+    <motion.section
+      className="rounded-lg border border-line bg-panel/80 p-5"
+      initial={false}
+      animate={{ opacity: answering ? 1 : 0.68 }}
+      transition={{ duration: 0.32, ease: EASE }}
+    >
+      <p className="font-mono text-mono-sm text-terracotta-400">answer</p>
+      <h3 className="mt-2 text-heading text-ink-hi">Grounded result</h3>
+      <div className="mt-5 rounded-(--radius-control) border border-line bg-inset p-4">
+        <AnswerText on={answering} live={live} />
+      </div>
+      <p className="mt-5 font-mono text-mono-sm text-ink-low">from ranked context</p>
+    </motion.section>
   );
 }
 
@@ -341,7 +271,7 @@ export default function InferenceDemo() {
   }, []);
 
   const live = seen && !reduced;
-  const beat = useBeats([620, 820, 820, 1260], live);
+  const beat = useBeats([620, 780, 780, 1120], live);
   const phase = phaseFor(beat);
 
   return (
@@ -359,7 +289,7 @@ export default function InferenceDemo() {
           className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-5 py-2"
           style={{ background: EMBER(0.04) }}
         >
-          <span className="font-mono text-mono-body text-ink-hi">built-in AI loop</span>
+          <span className="font-mono text-mono-body text-ink-hi">native inference</span>
           <span className="font-mono text-mono-sm text-ink-low">embed · rank · generate</span>
           <span className="ml-auto font-mono text-mono-sm text-ink-low">strata · main</span>
         </div>
@@ -372,12 +302,11 @@ export default function InferenceDemo() {
           }}
         >
           <FlowLines phase={phase} />
-          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(10rem,0.56fr)_minmax(0,1fr)]">
-            <RecordStack phase={phase} />
-            <AiCore phase={phase} />
-            <AnswerCard phase={phase} live={live} />
+          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(11rem,0.64fr)_minmax(0,0.92fr)]">
+            <RecordsNode phase={phase} />
+            <InferencePlane phase={phase} />
+            <AnswerNode phase={phase} live={live} />
           </div>
-          <StepRail phase={phase} />
         </div>
       </div>
     </div>

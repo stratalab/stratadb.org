@@ -31,7 +31,7 @@ No scroll furniture.
 2 Branching               believe    animated terminal, live-capable
 3 Multi-primitive         believe    strata column (interactive)
 4 Time travel             believe    scroll-scrub — THE ONLY scrub piece
-5 Native inference        believe    built-in AI loop
+5 Native inference        believe    native inference loop
 6 Strata Hub              consequence catalog of clone-ready datasets
 7 Install & start         act        library, CLI, Hub, and agent paths
 ```
@@ -397,8 +397,17 @@ a compute layer over data, not a stored primitive.
 
 **v4 (2026-08-31, Ani): simplify the artifact.** The workbench was still too crowded:
 provider rails, scored context lists, and command inventory competed with the core idea.
-The landing page now shows one loop only: database records stay in Strata, AI runs beside
-them, and a grounded answer returns from database context.
+The landing page now shows one loop only: database records stay in Strata, model work
+runs beside them, and a grounded answer returns from database context.
+
+**v5 (2026-08-31, Ani): no generic AI label inside the artifact.** The visual should be
+technically precise without becoming a dashboard. It now says `native inference` and
+`inference layer`, with only three objects on stage: stored context, the native layer,
+and the grounded result.
+
+**v6 (2026-08-31, Ani): replace the circular core.** The center object should feel
+engineered, not like a generic assistant badge. The circle is replaced by a thin angled
+inference plane with subtle scan lines and a short operation readout.
 
 **Copy.** Section rule `NATIVE INFERENCE`; feature eyebrow **"Inference"**; H2
 **"AI is built-in"** Intro: "Run model work where the data already lives.
@@ -410,15 +419,13 @@ without moving the app into a separate AI service." Capability chips beneath
 field. Native Inference is scroll-owned: the rule docks below the nav, and the copy
 plus workbench share a centered pinned frame.
 
-**The demo — one built-in AI loop (plays once ≥35%):**
+**The demo — one native inference loop (plays once ≥35%):**
 
-1. Read: KV `portfolio.value`, JSON allocation, merge event, and vector note appear
-   as records inside the same database file.
-2. Embed: the question lights the AI core.
-3. Rank: the useful records become the context set.
-4. Generate: the seed-true answer streams back: "The portfolio value moved from 98400
-   to 111080 after the branch merge..." Reduced motion and SSR render the completed
-   loop.
+1. Stored context: KV, JSON, event, and vector sources sit in one database.
+2. Inference layer: a glass plane lights as the operation changes from read to embed to
+   rank to generate.
+3. Grounded result: the seed-true answer streams back: "The portfolio value moved from
+   98400 to 111080..." Reduced motion and SSR render the completed loop.
 
 ## 7. Section 6 — Strata Hub
 

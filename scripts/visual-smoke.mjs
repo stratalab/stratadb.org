@@ -77,10 +77,14 @@ async function assertHomepagePrimitiveLinks(page, viewport) {
 
 async function assertHomepageInferenceWorkbench(page, viewport) {
   await scrollSectionToNav(page, 'inference');
-  await page.locator('text=built-in AI loop').first().waitFor({
-    state: 'visible',
-    timeout: 5_000,
-  });
+  await page
+    .locator('[data-inference-workbench]')
+    .locator('text=native inference')
+    .first()
+    .waitFor({
+      state: 'visible',
+      timeout: 5_000,
+    });
   await page.locator('text=The portfolio value moved from 98400 to 111080').first().waitFor({
     state: 'visible',
     timeout: 8_000,
@@ -96,12 +100,12 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
     };
   });
   const required = [
-    'database records',
-    'same file',
-    'built into Strata',
-    'grounded answer',
-    'ranked context',
-    'from database context',
+    'native inference',
+    'Stored context',
+    'Inference layer',
+    'Grounded result',
+    'records stay local',
+    'from ranked context',
     'embed · rank · generate',
     'The portfolio value moved from 98400 to 111080',
   ];
