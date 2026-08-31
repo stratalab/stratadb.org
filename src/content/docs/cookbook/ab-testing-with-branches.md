@@ -109,7 +109,7 @@ single atomic commit; the source branch is left unchanged.
 strata ./ab branch merge variant-b default
 ```
 
-The promotion reports the keys it applied — `config:temperature` and `score` —
+The promotion reports the keys it applied - `config:temperature` and `score` -
 with no conflicts, because `default` never received any per-variant config
 (step 5) and so nothing diverged. Read them back on `default`:
 
@@ -126,16 +126,16 @@ strata ./ab --raw kv get score
 Had both branches changed the same key differently since the fork, the default
 `strict` strategy would refuse with `conflict.engine.promotion` and leave
 `default` untouched; `--strategy source-wins` would take the winner's side
-instead. The variant's event stream stays on its own branch — events are
-compared, never promoted — so `default` keeps an empty log.
+instead. The variant's event stream stays on its own branch - events are
+compared, never promoted - so `default` keeps an empty log.
 
 ## Why this works
 
 Each fork is an isolated [branch](/docs/concepts/branches): writes on `variant-a`
 and `variant-b` never see each other, and neither disturbs `default`. Because a
 fork shares the parent's history until it diverges, the baseline you seed in step
-1 is visible in both variants for free — no cleanup of half-written state on a
-shared branch. Promotion with `branch merge` is deliberate and atomic — it folds
+1 is visible in both variants for free - no cleanup of half-written state on a
+shared branch. Promotion with `branch merge` is deliberate and atomic - it folds
 the winner's KV, JSON, and vector writes onto `default` in one commit and refuses
 divergent conflicts by default, so you decide exactly what graduates. See the
 [branch management guide](/docs/guides/branching-workflows) for the full lifecycle,

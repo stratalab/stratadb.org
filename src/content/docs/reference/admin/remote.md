@@ -31,7 +31,7 @@ _No parameters._
 
 ## Returns
 
-`Maybe<RemoteOriginInfo>` — a miss returns nothing rather than raising.
+`Maybe<RemoteOriginInfo>` - a miss returns nothing rather than raising.
 
 ## Errors
 

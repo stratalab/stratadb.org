@@ -11,8 +11,8 @@ the recorded fork lineage, and a three-way merge applies every change the source
 made since that point.
 
 Merge applies to key-value, JSON, and vector data. Event streams and graphs are
-compared (see `branch.diff`) but never merged — divergent append-only and
-structural data cannot be three-way merged — so a promotion leaves them
+compared (see `branch.diff`) but never merged - divergent append-only and
+structural data cannot be three-way merged - so a promotion leaves them
 untouched.
 
 The `strict` strategy (the default) refuses with `conflict.engine.promotion`,

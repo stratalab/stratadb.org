@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: json
 ---
 
-# `json` — command reference
+# `json` - command reference
 
 | Command | Summary |
 |---|---|

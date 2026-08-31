@@ -73,7 +73,7 @@ tinyllama
 ## 5. Inspect an earlier state
 
 Every write carries a commit timestamp. List the document's history, then read
-`--as-of` any of those timestamps to see the exact memory at that point — a
+`--as-of` any of those timestamps to see the exact memory at that point - a
 rollback-style inspection with no rollback.
 
 ```bash
@@ -94,11 +94,11 @@ strata ./agent --raw json get agent '$' --as-of 9
 
 ## Why this works
 
-Each primitive carries its own version history, so you never overwrite the past —
+Each primitive carries its own version history, so you never overwrite the past -
 you append to it. Config lives in [KV](/docs/data/key-value), evolving memory in
 a [JSON document](/docs/data/json), and every action in the
 [event log](/docs/data/events). Because reads accept a
 [commit](/docs/concepts/commits) timestamp via `--as-of`, "what did the agent
 know at step 1" is one query, not a reconstruction. When you need to branch from
-an earlier point rather than just read it, fork the branch at that version — see
+an earlier point rather than just read it, fork the branch at that version - see
 [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches).

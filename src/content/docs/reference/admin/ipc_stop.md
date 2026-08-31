@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: admin
 ---
 
-Stops hosting the same-machine broker socket for this store: the listener stops accepting connections and the store is no longer reachable by new clients. Run from a client, it forwards to the owner, which stops hosting (ending that client's own connection). The store stays open in this process; the socket files are unlinked when the owner closes. Idempotent — a process that was not hosting reports `stopped: false`.
+Stops hosting the same-machine broker socket for this store: the listener stops accepting connections and the store is no longer reachable by new clients. Run from a client, it forwards to the owner, which stops hosting (ending that client's own connection). The store stays open in this process; the socket files are unlinked when the owner closes. Idempotent - a process that was not hosting reports `stopped: false`.
 
 Status commands return a scalar or compact status payload and do not mutate database state.
 

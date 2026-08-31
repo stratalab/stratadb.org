@@ -43,7 +43,7 @@ const prev = here > 0 ? flat[here - 1] : undefined;
 const next = here !== -1 && here < flat.length - 1 ? flat[here + 1] : undefined;
 ---
 
-<BaseLayout title={`${title} — StrataDB Docs`} description={description}>
+<BaseLayout title={`${title} | StrataDB Docs`} description={description}>
   <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4 xl:max-w-[86rem]">
     <div class="flex gap-12">
       <DocsSidebar sections={sections} currentPath={currentPath} />
@@ -174,7 +174,7 @@ const next = here !== -1 && here < flat.length - 1 ? flat[here + 1] : undefined;
           btn.innerHTML = copyIcon;
         }, 1500);
       } catch {
-        /* clipboard unavailable (permissions/insecure context) — leave as-is */
+        /* clipboard unavailable (permissions/insecure context) - leave as-is */
       }
     });
     wrapper.appendChild(btn);

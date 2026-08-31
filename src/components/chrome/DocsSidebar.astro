@@ -53,7 +53,7 @@ const isActive = (href: string) => currentPath === href || currentPath === `${hr
               ))}
             </ul>
           )}
-          {/* Nested groups (generated command families) — collapsible, open on the active family */}
+          {/* Nested groups (generated command families) - collapsible, open on the active family */}
           {section.groups?.map((group) => {
             const groupActive =
               (group.href && isActive(group.href)) || group.items.some((i) => isActive(i.href));

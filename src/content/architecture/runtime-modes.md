@@ -20,8 +20,8 @@ reference durable backend.
 
 ### Cache
 
-Explicit and non-durable. Cache mode avoids all hidden disk durability — no WAL,
-manifest, checkpoint, or durable files — while still supporting normal data
+Explicit and non-durable. Cache mode avoids all hidden disk durability - no WAL,
+manifest, checkpoint, or durable files - while still supporting normal data
 capability behavior in memory. It is visibly different from durable mode in info
 and health output, so it is never mistaken for a durable database. Disk-backed
 cache mode is not a V1 mode.
@@ -36,8 +36,8 @@ needed).
 
 ### IPC-backed local shared access
 
-Strata is embedded, but two local processes — an application and a Strata AI
-assistant, say — sometimes need the same database. Rather than open a second
+Strata is embedded, but two local processes - an application and a Strata AI
+assistant, say - sometimes need the same database. Rather than open a second
 direct writer, the secondary process connects over **IPC** to the process that
 already owns the database. IPC:
 
@@ -53,7 +53,7 @@ use needs no daemon. (The older follower mode is not part of V1.)
 
 ## The backend capability contract
 
-A backend is not "supported" because its adapter compiles — it is supported for a
+A backend is not "supported" because its adapter compiles - it is supported for a
 mode only when it **declares and passes the capabilities that mode requires**. The
 contract defines backend address syntax, capability declarations, the required
 capabilities per runtime mode, explicit unsupported-capability errors, and backend
@@ -69,23 +69,23 @@ large server. The engine owns that adaptation:
 
 - The **engine probes the host**, classifies a resource profile, applies any
   explicit user overrides in precedence order, and allocates product-wide budgets.
-- **Storage receives resolved budgets** and spends within them — it does not
+- **Storage receives resolved budgets** and spends within them - it does not
   classify the host or mutate product defaults.
 - Graph, vector, search, and retrieval features receive engine-owned budget
   guidance instead of independently probing the machine.
 - Resolved runtime plans are **observable but not persisted** as user
-  configuration — they are a computed plan, not saved state.
+  configuration - they are a computed plan, not saved state.
 - Low-memory conditions produce typed resource errors or bounded/degraded
   operation *before* uncontrolled out-of-memory behavior.
 
 The result is that scaling from small to large is a matter of the resolved plan,
-not a different build — the same architecture, sized to the host.
+not a different build - the same architecture, sized to the host.
 
 ## Related
 
-- [Durability and recovery](/architecture/durability-and-recovery) — what each
+- [Durability and recovery](/architecture/durability-and-recovery) - what each
   mode guarantees across a crash.
-- [The storage substrate](/architecture/storage-substrate) — the backend layer the
+- [The storage substrate](/architecture/storage-substrate) - the backend layer the
   capability contract sits over.
-- [Embedded architecture](/docs/concepts/embedded-architecture) — the product-level
+- [Embedded architecture](/docs/concepts/embedded-architecture) - the product-level
   view of these modes.

@@ -1,12 +1,12 @@
 ---
 title: "Inference (db.ai)"
 section: "python"
-description: "Chat, embeddings, and reranking through cloud providers or local models — an OpenAI-shaped surface on the database handle."
+description: "Chat, embeddings, and reranking through cloud providers or local models - an OpenAI-shaped surface on the database handle."
 source: "strata-python@v1.1.0"
 ---
 
 `db.ai` runs models: chat generation, embeddings, and reranking, over cloud
-providers (OpenAI, Anthropic, Google) or local GGUF models — an OpenAI-shaped
+providers (OpenAI, Anthropic, Google) or local GGUF models - an OpenAI-shaped
 surface right on the database handle. Strata ships no keys; provide them as
 described in [providers & API keys](/docs/inference/providers-and-keys) (an
 environment variable or `strata config set <provider>.api_key`).
@@ -62,12 +62,12 @@ e.vectors      # all vectors, ordered by input index
 e.vector       # convenience for a single-input call
 ```
 
-Embedding output feeds the [vector store](/docs/python/namespaces) — embed text,
+Embedding output feeds the [vector store](/docs/python/namespaces) - embed text,
 then `db.vectors.upsert` the result under the same key as its source record.
 
 ## Reranking
 
-`rank` scores candidate passages against a query — the precision pass after a
+`rank` scores candidate passages against a query - the precision pass after a
 vector search recall pass:
 
 ```python
@@ -91,7 +91,7 @@ qwen.capability()
 
 ## Capability, without a call
 
-`db.ai.capability(spec)` reports what a model supports — computed offline, with
+`db.ai.capability(spec)` reports what a model supports - computed offline, with
 no request to the provider. Real output from the base wheel:
 
 ```python
@@ -115,7 +115,7 @@ Use it to route in a script before spending a call.
 Inference failures are [typed and coded](/docs/python/errors) like every other
 Strata error. The two most common, reproduced verbatim:
 
-**Missing provider key** — the call never leaves your process:
+**Missing provider key** - the call never leaves your process:
 
 ```python
 db.ai.chat("hi", model="openai:gpt-4o-mini")
@@ -130,7 +130,7 @@ https://platform.openai.com/api-keys, then set it with
   ref: https://stratadb.org/e/inference.missing_api_key
 ```
 
-**Local model on a base build** — local execution is a build-time feature
+**Local model on a base build** - local execution is a build-time feature
 (the base wheel runs cloud providers; see
 [local models](/docs/inference/local-models)):
 
@@ -153,15 +153,15 @@ from stratadb import errors
 try:
     r = db.ai.chat("hi", model="openai:gpt-4o-mini")
 except errors.FailedPreconditionError:
-    ...   # key missing — configure and retry
+    ...   # key missing - configure and retry
 except errors.UnavailableError:
-    ...   # provider unreachable / rate limited — retryable
+    ...   # provider unreachable / rate limited - retryable
 ```
 
 ## Related
 
-- [Providers & API keys](/docs/inference/providers-and-keys) — where keys come from.
-- [Local models](/docs/inference/local-models) — running GGUF models in process.
-- [Typed errors](/docs/python/errors) — the exception hierarchy.
-- [Combining primitives](/docs/data/combining-primitives) — the embed-then-upsert
+- [Providers & API keys](/docs/inference/providers-and-keys) - where keys come from.
+- [Local models](/docs/inference/local-models) - running GGUF models in process.
+- [Typed errors](/docs/python/errors) - the exception hierarchy.
+- [Combining primitives](/docs/data/combining-primitives) - the embed-then-upsert
   retrieval flow.

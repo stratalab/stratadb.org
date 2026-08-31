@@ -1,5 +1,5 @@
 // The curated fictional seed world (Doc 04 decision, 2026-06-11).
-// ONE world feeds every demo on the page — and, when R8 lands, the live hero
+// ONE world feeds every demo on the page - and, when R8 lands, the live hero
 // engine. Authored so each demo beat has a true answer in the data
 // (the portfolio branch journey carries from hero through inference).
 
@@ -21,7 +21,7 @@ export const SEED: SeedWorld = {
   kv: {
     // The finance thread, part 2 (time travel, 2026-06-12): the portfolio's
     // VALUE over the three days. It dips on 06-10, then the aggressive
-    // strategy — merged in the branch story on 06-11 — pays off. Scrubbing
+    // strategy - merged in the branch story on 06-11 - pays off. Scrubbing
     // the timeline tells that story in dollars.
     'portfolio.value': {
       value: 111080,
@@ -53,7 +53,7 @@ export const SEED: SeedWorld = {
   },
   json: {
     // The branch-story document (section 2, finance domain 2026-06-12):
-    // nobody experiments on live money — which is exactly what branching is
+    // nobody experiments on live money - which is exactly what branching is
     // for. The risky branch tries the aggressive allocation.
     portfolio: {
       strategy: 'balanced',

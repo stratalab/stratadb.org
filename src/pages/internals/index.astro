@@ -1,5 +1,5 @@
 ---
-// PRIVATE pitch surface — Strata engine, "engineering spec-sheet" aesthetic.
+// PRIVATE pitch surface - Strata engine, "engineering spec-sheet" aesthetic.
 // §1–§10. Closes on the benchmarks (the "why it matters" close stays verbal).
 import PitchLayout from '../../layouts/PitchLayout.astro';
 
@@ -16,7 +16,7 @@ const sections = [
   { id: 'benchmarks', label: 'Benchmarks' },
 ];
 
-// §6 BENCHMARKS — ILLUSTRATIVE placeholder figures. A benchmark run is in
+// §6 BENCHMARKS - ILLUSTRATIVE placeholder figures. A benchmark run is in
 // progress; replace the `v` / `qps` / `p99` values below with the real
 // harness output when it lands. Layout reads straight from these objects.
 const fmtOps = (n: number): string =>
@@ -52,7 +52,7 @@ const vecBench = {
 };
 ---
 
-<PitchLayout title="Strata — engine internals" sections={sections}>
+<PitchLayout title="Strata | engine internals" sections={sections}>
   <!-- §1 · WHAT IT IS -->
   <section id="what-it-is" class="pitch-section" aria-label="What Strata is">
     <div class="pitch-wrap">
@@ -67,7 +67,7 @@ const vecBench = {
           <div class="open-statement reveal">
             <h1 class="open-product">Strata is an embedded database for the AI&nbsp;era.</h1>
             <p class="open-technical">
-              A branch-aware, MVCC, log-structured key-value store — KV, JSON, events, vectors, and
+              A branch-aware, MVCC, log-structured key-value store - KV, JSON, events, vectors, and
               graph as capabilities over one&nbsp;substrate.
             </p>
           </div>
@@ -165,7 +165,7 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §3 · WHO IT'S FOR — ideal customer profile -->
+  <!-- §3 · WHO IT'S FOR - ideal customer profile -->
   <section id="who" class="pitch-section" aria-label="Who it's for">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
@@ -550,7 +550,7 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §5 · PRODUCT ARCHITECTURE — the five crates -->
+  <!-- §5 · PRODUCT ARCHITECTURE - the five crates -->
   <section id="product" class="pitch-section" aria-label="Product architecture">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
@@ -624,8 +624,8 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §6 · ARCHITECTURE — the storage engine (L1–L9 explorer) -->
-  <section id="architecture" class="pitch-section" aria-label="Architecture — the storage engine">
+  <!-- §6 · ARCHITECTURE - the storage engine (L1–L9 explorer) -->
+  <section id="architecture" class="pitch-section" aria-label="Architecture - the storage engine">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
         <span class="sec-id"
@@ -753,7 +753,7 @@ const vecBench = {
                   </div>
                   <div class="bf-reads">
                     <span class="bf-read" data-bf-readmain>main reads k = <b>c</b></span>
-                    <span class="bf-read" data-bf-readfork hidden>fork reads k = <b>—</b></span>
+                    <span class="bf-read" data-bf-readfork hidden>fork reads k = <b>-</b></span>
                   </div>
                 </div>
                 <p class="lsm-note" data-bf-note>
@@ -780,7 +780,7 @@ const vecBench = {
             <article class="explorer-pane" data-pane="lsm">
               <div class="pane-head">
                 <span class="pane-layer">L5</span>
-                <h3 class="pane-name">Table runtime — the LSM</h3>
+                <h3 class="pane-name">Table runtime - the LSM</h3>
               </div>
               <p class="pane-desc">
                 Writes land in an in-memory table, then flush to immutable L0 tables and merge down
@@ -791,7 +791,7 @@ const vecBench = {
               <div
                 class="lsm"
                 data-lsm
-                aria-label="Interactive: an LSM write — flush, compaction, and read"
+                aria-label="Interactive: an LSM write - flush, compaction, and read"
               >
                 <div class="lsm-stage">
                   <span class="lsm-read" data-lsm-read hidden>read b</span>
@@ -835,7 +835,7 @@ const vecBench = {
                 </div>
               </div>
               <p class="pane-show">
-                <span class="pane-show-k">// show me</span>compaction(prune · tombstone · TTL) —
+                <span class="pane-show-k">// show me</span>compaction(prune · tombstone · TTL) -
                 caller-supplied&nbsp;&nbsp;·&nbsp;&nbsp;L0 overlaps · L1+ sorted by range
               </p>
             </article>
@@ -849,8 +849,8 @@ const vecBench = {
               <p class="pane-desc">
                 Visibility and durability are tracked as separate states. A write can become visible
                 before its durability is confirmed, and if the process crashes during that window,
-                recovery resolves each affected write to a specific outcome — durable, or visible
-                with durability unconfirmed — and reports which is which.
+                recovery resolves each affected write to a specific outcome - durable, or visible
+                with durability unconfirmed - and reports which is which.
               </p>
               <figure class="pane-svg">
                 <svg viewBox="0 0 360 152" fill="none" aria-hidden="true">
@@ -858,7 +858,7 @@ const vecBench = {
                     x="16"
                     y="16"
                     style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)"
-                    >durable publish — one object, four steps</text
+                    >durable publish - one object, four steps</text
                   >
                   <rect
                     x="16"
@@ -1047,7 +1047,7 @@ const vecBench = {
                     x="16"
                     y="13"
                     style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)"
-                    >one commit — durable in the WAL before visible</text
+                    >one commit - durable in the WAL before visible</text
                   >
                   <rect
                     x="16"
@@ -1237,7 +1237,7 @@ const vecBench = {
                     x="16"
                     y="13"
                     style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)"
-                    >typed lifecycle — recovery reports health</text
+                    >typed lifecycle - recovery reports health</text
                   >
                   <rect
                     x="16"
@@ -1637,7 +1637,7 @@ const vecBench = {
                     x="24"
                     y="16"
                     style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)"
-                    >durable record — framed, checksummed</text
+                    >durable record - framed, checksummed</text
                   >
                   <rect
                     x="24"
@@ -1810,8 +1810,8 @@ const vecBench = {
                 <h3 class="pane-name">Object layout</h3>
               </div>
               <p class="pane-desc">
-                One canonical object namespace under a database root — manifest, wal, tables,
-                snapshots, quarantine, locks — built from typed constructors so no layer assembles
+                One canonical object namespace under a database root - manifest, wal, tables,
+                snapshots, quarantine, locks - built from typed constructors so no layer assembles
                 its own paths. The layer defines the names; the bytes and policy live above it. The
                 database manifest sits at a fixed path, <code>manifest/current</code>, and an object
                 can be deleted only once it is proven unreachable from there.
@@ -1822,7 +1822,7 @@ const vecBench = {
                     x="24"
                     y="14"
                     style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)"
-                    >object namespace — canonical names</text
+                    >object namespace - canonical names</text
                   >
                   <rect
                     x="24"
@@ -1909,7 +1909,7 @@ const vecBench = {
                     x="252"
                     y="115"
                     style="font-family:var(--font-mono);font-size:7.5px;fill:var(--color-ink-low)"
-                    >only — no</text
+                    >only - no</text
                   >
                   <text
                     x="252"
@@ -1934,7 +1934,7 @@ const vecBench = {
               </div>
               <p class="pane-desc">
                 The portability layer. Everything above it works in terms of named objects under a
-                database root, through a small set of operations — read, read-range, write, append —
+                database root, through a small set of operations - read, read-range, write, append -
                 rather than files, descriptors, or fsync calls. The same contract backs a durable
                 local-filesystem implementation and a browser/cache one, and leaves room for an
                 object-storage backend later.
@@ -1945,7 +1945,7 @@ const vecBench = {
                     x="24"
                     y="14"
                     style="font-family:var(--font-mono);font-size:8.5px;fill:var(--color-ink-low)"
-                    >object-first — one name, two realizations</text
+                    >object-first - one name, two realizations</text
                   >
                   <rect
                     x="24"
@@ -2073,7 +2073,7 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §7 · VECTOR ARCHITECTURE — per-slab progressive index on the LSM -->
+  <!-- §7 · VECTOR ARCHITECTURE - per-slab progressive index on the LSM -->
   <section id="vector" class="pitch-section" aria-label="Vector architecture">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
@@ -2353,7 +2353,7 @@ const vecBench = {
     </div>
   </section>
 
-  <!-- §8 · API SURFACE — one operation contract, machine-actionable errors -->
+  <!-- §8 · API SURFACE - one operation contract, machine-actionable errors -->
   <section id="api" class="pitch-section" aria-label="API surface">
     <div class="pitch-wrap">
       <header class="sec-header reveal">
@@ -3343,7 +3343,7 @@ const vecBench = {
       height: auto;
     }
 
-    /* ===== §9 · how we test — bug-class approaches =================== */
+    /* ===== §9 · how we test - bug-class approaches =================== */
     .approaches {
       margin-top: 2rem;
       display: flex;
@@ -3448,7 +3448,7 @@ const vecBench = {
       font-size: 0.85rem;
     }
 
-    /* ===== §3 · who it's for — ideal customer profile =============== */
+    /* ===== §3 · who it's for - ideal customer profile =============== */
     .icp-grid {
       margin-top: 2.4rem;
       display: grid;
@@ -3494,7 +3494,7 @@ const vecBench = {
       color: var(--color-ink-mid);
     }
 
-    /* ===== §5 · product architecture — the five crates ============== */
+    /* ===== §5 · product architecture - the five crates ============== */
     .crates {
       margin-top: 1.2rem;
     }
@@ -3575,12 +3575,12 @@ const vecBench = {
       background: color-mix(in srgb, var(--color-ink-hi) 3%, var(--color-panel));
     }
 
-    /* ===== §6 · architecture — section intro ========================= */
+    /* ===== §6 · architecture - section intro ========================= */
     .arch-intro {
       max-width: 52rem;
     }
 
-    /* ===== §6 · architecture — screen 2 (storage explorer) =========== */
+    /* ===== §6 · architecture - screen 2 (storage explorer) =========== */
     .explorer {
       display: grid;
       grid-template-columns: 16.5rem minmax(0, 1fr);
@@ -4130,7 +4130,7 @@ const vecBench = {
       }
     }
 
-    /* ===== §7 · vector architecture — per-slab index on the LSM ====== */
+    /* ===== §7 · vector architecture - per-slab index on the LSM ====== */
     .varch-top {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -4242,7 +4242,7 @@ const vecBench = {
       color: var(--color-ink-hi);
     }
 
-    /* ===== §8 · api surface — fan-out + contract enums =============== */
+    /* ===== §8 · api surface - fan-out + contract enums =============== */
     .api-enum {
       margin-top: 0.55rem;
       padding-top: 0.5rem;
@@ -4340,7 +4340,7 @@ const vecBench = {
       letter-spacing: 0.04em;
       color: var(--color-ink-low);
     }
-    /* KV — grouped bars per YCSB workload (Strata in ember) */
+    /* KV - grouped bars per YCSB workload (Strata in ember) */
     .bench-bars {
       margin-top: 0.1rem;
       display: grid;
@@ -4412,7 +4412,7 @@ const vecBench = {
       color: var(--color-terracotta-700);
     }
 
-    /* Vector — solo; five metrics, each its own card, charted across sizes */
+    /* Vector - solo; five metrics, each its own card, charted across sizes */
     .vmetrics {
       margin-top: 0.7rem;
       display: grid;
@@ -4519,7 +4519,7 @@ const vecBench = {
   </style>
 
   <script>
-    // §4 storage explorer — select a layer, swap its detail pane.
+    // §4 storage explorer - select a layer, swap its detail pane.
     const explorer = document.querySelector('.explorer');
     if (explorer) {
       const nodes = explorer.querySelectorAll<HTMLElement>('[data-node]');
@@ -4532,7 +4532,7 @@ const vecBench = {
       nodes.forEach((n) => n.addEventListener('click', () => select(n.dataset.node)));
     }
 
-    // §4 · L5 living-LSM — deterministic, precomputed frames: write → flush → compaction → read.
+    // §4 · L5 living-LSM - deterministic, precomputed frames: write → flush → compaction → read.
     interface LsmFrame {
       mem: string[];
       l0: string[];
@@ -4558,7 +4558,7 @@ const vecBench = {
           l0: [],
           l1: [],
           active: 'mem',
-          note: 'write a → memtable — held in memory, kept sorted.',
+          note: 'write a → memtable - held in memory, kept sorted.',
         },
         {
           mem: ['a', 'b'],
@@ -4603,7 +4603,7 @@ const vecBench = {
           l1: [],
           active: 'l0',
           flow: 'flush',
-          note: 'a third flush — L0 tables may overlap in key range (a–c, d–f, a–e), so a read may touch several.',
+          note: 'a third flush - L0 tables may overlap in key range (a–c, d–f, a–e), so a read may touch several.',
         },
         {
           mem: [],
@@ -4777,7 +4777,7 @@ const vecBench = {
       render();
     }
 
-    // §4 · L6 branch-fork — fork (O(metadata)) → write each branch → one key's reads diverge.
+    // §4 · L6 branch-fork - fork (O(metadata)) → write each branch → one key's reads diverge.
     interface BfCell {
       v: string;
       val: string;
@@ -4811,7 +4811,7 @@ const vecBench = {
           hot: { v5: 'main' },
           readMain: 'c',
           readFork: null,
-          note: 'main holds one key k with three versions — v1, v3, v5 — newest first. A read returns the newest: c.',
+          note: 'main holds one key k with three versions - v1, v3, v5 - newest first. A read returns the newest: c.',
         },
         {
           fork: true,
@@ -4822,7 +4822,7 @@ const vecBench = {
           hot: { v5: 'both' },
           readMain: 'c',
           readFork: 'c',
-          note: 'Fork main. O(metadata) — zero rows copied; the fork inherits main’s layers by reference, gated at v5. Both branches read c.',
+          note: 'Fork main. O(metadata) - zero rows copied; the fork inherits main’s layers by reference, gated at v5. Both branches read c.',
         },
         {
           fork: true,
@@ -4896,7 +4896,7 @@ const vecBench = {
           ? f.mainHead.map((c) => ownCell(c, !!f.hot[c.v])).join('')
           : ghost('latest in base ↓');
         elForkHead.innerHTML = !f.fork
-          ? ghost('— not forked —')
+          ? ghost('- not forked -')
           : f.forkHead.length
             ? f.forkHead.map((c) => ownCell(c, !!f.hot[c.v])).join('')
             : ghost('inherits base ↓');

@@ -1,12 +1,12 @@
 // Sidebar tree generated FROM the content collections (01 §6 done-criterion:
-// no dead links — the nav can only point at entries that exist).
+// no dead links - the nav can only point at entries that exist).
 import { getCollection } from 'astro:content';
 
 export interface NavItem {
   title: string;
   href: string;
 }
-// A nested group within a section — used for the generated command reference,
+// A nested group within a section - used for the generated command reference,
 // where each family (kv, vector, …) is a sub-tree (Doc 11 §7.1).
 export interface NavGroup {
   title: string;
@@ -164,7 +164,7 @@ function referenceSection(entries: Doc[]): NavSection {
   const discovered = new Set<string>();
   for (const entry of entries) {
     const parts = entry.id.split('/');
-    // reference/<family>/<op...> — a family index alone (depth 2) does not
+    // reference/<family>/<op...> - a family index alone (depth 2) does not
     // make a family; only real command pages (depth ≥ 3) do.
     if (parts.length >= 3) discovered.add(parts[1]);
   }

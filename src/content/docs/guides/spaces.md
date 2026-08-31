@@ -8,10 +8,10 @@ source: "strata-core@v1.1.0"
 
 A product space is a named partition of data inside a branch. Spaces and
 branches are Strata's two organizing dimensions, not data types of their own:
-your data always lives in one of the five capabilities — KV, JSON, events,
-vectors, and graphs — while branches isolate history across forks and spaces
+your data always lives in one of the five capabilities - KV, JSON, events,
+vectors, and graphs - while branches isolate history across forks and spaces
 scope which slice of that data you see within a branch. Every branch has a
-`default` space, and you can add more to keep unrelated data apart — one space
+`default` space, and you can add more to keep unrelated data apart - one space
 per tenant, per agent session, or per dataset. This guide covers the four space
 verbs: `list`, `create`, `exists`, and `delete`.
 
@@ -54,7 +54,7 @@ created analytics applied=true
 
 ## Check existence
 
-`space exists <name>` prints a bare boolean — handy in scripts:
+`space exists <name>` prints a bare boolean - handy in scripts:
 
 ```bash
 strata ./mydb space exists analytics   # true
@@ -73,7 +73,7 @@ strata ./mydb --space analytics kv get report   # q3
 strata ./mydb kv get report                      # (nil)
 ```
 
-Counts confirm the isolation — `kv count` returns `1` in `analytics` and `0` in
+Counts confirm the isolation - `kv count` returns `1` in `analytics` and `0` in
 `default`. This applies to every primitive: KV, JSON, vectors, events, and
 graphs are all space-scoped.
 
@@ -103,7 +103,7 @@ deleted analytics applied=true
 ```
 
 Deleting an empty space needs no flag. Deleting a space that does not exist is a
-no-op — it reports `applied=false` and exits zero rather than failing:
+no-op - it reports `applied=false` and exits zero rather than failing:
 
 ```bash
 strata ./mydb space delete ghost
@@ -128,13 +128,13 @@ invalid_argument.engine.space_delete_default: default product space cannot be de
 ## Spaces or branches?
 
 Reach for a space when you want to keep related data organized inside one line
-of history — tenants, sessions, or datasets that live and version together.
+of history - tenants, sessions, or datasets that live and version together.
 Reach for a [branch](/docs/guides/branching-workflows) when you want an isolated
 copy of history you can fork, time-travel, and discard. The two compose: a
 branch contains spaces, and forking a branch carries its spaces along.
 
 ## Next
 
-- [Branch Management](/docs/guides/branching-workflows) — isolate history with forks.
-- [KV Store](/docs/data/key-value) — the primitive used in these examples.
-- [Concepts: Primitives](/docs/concepts/primitives) — how the five data types relate.
+- [Branch Management](/docs/guides/branching-workflows) - isolate history with forks.
+- [KV Store](/docs/data/key-value) - the primitive used in these examples.
+- [Concepts: Primitives](/docs/concepts/primitives) - how the five data types relate.

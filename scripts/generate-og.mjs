@@ -1,4 +1,4 @@
-// OG image (04 §9): dark canvas, layer glyph, H1, stat strip — rendered with
+// OG image (04 §9): dark canvas, layer glyph, H1, stat strip - rendered with
 // the real fonts via headless chromium (no satori dependency chain).
 // Run manually or in CI after font changes; output is committed.
 import { chromium } from 'playwright';

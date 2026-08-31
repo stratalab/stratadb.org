@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: event
 ---
 
-# `event` — command reference
+# `event` - command reference
 
 | Command | Summary |
 |---|---|

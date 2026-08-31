@@ -3,14 +3,14 @@
 //
 // Source of truth is strata-core (docs sourcing policy §1: reference is
 // generated in the code repo). We consume the RELEASED version's bundle, never
-// `main` — the site documents the binary users actually install.
+// `main` - the site documents the binary users actually install.
 //
 // Source resolution (first that succeeds; never fails the build):
-//   1. STRATA_DOCS_DIR  — a local strata-core `.../idl/v1/generated` dir (dev).
-//   2. Release asset    — strata-idl-docs.tar.gz from the release tag in
+//   1. STRATA_DOCS_DIR  - a local strata-core `.../idl/v1/generated` dir (dev).
+//   2. Release asset    - strata-idl-docs.tar.gz from the release tag in
 //                         src/data/release.json (CI / prod). strata-core is
 //                         public, so this is unauthenticated.
-//   3. Committed floor  — whatever was last staged; a fetch failure keeps it.
+//   3. Committed floor  - whatever was last staged; a fetch failure keeps it.
 //
 // Output:
 //   src/content/docs/reference/<family>/<op>.md   (git-ignored; regenerated)
@@ -31,6 +31,10 @@ const INDEX_OUT = join(ROOT, 'src/data/command-index.json');
 const RELEASE_JSON = join(ROOT, 'src/data/release.json');
 const ASSET = 'strata-idl-docs.tar.gz';
 const REPO = 'https://github.com/stratalab/strata-core';
+
+function normalizeCopy(text) {
+  return text.replaceAll('\u2014', '-');
+}
 
 // The generated command families are DISCOVERED from the bundle (every
 // top-level dir under generated/docs/), so a family added in strata-core
@@ -84,7 +88,9 @@ async function resolveSource() {
 // Rewrite generated `/docs/<family>/` links to the Reference section.
 function makeLinkRewriter(families) {
   const pattern = new RegExp(`\\]\\(/docs/(${families.join('|')})/`, 'g');
-  return (md) => md.replace(pattern, '](/docs/reference/$1/');
+  return (md) => {
+    return normalizeCopy(md.replace(pattern, '](/docs/reference/$1/'));
+  };
 }
 
 function normalizeCommandIndexDocs(index, families) {
@@ -145,7 +151,7 @@ async function main() {
   if (existsSync(indexSrc)) {
     await mkdir(join(INDEX_OUT, '..'), { recursive: true });
     const index = normalizeCommandIndexDocs(JSON.parse(await readFile(indexSrc, 'utf8')), families);
-    await writeFile(INDEX_OUT, `${JSON.stringify(index, null, 2)}\n`);
+    await writeFile(INDEX_OUT, `${normalizeCopy(JSON.stringify(index, null, 2))}\n`);
   }
 
   console.log(`fetch-docs: staged ${total} reference pages from ${source.label}`);

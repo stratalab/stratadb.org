@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: vector
 ---
 
-# `vector` — command reference
+# `vector` - command reference
 
 | Command | Summary |
 |---|---|

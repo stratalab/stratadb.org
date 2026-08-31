@@ -9,12 +9,12 @@ source: "strata-python@v1.1.0"
 pip install stratadb
 ```
 
-That is the whole install. Wheels are **prebuilt** — there is no Rust toolchain
+That is the whole install. Wheels are **prebuilt** - there is no Rust toolchain
 to set up and nothing compiles on your machine.
 
 ## Wheels and platforms
 
-- **`abi3`** — one wheel per platform works across Python **3.9+**, so upgrades
+- **`abi3`** - one wheel per platform works across Python **3.9+**, so upgrades
   don't need a new download.
 - Platforms: manylinux and musllinux (x86_64, aarch64), macOS (arm64, x86_64),
   and Windows x86_64.
@@ -23,7 +23,7 @@ to set up and nothing compiles on your machine.
 
 ## CPU and GPU inference
 
-The base wheel runs **cloud inference on CPU** — chat, embeddings, and reranking
+The base wheel runs **cloud inference on CPU** - chat, embeddings, and reranking
 through cloud providers work out of the box. For **GPU-accelerated local models**,
 install the companion extra:
 
@@ -31,14 +31,14 @@ install the companion extra:
 pip install "stratadb[cuda]"     # GPU-accelerated local model execution
 ```
 
-Cloud inference needs no extra — only a provider API key (see
+Cloud inference needs no extra - only a provider API key (see
 [`db.ai`](/docs/python/inference)). Local model execution is the piece that
 benefits from the GPU build.
 
 ## Type checking
 
 The package ships `py.typed` and generated stubs, so type checkers (mypy,
-pyright) see the full typed surface — every namespace method, its parameters, and
+pyright) see the full typed surface - every namespace method, its parameters, and
 its return model. Editors get autocomplete and inline signatures with no extra
 setup.
 
@@ -57,5 +57,5 @@ If that runs, the native binding loaded and the engine is live in your process.
 
 ## Next
 
-- [Namespaces](/docs/python/namespaces) — the data-plane API.
-- [Inference](/docs/python/inference) — `db.ai` and provider keys.
+- [Namespaces](/docs/python/namespaces) - the data-plane API.
+- [Inference](/docs/python/inference) - `db.ai` and provider keys.

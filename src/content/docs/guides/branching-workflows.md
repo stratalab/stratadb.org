@@ -54,7 +54,7 @@ strata ./mydb branch get default
 ## Create an empty branch
 
 `branch create <name>` makes a new root branch with no data and no parent. It
-does not switch you onto it — pass `--branch` on later commands to target it:
+does not switch you onto it - pass `--branch` on later commands to target it:
 
 ```bash
 strata ./mydb branch create scratch
@@ -142,7 +142,7 @@ invalid_argument.engine.branch_delete: default branch cannot be deleted (err_loc
 
 ## Refusals
 
-Branch operations fail with stable codes, not prose. Recover by code — see
+Branch operations fail with stable codes, not prose. Recover by code - see
 [Error Handling](/docs/guides/error-handling). Common cases:
 
 - Reserved names (the `_system_` prefix is engine-owned) →
@@ -160,7 +160,7 @@ Diverged branches can be inspected and reconciled with three verbs. All are
 directional and take branch names positionally.
 
 `branch diff <a> <b>` reports what differs between two branches across every
-capability — KV, JSON, vectors, events, and graph nodes, edges, and ontology —
+capability - KV, JSON, vectors, events, and graph nodes, edges, and ontology -
 grouped by space, as entries `added` on `b`, `removed` relative to `a`, and
 `modified` on both. It is read-only:
 
@@ -184,8 +184,8 @@ strata ./mydb branch merge review default
 ```
 
 Promotion applies to key-value, JSON, and vector data (with their collection
-configs). Event streams and graphs are compared but never merged — divergent
-append-only and structural data cannot be three-way merged — so a promotion
+configs). Event streams and graphs are compared but never merged - divergent
+append-only and structural data cannot be three-way merged - so a promotion
 leaves them untouched.
 
 The default `--strategy strict` refuses with
@@ -199,6 +199,6 @@ rejected with
 
 ## Next
 
-- [Spaces](/docs/guides/spaces) — organize data within a branch.
-- [KV Store](/docs/data/key-value) — versioned reads and `--as-of` time travel.
-- [Concepts: Branches](/docs/concepts/branches) — the model behind these verbs.
+- [Spaces](/docs/guides/spaces) - organize data within a branch.
+- [KV Store](/docs/data/key-value) - versioned reads and `--as-of` time travel.
+- [Concepts: Branches](/docs/concepts/branches) - the model behind these verbs.

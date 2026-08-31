@@ -7,37 +7,37 @@ export const HERO_SCRIPT: ScriptEvent[] = [
   { type: 'cmd', panel: 'main', branch: 'default', text: 'kv put portfolio.value 98400' },
   { type: 'output', panel: 'main', text: 'created portfolio.value applied=true' },
 
-  // Beat 1 — create the branch
+  // Beat 1 - create the branch
   { type: 'cmd', panel: 'main', branch: 'default', text: 'branch fork default risky' },
   { type: 'output', panel: 'main', text: '"name": "risky"', tone: 'ok' },
 
-  // Beat 2 — the fork
+  // Beat 2 - the fork
   { type: 'split' },
   { type: 'pause', ms: 700 },
 
-  // Beat 3 — write on the fork
+  // Beat 3 - write on the fork
   { type: 'cmd', panel: 'fork', branch: 'risky', text: 'kv put portfolio.value 111080' },
   { type: 'output', panel: 'fork', text: 'updated portfolio.value applied=true' },
 
-  // Beat 4 — the isolation beat: main is untouched
+  // Beat 4 - the isolation beat: main is untouched
   { type: 'cmd', panel: 'main', branch: 'default', text: 'kv get portfolio.value' },
   { type: 'output', panel: 'main', text: '98400' },
 
-  // Beat 5 — the verb beat: diff before merge
+  // Beat 5 - the verb beat: diff before merge
   { type: 'cmd', panel: 'main', branch: 'default', text: 'branch diff default risky' },
   { type: 'output', panel: 'main', text: '"branch_b": "risky"', tone: 'ok' },
 
-  // Beat 6 — preview the promotion before applying it
+  // Beat 6 - preview the promotion before applying it
   { type: 'cmd', panel: 'main', branch: 'default', text: 'branch preview risky default' },
   { type: 'output', panel: 'main', text: '"conflicts": []', tone: 'ok' },
 
-  // Beat 7 — merge; panels rejoin
+  // Beat 7 - merge; panels rejoin
   { type: 'cmd', panel: 'main', branch: 'default', text: 'branch merge risky default' },
   { type: 'output', panel: 'main', text: '"target": "default"', tone: 'ok' },
   { type: 'merge' },
   { type: 'pause', ms: 700 },
 
-  // Beat 8 — payoff
+  // Beat 8 - payoff
   { type: 'cmd', panel: 'main', branch: 'default', text: 'kv get portfolio.value' },
   { type: 'output', panel: 'main', text: '111080' },
 ];

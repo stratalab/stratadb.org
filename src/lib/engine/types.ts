@@ -25,7 +25,7 @@ export interface TerminalState {
   merged: boolean;
 }
 
-/** Fold a script into its final visual state — the SSR first frame (03 §7). */
+/** Fold a script into its final visual state - the SSR first frame (03 §7). */
 export function completedState(script: ScriptEvent[]): TerminalState {
   const state: TerminalState = { main: [], fork: [], split: false, merged: false };
   for (const e of script) {

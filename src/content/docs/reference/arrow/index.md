@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: arrow
 ---
 
-# `arrow` — command reference
+# `arrow` - command reference
 
 | Command | Summary |
 |---|---|

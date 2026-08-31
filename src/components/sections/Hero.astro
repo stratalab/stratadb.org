@@ -1,6 +1,6 @@
 ---
 // Section 1: badge → H1 → CTAs → data-model index → set-piece.
-// (Stat strip removed 2026-06-12, Ani — the benchmark claims leave the hero;
+// (Stat strip removed 2026-06-12, Ani - the benchmark claims leave the hero;
 // benchmarks.json remains for the specimen/docs.) Parallax site #1 of 2
 // (03 §3.1): glow 0.85× · terminal 1.0×.
 import Badge from '../foundation/Badge.astro';
@@ -77,13 +77,13 @@ const dataModel = [
 
 <section id="hero" class="relative overflow-hidden">
   <!-- The living backdrop (2026-06-12): three light fields breathing on the
-       neutral stage. Transform-only, GPU-composited, 22–36s periods —
+       neutral stage. Transform-only, GPU-composited, 22–36s periods -
        sanctioned infinite animation #2 (03 §5 amendment). -->
   <div class="hero-backdrop pointer-events-none absolute inset-0" aria-hidden="true">
     <div class="hero-light hero-light-ember"></div>
     <div class="hero-light hero-light-cool"></div>
     <div class="hero-light hero-light-deep"></div>
-    <!-- The branching river (2026-06-12): the product thesis as artwork — a
+    <!-- The branching river (2026-06-12): the product thesis as artwork - a
          trunk forks, strands diverge, one merges back. Energy flows along the
          lines via dashoffset; each strand = wide glow stroke + bright core. -->
     <svg
@@ -132,7 +132,7 @@ const dataModel = [
     <HorizonGlow />
   </div>
   <!-- Content scrim (2026-06-12): quiets the river exactly where the words
-       sit — the artwork stays, legibility wins. -->
+       sit - the artwork stays, legibility wins. -->
   <div
     class="pointer-events-none absolute inset-0"
     style="background: radial-gradient(ellipse 58% 46% at 50% 36%, rgb(var(--rgb-black) / 0.78), rgb(var(--rgb-black) / 0.35) 55%, transparent 72%);"
@@ -148,7 +148,7 @@ const dataModel = [
       >
 
       <!-- The acquisition control (2026-06-12): the hero IS the act surface.
-           No Get Started — get the product: CLI via curl, or the studio. -->
+           No Get Started - get the product: CLI via curl, or the studio. -->
       <!-- Two species, two paths (2026-06-12): the GUI gets a real button that
            says what it IS (nobody knows "Foundry" yet); the CLI keeps the quiet
            mono chip. "Get", not "Download", until R1 artifacts exist. -->
@@ -166,7 +166,7 @@ const dataModel = [
         <button
           type="button"
           class="copy-chip group inline-flex items-center gap-2.5 rounded-full border border-line bg-panel/90 px-4 py-1.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
-          data-copy="Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/getting-started/quickstart-agents.md — report the verification output when done."
+          data-copy="Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/getting-started/quickstart-agents.md - report the verification output when done."
           aria-label="Copy setup instructions for your AI agent"
         >
           <span>Set up with your agent</span>
@@ -187,7 +187,7 @@ const dataModel = [
             </svg>
           </span>
           <span class="copy-chip-done hidden text-ok" aria-hidden="true"
-            >✓ copied — paste it to your agent</span
+            >✓ copied - paste it to your agent</span
           >
         </button>
       </p>
@@ -235,7 +235,7 @@ const dataModel = [
 </section>
 
 <style>
-  /* Perceptibility fix (2026-06-12): the first cut moved ~0.5%/s — technically
+  /* Perceptibility fix (2026-06-12): the first cut moved ~0.5%/s - technically
      animated, perceptually static. Now: 11–18s periods, wider travel, and
      opacity breathing (the eye catches luminosity change fastest). Still
      transform/opacity only; still off under reduced motion. */

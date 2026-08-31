@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: graph
 ---
 
-# `graph` — command reference
+# `graph` - command reference
 
 | Command | Summary |
 |---|---|

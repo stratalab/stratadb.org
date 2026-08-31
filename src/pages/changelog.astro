@@ -1,5 +1,5 @@
 ---
-// Generated from real release data (PRD §7.2) — the sibling-path read with the
+// Generated from real release data (PRD §7.2) - the sibling-path read with the
 // stale hardcoded fallback is dead. Build-time fetch; committed release.json
 // is the single-entry floor if the API is unreachable.
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -20,6 +20,8 @@ interface GitHubRelease {
   body: string | null;
 }
 
+const normalizeCopy = (value: string) => value.replaceAll('\u2014', '-');
+
 let releases: Release[] = [];
 try {
   const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
@@ -34,9 +36,9 @@ try {
     const data = (await res.json()) as GitHubRelease[];
     releases = data.map((r) => ({
       tag: r.tag_name,
-      name: r.name || r.tag_name,
+      name: normalizeCopy(r.name || r.tag_name),
       date: (r.published_at ?? '').slice(0, 10),
-      body: r.body ?? '',
+      body: normalizeCopy(r.body ?? ''),
     }));
   }
 } catch {
@@ -55,7 +57,7 @@ if (!releases.length) {
 ---
 
 <BaseLayout
-  title="Changelog — StrataDB"
+  title="Changelog | StrataDB"
   description="StrataDB release history, generated from GitHub releases."
 >
   <SectionShell eyebrow="CHANGELOG">

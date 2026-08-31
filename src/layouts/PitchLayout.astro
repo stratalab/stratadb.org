@@ -1,5 +1,5 @@
 ---
-// PRIVATE — Strata engine-internals pitch surface. Own chrome (sticky section
+// PRIVATE - Strata engine-internals pitch surface. Own chrome (sticky section
 // rail), light "engineering spec-sheet" aesthetic: ruled structure, monospace
 // metadata, ember as the single instrument indicator. noindex.
 import '../styles/global.css';
@@ -12,7 +12,7 @@ interface Props {
   title?: string;
   sections: Section[];
 }
-const { title = 'Strata — engine internals', sections } = Astro.props;
+const { title = 'Strata | engine internals', sections } = Astro.props;
 ---
 
 <!doctype html>
@@ -54,11 +54,11 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
 
   <body class="pitch-light min-h-screen">
     {
-      /* warm-light "pitch" theme tokens live in src/styles/tokens.css (.pitch-light) — literal-drift rule */
+      /* warm-light "pitch" theme tokens live in src/styles/tokens.css (.pitch-light) - literal-drift rule */
     }
 
     <div class="pitch-shell">
-      <!-- Sticky section rail — the index -->
+      <!-- Sticky section rail - the index -->
       <nav class="pitch-rail" aria-label="Sections">
         <a href={`#${sections[0]?.id}`} class="rail-brand">
           <img class="rail-logo" src="/logo.svg" alt="" width="22" height="22" />
@@ -290,7 +290,7 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
     </style>
 
     <script>
-      // Scrollspy — light the rail item for the section nearest the top band.
+      // Scrollspy - light the rail item for the section nearest the top band.
       const links = new Map<string, HTMLElement>();
       document.querySelectorAll<HTMLElement>('[data-rail-link]').forEach((el) => {
         const id = el.dataset.railLink;

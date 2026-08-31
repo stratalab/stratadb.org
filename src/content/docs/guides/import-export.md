@@ -72,7 +72,7 @@ strata ./restored arrow import --target kv ./users.csv
 }
 ```
 
-`--target` accepts `kv`, `json`, and `vector`. The format is inferred from the file, or state it explicitly with `--format <parquet|csv|jsonl>`. The round trip is faithful — the keys and values written above read straight back:
+`--target` accepts `kv`, `json`, and `vector`. The format is inferred from the file, or state it explicitly with `--format <parquet|csv|jsonl>`. The round trip is faithful - the keys and values written above read straight back:
 
 ```bash
 strata ./restored kv get user:2
@@ -86,9 +86,9 @@ bob
 
 By default the importer expects the same column layout that export produces. When you load a file from elsewhere, point it at the right columns:
 
-- `--key-column <name>` — the column to use as the key.
-- `--value-column <name>` — the column holding the value, document, or embedding.
-- `--collection <name>` — the destination collection for a vector import.
+- `--key-column <name>` - the column to use as the key.
+- `--value-column <name>` - the column holding the value, document, or embedding.
+- `--collection <name>` - the destination collection for a vector import.
 
 For example, importing exported JSON-lines documents by naming the key and document columns explicitly:
 
@@ -110,7 +110,7 @@ strata ./docs arrow import --target json --key-column key --value-column documen
 
 ## Related
 
-- [KV Store](/docs/data/key-value), [JSON Store](/docs/data/json), and [Vector Store](/docs/data/vectors) — the import targets
-- [Graph](/docs/data/graph) — the node and edge model behind a graph export
-- [Cloning Datasets](/docs/guides/cloning-datasets) — pulling a whole prepared database instead of a file
-- [Command Reference](/docs/reference/command-reference) — every verb and flag
+- [KV Store](/docs/data/key-value), [JSON Store](/docs/data/json), and [Vector Store](/docs/data/vectors) - the import targets
+- [Graph](/docs/data/graph) - the node and edge model behind a graph export
+- [Cloning Datasets](/docs/guides/cloning-datasets) - pulling a whole prepared database instead of a file
+- [Command Reference](/docs/reference/command-reference) - every verb and flag

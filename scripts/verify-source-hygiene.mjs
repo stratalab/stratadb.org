@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const ROOT = process.cwd();
 
@@ -14,6 +15,7 @@ const SKIP_DIRS = new Set([
 
 const LIVE_SOURCE_DIRS = ['src/components', 'src/layouts', 'src/lib', 'src/pages', 'src/styles'];
 const LIVE_SOURCE_EXTS = new Set(['.astro', '.css', '.ts', '.tsx']);
+const EM_DASH_EXEMPTIONS = new Set(['public/fonts/GeneralSans-LICENSE.txt']);
 
 const CLAIM_PATTERNS = [
   { label: 'unsupported production claim', pattern: /\bproduction-ready\b/i },
@@ -39,6 +41,20 @@ const RAW_COLOR_PATTERN = /(?<!&)#[0-9a-fA-F]{3,8}\b|(?:rgba?|hsla?)\(\s*\d/gi;
 const OLD_VERSION_PATTERN = /\bv?0\.(?:6|12)\.[0-9]+\b/g;
 
 const failures = [];
+
+const emDashGrep = spawnSync('git', ['grep', '-n', '\u2014'], {
+  cwd: ROOT,
+  encoding: 'utf8',
+});
+
+if (emDashGrep.status === 0) {
+  for (const line of emDashGrep.stdout.trim().split('\n')) {
+    const rel = line.slice(0, line.indexOf(':'));
+    if (!EM_DASH_EXEMPTIONS.has(rel)) failures.push(`${line}: replace em dash punctuation`);
+  }
+} else if (emDashGrep.status !== 1) {
+  failures.push(`git grep for em dashes failed: ${emDashGrep.stderr.trim()}`);
+}
 
 function walk(dir) {
   if (!existsSync(dir)) return [];

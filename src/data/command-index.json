@@ -21,7 +21,7 @@
       },
       "mcp": {
         "name": "strata_admin_config",
-        "description": "Use this when the user asks how the database is configured — its open target, durability, and default branch."
+        "description": "Use this when the user asks how the database is configured - its open target, durability, and default branch."
       },
       "feature": "core",
       "access": "read",
@@ -118,7 +118,7 @@
       },
       "mcp": {
         "name": "strata_admin_describe",
-        "description": "Use this when the user wants an overview of a database — its branches, spaces, primitive counts, and available capabilities."
+        "description": "Use this when the user wants an overview of a database - its branches, spaces, primitive counts, and available capabilities."
       },
       "feature": "core",
       "access": "read",
@@ -287,7 +287,7 @@
       "kind": "read.summary",
       "title": "Read database info",
       "summary": "Read database identity and a catalog summary.",
-      "description": "Returns database identity and a catalog summary for one branch: engine version, open target, whether this open created the database, durability, the default branch, the active branch count, the registered space count for the selected branch, and the resolved storage `memory_budget` (its `total_bytes` and its `source` — `explicit`, `derived_from_host`, or `fixed_default`). When no budget is set, the engine derives the default from host memory at open — 25% of usable memory, clamped to a ceiling — so `memory_budget` reveals what the database is actually sized to. The branch defaults to the handle branch when omitted.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
+      "description": "Returns database identity and a catalog summary for one branch: engine version, open target, whether this open created the database, durability, the default branch, the active branch count, the registered space count for the selected branch, and the resolved storage `memory_budget` (its `total_bytes` and its `source` - `explicit`, `derived_from_host`, or `fixed_default`). When no budget is set, the engine derives the default from host memory at open - 25% of usable memory, clamped to a ceiling - so `memory_budget` reveals what the database is actually sized to. The branch defaults to the handle branch when omitted.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
       "docs": "/docs/reference/admin/info",
       "cli": {
         "path": [
@@ -352,7 +352,7 @@
       },
       "mcp": {
         "name": "strata_admin_ipc_status",
-        "description": "Use this when the user asks whether this database is being shared across processes — whether this process owns it or is a client, whether a broker socket is hosted, and how many clients are connected."
+        "description": "Use this when the user asks whether this database is being shared across processes - whether this process owns it or is a client, whether a broker socket is hosted, and how many clients are connected."
       },
       "feature": "core",
       "access": "read",
@@ -388,7 +388,7 @@
       "kind": "action.status",
       "title": "Stop IPC hosting",
       "summary": "Stop hosting the multi-process broker socket.",
-      "description": "Stops hosting the same-machine broker socket for this store: the listener stops accepting connections and the store is no longer reachable by new clients. Run from a client, it forwards to the owner, which stops hosting (ending that client's own connection). The store stays open in this process; the socket files are unlinked when the owner closes. Idempotent — a process that was not hosting reports `stopped: false`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
+      "description": "Stops hosting the same-machine broker socket for this store: the listener stops accepting connections and the store is no longer reachable by new clients. Run from a client, it forwards to the owner, which stops hosting (ending that client's own connection). The store stays open in this process; the socket files are unlinked when the owner closes. Idempotent - a process that was not hosting reports `stopped: false`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
       "docs": "/docs/reference/admin/ipc_stop",
       "cli": {
         "path": [
@@ -399,7 +399,7 @@
       },
       "mcp": {
         "name": "strata_admin_ipc_stop",
-        "description": "Use this when the user wants to stop sharing this database across processes — tear down the broker socket so no new clients can attach."
+        "description": "Use this when the user wants to stop sharing this database across processes - tear down the broker socket so no new clients can attach."
       },
       "feature": "core",
       "access": "write",
@@ -849,7 +849,7 @@
       "kind": "mutation.delete",
       "title": "Delete branch",
       "summary": "Delete an active branch and release its storage claims.",
-      "description": "Deletes an active branch and reports the deleted branch summary, generation facts, and storage cleanup counts. The `default` branch refuses deletion with `invalid_argument.engine.branch_delete`. Deletion discards the branch's work — promote anything worth keeping onto another branch with `branch merge` before deleting, or keep working on the branch instead.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
+      "description": "Deletes an active branch and reports the deleted branch summary, generation facts, and storage cleanup counts. The `default` branch refuses deletion with `invalid_argument.engine.branch_delete`. Deletion discards the branch's work - promote anything worth keeping onto another branch with `branch merge` before deleting, or keep working on the branch instead.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
       "docs": "/docs/reference/branch/delete",
       "cli": {
         "path": [
@@ -915,7 +915,7 @@
       "kind": "read.status",
       "title": "Compare branches",
       "summary": "Compare two branches and report the entities that differ across every primitive.",
-      "description": "Compares two branches and reports the authored entities that differ, grouped by\ncapability and space: entries `added` on `branch_b`, `removed` relative to\n`branch_a`, and `modified` on both sides. The comparison is directional from\n`branch_a` to `branch_b`.\n\nEvery data primitive is compared — key-value, JSON documents, vectors, event\nstreams, and graphs. Graph changes are reported per row class: nodes, edges, and\nontology appear as separate capabilities in the result. Derived rows (search and\nvector indexes, graph reverse maps) are omitted. A missing branch is rejected\nwith `not_found.engine.branch`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
+      "description": "Compares two branches and reports the authored entities that differ, grouped by\ncapability and space: entries `added` on `branch_b`, `removed` relative to\n`branch_a`, and `modified` on both sides. The comparison is directional from\n`branch_a` to `branch_b`.\n\nEvery data primitive is compared - key-value, JSON documents, vectors, event\nstreams, and graphs. Graph changes are reported per row class: nodes, edges, and\nontology appear as separate capabilities in the result. Derived rows (search and\nvector indexes, graph reverse maps) are omitted. A missing branch is rejected\nwith `not_found.engine.branch`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
       "docs": "/docs/reference/branch/diff",
       "cli": {
         "path": [
@@ -926,7 +926,7 @@
       },
       "mcp": {
         "name": "strata_branch_diff",
-        "description": "Use this when the user wants to see what changed between two branches — which keys, documents, vectors, events, or graph nodes/edges/ontology were added, removed, or modified."
+        "description": "Use this when the user wants to see what changed between two branches - which keys, documents, vectors, events, or graph nodes/edges/ontology were added, removed, or modified."
       },
       "feature": "core",
       "access": "read",
@@ -1044,7 +1044,7 @@
       "kind": "mutation.create",
       "title": "Fork branch at timestamp",
       "summary": "Fork a new branch from a retained source timestamp.",
-      "description": "Forks a new branch anchored at a retained source timestamp (microseconds, on Strata's logical commit clock). The engine resolves the timestamp to the covering retained commit; the returned parent lineage records both the fork timestamp and the resolved fork version. A timestamp outside retained history fails with `history_unavailable.engine.persistence_history`.\n\nThis command has no dedicated CLI verb: the CLI expresses it as `strata branch fork <SOURCE> <BRANCH> --timestamp <TIMESTAMP>` (one shared `branch fork` verb routes to all three fork commands, so only `branch.fork` owns the CLI path). It remains fully reachable through the generic wire surface — `strata command run`, MCP, and SDKs.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
+      "description": "Forks a new branch anchored at a retained source timestamp (microseconds, on Strata's logical commit clock). The engine resolves the timestamp to the covering retained commit; the returned parent lineage records both the fork timestamp and the resolved fork version. A timestamp outside retained history fails with `history_unavailable.engine.persistence_history`.\n\nThis command has no dedicated CLI verb: the CLI expresses it as `strata branch fork <SOURCE> <BRANCH> --timestamp <TIMESTAMP>` (one shared `branch fork` verb routes to all three fork commands, so only `branch.fork` owns the CLI path). It remains fully reachable through the generic wire surface - `strata command run`, MCP, and SDKs.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
       "docs": "/docs/reference/branch/fork_at_timestamp",
       "cli": {
         "path": [
@@ -1114,7 +1114,7 @@
       "kind": "mutation.create",
       "title": "Fork branch at version",
       "summary": "Fork a new branch from a retained source commit version.",
-      "description": "Forks a new branch anchored at a retained commit version of the source branch, giving time-travel semantics: the new branch sees exactly the data visible at that version. A version outside retained history fails with `history_unavailable.engine.persistence_history`.\n\nThis command has no dedicated CLI verb: the CLI expresses it as `strata branch fork <SOURCE> <BRANCH> --version <VERSION>` (one shared `branch fork` verb routes to all three fork commands, so only `branch.fork` owns the CLI path). It remains fully reachable through the generic wire surface — `strata command run`, MCP, and SDKs.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
+      "description": "Forks a new branch anchored at a retained commit version of the source branch, giving time-travel semantics: the new branch sees exactly the data visible at that version. A version outside retained history fails with `history_unavailable.engine.persistence_history`.\n\nThis command has no dedicated CLI verb: the CLI expresses it as `strata branch fork <SOURCE> <BRANCH> --version <VERSION>` (one shared `branch fork` verb routes to all three fork commands, so only `branch.fork` owns the CLI path). It remains fully reachable through the generic wire surface - `strata command run`, MCP, and SDKs.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
       "docs": "/docs/reference/branch/fork_at_version",
       "cli": {
         "path": [
@@ -1296,7 +1296,7 @@
       "kind": "mutation.merge",
       "title": "Promote branch",
       "summary": "Promote one branch's changes into another as a single atomic commit.",
-      "description": "Promotes the `source` branch's changes into the `target` branch as a single\natomic commit, leaving the source unchanged. The branch point is derived from\nthe recorded fork lineage, and a three-way merge applies every change the source\nmade since that point.\n\nMerge applies to key-value, JSON, and vector data. Event streams and graphs are\ncompared (see `branch.diff`) but never merged — divergent append-only and\nstructural data cannot be three-way merged — so a promotion leaves them\nuntouched.\n\nThe `strict` strategy (the default) refuses with `conflict.engine.promotion`,\nmutating nothing, when the two branches changed the same entity differently since\nthe branch point. The `source_wins` strategy applies the source side's value or\ntombstone for each such conflict and reports every overwritten or deleted target\nentry. A promotion that applies nothing writes no commit and leaves the target\nunchanged.\n\nBranches with no shared fork lineage are rejected with\n`invalid_argument.engine.branch_point`; a missing branch with\n`not_found.engine.branch`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
+      "description": "Promotes the `source` branch's changes into the `target` branch as a single\natomic commit, leaving the source unchanged. The branch point is derived from\nthe recorded fork lineage, and a three-way merge applies every change the source\nmade since that point.\n\nMerge applies to key-value, JSON, and vector data. Event streams and graphs are\ncompared (see `branch.diff`) but never merged - divergent append-only and\nstructural data cannot be three-way merged - so a promotion leaves them\nuntouched.\n\nThe `strict` strategy (the default) refuses with `conflict.engine.promotion`,\nmutating nothing, when the two branches changed the same entity differently since\nthe branch point. The `source_wins` strategy applies the source side's value or\ntombstone for each such conflict and reports every overwritten or deleted target\nentry. A promotion that applies nothing writes no commit and leaves the target\nunchanged.\n\nBranches with no shared fork lineage are rejected with\n`invalid_argument.engine.branch_point`; a missing branch with\n`not_found.engine.branch`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
       "docs": "/docs/reference/branch/merge",
       "cli": {
         "path": [
@@ -1307,7 +1307,7 @@
       },
       "mcp": {
         "name": "strata_branch_merge",
-        "description": "Use this when the user wants to merge or promote one branch into another — applying the source branch's changes to the target."
+        "description": "Use this when the user wants to merge or promote one branch into another - applying the source branch's changes to the target."
       },
       "feature": "core",
       "access": "write",
@@ -1387,7 +1387,7 @@
       "kind": "read.status",
       "title": "Preview branch promotion",
       "summary": "Preview promoting one branch into another, reporting conflicts without mutating either branch.",
-      "description": "Previews promoting the `source` branch into the `target` branch: it derives the\nbranch point from the recorded fork lineage, runs a three-way comparison, and\nreports the conflicts a promotion would hit — entries both branches changed\ndifferently since the branch point. Preview is read-only: it mutates neither\nbranch.\n\nEach conflict reports what the selected `strategy` would do — `strict` refuses\n(`refused`), `source_wins` overwrites the target with the source value. A preview\nwith no conflicts is clean and a promotion under `strict` would apply. Preview\ncovers the capabilities a promotion applies — key-value, JSON, and vectors;\nevents and graphs are diff-only and never appear as promotion conflicts.\nBranches with no shared fork lineage are rejected with\n`invalid_argument.engine.branch_point`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
+      "description": "Previews promoting the `source` branch into the `target` branch: it derives the\nbranch point from the recorded fork lineage, runs a three-way comparison, and\nreports the conflicts a promotion would hit - entries both branches changed\ndifferently since the branch point. Preview is read-only: it mutates neither\nbranch.\n\nEach conflict reports what the selected `strategy` would do - `strict` refuses\n(`refused`), `source_wins` overwrites the target with the source value. A preview\nwith no conflicts is clean and a promotion under `strict` would apply. Preview\ncovers the capabilities a promotion applies - key-value, JSON, and vectors;\nevents and graphs are diff-only and never appear as promotion conflicts.\nBranches with no shared fork lineage are rejected with\n`invalid_argument.engine.branch_point`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
       "docs": "/docs/reference/branch/preview",
       "cli": {
         "path": [
@@ -1398,7 +1398,7 @@
       },
       "mcp": {
         "name": "strata_branch_preview",
-        "description": "Use this when the user wants to see what a merge would do — which entries conflict — before promoting one branch into another."
+        "description": "Use this when the user wants to see what a merge would do - which entries conflict - before promoting one branch into another."
       },
       "feature": "core",
       "access": "read",
@@ -4611,7 +4611,7 @@
       },
       "mcp": {
         "name": "strata_inference_capability",
-        "description": "Use this when the user wants to know what a model spec can do — generate, tokenize, embed, or rank — and whether it needs the network, an API key, or a compiled provider feature."
+        "description": "Use this when the user wants to know what a model spec can do - generate, tokenize, embed, or rank - and whether it needs the network, an API key, or a compiled provider feature."
       },
       "feature": "core",
       "access": "read",
@@ -6342,7 +6342,7 @@
       },
       "mcp": {
         "name": "strata_json_set",
-        "description": "Use this when the user wants to write, update, or upsert JSON data — a whole document (path `$`) or one nested field."
+        "description": "Use this when the user wants to write, update, or upsert JSON data - a whole document (path `$`) or one nested field."
       },
       "feature": "core",
       "access": "write",

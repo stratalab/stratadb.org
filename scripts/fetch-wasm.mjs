@@ -1,10 +1,10 @@
 // Build-time: stage the browser wasm playground bundle from the released
 // strata-core into public/playground/pkg/. We consume the RELEASED version's
-// asset (never `main`) — the playground runs the engine users can install.
+// asset (never `main`) - the playground runs the engine users can install.
 //
 // Source resolution (first that succeeds; never fails the build):
-//   1. STRATA_WASM_DIR — a local prebuilt pkg dir (dev).
-//   2. Release asset    — strata-wasm-web.tar.gz from the release tag in
+//   1. STRATA_WASM_DIR - a local prebuilt pkg dir (dev).
+//   2. Release asset    - strata-wasm-web.tar.gz from the release tag in
 //                         src/data/release.json. strata-core is public, so
 //                         this is unauthenticated.
 // On failure the build still succeeds; /playground shows a load error until the
@@ -26,6 +26,10 @@ const ASSET = 'strata-wasm-web.tar.gz';
 const REPO = 'https://github.com/stratalab/strata-core';
 const FILES = ['strata_wasm.js', 'strata_wasm_bg.wasm'];
 
+function normalizeCopy(text) {
+  return text.replaceAll('\u2014', '-');
+}
+
 async function version() {
   try {
     return JSON.parse(await readFile(RELEASE_JSON, 'utf8')).version;
@@ -37,7 +41,13 @@ async function version() {
 async function stageFrom(dir, label) {
   await mkdir(PKG_DIR, { recursive: true });
   for (const file of FILES) {
-    await cp(join(dir, file), join(PKG_DIR, file));
+    const src = join(dir, file);
+    const out = join(PKG_DIR, file);
+    if (file.endsWith('.js')) {
+      await writeFile(out, normalizeCopy(await readFile(src, 'utf8')));
+    } else {
+      await cp(src, out);
+    }
   }
   console.log(`fetch-wasm: staged the playground bundle from ${label}`);
 }

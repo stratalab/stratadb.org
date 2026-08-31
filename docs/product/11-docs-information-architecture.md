@@ -1,4 +1,4 @@
-# Docs Information Architecture — stratadb.org
+# Docs Information Architecture - stratadb.org
 
 | | |
 |---|---|
@@ -16,26 +16,26 @@
 The structure of the `/docs` tree only: its top-level sections, the shape within each
 section, and the rules that keep it coherent. It does **not** own page prose (authored per
 09), reference generation mechanics (owned by strata-core per 09/10), visuals (02), or the
-whole-site nav/landing/SEO (01). **No pages are specified here — sections and topics only.**
+whole-site nav/landing/SEO (01). **No pages are specified here - sections and topics only.**
 
 This document reopens **01 §6** and re-gates **10** (10's page membership must be re-slotted
 into the sections below). It is grounded in a two-stream research pass (documentation-IA
 frameworks + the live nav trees of SQLite, DuckDB, Redis, PostgreSQL, MongoDB, Turso,
-Prisma, Supabase, Stripe, Anthropic, and vector/AI-DB peers) — see §8.
+Prisma, Supabase, Stripe, Anthropic, and vector/AI-DB peers) - see §8.
 
 ## 2. The decision: evolve, do not restart
 
 The prompt was "everything is stale, start from scratch." The research falsified half of
 that premise and it is worth recording why:
 
-- The existing five-section spine — **Get Started → Concepts → Guides → Cookbook →
-  Reference** — *is* the recurring "world-class spine." Every exemplar studied reduces to
+- The existing five-section spine - **Get Started → Concepts → Guides → Cookbook →
+  Reference** - *is* the recurring "world-class spine." Every exemplar studied reduces to
   some ordering of Get Started → Guides → (per-capability) → Reference, Concepts woven in.
   Throwing it out to reinvent the same shape would be novelty for its own sake.
 - The narrative content is **not stale**: it was rebuilt against the 1.0.0 binary (10 Phase
   0, 2026-07-10) and every page carries `source: strata-core@v1.0.0`.
 - What *is* stale is narrow and already known: the **hand-written `reference/` pages** (the
-  IDL generator now replaces them — strata-core PR #2600, merged) and the **v0.12.5-era
+  IDL generator now replaces them - strata-core PR #2600, merged) and the **v0.12.5-era
   `/architecture` whitepapers** (they still document the removed `state` primitive and
   public transactions, and omit `graph`).
 
@@ -44,7 +44,7 @@ structural moves the research demands (§4). Do not clean-sheet.
 
 ## 3. Top-level sections
 
-The `/docs` tree has eleven sections, ordered by the reader's journey — evaluate, succeed,
+The `/docs` tree has eleven sections, ordered by the reader's journey - evaluate, succeed,
 understand, then depth and lookup. The first nine are the reading spine; **Architecture** and
 **Resources** are the advanced/reference tier the sidebar renders last.
 
@@ -56,7 +56,7 @@ understand, then depth and lookup. The first nine are the reading spine; **Archi
 5   Inference           the built-in model capability, its own front door           ← its own section
 6   Guides              cross-cutting, operational how-to
 7   Cookbook            end-to-end, agent-forward recipes
-8   Reference           generated from the IDL — a distinct, drift-guarded surface
+8   Reference           generated from the IDL - a distinct, drift-guarded surface
 9   For AI Agents       the machine surface as a destination                        ← new, first-class
 10  Architecture        rebuilt V1 internals (the "whitepapers")
 11  Resources           FAQ · troubleshooting · changelog · roadmap
@@ -68,7 +68,7 @@ understand, then depth and lookup. The first nine are the reading spine; **Archi
 
 ## 4. The structural moves (vs. today)
 
-1. **A "Why Strata" front door** (→ §5.1). A short evaluate-first section — what it is, when
+1. **A "Why Strata" front door** (→ §5.1). A short evaluate-first section - what it is, when
    to use it (and when not), and honest comparisons vs SQLite/DuckDB/Redis/vector DBs. Serves
    the evaluator before the builder (SQLite's "About / Appropriate Uses" pattern).
 2. **Split per-capability from cross-cutting** (→ §5.4 "Working with Data"). Today the
@@ -84,8 +84,8 @@ understand, then depth and lookup. The first nine are the reading spine; **Archi
    Data" honestly about the five stored primitives.
 5. **Promote the agent surface to a first-class section** (→ §5.9 "For AI Agents"). Strata's
    primary audience includes coding agents (00 §3). The best agent-facing docs (Cloudflare,
-   Pinecone, Stripe) enumerate every machine surface — MCP, llms.txt, `.md` mirrors, the spec
-   — in one destination. Strata already ships most; they just are not a place you can go.
+   Pinecone, Stripe) enumerate every machine surface - MCP, llms.txt, `.md` mirrors, the spec
+   - in one destination. Strata already ships most; they just are not a place you can go.
    Deepens, not contradicts, 01 §7.
 6. **Regenerate Reference from the IDL and rebuild Architecture** (→ §5.8, §5.10). Retire the
    seven hand-written reference pages (09 anti-pattern #1); rewrite the whitepapers for V1.
@@ -97,7 +97,7 @@ authored here with `source:` frontmatter.
 
 ### 5.1 Why Strata
 What Strata is (one paragraph) · The differentiators (multi-model in one embedded file;
-branches & time-travel; built-in inference; agent-native) · When to use it — and when not
+branches & time-travel; built-in inference; agent-native) · When to use it - and when not
 (honest boundaries) · Comparisons (vs SQLite / DuckDB / Redis / vector DBs). Serves the
 evaluator (P2/P3) before the builder; honest advocacy, cleanly separated from reference
 (SQLite's "About / Appropriate Uses / When to use" pattern).
@@ -116,7 +116,7 @@ clone artifacts · Errors & diagnostics (the `class.area.detail` contract). (The
 *model* is taught in §5.5.)
 
 ### 5.4 Working with Data
-**Per-primitive template — identical shape for all five:** Overview → How-to guides →
+**Per-primitive template - identical shape for all five:** Overview → How-to guides →
 Reference (link to §5.8). Sections: **Key-Value · JSON documents · Vectors · Events ·
 Graph**. Plus **▸ Combining primitives**: RAG · semantic search · knowledge graphs ·
 time-travel across primitives · autoembedding pipelines (these bridge into §5.5 Inference).
@@ -141,7 +141,7 @@ per 00's dual-loop.
 
 ### 5.8 Reference `[G]`
 Commands, by family (kv · json · vector · event · graph · branch · space · admin · arrow ·
-inference) — the 117 generated pages with CLI/wire/Python tabs · CLI reference · Python SDK
+inference) - the 117 generated pages with CLI/wire/Python tabs · CLI reference · Python SDK
 reference · Errors (`/e/<code>`, 204 codes) · Configuration keys · Value types / schemas.
 All generated; a distinct surface; narrative points in, reference links back out. Never
 inlined into a guide or tutorial.
@@ -196,16 +196,16 @@ FAQ · Troubleshooting · Changelog · Roadmap. (Comparisons live in §5.1 Why S
 ## 8. Research basis (why this shape)
 
 - **Framework:** Diátaxis (tutorials / how-to / reference / explanation) governs *page
-  shape*, not site IA — it is "a compass, not a cage." Applied *within* sections here; the
+  shape*, not site IA - it is "a compass, not a cage." Applied *within* sections here; the
   top level is capability/lifecycle-based, which is how every multi-capability exemplar is
   actually built.
 - **The recurring world-class spine:** Get Started → Guides → (per-capability) → Reference →
-  SDKs → Operate, Concepts woven in, agent surfaces published alongside — observed across
+  SDKs → Operate, Concepts woven in, agent surfaces published alongside - observed across
   SQLite, DuckDB, Redis, MongoDB, Turso, Prisma, Supabase, Stripe, Anthropic, Chroma,
   Pinecone.
 - **Patterns adopted:** an evaluate-first "About/Appropriate Uses" front door (SQLite);
   copy-paste first-success on page one (DuckDB/embedded); uniform per-capability template +
-  a "combine capabilities" spine (Redis/Supabase/Chroma — anti-fragmentation); generated
+  a "combine capabilities" spine (Redis/Supabase/Chroma - anti-fragmentation); generated
   reference as a distinct, drift-proof surface woven by links (Stripe/Prisma); agent surface
   as an enumerated destination (Cloudflare "Docs for agents").
 - **Pitfalls avoided:** reference-as-tutorial; Diátaxis-as-rigid-nav; capability
@@ -224,6 +224,6 @@ FAQ · Troubleshooting · Changelog · Roadmap. (Comparisons live in §5.1 Why S
 
 - **Umbrella name:** "Working with Data" (verb-forward, task-oriented; over "Data" /
   "Capabilities").
-- **Inference:** its own top-level section (§5.5), not inside the data umbrella — a capability,
+- **Inference:** its own top-level section (§5.5), not inside the data umbrella - a capability,
   not a stored primitive.
 - **Comparisons:** live in §5.1 Why Strata (the evaluate-first front door), not Resources.

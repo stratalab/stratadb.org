@@ -40,7 +40,7 @@ Plus the optional scope: `branch` and `space` (default to the session branch and
 
 ## Returns
 
-`Maybe<EventVersionedData>` — a miss returns nothing rather than raising.
+`Maybe<EventVersionedData>` - a miss returns nothing rather than raising.
 
 ## Errors
 

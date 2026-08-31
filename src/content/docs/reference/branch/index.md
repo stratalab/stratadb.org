@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: branch
 ---
 
-# `branch` — command reference
+# `branch` - command reference
 
 | Command | Summary |
 |---|---|

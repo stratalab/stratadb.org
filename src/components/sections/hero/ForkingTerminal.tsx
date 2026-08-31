@@ -11,7 +11,7 @@ import {
 } from '../../../lib/engine/types';
 import { HERO_SCRIPT, HERO_HOLD_MS } from '../../../lib/engine/heroScript';
 
-// 03 §1 spring-settle — panels splitting/joining
+// 03 §1 spring-settle - panels splitting/joining
 const springSettle = { type: 'spring' as const, stiffness: 260, damping: 26 };
 // 03 §2 typing clock
 const KEY_MIN = 24;
@@ -69,7 +69,7 @@ function Panel({
         {status && <span className="ml-auto font-mono text-mono-sm text-ink-low">{status}</span>}
       </div>
       <div
-        // FIXED height (03 §7: space always reserved) — lines append inside a
+        // FIXED height (03 §7: space always reserved) - lines append inside a
         // constant box so the loop never shifts layout below the set-piece.
         className="h-[21.5rem] overflow-hidden bg-inset p-4 font-mono text-mono-body text-ink-mid"
         role="log"

@@ -14,7 +14,7 @@ Report a model's capabilities without a network call.
 ### CLI
 
 ```console
-$ strata inference capability openai:gpt-4o-mini  # Pure metadata — no request is sent to the provider.
+$ strata inference capability openai:gpt-4o-mini  # Pure metadata - no request is sent to the provider.
 ```
 
 ### Wire

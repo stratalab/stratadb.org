@@ -1,4 +1,4 @@
-# Component Spec — stratadb.org
+# Component Spec - stratadb.org
 
 | | |
 |---|---|
@@ -12,7 +12,7 @@
 
 1. **Static by default.** Astro components render everything; React islands exist only
    where interaction demands them. Every island is justified in §6's budget table.
-2. **Tokens only.** No component contains a raw color/size/duration — everything resolves
+2. **Tokens only.** No component contains a raw color/size/duration - everything resolves
    to the 02 §13 token sheet. A hex literal in a component is a review failure.
 3. **One engine, one live view (scoped 2026-06-11).** The hero terminal (and its
    fullscreen overlay) is the only engine consumer; sections 2–5 are choreographed
@@ -25,29 +25,29 @@
 
 | Component | Anatomy & rules | States |
 |---|---|---|
-| `SectionShell` | Enforces the 128/80 rhythm + 1120px container; props: `eyebrow`, `id`. The ONLY place section spacing exists | — |
-| `Eyebrow` | 13px/500/+6% caps, `--text-low` | — |
-| `Heading` | Maps `display-xl`/`display`/`title` to the 02 §11 scale; tracking baked in | — |
+| `SectionShell` | Enforces the 128/80 rhythm + 1120px container; props: `eyebrow`, `id`. The ONLY place section spacing exists | - |
+| `Eyebrow` | 13px/500/+6% caps, `--text-low` | - |
+| `Heading` | Maps `display-xl`/`display`/`title` to the 02 §11 scale; tracking baked in | - |
 | `Badge` | Pill, hairline, `mono-sm`; the hero's research-preview marker | hover (border-hover) |
 | `Button` | `primary` (terracotta, 1px press-compress) / `quiet` (hairline) | hover · focus ring (2px terracotta, 2px offset) · active |
 | `CopyChip` | Mono command + copy affordance; used for curl chip, config blocks, the close | hover · copied (`✓ copied`, 2s, ok-green) |
 | `CommandClose` | The `pip install stratadb` closing statement: `stat`-scale Commit Mono + CopyChip behavior + trust line slot | as CopyChip |
-| `StatStrip` | Hairline-separated Commit Mono row; footnote markers; values from data file only | — |
+| `StatStrip` | Hairline-separated Commit Mono row; footnote markers; values from data file only | - |
 | `Card` | `--bg-panel`, 10px radius, hairline; hover border-bright. Resources cards | hover · focus-within |
-| `HorizonGlow` | The 1px gradient line + radial glow. **Hard cap: two instances per page** (hero, install close at 60%); the component throws in dev if mounted a third time | — |
+| `HorizonGlow` | The 1px gradient line + radial glow. **Hard cap: two instances per page** (hero, install close at 60%); the component throws in dev if mounted a third time | - |
 | `Footnote` | Superscript marker → tooltip/anchor with the stat's condition line | focus/hover |
 
 ## 3. Chrome components
 
 ### `TerminalFrame` (Astro shell + optional island core)
-The product-photography primitive — pixel-identical everywhere (02 §12).
+The product-photography primitive - pixel-identical everywhere (02 §12).
 
-- **Anatomy:** 40px header — three 10px monochrome dots (`--text-low`), `mono-sm` title,
-  right-aligned **status slot** (`engine: scripted replay` / `engine: live — in your
-  tab`, per 03 §4) — body on `--bg-inset`, `mono` 15/1.7, prompt `strata:{branch} ›`
+- **Anatomy:** 40px header - three 10px monochrome dots (`--text-low`), `mono-sm` title,
+  right-aligned **status slot** (`engine: scripted replay` / `engine: live - in your
+  tab`, per 03 §4) - body on `--bg-inset`, `mono` 15/1.7, prompt `strata:{branch} ›`
   with only `›` terracotta.
-- **Modes:** `transcript` (static SSR text, no JS — section 2) · `scripted` (executor
-  replay — hero) · `live` (wasm executor — R8).
+- **Modes:** `transcript` (static SSR text, no JS - section 2) · `scripted` (executor
+  replay - hero) · `live` (wasm executor - R8).
 - **A11y:** body is real text (selectable, SR-readable); `role="log"` +
   `aria-live="polite"` for appended output; pause/play button keyboard-reachable.
 
@@ -73,7 +73,7 @@ interface EngineProvider {
   expand(): void / collapse(): void                   // fullscreen overlay (03 §4)
 
   // RESERVED (scoped out 2026-06-11; kept so cross-section liveness is a future
-  // swap, not a rewrite — no v2 component may call these):
+  // swap, not a rewrite - no v2 component may call these):
   // subscribe(view, fn) · history(key?) · counts()
 }
 
@@ -87,7 +87,7 @@ type ScriptEvent =
 - `ScriptedExecutor` replays the authored beat scripts (04 storyboards) on the Tier-1
   typing clock. `WasmExecutor` produces real outputs; both emit the same stream.
 - Engine fetch/swap policy, state continuity, and the status indicator are owned by
-  03 §4 — this contract just implements them.
+  03 §4 - this contract just implements them.
 - Views are dumb: they render snapshots/events and never touch storage directly.
 
 ## 5. Set-piece components (islands)
@@ -95,10 +95,10 @@ type ScriptEvent =
 | Component | Section | Notes | States beyond default |
 |---|---|---|---|
 | `ForkingTerminal` | Hero | Two `TerminalFrame`s + branch-line SVG; beats 1–7; `spring-settle` split/merge; pause/play; live: takeover + **fullscreen overlay** (⛶, focus-trapped, Esc, same instance) | idle · playing · paused · complete · takeover · fullscreen |
-| `BranchScrub` | Branching | Scrub #2 (04 §3 v4–v5): pinned 340vh fork→modify→diff→merge story + session terminal + branch river; reduced = steppers; mobile = snap carousel. *(Supersedes `VerbTranscript`'s "zero JS permanently" — reversed 2026-06-12 when the section became the page's second set-piece.)* | acts 1–4 · stepper · carousel |
-| `PrimitiveTabs` | Multi-primitive | v5 (04 §4, 2026-06-12): the FOUNDRY WINDOW — the app's real sidebar as tab rail (5 numbered views + dimmed rest), per-view GUI screens (key browser w/ history, event stream, JSON tree, vector search, graph canvas), GUI choreography, no CLI; the canonical preview of Foundry's redesign in the shared language. Roving tabindex; reduced = final frames; mobile = horizontal sidebar row. | per-view · playing · complete |
-| `TimeScrubber` | Time travel | Direct-manipulation playhead (04 §5 v2, 2026-06-12 — replaces `VersionStrip`'s scroll-scrub): drag/click/keyboard slider over the seed timeline, live `--as-of` read, CLS-zero value swaps; alive under reduced motion (user-driven) | scrubbing · before-first-write · at-now |
-| `InferenceDemo` | Inference | v3 (04 §6, 2026-08-30): native inference workbench — capability check → gather KV/JSON/event/vector context → embed → rank → generate a seed-true answer; source guard keeps shipped commands represented while the visible artifact stops being a CLI transcript | idle · playing · complete |
+| `BranchScrub` | Branching | Scrub #2 (04 §3 v4–v5): pinned 340vh fork→modify→diff→merge story + session terminal + branch river; reduced = steppers; mobile = snap carousel. *(Supersedes `VerbTranscript`'s "zero JS permanently" - reversed 2026-06-12 when the section became the page's second set-piece.)* | acts 1–4 · stepper · carousel |
+| `PrimitiveTabs` | Multi-primitive | v5 (04 §4, 2026-06-12): the FOUNDRY WINDOW - the app's real sidebar as tab rail (5 numbered views + dimmed rest), per-view GUI screens (key browser w/ history, event stream, JSON tree, vector search, graph canvas), GUI choreography, no CLI; the canonical preview of Foundry's redesign in the shared language. Roving tabindex; reduced = final frames; mobile = horizontal sidebar row. | per-view · playing · complete |
+| `TimeScrubber` | Time travel | Direct-manipulation playhead (04 §5 v2, 2026-06-12 - replaces `VersionStrip`'s scroll-scrub): drag/click/keyboard slider over the seed timeline, live `--as-of` read, CLS-zero value swaps; alive under reduced motion (user-driven) | scrubbing · before-first-write · at-now |
+| `InferenceDemo` | Inference | v3 (04 §6, 2026-08-30): native inference workbench - capability check → gather KV/JSON/event/vector context → embed → rank → generate a seed-true answer; source guard keeps shipped commands represented while the visible artifact stops being a CLI transcript | idle · playing · complete |
 | `NavMenu` | Nav | Mobile sheet; focus-trapped; closes on route/Escape | open/closed |
 
 All six conform to 03 §8 (their full storyboard fields live in Doc 04).
@@ -114,11 +114,11 @@ All six conform to 03 §8 (their full storyboard fields live in Doc 04).
 | motion shared bits + jsx + use-in-view | 3.8KB | |
 | InstallTabs | 1.7KB | |
 | InferenceDemo | 1.3KB | |
-| **Landing total** | **≈100.5KB** | vs the 140KB gate — ~40KB headroom; `WasmExecutor` loader OUTSIDE this budget (R8, 06 §8) |
+| **Landing total** | **≈100.5KB** | vs the 140KB gate - ~40KB headroom; `WasmExecutor` loader OUTSIDE this budget (R8, 06 §8) |
 
 ~~`VerbTranscript` and `StrataColumn` ship zero-JS, permanently (scoped 2026-06-11).~~
-*(Reversed 2026-06-12: both sections became islands — `BranchScrub` and
-`PrimitiveTabs` — during the world-class iteration. The budget table above is the
+*(Reversed 2026-06-12: both sections became islands - `BranchScrub` and
+`PrimitiveTabs` - during the world-class iteration. The budget table above is the
 Phase-6 measurement; re-measure at the Phase 7 gate against the 140KB ceiling.)*
 The original "hero ≤60KB" line is restated as: **hero-specific JS ≤60KB excluding the
 shared React runtime** (ForkingTerminal at 43.6KB passes).
@@ -127,7 +127,7 @@ shared React runtime** (ForkingTerminal at 43.6KB passes).
 
 - `src/components/{foundation,chrome,engine,sections}/`; Astro files for static,
   `.tsx` only for islands; one component per file; props typed.
-- Tokens imported from `src/styles/tokens.css` (the 02 §13 contract) — Tailwind v4
+- Tokens imported from `src/styles/tokens.css` (the 02 §13 contract) - Tailwind v4
   `@theme` names used directly in class form.
 - Seed dataset lives at `src/data/seed.ts` (typed, single source for demos + frames +
   future live instance).
@@ -135,5 +135,5 @@ shared React runtime** (ForkingTerminal at 43.6KB passes).
 
 ## Open questions
 
-None — this consolidates signed decisions. Review is for shape objections (e.g., if you
+None - this consolidates signed decisions. Review is for shape objections (e.g., if you
 want `StrataColumn` CSS-only at launch and island-ified later, say so).

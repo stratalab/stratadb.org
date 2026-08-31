@@ -5,11 +5,11 @@ description: "What a value is depends on the primitive: KV stores opaque bytes, 
 source: "strata-core@v1.1.0"
 ---
 
-StrataDB does not have one universal value type. What counts as a "value" depends on which [primitive](/docs/concepts/primitives) you are using. Knowing the value model of each one saves you from surprises — especially in KV, which is more literal than you might expect.
+StrataDB does not have one universal value type. What counts as a "value" depends on which [primitive](/docs/concepts/primitives) you are using. Knowing the value model of each one saves you from surprises - especially in KV, which is more literal than you might expect.
 
 ## KV values are opaque bytes
 
-The KV store maps a byte key to a byte value. It does **not** interpret, parse, or type your values. If you put the text `42`, you get back the two bytes `4` and `2` — not an integer.
+The KV store maps a byte key to a byte value. It does **not** interpret, parse, or type your values. If you put the text `42`, you get back the two bytes `4` and `2` - not an integer.
 
 ```text
 $ strata ./db kv put n 42
@@ -25,7 +25,7 @@ $ strata --json ./db kv get n
 {"data":{"timestamp":3,"value":"NDI=","version":3},"type":"kv_versioned_value"}
 ```
 
-`NDI=` is base64 for the ASCII characters `42`. In the default human output, byte values are shown as text when they are valid UTF-8. Because values are just bytes, you can store anything — including binary — with `kv put <key> @file` or `--file`. If you want typed, structured data with a key, use the JSON store instead.
+`NDI=` is base64 for the ASCII characters `42`. In the default human output, byte values are shown as text when they are valid UTF-8. Because values are just bytes, you can store anything - including binary - with `kv put <key> @file` or `--file`. If you want typed, structured data with a key, use the JSON store instead.
 
 ## JSON values use the JSON model
 
@@ -77,7 +77,7 @@ The metadata object uses the JSON model and is what you filter on at query time.
 
 ## Event payloads are JSON objects
 
-An event carries a type label and a JSON payload. The payload is a JSON value — typically an object — and it is stored exactly as given, alongside a sequence number and a hash that links it to the previous event.
+An event carries a type label and a JSON payload. The payload is a JSON value - typically an object - and it is stored exactly as given, alongside a sequence number and a hash that links it to the previous event.
 
 ```text
 $ strata ./db event append audit '{"action":"login","user":"alice"}'
@@ -95,10 +95,10 @@ $ strata ./db graph add-edge social alice knows bob
 
 ## The through-line
 
-The rule of thumb: **KV is bytes, everything else is structured.** Reach for KV when you want to store and return exact bytes without interpretation, and for JSON, vectors, events, or graphs when you want the database to understand the shape of your data. All of them are versioned and branch-scoped the same way — the difference is only in what a single value means.
+The rule of thumb: **KV is bytes, everything else is structured.** Reach for KV when you want to store and return exact bytes without interpretation, and for JSON, vectors, events, or graphs when you want the database to understand the shape of your data. All of them are versioned and branch-scoped the same way - the difference is only in what a single value means.
 
 ## Next
 
-- [Primitives](/docs/concepts/primitives) — the five capabilities in full
-- [Value Type Reference](/docs/reference/value-type-reference) — the complete specification
-- [KV Store](/docs/data/key-value) and [JSON Store](/docs/data/json) — the two value models in practice
+- [Primitives](/docs/concepts/primitives) - the five capabilities in full
+- [Value Type Reference](/docs/reference/value-type-reference) - the complete specification
+- [KV Store](/docs/data/key-value) and [JSON Store](/docs/data/json) - the two value models in practice

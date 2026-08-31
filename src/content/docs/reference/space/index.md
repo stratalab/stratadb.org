@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: space
 ---
 
-# `space` — command reference
+# `space` - command reference
 
 | Command | Summary |
 |---|---|

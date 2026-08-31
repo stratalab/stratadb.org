@@ -1,4 +1,4 @@
-# Docs Page Inventory & Build Map — stratadb.org
+# Docs Page Inventory & Build Map - stratadb.org
 
 | | |
 |---|---|
@@ -14,7 +14,7 @@
 ## 1. What this document owns
 
 Every page in the `/docs` tree, slotted into Doc 11's eleven sections, marked by
-**source** and **action** — the concrete work list that unlocks section-by-section
+**source** and **action** - the concrete work list that unlocks section-by-section
 authoring. It does not own prose or nav mechanics (built).
 
 **Source:** `[N]` narrative (hand-written here, `source:` frontmatter) · `[G]`
@@ -24,15 +24,15 @@ generated from the strata-core IDL (staged by the fetch-from-release pipeline).
 `new` (author) · `retire` (delete) · `rebuild` (V1 rewrite of stale content).
 
 Today: 39 narrative pages, 17 stale architecture pages, 125 generated command
-pages (10 families). Nothing about the generated families is authored here — they
+pages (10 families). Nothing about the generated families is authored here - they
 render from the release bundle (`Doc 11 §7.2`).
 
 ## 2. Per-section map
 
-### 1 · Why Strata `[N]` — **done** (wave 5)
+### 1 · Why Strata `[N]` - **done** (wave 5)
 | Page | Action | Source / notes |
 |---|---|---|
-| `why-strata/index` — what Strata is | **done** | one-screen framing from the FAQ (NOT the landing hero — hero overpromises diff/merge/cherry-pick/search, none of which ship) |
+| `why-strata/index` - what Strata is | **done** | one-screen framing from the FAQ (NOT the landing hero - hero overpromises diff/merge/cherry-pick/search, none of which ship) |
 | `why-strata/when-to-use` | **done** | good fits + poor fits + honest boundaries, from the FAQ |
 | `why-strata/comparisons` | **done** | vs SQLite / DuckDB / Redis / Postgres / vector DBs, at-a-glance table + prose |
 
@@ -45,7 +45,7 @@ render from the release bundle (`Doc 11 §7.2`).
 | `getting-started/quickstart-cli` | new | CLI first-success |
 | `getting-started/quickstart-agents` | new | short; links into §7 (full surface there) |
 
-### 3 · Concepts `[N]` — gaps closed (wave 5)
+### 3 · Concepts `[N]` - gaps closed (wave 5)
 | Page | Action | Source / notes |
 |---|---|---|
 | `concepts/index` | **updated** | regrouped into model / history+isolation / organizing / contract; lists all 10 |
@@ -61,10 +61,10 @@ render from the release bundle (`Doc 11 §7.2`).
 | `concepts/errors` | **done** | the `class.area.detail` contract, recover-by-code, fixed taxonomy, redaction |
 
 **Landing-hero drift flagged:** `src/pages/index.astro` hero tagline claims
-"diff, merge, cherry-pick … and search" — none ship in V1. Why-Strata sourced
+"diff, merge, cherry-pick … and search" - none ship in V1. Why-Strata sourced
 from the FAQ instead. Hero copy is a marketing-page fix, out of this wave's scope.
 
-### 4 · Working with Data `[N]` — uniform per-primitive; each links to `[G]` §8 reference
+### 4 · Working with Data `[N]` - uniform per-primitive; each links to `[G]` §8 reference
 | Page | Action | Source / notes |
 |---|---|---|
 | `data/key-value` (overview + how-to) | move | from `guides/kv-store` |
@@ -74,17 +74,17 @@ from the FAQ instead. Hero copy is a marketing-page fix, out of this wave's scop
 | `data/graph` | move | from `guides/graph` |
 | `data/combining-primitives` | new | RAG · semantic search · knowledge graphs · time-travel across · autoembed |
 
-### 5 · Inference `[N]` — its own section; links to `[G]` §8 `reference/inference`
+### 5 · Inference `[N]` - its own section; links to `[G]` §8 `reference/inference`
 | Page | Action | Source / notes |
 |---|---|---|
 | `inference/index` (the inference model) | **done** | moved from `guides/inference`; reframed as capability + catalog + operations + section map |
 | `inference/providers-and-keys` | **done** | BYOK; 3 providers, env vars + `strata config set <p>.api_key`, resolution order, acquisition URLs |
 | `inference/local-models` | **done** | pull/cache/runtime + local build feature + CPU/`[cuda]` note |
-| `inference/chat` · `embeddings` · `reranking` | new | deferred — "split from the guide as it grows"; operations live in `inference/index` for now |
-| `inference/tools-structured-outputs` | new | deferred — needs a live-model transcript; the G-series surface (tools/tool_choice/json_schema/logprobs) exists in the CLI |
+| `inference/chat` · `embeddings` · `reranking` | new | deferred - "split from the guide as it grows"; operations live in `inference/index` for now |
+| `inference/tools-structured-outputs` | new | deferred - needs a live-model transcript; the G-series surface (tools/tool_choice/json_schema/logprobs) exists in the CLI |
 | ~~`inference/autoembedding`~~ | **deferred** | the feature is **not implemented in V1** (0 refs to autoembed/shadow-vector in engine/intelligence); CLAUDE.md invariants 24–26 reserve the architecture only. Ship the page with the feature. §4 Combining reframed to the explicit embed-then-upsert flow. |
 
-### 6 · Guides `[N]` — cross-cutting only — **done** (wave 6)
+### 6 · Guides `[N]` - cross-cutting only - **done** (wave 6)
 | Page | Action | Source / notes |
 |---|---|---|
 | `guides/index` | **done** | reframed to cross-cutting only; grouped history / operating / moving data / shipping; per-primitive pointer → §4 |
@@ -97,26 +97,26 @@ from the FAQ instead. Hero copy is a marketing-page fix, out of this wave's scop
 | `guides/import-export` | **done** | renamed from `guides/arrow` |
 | `guides/spaces` | keep | the how-to (concept now in §3) |
 | `guides/deploying` | **done** | embedded model, bundle/clone, wasm/browser (playground is real); edge as an honest direction, not a turnkey recipe |
-| `guides/migrating` | **done** | SQLite / DuckDB / Redis via `arrow import` (real path — targets kv/json/vector); no auto schema translation, stated plainly |
+| `guides/migrating` | **done** | SQLite / DuckDB / Redis via `arrow import` (real path - targets kv/json/vector); no auto schema translation, stated plainly |
 
 All three renames repointed site-wide. `guides/kv-store … graph`, `inference`,
 `agents-and-mcp` already moved in waves 2/3/4.
 
-### 7 · For AI Agents `[N]` — **done** (wave 4)
+### 7 · For AI Agents `[N]` - **done** (wave 4)
 | Page | Action | Source / notes |
 |---|---|---|
-| `agents/index` — how agents use Strata | **done** | moved from `getting-started/for-agents`; absorbed the guide's overview + onboarding; DB-targeting front and centre |
+| `agents/index` - how agents use Strata | **done** | moved from `getting-started/for-agents`; absorbed the guide's overview + onboarding; DB-targeting front and centre |
 | `agents/mcp-server` | **done** | moved from `reference/mcp`; merged the guide's MCP walkthrough (handshake + 20-tool table + wire-vs-flag gotcha) |
-| `agents/agents-guide` | **done** | `strata agents guide` + `stratadb.agents_guide()` + the `strata_guide` tool — one guide, three front doors |
-| `agents/command-index` | **done** | `strata agents commands --json` + `strata agents errors --json` — the machine catalogs = the IDL behind the reference |
-| `agents/machine-docs` | **done** | llms.txt · llms-full.txt · `.md` mirrors (append `.md`) · `/e/` registry. NB: **no copy-as-markdown button exists** — the `.md` mirror is the mechanism |
+| `agents/agents-guide` | **done** | `strata agents guide` + `stratadb.agents_guide()` + the `strata_guide` tool - one guide, three front doors |
+| `agents/command-index` | **done** | `strata agents commands --json` + `strata agents errors --json` - the machine catalogs = the IDL behind the reference |
+| `agents/machine-docs` | **done** | llms.txt · llms-full.txt · `.md` mirrors (append `.md`) · `/e/` registry. NB: **no copy-as-markdown button exists** - the `.md` mirror is the mechanism |
 
 `guides/agents-and-mcp` retired (content split into `agents/index` + `agents/mcp-server`). All 3 old paths (`getting-started/for-agents`, `guides/agents-and-mcp`, `reference/mcp`) repointed site-wide + in `llms.txt`; Reference and Guides landings de-listed MCP/agents.
 
-### 8 · Reference `[G]` (generated — the pipeline renders these)
+### 8 · Reference `[G]` (generated - the pipeline renders these)
 | Family | Pages | Source |
 |---|---|---|
-| kv · json · vector · event · graph · branch · space · admin · arrow · inference | **125 commands + 10 family indexes** | `[G]` — from the release bundle |
+| kv · json · vector · event · graph · branch · space · admin · arrow · inference | **125 commands + 10 family indexes** | `[G]` - from the release bundle |
 | `reference/cli` | keep→`[G]` | hand-written until a CLI catalog generates it |
 | `reference/error-reference` | keep→`[G]` | pairs with the live `/e/<code>` routes |
 | `reference/configuration-reference` | keep | **no generator source yet** (10 §2 gap) |
@@ -125,7 +125,7 @@ All three renames repointed site-wide. `guides/kv-store … graph`, `inference`,
 | `reference/mcp` | move | → §7 `agents/mcp-server` |
 | `reference/index` | keep | Reference landing |
 
-### 9 · Architecture `[N]` — **done** (wave 7): consolidated 17 v0.12.5 pages → 8 V1 whitepapers
+### 9 · Architecture `[N]` - **done** (wave 7): consolidated 17 v0.12.5 pages → 8 V1 whitepapers
 | Page (V1) | Action | Source / notes |
 |---|---|---|
 | `architecture/index` (overview) | **done** | rebuilt to the five-layer stack + "engine owns meaning, storage owns mechanics" + a map |
@@ -170,16 +170,16 @@ work is ~26 new narrative pages + ~15 architecture rewrites + ~24 relocations.
 
 Sequenced so each wave ships a coherent, linkable slice:
 
-1. **Reference is live already** — merge strata-core #2602, delete the retired
+1. **Reference is live already** - merge strata-core #2602, delete the retired
    hand-written pages, done.
-2. **Working with Data** (§4) — relocate the 5 primitive guides + author Combining.
+2. **Working with Data** (§4) - relocate the 5 primitive guides + author Combining.
    Highest value: pairs narrative with the freshly-live generated reference.
-3. **Inference** (§5) — relocate + split the inference guide.
-4. **For AI Agents** (§7) — consolidate the agent pages; a differentiator.
-5. **Why Strata** (§1) + **Concepts** gaps (§3) — the evaluate/understand front.
+3. **Inference** (§5) - relocate + split the inference guide.
+4. **For AI Agents** (§7) - consolidate the agent pages; a differentiator.
+5. **Why Strata** (§1) + **Concepts** gaps (§3) - the evaluate/understand front.
 6. **Guides** (§6) reframe + the 2 new cross-cutting guides.
-7. **Architecture** (§8) rebuild — last; it serves evaluators/contributors, not first-run.
-8. **Resources** (§9) — changelog/roadmap.
+7. **Architecture** (§8) rebuild - last; it serves evaluators/contributors, not first-run.
+8. **Resources** (§9) - changelog/roadmap.
 
 ## 5. Status & next
 

@@ -10,7 +10,7 @@ source: "strata-core@v1.1.0"
 ### What is StrataDB?
 
 An embedded, multi-model database. It runs inside your process against a local
-directory — one binary, one database directory, no server. Five data
+directory - one binary, one database directory, no server. Five data
 capabilities share one storage substrate: key-value, JSON documents, an event
 log, vectors, and a graph. On top of that substrate you get git-style branches
 and time travel. See [Your first database](/docs/getting-started/first-database)
@@ -19,15 +19,15 @@ for a hands-on tour.
 ### Is it a server?
 
 No. StrataDB is embedded and in-process, like SQLite or DuckDB. You do not start
-a daemon, open a port, or manage a connection pool — you point the CLI or the
+a daemon, open a port, or manage a connection pool - you point the CLI or the
 [Python SDK](/docs/python) at a directory and it opens the database in-process.
 There is no network mode in this line.
 
 ### Is it a replacement for Postgres or Redis?
 
-No — it complements them. Keep Postgres for relational application data and
+No - it complements them. Keep Postgres for relational application data and
 Redis for a shared cache. Reach for StrataDB when you want branch-isolated,
-versioned state with a KV, JSON, event, vector, and graph model in one place —
+versioned state with a KV, JSON, event, vector, and graph model in one place -
 agent memory, experiment isolation, and replayable history are the sweet spot.
 
 ### Why not just use SQLite?
@@ -42,14 +42,14 @@ gives you those on one substrate instead of asking you to build them yourself.
 
 Point StrataDB at a path and it runs **durable**: writes go through a
 write-ahead log and survive the process exiting. Run it with `--cache` and it
-runs **in-memory** — nothing is written to disk and the data is gone when the
+runs **in-memory** - nothing is written to disk and the data is gone when the
 process ends. Durable mode is the default for any named path; cache mode is for
 tests, scratch work, and ephemeral MCP servers.
 
 ### Where does my data live?
 
 In the directory you name. A durable database directory holds a write-ahead log,
-a manifest, and lock files — treat the directory as one unit; do not edit files
+a manifest, and lock files - treat the directory as one unit; do not edit files
 inside it by hand. Global CLI configuration lives separately under your home
 directory, so uninstalling the binary never touches your databases.
 
@@ -79,7 +79,7 @@ mutable keyed state, or a JSON document for structured state.
 ### What happened to sessions and transactions?
 
 Removed as a public surface. There is no `begin` / `commit` / `rollback`. Writes
-auto-commit, and multi-item batches commit itemwise or under one shared commit —
+auto-commit, and multi-item batches commit itemwise or under one shared commit -
 you do not manage a transaction by hand.
 
 ### What happened to branch bundles?
@@ -91,7 +91,7 @@ shows where a database was cloned from. See
 
 ### What happened to search?
 
-Vector similarity search is here — create a collection and run `vector query`.
+Vector similarity search is here - create a collection and run `vector query`.
 The broader standalone search surface and its optimizer are deferred beyond this
 line; the substrate for them is in place. See
 [Vectors](/docs/data/vectors).
@@ -99,7 +99,7 @@ line; the substrate for them is in place. See
 ### Can it run local models?
 
 Not with the released binary. The shipped build executes inference through
-cloud providers (Anthropic, OpenAI, Google — bring an API key); local GGUF
+cloud providers (Anthropic, OpenAI, Google - bring an API key); local GGUF
 execution is compiled in only when the binary is built with the local
 feature. The model catalog commands work either way. See
 [Inference](/docs/inference).
@@ -109,14 +109,14 @@ feature. The model catalog commands work either way. See
 ### Is there a Python or Node SDK?
 
 The **Python SDK** (`stratadb`) links the engine in your process and speaks the
-same command surface, value shapes, and error codes as the CLI — see the
+same command surface, value shapes, and error codes as the CLI - see the
 [Python SDK](/docs/python) section. Its V1 wheels are rolling out to PyPI. A Node
 SDK is later work. Beyond those, the `strata` CLI and its MCP server mean any
 language that can run a subprocess or speak MCP can drive Strata today.
 
 ### How do I use it from an AI agent?
 
-The Model Context Protocol server is built into the binary — run
+The Model Context Protocol server is built into the binary - run
 `strata <db> mcp serve`; there is no separate package to install. See
 [For AI agents](/docs/agents) and
 [Agents and MCP](/docs/agents).

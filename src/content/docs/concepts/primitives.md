@@ -1,7 +1,7 @@
 ---
 title: "Primitives"
 section: "concepts"
-description: "Five data capabilities — KV, JSON, event log, vectors, and graphs — layered over one branch-aware, versioned KV storage substrate."
+description: "Five data capabilities - KV, JSON, event log, vectors, and graphs - layered over one branch-aware, versioned KV storage substrate."
 source: "strata-core@v1.1.0"
 ---
 
@@ -32,9 +32,9 @@ $ strata ./db describe
 
 The five primitives are not five separate storage engines. Underneath, StrataDB has a single physical primitive: a **branch-aware, versioned (MVCC) key-value row**. JSON documents, events, vectors, and graph nodes and edges are all encoded as rows in that one store. This is why every primitive gets the same properties for free:
 
-- **Branch isolation** — every row is scoped to a branch, so a fork isolates all five capabilities at once. See [Branches](/docs/concepts/branches).
-- **Versioning and time travel** — every write is a [commit](/docs/concepts/commits) with a version and timestamp, so `--as-of` reads and history work the same across KV, JSON, events, vectors, and graphs.
-- **Uniform durability** — the same [durability](/docs/concepts/durability) guarantees cover every primitive, because they all write to the same log.
+- **Branch isolation** - every row is scoped to a branch, so a fork isolates all five capabilities at once. See [Branches](/docs/concepts/branches).
+- **Versioning and time travel** - every write is a [commit](/docs/concepts/commits) with a version and timestamp, so `--as-of` reads and history work the same across KV, JSON, events, vectors, and graphs.
+- **Uniform durability** - the same [durability](/docs/concepts/durability) guarantees cover every primitive, because they all write to the same log.
 
 You never manage the substrate directly. You work through each capability's own commands, and the shared row model is what keeps their semantics consistent.
 
@@ -50,11 +50,11 @@ You never manage the substrate directly. You work through each capability's own 
 
 **Entities and the relationships between them** → Graph. Add nodes, connect them with typed edges, and walk neighbors. An edge requires both endpoints to exist first.
 
-There is no general-purpose "state cell" primitive — coordination values live in KV or JSON, and history lives in the event log.
+There is no general-purpose "state cell" primitive - coordination values live in KV or JSON, and history lives in the event log.
 
 ## Spaces: organizing within a branch
 
-Within a single branch, you can partition primitives into **spaces** — every operation targets the `default` space unless you pass `--space <name>`. Spaces group related data inside a branch; branches are the isolation boundary between unrelated data. See the [Spaces concept](/docs/concepts/spaces) for the model and the [Spaces guide](/docs/guides/spaces) for the verbs.
+Within a single branch, you can partition primitives into **spaces** - every operation targets the `default` space unless you pass `--space <name>`. Spaces group related data inside a branch; branches are the isolation boundary between unrelated data. See the [Spaces concept](/docs/concepts/spaces) for the model and the [Spaces guide](/docs/guides/spaces) for the verbs.
 
 ## Beyond the five
 
@@ -62,5 +62,5 @@ Two more capabilities sit alongside the primitives but are not data types of the
 
 ## Next
 
-- [Value Types](/docs/concepts/value-types) — what a value actually is in each primitive
-- [Guides](/docs/data/key-value) — per-primitive API walkthroughs
+- [Value Types](/docs/concepts/value-types) - what a value actually is in each primitive
+- [Guides](/docs/data/key-value) - per-primitive API walkthroughs

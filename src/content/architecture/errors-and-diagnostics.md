@@ -7,13 +7,13 @@ order: 7
 Errors in StrataDB follow the same rule as everything else: **storage owns the
 mechanics, the engine owns the meaning.** Storage failures are detailed and
 mechanic-specific; the engine decides which of them become public product errors
-and how they are explained. This page is the propagation architecture — the
+and how they are explained. This page is the propagation architecture - the
 product-level error contract is [errors](/docs/concepts/errors).
 
 ## Two audiences, one path
 
-A failure deep in storage — a checksum mismatch, a torn write at the log tail, a
-backend that cannot satisfy a capability — is described in storage's own terms,
+A failure deep in storage - a checksum mismatch, a torn write at the log tail, a
+backend that cannot satisfy a capability - is described in storage's own terms,
 with all the mechanic detail needed to diagnose it. That detail is for storage
 tests and internal diagnostics.
 
@@ -46,21 +46,21 @@ prose.
 A guiding constraint: normal diagnostics must not require a user to understand
 WAL records, manifests, checkpoints, memtables, segment compaction, or cleanup
 history. Those are storage's concern. What the engine exposes instead is
-**structured health, metrics, describe, and durability counters** — enough to
+**structured health, metrics, describe, and durability counters** - enough to
 answer "is this database healthy, durable, and recovered?" without a tour of the
 internals. When a raw storage fact *is* worth surfacing, the engine converts it
 deliberately into an engine-owned diagnostic rather than leaking the mechanic.
 
 ## Secrets never travel with an error
 
-The error and diagnostic path redacts sensitive material by default — provider API
-keys, signed URLs, prompts, and document contents — so an error is safe to log and
+The error and diagnostic path redacts sensitive material by default - provider API
+keys, signed URLs, prompts, and document contents - so an error is safe to log and
 to show a user without exposing what produced it. Redaction is a property of the
 boundary, not something each call site has to remember.
 
 ## Recovery health is a storage-owned fact
 
-Recovery outcomes — whether recovery was clean, degraded, or found a fault — are
+Recovery outcomes - whether recovery was clean, degraded, or found a fault - are
 **storage-owned facts** that the engine re-exports or wraps as public
 diagnostics. Ownership sits with the layer that actually performs recovery, which
 keeps the source of truth for "what happened on open" in one place. See
@@ -68,9 +68,9 @@ keeps the source of truth for "what happened on open" in one place. See
 
 ## Related
 
-- [Errors (concept)](/docs/concepts/errors) — the `class.area.detail` contract and
+- [Errors (concept)](/docs/concepts/errors) - the `class.area.detail` contract and
   the fixed class taxonomy.
-- [Error handling (guide)](/docs/guides/error-handling) — parsing the envelope,
+- [Error handling (guide)](/docs/guides/error-handling) - parsing the envelope,
   retry policy, and commit outcome.
-- [The layered stack](/architecture/layered-stack) — why meaning and mechanics are
+- [The layered stack](/architecture/layered-stack) - why meaning and mechanics are
   split in the first place.

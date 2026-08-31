@@ -34,7 +34,7 @@
   }
 
   body {
-    /* The neutral stage (Neon-macro, 2026-06-12): flat true black —
+    /* The neutral stage (Neon-macro, 2026-06-12): flat true black -
        all atmosphere lives in the hero's animated backdrop. */
     background-color: var(--color-void);
     color: var(--color-ink-hi);
@@ -79,7 +79,7 @@
     --tw-prose-bullets: var(--color-ink-low);
     --tw-prose-counters: var(--color-ink-low);
   }
-  /* Shiki blocks keep their theme background — its token colors are contrast-
+  /* Shiki blocks keep their theme background - its token colors are contrast-
      tuned for it (forcing inset under them failed AA in the Phase-6 audit). */
   .prose-docs :where(pre) {
     border: 1px solid var(--color-line);
@@ -106,7 +106,7 @@
     text-underline-offset: 3px;
   }
 
-  /* Reveal recipe (03 §2) — applied via IntersectionObserver adding .is-revealed */
+  /* Reveal recipe (03 §2) - applied via IntersectionObserver adding .is-revealed */
   .reveal {
     opacity: 0;
     transform: translateY(16px);

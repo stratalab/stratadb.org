@@ -1,4 +1,4 @@
-// Scrub #2 of 2 (03 §3.2) — v5 (2026-06-12): the head rides the pin.
+// Scrub #2 of 2 (03 §3.2) - v5 (2026-06-12): the head rides the pin.
 // A database branch splits into two color-coded worlds (main = cool slate,
 // risky = ember-warm); the sample portfolio document changes there so the
 // user sees the actual verbs: branch, change, diff, preview, merge. Commands
@@ -63,7 +63,7 @@ const SESSION: { act: number; cmd?: string; out?: string; branch?: string }[] = 
 
 type Driver = MotionValue<number> | number;
 const inv = (d: Driver) => (typeof d === 'number' ? 1 - d : useTransform(d, (v) => 1 - v));
-// Faded-out text must ALSO leave the a11y tree — opacity 0 alone keeps it
+// Faded-out text must ALSO leave the a11y tree - opacity 0 alone keeps it
 // "visible" to checkers as unreadable text (the session-panel lesson,
 // applied stage-wide).
 const visOf = (d: Driver) =>
@@ -227,7 +227,7 @@ function DiffCard({ visible }: { visible: Driver }) {
 
 // The session terminal: lines flash in with their act, then dim into history.
 function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
-  // Unrevealed lines leave the a11y tree entirely — opacity 0 alone keeps
+  // Unrevealed lines leave the a11y tree entirely - opacity 0 alone keeps
   // them "visible" to checkers as unreadable text.
   const vis =
     lineIn !== undefined && typeof lineIn !== 'number'
@@ -244,7 +244,7 @@ function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
           <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
           <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
         </span>
-        <span className="ml-2 font-mono text-mono-sm text-ink-low">strata — session</span>
+        <span className="ml-2 font-mono text-mono-sm text-ink-low">strata - session</span>
       </div>
       <div className="h-[17rem] overflow-hidden bg-inset p-4 font-mono text-[0.75rem] leading-5 xl:h-[20rem] xl:text-mono-sm xl:leading-7">
         {SESSION.map((entry, i) => {
@@ -258,7 +258,7 @@ function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
             current && lineIn !== undefined
               ? { opacity: lineIn, visibility: vis }
               : { opacity: 1, visibility: 'visible' as const };
-          // History recedes by COLOR, not opacity — dimmed ink-low fails
+          // History recedes by COLOR, not opacity - dimmed ink-low fails
           // WCAG contrast; full-strength ink-low is the floor (4.56:1).
           return (
             <motion.div key={i} style={style}>
@@ -427,7 +427,7 @@ function FlowHead() {
 // the ember strand sweeps the bottom band and rises through the empty
 // top-right corner toward risky's side; the cool strand holds the bottom
 // (main's ground); a dim ember strand peels off and bends back down to meet
-// it — fork and merge as ambient artwork. Desktop pin only; the
+// it - fork and merge as ambient artwork. Desktop pin only; the
 // reduced-motion variant never renders it.
 const RIVER = [
   {
@@ -588,7 +588,7 @@ export default function BranchScrub() {
           <BranchRiver />
           <div className="relative z-10">
             <div className="mx-auto w-full max-w-[96rem] px-12">
-              {/* second h2 lives in the mobile branch — only one is ever displayed */}
+              {/* second h2 lives in the mobile branch - only one is ever displayed */}
               <p
                 data-feature-eyebrow="branching"
                 className="mb-4 font-mono text-eyebrow uppercase text-terracotta-400"

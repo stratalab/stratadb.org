@@ -7,11 +7,11 @@ source: "strata-python@v1.1.0"
 
 The SDK carries the same self-describing surface as the binary, so an agent
 working in Python never has to shell out to learn what Strata can do. Everything
-here is bundled in the wheel — no network call.
+here is bundled in the wheel - no network call.
 
 ## The offline guide
 
-`stratadb.agents_guide()` returns the complete usage guide as markdown —
+`stratadb.agents_guide()` returns the complete usage guide as markdown -
 identical to `strata agents guide`, matched to the wheel's engine version. Hand it
 to an agent at the start of a session:
 
@@ -26,9 +26,9 @@ same artifact.
 
 ## The command catalog
 
-`stratadb.command_index()` returns the full machine-readable command catalog —
+`stratadb.command_index()` returns the full machine-readable command catalog -
 every command with its access class, batching and commit behavior, and error
-codes — bundled in the wheel:
+codes - bundled in the wheel:
 
 ```python
 idx = stratadb.command_index()   # the IDL catalog, as a dict
@@ -47,13 +47,13 @@ stratadb.mcp_config("./app-data")
 # {"command": "strata", "args": ["./app-data", "mcp", "serve"]}
 ```
 
-Drop it into your MCP client's `mcpServers` map — see
+Drop it into your MCP client's `mcpServers` map - see
 [the MCP server](/docs/agents/mcp-server).
 
 ## The escape hatch
 
 The typed namespaces cover the common path; for anything else in the catalog,
-`db.execute()` runs a raw command as a dict and returns the response dict — the
+`db.execute()` runs a raw command as a dict and returns the response dict - the
 same wire the CLI and MCP speak. The namespaces are built on it:
 
 ```python
@@ -65,6 +65,6 @@ namespaces for everything else.
 
 ## Related
 
-- [For AI agents](/docs/agents) — the section overview.
+- [For AI agents](/docs/agents) - the section overview.
 - [The agents guide](/docs/agents/agents-guide) and
-  [command index](/docs/agents/command-index) — the CLI/MCP forms.
+  [command index](/docs/agents/command-index) - the CLI/MCP forms.

@@ -5,7 +5,7 @@ description: "Every write auto-commits atomically and returns a commit version a
 source: "strata-core@v1.1.0"
 ---
 
-Every write in StrataDB is a **commit**. When you put a key, set a JSON path, append an event, upsert a vector, or add a graph node, that change is applied atomically and becomes durable on its own — there is no separate step to commit it. This keeps one canonical path for every write and removes a whole class of "did I remember to commit?" bugs.
+Every write in StrataDB is a **commit**. When you put a key, set a JSON path, append an event, upsert a vector, or add a graph node, that change is applied atomically and becomes durable on its own - there is no separate step to commit it. This keeps one canonical path for every write and removes a whole class of "did I remember to commit?" bugs.
 
 ## Writes auto-commit
 
@@ -25,8 +25,8 @@ $ strata --json ./db kv put config staging
 
 Two objects matter here:
 
-- **`commit`** — the `version` and `timestamp` this write was assigned, plus how many rows it put or deleted and whether it was made `durable`. Versions are a monotonic per-database clock: every commit gets a strictly higher number than the last.
-- **`effect`** — what the write did to the target: `kind` is `created`, `updated`, or `deleted`; `matched` says whether a prior value existed; `affected_count` is how many rows changed.
+- **`commit`** - the `version` and `timestamp` this write was assigned, plus how many rows it put or deleted and whether it was made `durable`. Versions are a monotonic per-database clock: every commit gets a strictly higher number than the last.
+- **`effect`** - what the write did to the target: `kind` is `created`, `updated`, or `deleted`; `matched` says whether a prior value existed; `affected_count` is how many rows changed.
 
 ## No manual transactions
 
@@ -49,7 +49,7 @@ $ strata ./db kv history config
 {"timestamp":3,"tombstone":false,"value":"prod","version":3}
 ```
 
-Pass a commit timestamp to `--as-of` to read the value as it stood then — the same flag works on `kv`, `json`, `event`, `vector`, and `graph` reads:
+Pass a commit timestamp to `--as-of` to read the value as it stood then - the same flag works on `kv`, `json`, `event`, `vector`, and `graph` reads:
 
 ```text
 $ strata ./db kv get config --as-of 3
@@ -62,7 +62,7 @@ Deletes are commits too. A delete writes a **tombstone** rather than erasing his
 
 ## Batches: itemwise with a shared commit
 
-A batch applies many items in one call. Batches are part of the command surface used by the SDKs, the [MCP tools](/docs/agents), and the raw command path — not a bare CLI verb — so the semantics below are what you get from those callers. StrataDB's batches are **itemwise**: you get one positional result per input item, and the outer status summarizes whether all, some, or none succeeded. Valid items that the engine applies together share one commit.
+A batch applies many items in one call. Batches are part of the command surface used by the SDKs, the [MCP tools](/docs/agents), and the raw command path - not a bare CLI verb - so the semantics below are what you get from those callers. StrataDB's batches are **itemwise**: you get one positional result per input item, and the outer status summarizes whether all, some, or none succeeded. Valid items that the engine applies together share one commit.
 
 Putting two keys in a single batch, both land at the same `version` and `timestamp`:
 
@@ -76,7 +76,7 @@ Putting two keys in a single batch, both land at the same `version` and `timesta
 "status": "ok"
 ```
 
-(Abbreviated from the real `--json` envelope; every item also repeats the shared `commit`.) Each item reports its own outcome, so a batch where one item fails validation returns an outer `status` of `partial` — the offending item is flagged with its own error while the valid items still commit. See the [CLI reference](/docs/reference/cli) for the full command surface.
+(Abbreviated from the real `--json` envelope; every item also repeats the shared `commit`.) Each item reports its own outcome, so a batch where one item fails validation returns an outer `status` of `partial` - the offending item is flagged with its own error while the valid items still commit. See the [CLI reference](/docs/reference/cli) for the full command surface.
 
 ## Why this design
 
@@ -84,6 +84,6 @@ Auto-commit plus versioning gives you atomic writes, a single canonical write pa
 
 ## Next
 
-- [Durability](/docs/concepts/durability) — when `durable` is true and how recovery works
-- [Value Types](/docs/concepts/value-types) — what a value is in each capability
-- [Deterministic Replay](/docs/cookbook/deterministic-replay) — using versions and `--as-of` to reproduce state
+- [Durability](/docs/concepts/durability) - when `durable` is true and how recovery works
+- [Value Types](/docs/concepts/value-types) - what a value is in each capability
+- [Deterministic Replay](/docs/cookbook/deterministic-replay) - using versions and `--as-of` to reproduce state

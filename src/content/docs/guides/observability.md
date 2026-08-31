@@ -12,7 +12,7 @@ human-readable output by default and a compact envelope with `--json`, so the
 same command serves both a quick eyeball and a script. None of them writes
 anything. Examples use a durable database at `./mydb`.
 
-## ping — liveness
+## ping - liveness
 
 `ping` confirms the binary responds and reports its version:
 
@@ -32,9 +32,9 @@ strata --json ./mydb ping
 {"data":{"version":"1.1.0"},"type":"pong"}
 ```
 
-## info — top-line facts
+## info - top-line facts
 
-`info` prints the essential facts about an open database — branch and space
+`info` prints the essential facts about an open database - branch and space
 counts, the default branch, whether it is durable and open, and its storage
 target:
 
@@ -55,7 +55,7 @@ strata ./mydb info
 }
 ```
 
-## health — subsystem checks
+## health - subsystem checks
 
 `health` reports the status of each control-plane subsystem and an overall
 `status`. Everything healthy looks like this:
@@ -78,9 +78,9 @@ strata ./mydb health
 
 Watch the top-level `status`: it is the single field to alert on.
 
-## metrics — operational facts
+## metrics - operational facts
 
-`metrics` reports operational state — control status, durability, open state,
+`metrics` reports operational state - control status, durability, open state,
 target, and the branch and space counts:
 
 ```bash
@@ -98,7 +98,7 @@ strata ./mydb metrics
 }
 ```
 
-## describe — full snapshot
+## describe - full snapshot
 
 `describe` is the widest view: which capabilities are present, the current and
 available branches and spaces, and per-primitive counts. It is the fastest way
@@ -146,7 +146,7 @@ strata ./mydb describe
 }
 ```
 
-## doctor — installation and database check
+## doctor - installation and database check
 
 `doctor` checks the installation: the binary version, the Strata home
 directory, whether it is on your `PATH`, the platform, and any `issues`. With no
@@ -167,7 +167,7 @@ strata doctor
 }
 ```
 
-Pass a database as the global target — before the `doctor` verb — to also open
+Pass a database as the global target - before the `doctor` verb - to also open
 it and report its facts under `database`:
 
 ```bash
@@ -180,6 +180,6 @@ needs attention, which makes it a natural preflight check in scripts and CI.
 
 ## Next
 
-- [Error Handling](/docs/guides/error-handling) — decode failures when a check goes red.
-- [Database Configuration](/docs/guides/configuration) — read a database's config.
-- [Agents and MCP](/docs/agents) — the self-describing surface behind these facts.
+- [Error Handling](/docs/guides/error-handling) - decode failures when a check goes red.
+- [Database Configuration](/docs/guides/configuration) - read a database's config.
+- [Agents and MCP](/docs/agents) - the self-describing surface behind these facts.

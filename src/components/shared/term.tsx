@@ -78,7 +78,7 @@ export function Cmd({
   const n = useTyped(cmd, live, on);
   const typing = live && on && n < cmd.length;
   return (
-    // invisible (not display:none) — the line reserves its height, so
+    // invisible (not display:none) - the line reserves its height, so
     // nothing below shifts when it lands; hidden lines stay out of the
     // a11y tree.
     <div className={on ? '' : 'invisible'}>
@@ -117,7 +117,7 @@ export function Line({
   );
 }
 
-// The card material: neutral panel, the page's one temperature — ember dot,
+// The card material: neutral panel, the page's one temperature - ember dot,
 // ember header wash, ember bloom, graph-paper body.
 export function TermCard({
   title,

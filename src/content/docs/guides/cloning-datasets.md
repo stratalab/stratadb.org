@@ -5,7 +5,7 @@ description: "Clone a prepared dataset from a hub into a local database, and con
 source: "strata-core@v1.1.0"
 ---
 
-`strata clone` pulls a prepared dataset from a hub into a new local database. A cloned database is an ordinary database — it opens, branches, and queries like any other, and it remembers where it came from.
+`strata clone` pulls a prepared dataset from a hub into a new local database. A cloned database is an ordinary database - it opens, branches, and queries like any other, and it remembers where it came from.
 
 ## Cloning
 
@@ -123,11 +123,11 @@ strata ./fresh remote
 }
 ```
 
-On a cloned database, `remote` reports the origin instead — the hub and dataset it was pulled from — so you can trace a local copy back to its source.
+On a cloned database, `remote` reports the origin instead - the hub and dataset it was pulled from - so you can trace a local copy back to its source.
 
 ## Related
 
-- [Configuration Reference](/docs/reference/configuration-reference) — every config key and resolution layer
-- [Branches](/docs/concepts/branches) — cloning a specific branch, and branching a clone locally
-- [Arrow](/docs/guides/import-export) — moving individual primitives as files instead of whole datasets
-- [Error Handling](/docs/guides/error-handling) — reading structured error codes
+- [Configuration Reference](/docs/reference/configuration-reference) - every config key and resolution layer
+- [Branches](/docs/concepts/branches) - cloning a specific branch, and branching a clone locally
+- [Arrow](/docs/guides/import-export) - moving individual primitives as files instead of whole datasets
+- [Error Handling](/docs/guides/error-handling) - reading structured error codes

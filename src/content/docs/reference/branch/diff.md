@@ -10,7 +10,7 @@ capability and space: entries `added` on `branch_b`, `removed` relative to
 `branch_a`, and `modified` on both sides. The comparison is directional from
 `branch_a` to `branch_b`.
 
-Every data primitive is compared — key-value, JSON documents, vectors, event
+Every data primitive is compared - key-value, JSON documents, vectors, event
 streams, and graphs. Graph changes are reported per row class: nodes, edges, and
 ontology appear as separate capabilities in the result. Derived rows (search and
 vector indexes, graph reverse maps) are omitted. A missing branch is rejected

@@ -1,4 +1,4 @@
-# 09 — Documentation Sourcing Policy (family-wide)
+# 09 - Documentation Sourcing Policy (family-wide)
 
 **Status:** Policy (2026-06-12). Unlike docs 00–08, this document governs the whole
 Strata family, not just the website. It is the canonical answer to "where do docs
@@ -18,12 +18,12 @@ fork it.
 
 Arguments about which repo docs live in are mostly proxies for the real question:
 *what physically breaks when code changes and the docs don't?* Co-location alone
-solves nothing — a stale doc next to fresh code is still stale. The policy below
+solves nothing - a stale doc next to fresh code is still stale. The policy below
 places each document type where it is cheapest to write, and then makes CI execute
 it so it cannot silently rot.
 
 Real incident that motivates this (2026-06-12): the landing-page quickstart was
-written with `db.kv.history(...)` — plausible, unverified at the time of writing.
+written with `db.kv.history(...)` - plausible, unverified at the time of writing.
 Under this policy that snippet runs in CI against the released package, and a wrong
 method name fails the build instead of shipping.
 
@@ -31,7 +31,7 @@ method name fails the build instead of shipping.
 
 | Type | Examples | Lives in | Written by | Kept true by |
 |---|---|---|---|---|
-| **Reference** | API signatures, options, types, errors, CLI flags, config keys | **The code's repo — generated from source.** rustdoc for the crate, docstrings for Python, TSDoc/`.d.ts` for Node, `--help`/clap definitions for the CLI | Nobody (extracted) | Being the code |
+| **Reference** | API signatures, options, types, errors, CLI flags, config keys | **The code's repo - generated from source.** rustdoc for the crate, docstrings for Python, TSDoc/`.d.ts` for Node, `--help`/clap definitions for the CLI | Nobody (extracted) | Being the code |
 | **Narrative** | Concepts, guides, cookbook, quickstarts, tutorials, FAQs | **stratadb.org** (`src/content/docs/`) | A human, in product voice | Executable snippets run in CI (§3) |
 
 The decision test: **if it describes a signature, it belongs to the code; if it
@@ -42,7 +42,7 @@ Corollaries:
 - Reference is **never hand-written twice**. If a hand-maintained API table exists
   anywhere, it is a bug against this policy.
 - Narrative is **never duplicated into SDK repos**. An SDK repo's README carries
-  exactly one narrative artifact: its quickstart (§4.1) — which is also an
+  exactly one narrative artifact: its quickstart (§4.1) - which is also an
   executable test.
 - A separate consolidated "docs repo" is rejected: it adds a third place with
   neither co-location with code nor co-location with the product voice.
@@ -51,7 +51,7 @@ Corollaries:
 
 - `stratadb.org/src/data/release.json` is the **single source of version strings**
   for everything user-facing (built today; fetched by `scripts/fetch-release.mjs`).
-  No version literal appears in any doc body — version-drift CI enforces this.
+  No version literal appears in any doc body - version-drift CI enforces this.
 - The site documents **released versions only**: reference artifacts and snippet
   runs pin to release tags, never to `main`. If it isn't tagged, it isn't
   documented.
@@ -65,18 +65,18 @@ Every executable example, everywhere, runs in CI. The mechanisms by surface:
 
 | Surface | Mechanism | Status |
 |---|---|---|
-| CLI transcripts (site + strata-core README) | `scripts/verify-transcripts.mjs` — runs the commands against the real `strata` binary, diffs output | Built (advisory now; blocking at site cutover) |
-| Rust examples | `cargo test` doctests — free, native; every public item's example is a doctest | Adopt in strata-core |
+| CLI transcripts (site + strata-core README) | `scripts/verify-transcripts.mjs` - runs the commands against the real `strata` binary, diffs output | Built (advisory now; blocking at site cutover) |
+| Rust examples | `cargo test` doctests - free, native; every public item's example is a doctest | Adopt in strata-core |
 | Python snippets (site docs + SDK README) | Snippet extractor: pull fenced `python` blocks tagged `verify`, run via pytest against `pip install stratadb==<release.json>` | To build with the docs pass |
 | Node snippets | Same pattern: fenced `js`/`ts` blocks tagged `verify`, run via node test against the published `@stratadb/core` | To build with the docs pass |
 | MCP config examples | Schema-validate against strata-mcp's declared config schema | Adopt in strata-mcp |
-| Claims | Claims lint (forbidden marketing vocabulary) — already in site CI | Extend to SDK READMEs |
-| Links | lychee link check — already in site CI | Extend to SDK READMEs |
+| Claims | Claims lint (forbidden marketing vocabulary) - already in site CI | Extend to SDK READMEs |
+| Links | lychee link check - already in site CI | Extend to SDK READMEs |
 
 Authoring rule that makes this work: **examples are real programs.** Write the
 mem0-style complete quickstart (numbered steps, runnable top to bottom), not
 floating fragments. A snippet that cannot run cannot be verified; if a fragment is
-truly necessary, mark it `no-verify` with a one-line reason — CI counts and reports
+truly necessary, mark it `no-verify` with a one-line reason - CI counts and reports
 `no-verify` blocks so they stay rare.
 
 ## 4. The per-repo contract
@@ -88,7 +88,7 @@ One complete, runnable quickstart (install → open → first write → first re
 product voice, ≤ 30 lines of code. This is the repo's ONLY narrative doc. It is
 extracted and run by that repo's snippet CI on every PR and on every release tag.
 It should tell the same seed-world story as the site where natural (the portfolio
-example) — one world, every surface.
+example) - one world, every surface.
 
 ### 4.2 A generated reference artifact
 Built in that repo's CI on every release tag:
@@ -99,14 +99,14 @@ Built in that repo's CI on every release tag:
 - Node: typedoc → JSON
 
 The artifact is attached to the release (or published to a known path). The site
-consumes these at build, by tag, and renders them through site templates — the SDK
+consumes these at build, by tag, and renders them through site templates - the SDK
 repos ship **data**, the site owns **presentation**.
 
 ### 4.3 The CI jobs
-1. **doctest/snippet job** — §3's mechanism for that language; blocking.
-2. **reference-artifact job** — builds and attaches the artifact on tags; blocking
+1. **doctest/snippet job** - §3's mechanism for that language; blocking.
+2. **reference-artifact job** - builds and attaches the artifact on tags; blocking
    on tags.
-3. **changelog gate** — a release PR without a CHANGELOG entry fails.
+3. **changelog gate** - a release PR without a CHANGELOG entry fails.
 
 ### 4.4 The PR checklist line
 Every SDK repo's PR template includes:
@@ -115,7 +115,7 @@ Every SDK repo's PR template includes:
 >   and a companion note filed against stratadb.org narrative docs.
 
 This is the cheap human bridge until generated reference covers the surface; it is
-discipline, not enforcement — the enforcement is §3.
+discipline, not enforcement - the enforcement is §3.
 
 ## 5. The site's side of the contract
 
@@ -134,7 +134,7 @@ discipline, not enforcement — the enforcement is §3.
 
 - Quiet competence: facts stated flat, no marketing vocabulary (claims lint
   enforces the floor).
-- Examples use the seed world where natural — `portfolio.value`, the deploy story —
+- Examples use the seed world where natural - `portfolio.value`, the deploy story -
   so every surface tells one coherent story.
 - Comments inside examples state facts ("# every write keeps its past"), never
   hype.
@@ -173,5 +173,5 @@ Adopt the Strata docs-sourcing policy (stratadb.org/docs/product/09):
 2. **At SDK stabilization:** reference artifacts wired into the site build by tag;
    reference pages switch from hand-written to generated and the hand-written
    versions are deleted.
-3. **At cutover (site Phase 7):** transcript verifier flips to blocking — the
+3. **At cutover (site Phase 7):** transcript verifier flips to blocking - the
    first surface where the full contract is live end-to-end.

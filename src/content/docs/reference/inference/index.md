@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: inference
 ---
 
-# `inference` — command reference
+# `inference` - command reference
 
 | Command | Summary |
 |---|---|

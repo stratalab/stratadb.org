@@ -55,8 +55,8 @@ The **class** (the first segment) tells you how to react: `not_found`,
 `invalid_argument`, and `already_exists` mean fix the request;
 `failed_precondition` means the database is in a state that blocks the
 operation; `unavailable` means retry after the underlying layer recovers;
-`corruption` means stop and inspect. Open the `ref` URL — the same
-`/e/<code>` page — for the details, or look any code up offline with
+`corruption` means stop and inspect. Open the `ref` URL - the same
+`/e/<code>` page - for the details, or look any code up offline with
 `strata agents errors --json`. Add `--json` to any command to get the same
 information as a structured envelope. Recover by code, never by message text.
 
@@ -77,7 +77,7 @@ error: [invalid_argument.cli.no_database]: no database specified
 
 StrataDB never opens the current directory implicitly. Pass a path
 (`strata ./mydb …`), set `STRATA_DB`, or use `--cache` for an ephemeral
-database. This is the `invalid_argument.cli.no_database` code — CLI usage errors
+database. This is the `invalid_argument.cli.no_database` code - CLI usage errors
 like it print a plain `error:` line, exit with status 2, and are not in the
 `/e/` registry, so look them up by reading the printed hint.
 
@@ -95,9 +95,9 @@ unavailable.engine.persistence: persistence lower layer is unavailable (err_loca
 
 Check that the path points at a database directory you own and can write, that
 no other process is holding it, and that the disk is not full. `strata <path>
-doctor` confirms whether the open succeeds — the path is a global argument, so
+doctor` confirms whether the open succeeds - the path is a global argument, so
 it comes before the subcommand. Treat a database directory as one
-unit — do not edit or remove files inside it by hand.
+unit - do not edit or remove files inside it by hand.
 
 ## Opening a pre-V1 database
 
@@ -106,7 +106,7 @@ Databases created before the V1 line are rejected on open with
 class `failed_precondition`. From the registry, its message is "The database
 layout is incompatible with this runtime," and its hint is to open the database
 with a compatible version. This line does not migrate pre-V1 development
-databases — create a fresh database and reload your data. Look the code up with
+databases - create a fresh database and reload your data. Look the code up with
 `strata agents errors --json`.
 
 ## Durability and recovery failures
@@ -114,19 +114,19 @@ databases — create a fresh database and reload your data. Look the code up wit
 If the storage layer cannot make a write durable, the writer stops rather than
 report a false success, and operations surface in the `unavailable` class
 (`unavailable.engine.persistence` and related codes) with a retry-after-recovery
-hint. Recovery is explicit: fix the underlying condition — free space,
-permissions, a healthy disk — and reopen the database.
+hint. Recovery is explicit: fix the underlying condition - free space,
+permissions, a healthy disk - and reopen the database.
 
 If stored data fails validation while recovering, you get
 [`corruption.engine.persistence_recovery`](/e/corruption.engine.persistence_recovery),
 whose hint is blunt: "Stop writing to the database and inspect recovery
-diagnostics before continuing." Do exactly that — take a copy of the directory
+diagnostics before continuing." Do exactly that - take a copy of the directory
 and inspect it before any further writes.
 
 ## Getting more help
 
-- [FAQ](/docs/faq) — what changed in this line and why.
-- [Error reference](/docs/reference/error-reference) — every code with its class
+- [FAQ](/docs/faq) - what changed in this line and why.
+- [Error reference](/docs/reference/error-reference) - every code with its class
   and meaning.
-- [Observability guide](/docs/guides/observability) — health and metrics
+- [Observability guide](/docs/guides/observability) - health and metrics
   surfaces beyond `doctor`.

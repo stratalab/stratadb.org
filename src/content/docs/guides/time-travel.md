@@ -12,7 +12,7 @@ use a durable database at `./mydb`.
 
 ## Capture a commit timestamp
 
-Time-travel reads take a **commit timestamp** — the small logical clock value a
+Time-travel reads take a **commit timestamp** - the small logical clock value a
 write returns, not a wall-clock time. Grab it from a write receipt under `--json`:
 
 ```bash
@@ -40,8 +40,8 @@ strata ./mydb json get config '$.tier'              # "pro"   (latest)
 strata ./mydb --as-of 3 json get config '$.tier'    # "free"  (as of commit 3)
 ```
 
-The same flag works on every primitive — KV, JSON, vectors, events, and the
-graph — so one timestamp gives you a consistent snapshot of the whole database.
+The same flag works on every primitive - KV, JSON, vectors, events, and the
+graph - so one timestamp gives you a consistent snapshot of the whole database.
 
 ## List a key's history
 
@@ -71,7 +71,7 @@ strata ./mydb branch fork main investigate --timestamp 3
 strata ./mydb --branch investigate json get config '$.tier'   # "free"
 ```
 
-This is the "reproduce the bug as of last Tuesday, then poke at it" workflow — see
+This is the "reproduce the bug as of last Tuesday, then poke at it" workflow - see
 [branching workflows](/docs/guides/branching-workflows) for the full fork surface.
 
 ## Audit what changed
@@ -92,12 +92,12 @@ For an append-only audit trail rather than point-in-time diffs, the
 ## When history runs out
 
 History is retained but not unbounded. Asking for a timestamp older than retained
-history returns a typed `history_unavailable` error rather than a wrong answer —
+history returns a typed `history_unavailable` error rather than a wrong answer -
 branch on that class if you reach far back. See
 [error handling](/docs/guides/error-handling).
 
 ## Related
 
-- [Time travel (concept)](/docs/concepts/time-travel) — the commit clock and the model.
-- [Branching workflows](/docs/guides/branching-workflows) — forking from a past point.
-- [Combining primitives](/docs/data/combining-primitives) — one snapshot across all five.
+- [Time travel (concept)](/docs/concepts/time-travel) - the commit clock and the model.
+- [Branching workflows](/docs/guides/branching-workflows) - forking from a past point.
+- [Combining primitives](/docs/data/combining-primitives) - one snapshot across all five.

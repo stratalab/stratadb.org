@@ -13,7 +13,7 @@ const RELEASE = JSON.parse(
 );
 
 // One session per scenario; expectations are substring matches per command.
-// These mirror src/lib/engine/heroScript.ts and the section transcripts —
+// These mirror src/lib/engine/heroScript.ts and the section transcripts -
 // keep in sync (single-source extraction is a noted follow-up).
 const SCENARIOS = [
   {
@@ -90,7 +90,7 @@ for (const scenario of SCENARIOS) {
   const out = (run.stdout || '') + (run.stderr || '');
   for (const [cmd, expected] of scenario.exchanges) {
     if (expected && !out.includes(expected)) {
-      console.error(`✗ [${scenario.name}] '${cmd}' — expected output containing '${expected}'`);
+      console.error(`✗ [${scenario.name}] '${cmd}' - expected output containing '${expected}'`);
       failures++;
     } else {
       console.log(`✓ [${scenario.name}] ${cmd}`);
@@ -99,7 +99,7 @@ for (const scenario of SCENARIOS) {
 }
 
 if (failures) {
-  console.error(`\n${failures} transcript assertion(s) failed — a demo is lying.`);
+  console.error(`\n${failures} transcript assertion(s) failed - a demo is lying.`);
   process.exit(1);
 }
 console.log('\nAll transcripts verified against the real CLI.');

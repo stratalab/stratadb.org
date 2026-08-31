@@ -247,7 +247,7 @@ function KvView({ live }: { live: boolean }) {
                   </span>
                   <span className="tabular-nums">{Number(h.value).toLocaleString('en-US')}</span>
                 </span>
-                {/* ink-mid on the selected row — the ember wash eats ink-low's margin */}
+                {/* ink-mid on the selected row - the ember wash eats ink-low's margin */}
                 <span className={`${i === 0 ? 'text-ink-mid' : 'text-ink-low'} max-sm:hidden`}>
                   {h.at.slice(0, 16).replace('T', ' ')}
                 </span>
@@ -374,7 +374,7 @@ function JsonView({ live }: { live: boolean }) {
           <TreeRow on={beat >= 8} depth={1} k="rebalance" v={'"quarterly"'} />
         </div>
         <Line on={beat >= 9} className="mt-3 font-mono text-mono-sm text-ink-low">
-          allocation fields updated — rebalance stayed put
+          allocation fields updated - rebalance stayed put
         </Line>
       </div>
     </div>
@@ -471,7 +471,7 @@ function VectorView({ live }: { live: boolean }) {
         ))}
       </div>
       <Line on={beat >= 5} className="mt-3 font-mono text-mono-sm text-ink-low">
-        embedded on write — vector query was ready before you asked
+        embedded on write - vector query was ready before you asked
       </Line>
     </div>
   );
@@ -775,7 +775,7 @@ export default function PrimitiveTabs() {
                     <ActivityIcon kind="find" />
                     <span className="truncate">Strata: open data view in portfolio.strata</span>
                   </span>
-                  {/* the invitation — fades on first touch */}
+                  {/* the invitation - fades on first touch */}
                   <motion.span
                     className="rounded-full px-2.5 py-0.5 font-mono text-mono-sm max-[560px]:hidden"
                     style={{ background: VS_BLUE(22), color: 'var(--color-vscode-text)' }}
@@ -800,7 +800,7 @@ export default function PrimitiveTabs() {
                   <ActivityRail />
 
                   {/* the sidebar is the Strata explorer: five numbered data views,
-                active one lit by ember — plus the app's other surfaces, dimmed */}
+                active one lit by ember - plus the app's other surfaces, dimmed */}
                   <div
                     role="tablist"
                     aria-label="Strata data views"
@@ -932,7 +932,7 @@ export default function PrimitiveTabs() {
               {/* the ruled footer, drafting voice */}
               <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3">
                 <p className="font-mono text-mono-sm text-ink-low">
-                  <span className="text-vscode-status">0{activeIdx + 1}</span> / 05 · {active.id} —{' '}
+                  <span className="text-vscode-status">0{activeIdx + 1}</span> / 05 · {active.id} -{' '}
                   <span className="max-sm:hidden">
                     {active.role.toLowerCase().replace(/\.$/, '')}
                   </span>

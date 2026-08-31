@@ -9,7 +9,7 @@ source: "strata-core@v1.1.0"
 The `strata config` command reads and writes configuration. It covers two
 distinct things: the read-only facts about an open database, and the writable
 user setting that points Strata at a hub. This guide walks through all six
-verbs — `get`, `get-key`, `set`, `unset`, `path`, and `show` — and explains how
+verbs - `get`, `get-key`, `set`, `unset`, `path`, and `show` - and explains how
 the hub URL is resolved. For every configurable key, see the
 [Configuration Reference](/docs/reference/configuration-reference).
 
@@ -31,14 +31,14 @@ strata ./mydb config get
 }
 ```
 
-These are facts about how the database was opened — its default branch, whether
+These are facts about how the database was opened - its default branch, whether
 it is durable, and its storage target. They are read-only; you change them by
 how you open the database, not by writing config.
 
 ## The global hub setting
 
 The remaining verbs manage the user config, whose one key in this release is
-`hub.url` — the hub that [`clone`](/docs/guides/cloning-datasets) fetches from.
+`hub.url` - the hub that [`clone`](/docs/guides/cloning-datasets) fetches from.
 It lives in a global file. `config path` prints where:
 
 ```bash
@@ -115,7 +115,7 @@ STRATA_HUB_URL=https://env.example.com strata config show
 ```
 
 Run from a directory that has a `.strata/config.toml` with its own `[hub]` table,
-and that project file wins over the global file — but still loses to the
+and that project file wins over the global file - but still loses to the
 environment variable. The full precedence, highest first:
 
 | Layer | Source | Scope |
@@ -132,6 +132,6 @@ that single invocation.
 
 ## Next
 
-- [Cloning Datasets](/docs/guides/cloning-datasets) — put the hub URL to work.
-- [Observability](/docs/guides/observability) — inspect a database's health and facts.
-- [Configuration Reference](/docs/reference/configuration-reference) — the full key list.
+- [Cloning Datasets](/docs/guides/cloning-datasets) - put the hub URL to work.
+- [Observability](/docs/guides/observability) - inspect a database's health and facts.
+- [Configuration Reference](/docs/reference/configuration-reference) - the full key list.

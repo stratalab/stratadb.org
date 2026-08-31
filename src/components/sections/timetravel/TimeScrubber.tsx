@@ -1,6 +1,6 @@
 // Section 4 (04 §5 v2, 2026-06-12): time travel as DIRECT MANIPULATION.
 // Ani: "an interactive component that the user can scrub back and forth and
-// see how the value changes — not another parallax scroll." The section may
+// see how the value changes - not another parallax scroll." The section may
 // pin long enough to be noticed, but the playhead remains a Tier-1 user-driven
 // control, alive under reduced motion (it only moves when the user moves).
 //
@@ -49,7 +49,7 @@ export default function TimeScrubber() {
     setInteracted(true);
   };
 
-  // Invite by demonstration: on first view the instrument plays itself once —
+  // Invite by demonstration: on first view the instrument plays itself once -
   // the playhead glides back to the 06-10 dip, holds, returns. Beats at the
   // --dur-5 cap; any interaction cancels it instantly and it never replays.
   // Reduced motion skips the demo; the "← drag →" label still teaches.
@@ -187,7 +187,7 @@ export default function TimeScrubber() {
           <span className="text-terracotta-300 tabular-nums">{asOf}</span>
         </div>
 
-        {/* the answer — fixed height, swap-animated on version change */}
+        {/* the answer - fixed height, swap-animated on version change */}
         <div className="relative mt-4 h-24 md:h-28">
           <AnimatePresence initial={false}>
             <motion.div
@@ -227,7 +227,7 @@ export default function TimeScrubber() {
                 </>
               ) : (
                 <span className="text-ink-low">
-                  ∅ nothing here yet — the first write lands {fmtFull(HISTORY[0].ts)}
+                  ∅ nothing here yet - the first write lands {fmtFull(HISTORY[0].ts)}
                 </span>
               )}
             </motion.div>
@@ -239,14 +239,14 @@ export default function TimeScrubber() {
           ref={trackRef}
           role="slider"
           tabIndex={0}
-          aria-label="Time travel playhead — read portfolio.value as of any moment"
+          aria-label="Time travel playhead - read portfolio.value as of any moment"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(t * 100)}
           aria-valuetext={
             cur
-              ? `${fmt(ts)} — v${cur.version}, ${usd(cur.value)}`
-              : `${fmt(ts)} — before the first write`
+              ? `${fmt(ts)} - v${cur.version}, ${usd(cur.value)}`
+              : `${fmt(ts)} - before the first write`
           }
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -351,7 +351,7 @@ export default function TimeScrubber() {
         {/* the ruled footer, drafting voice */}
         <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3 font-mono text-mono-sm text-ink-low">
           <span>
-            <span className="text-terracotta-400">drag the playhead</span> — every read accepts
+            <span className="text-terracotta-400">drag the playhead</span> - every read accepts
             --as-of
           </span>
           <span className="max-sm:hidden">3 versions · 0 overwrites</span>

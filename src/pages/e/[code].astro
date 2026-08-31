@@ -18,21 +18,21 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 
 const RETRY_MEANING: Record<string, string> = {
-  never: 'Do not retry the same request — fix the request or the referenced state first.',
+  never: 'Do not retry the same request; fix the request or the referenced state first.',
   same_request: 'Safe to retry the same request unchanged (transient condition).',
   after_state_change: 'Retry only after the blocking state changes (see the hint).',
-  unknown: 'Outcome unknown — inspect the database state before retrying.',
+  unknown: 'Outcome unknown; inspect the database state before retrying.',
 };
 
 const COMMIT_MEANING: Record<string, string> = {
   not_started: 'No commit was started; the database is unchanged.',
   definitely_not_committed: 'The commit did not apply; the database is unchanged.',
-  maybe_committed: 'The commit may or may not have applied — verify with a read before retrying.',
+  maybe_committed: 'The commit may or may not have applied; verify with a read before retrying.',
   not_applicable: 'This operation does not commit.',
 };
 ---
 
-<BaseLayout title={`${entry.code} — StrataDB error`} description={entry.message}>
+<BaseLayout title={`${entry.code} | StrataDB error`} description={entry.message}>
   <div class="mx-auto w-full max-w-[46rem] px-6 py-16">
     <p class="mb-4 font-mono text-mono-sm text-ink-low">
       <a href="/e" class="transition-colors duration-200 hover:text-ink-hi">error registry</a>
@@ -51,7 +51,7 @@ const COMMIT_MEANING: Record<string, string> = {
       <div>
         <dt class="font-mono text-mono-sm uppercase text-ink-low">retry</dt>
         <dd class="mt-1 text-small text-ink-mid">
-          <code class="font-mono">{entry.retry_policy}</code> — {
+          <code class="font-mono">{entry.retry_policy}</code> - {
             RETRY_MEANING[entry.retry_policy] ?? ''
           }
         </dd>
@@ -59,7 +59,7 @@ const COMMIT_MEANING: Record<string, string> = {
       <div>
         <dt class="font-mono text-mono-sm uppercase text-ink-low">commit outcome</dt>
         <dd class="mt-1 text-small text-ink-mid">
-          <code class="font-mono">{entry.commit_outcome}</code> — {
+          <code class="font-mono">{entry.commit_outcome}</code> - {
             COMMIT_MEANING[entry.commit_outcome] ?? ''
           }
         </dd>

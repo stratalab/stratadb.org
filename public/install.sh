@@ -1,5 +1,5 @@
 #!/bin/sh
-# Strata installer — https://stratadb.org
+# Strata installer - https://stratadb.org
 # Usage: curl -fsSL https://stratadb.org/install.sh | sh
 #
 # Environment overrides:
@@ -220,7 +220,7 @@ verify_checksum() {
 }
 
 setup_path() {
-    # Already on PATH — nothing to do
+    # Already on PATH - nothing to do
     case ":${PATH}:" in
         *":${INSTALL_DIR}:"*)
             return
@@ -264,7 +264,7 @@ setup_path() {
             UPDATED_CONFIG="$SHELL_CONFIG"
             ;;
         *)
-            # Unknown shell — try .profile as a generic fallback
+            # Unknown shell - try .profile as a generic fallback
             SHELL_CONFIG="${HOME}/.profile"
             if [ -f "$SHELL_CONFIG" ] && grep -qF "$INSTALL_DIR" "$SHELL_CONFIG" 2>/dev/null; then
                 return

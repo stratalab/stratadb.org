@@ -1,6 +1,6 @@
 ---
 // PERMANENT (2026-06-12): the shared-foundation reference for the Strata family.
-// Foundry's token adoption (Doc 02 Appendix B) is checked against this page —
+// Foundry's token adoption (Doc 02 Appendix B) is checked against this page -
 // site and studio must read as one product. Never delete; stays noindex.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionShell from '../components/foundation/SectionShell.astro';
@@ -20,9 +20,9 @@ const sediment = terracotta;
 const strata = ['kv', 'event', 'json', 'vector', 'graph'];
 ---
 
-<BaseLayout title="Specimen — StrataDB design system" noindex>
+<BaseLayout title="Specimen | StrataDB design system" noindex>
   <SectionShell eyebrow="SPECIMEN · PHASE 1">
-    <Heading level={1} size="title">Tokens, type, and chrome — the font-veto page.</Heading>
+    <Heading level={1} size="title">Tokens, type, and chrome: the font-veto page.</Heading>
     <p class="mt-3 max-w-[42.5rem] text-body text-ink-mid">
       Everything below renders from <code class="font-mono text-mono-sm">tokens.css</code> only. General
       Sans carries display and body; Commit Mono carries everything that is code, data, or a measurement.
@@ -78,7 +78,7 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
     <div class="space-y-8">
       <div>
         <p class="mb-3 font-mono text-mono-sm text-ink-low">
-          terracotta — identity, used surgically
+          terracotta: identity, used surgically
         </p>
         <div class="flex overflow-hidden rounded-(--radius-control)">
           {
@@ -94,7 +94,7 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
       </div>
       <div>
         <p class="mb-3 font-mono text-mono-sm text-ink-low">
-          sediment — warm neutrals, never blue-gray
+          sediment: warm neutrals, never blue-gray
         </p>
         <div class="flex overflow-hidden rounded-(--radius-control)">
           {
@@ -191,7 +191,7 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
 
   <SectionShell eyebrow="TERMINAL CHROME">
     <div class="max-w-[42.5rem]">
-      <TerminalFrame title="strata — first write" status="engine: scripted replay">
+      <TerminalFrame title="strata: first write" status="engine: scripted replay">
         <TermLine cmd>kv put hello world</TermLine>
         <TermLine>(version) 1</TermLine>
         <TermLine cmd>kv get hello</TermLine>
@@ -207,7 +207,7 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
   <section class="relative overflow-hidden py-32 max-md:py-20">
     <HorizonGlow />
     <div class="relative mx-auto w-full max-w-[70rem] px-6 text-center">
-      <Eyebrow class="mb-4">The horizon — one of two permitted instances</Eyebrow>
+      <Eyebrow class="mb-4">The horizon, one of two permitted instances</Eyebrow>
       <p class="font-mono text-stat text-ink-hi">pip install stratadb</p>
     </div>
   </section>

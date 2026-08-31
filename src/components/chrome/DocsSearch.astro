@@ -4,7 +4,7 @@
 // `astro preview`); in `astro dev` the modal explains itself instead.
 // Render once per page (DocsLayout). Any element with the class
 // `docs-search-trigger` opens it; so do `/` and Cmd/Ctrl+K.
-// Loaded lazily — no JS cost until the user opens it.
+// Loaded lazily - no JS cost until the user opens it.
 ---
 
 <div
@@ -74,7 +74,7 @@
       loadFailed = true;
       if (resultsEl)
         resultsEl.innerHTML =
-          '<p class="px-3 py-6 text-center text-small text-ink-low">Search index not built — run <code>npm run build && npm run preview</code>.</p>';
+          '<p class="px-3 py-6 text-center text-small text-ink-low">Search index not built - run <code>npm run build && npm run preview</code>.</p>';
     }
     return pagefind;
   }

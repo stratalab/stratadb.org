@@ -1,7 +1,7 @@
-// The act surface, v3 (04 §8, 2026-06-12) — the mem0.ai steal, by Ani's
+// The act surface, v3 (04 §8, 2026-06-12) - the mem0.ai steal, by Ani's
 // call: INTEGRATION MODES first (Library · CLI · Hub · For agents), language
 // pills inside the window chrome, and the code is a
-// COMPLETE numbered quickstart with step comments — a script you paste
+// COMPLETE numbered quickstart with step comments - a script you paste
 // and run, not a fragment. Copy-all in the corner; CLI keeps per-command
 // copy buttons. Selection persists in sessionStorage (05 §3). Every
 // command string is subject to build-time transcript verification.
@@ -14,10 +14,10 @@ type Tok = [cls: 'c' | 'k' | 's' | 'i' | null, text: string];
 type Script = Tok[][];
 
 const PY: Script = [
-  [['c', '# Step 1 — install (run in your terminal, not in Python):']],
+  [['c', '# Step 1 - install (run in your terminal, not in Python):']],
   [['c', '#   pip install stratadb']],
   [],
-  [['c', '# Step 2 — save as quickstart.py and run: python quickstart.py']],
+  [['c', '# Step 2 - save as quickstart.py and run: python quickstart.py']],
   [
     ['k', 'from'],
     [null, ' stratadb '],
@@ -71,10 +71,10 @@ const PY: Script = [
 ];
 
 const JS: Script = [
-  [['c', '// Step 1 — install (run in your terminal):']],
+  [['c', '// Step 1 - install (run in your terminal):']],
   [['c', '//   npm install @stratadb/core']],
   [],
-  [['c', '// Step 2 — save as quickstart.mjs and run: node quickstart.mjs']],
+  [['c', '// Step 2 - save as quickstart.mjs and run: node quickstart.mjs']],
   [
     ['k', 'import'],
     [null, ' { Strata } '],
@@ -196,7 +196,7 @@ const MCP_JSON = [
 ];
 
 const AGENT_INSTRUCTION =
-  'Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/agents.md — report the verification output when done.';
+  'Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/agents.md - report the verification output when done.';
 
 const scriptText = (s: Script) => s.map((line) => line.map(([, t]) => t).join('')).join('\n');
 
@@ -418,7 +418,7 @@ export default function InstallTabs() {
 
   return (
     <div>
-      {/* the integration modes — how you want in, not just which language */}
+      {/* the integration modes - how you want in, not just which language */}
       <div
         role="tablist"
         aria-label="How do you want to install?"
@@ -543,7 +543,7 @@ export default function InstallTabs() {
               </pre>
               <div className="mt-5 space-y-3 border-t border-line pt-4">
                 <p className="text-small text-ink-mid">
-                  Or skip the config — paste one instruction into your agent and it sets everything
+                  Or skip the config - paste one instruction into your agent and it sets everything
                   up itself:
                 </p>
                 <div className="flex flex-wrap items-center gap-3">

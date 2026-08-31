@@ -7,14 +7,14 @@ section: branch
 
 Previews promoting the `source` branch into the `target` branch: it derives the
 branch point from the recorded fork lineage, runs a three-way comparison, and
-reports the conflicts a promotion would hit — entries both branches changed
+reports the conflicts a promotion would hit - entries both branches changed
 differently since the branch point. Preview is read-only: it mutates neither
 branch.
 
-Each conflict reports what the selected `strategy` would do — `strict` refuses
+Each conflict reports what the selected `strategy` would do - `strict` refuses
 (`refused`), `source_wins` overwrites the target with the source value. A preview
 with no conflicts is clean and a promotion under `strict` would apply. Preview
-covers the capabilities a promotion applies — key-value, JSON, and vectors;
+covers the capabilities a promotion applies - key-value, JSON, and vectors;
 events and graphs are diff-only and never appear as promotion conflicts.
 Branches with no shared fork lineage are rejected with
 `invalid_argument.engine.branch_point`.
@@ -31,7 +31,7 @@ Preview promoting a fork into the branch it came from.
 $ strata kv put config base
 $ strata branch fork default experiment
 $ strata kv put config tuned --branch experiment  # change on the fork
-$ strata branch preview experiment default --strategy strict  # a clean preview — no conflicting changes on default
+$ strata branch preview experiment default --strategy strict  # a clean preview - no conflicting changes on default
 ```
 
 ### Wire

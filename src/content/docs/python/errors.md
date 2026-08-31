@@ -1,7 +1,7 @@
 ---
 title: "Errors"
 section: "python"
-description: "Typed exceptions carrying stable codes — recover by code, never by message. Misses return None rather than raising."
+description: "Typed exceptions carrying stable codes - recover by code, never by message. Misses return None rather than raising."
 source: "strata-python@v1.1.0"
 ---
 
@@ -62,7 +62,7 @@ except errors.StrataError as e:
 
 ## Misses are not errors
 
-A read that finds nothing returns `None` and does **not** raise — a missing key,
+A read that finds nothing returns `None` and does **not** raise - a missing key,
 document, or path is a normal result, not a failure. The one historical exception
 is a time-travel read outside retained history, which raises
 `HistoryUnavailableError` (distinct from `NotFoundError`).
@@ -75,7 +75,7 @@ db.kv.get("k", as_of=0)         # raises HistoryUnavailableError if 0 is too old
 ## What each error tells you
 
 Beyond `code`, every `StrataError` carries a `message`, a `hint` (the safe next
-step), a `ref` (the `/e/<code>` docs URL), and — where relevant — retry and
+step), a `ref` (the `/e/<code>` docs URL), and - where relevant - retry and
 commit-outcome information. For the full model, see the
 [errors concept](/docs/concepts/errors) and the
 [error reference](/docs/reference/error-reference).

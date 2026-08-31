@@ -1,5 +1,5 @@
 /*
- * Strata design tokens — THE 02 §13 contract. The only file allowed to contain
+ * Strata design tokens - THE 02 §13 contract. The only file allowed to contain
  * raw color/size/duration values. CI fails the build on literals elsewhere.
  *
  * Naming note: Doc 02 ink tokens (--text-hi/mid/low) collide with Tailwind v4's
@@ -7,13 +7,13 @@
  * (class form: text-ink-hi). All other names match the doc verbatim.
  */
 
-/* `static` — the contract emits ALL tokens regardless of utility usage:
+/* `static` - the contract emits ALL tokens regardless of utility usage:
    inline styles, JS islands, and future consumers read these vars directly. */
 @theme static {
   /* ---- canvas: THE NEUTRAL STAGE (Neon-macro, 2026-06-12) ----
      Decided in pixels after the full tour (clay → ember → sapphire →
-     midnight → daylight → aurora): a strictly NEUTRAL macro — true black,
-     pure white, crisp grays — so ember is the only temperature on the
+     midnight → daylight → aurora): a strictly NEUTRAL macro - true black,
+     pure white, crisp grays - so ember is the only temperature on the
      page. Tinted canvases made the accent compete with ambient tint;
      the neutral stage makes it electric. (Honest reversal of the same-day
      "no greyish colors" rule: crisp neutral is a stage, not mud.) */
@@ -33,7 +33,7 @@
   --color-line-hover: rgba(255, 255, 255, 0.16);
 
   /* ---- terracotta ramp (02 §4.1; EMBER recalibration 2026-06-12) ----
-     Clay → ember: same family, luminous instead of muted — the palette
+     Clay → ember: same family, luminous instead of muted - the palette
      emits light rather than absorbing it (Ani: the clay read "too serious").
      Ramp rebalanced around the new 500. */
   --color-terracotta-50: #fff1ec;
@@ -62,7 +62,7 @@
   --color-sediment-950: #0a0908;
 
   /* ---- the five primitives, on-dark anchors (02 §4.3; ember-luminous) ----
-     branch is NOT a primitive — the branch model wears terracotta (brand). */
+     branch is NOT a primitive - the branch model wears terracotta (brand). */
   --color-strata-kv: #7caaff;
   --color-strata-event: #4fe0a6;
   --color-strata-json: #ffc66e;
@@ -161,21 +161,21 @@
   --dur-4: 480ms;
   --dur-5: 800ms;
 
-  /* the ONE glow (02 §10) — used only by HorizonGlow; ember presence */
+  /* the ONE glow (02 §10) - used only by HorizonGlow; ember presence */
   --horizon-glow: rgba(255, 122, 82, 0.24);
 
   /* hero backdrop lights (the living background, 2026-06-12): three slow-
-     breathing fields on the neutral stage — ember dominant, one cool
+     breathing fields on the neutral stage - ember dominant, one cool
      counterpoint. Consumed only by the Hero backdrop. */
   --backdrop-ember: rgba(255, 122, 82, 0.15);
   --backdrop-ember-deep: rgba(232, 95, 58, 0.11);
   --backdrop-cool: rgba(124, 170, 255, 0.09);
 
-  /* hero "river" cool stroke — the blue counter-current to the ember river */
+  /* hero "river" cool stroke - the blue counter-current to the ember river */
   --color-river-cool: #7caaff;
 
   /* branch-story card surfaces (2026-06-12): the only tinted surfaces on the
-     neutral stage — main is cool slate (stable), risky is ember-warm
+     neutral stage - main is cool slate (stable), risky is ember-warm
      (experimental); the merge dissolves warm into cool. */
   --color-branch-main-surface: #101a36;
   --color-branch-main-well: #0b1226;
@@ -186,7 +186,7 @@
   --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset, 0 24px 64px -32px rgba(0, 0, 0, 0.7);
 }
 
-/* ===== /internals "pitch" surface — warm-light spec-sheet theme. The raw hex
+/* ===== /internals "pitch" surface - warm-light spec-sheet theme. The raw hex
    lives here in tokens.css (literal-drift rule); applied via .pitch-light. ===== */
 .pitch-light {
   /* warm-light spec-sheet ground */
@@ -206,7 +206,7 @@
   --color-warn: #b27a12;
   --color-err: #d6453b;
 
-  /* the five primitive hues — one muted, harmonized scheme (uniform tone) */
+  /* the five primitive hues - one muted, harmonized scheme (uniform tone) */
   --color-strata-kv: #4c6ea4;
   --color-strata-json: #ae7f31;
   --color-strata-event: #2f8970;

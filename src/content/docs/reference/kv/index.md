@@ -5,7 +5,7 @@ source: strata-core@1.1.0
 section: kv
 ---
 
-# `kv` — command reference
+# `kv` - command reference
 
 | Command | Summary |
 |---|---|

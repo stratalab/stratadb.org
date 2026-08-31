@@ -5,7 +5,7 @@ description: "Store embeddings in a vector collection and source text in KV, the
 source: "strata-core@v1.1.0"
 ---
 
-Goal: build the retrieval half of a RAG pipeline — index document embeddings
+Goal: build the retrieval half of a RAG pipeline - index document embeddings
 alongside their source text, then find the nearest documents to a query and pull
 back the text to feed a model.
 
@@ -81,7 +81,7 @@ src:note-2	The event log is an append-only journal.
 ## Generating real embeddings
 
 In production you replace the hand-written vectors with model output. The
-`strata inference embed <model> <text>` command is the slot for this — its result
+`strata inference embed <model> <text>` command is the slot for this - its result
 becomes the vector you pass to `vector upsert` (indexing) and `vector query`
 (search). Embedding runs where the model does: on a build compiled with the local
 inference feature, or against a configured cloud provider. A build without local
@@ -93,7 +93,7 @@ inference.unsupported_operation: not supported: local embedding requires the loc
   ref: https://stratadb.org/e/inference.unsupported_operation
 ```
 
-Recover by code and class, never by message text — the bracketed reference id in
+Recover by code and class, never by message text - the bracketed reference id in
 the full output changes every run. See [/e/inference.unsupported_operation](/e/inference.unsupported_operation).
 
 ## Why this works
