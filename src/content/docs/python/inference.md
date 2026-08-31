@@ -2,7 +2,7 @@
 title: "Inference (db.ai)"
 section: "python"
 description: "Chat, embeddings, and reranking through cloud providers or local models — an OpenAI-shaped surface on the database handle."
-source: "strata-python@v1.0.0"
+source: "strata-python@v1.1.0"
 ---
 
 `db.ai` runs models: chat generation, embeddings, and reranking, over cloud

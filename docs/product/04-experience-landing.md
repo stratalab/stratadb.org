@@ -1,12 +1,12 @@
 # Landing Experience Spec & Copy Deck — stratadb.org
 
-| | |
-|---|---|
-| Status | **Signed off** (2026-06-11) |
-| Owner | Ani (product) · Claude (drafting) |
-| Last updated | 2026-06-11 (restructured to the 7-section shape) |
-| Upstream | 00 (claims, R1/R2/R8), 01 (claim ladder §5), 02 (tokens), 03 (motion system) |
-| Downstream | 05-components, 06-engineering, build Phases 1–3 |
+|              |                                                                              |
+| ------------ | ---------------------------------------------------------------------------- |
+| Status       | **Signed off** (2026-06-11)                                                  |
+| Owner        | Ani (product) · Claude (drafting)                                            |
+| Last updated | 2026-06-11 (restructured to the 7-section shape)                             |
+| Upstream     | 00 (claims, R1/R2/R8), 01 (claim ladder §5), 02 (tokens), 03 (motion system) |
+| Downstream   | 05-components, 06-engineering, build Phases 1–3                              |
 
 How to read: each section gets **Layout · Copy · Motion · States · Responsive**. Copy in
 quotes is canonical — the build uses these exact strings. Set-pieces carry storyboards
@@ -31,7 +31,7 @@ and §7 only. No scroll furniture.
 2 Branching               believe    animated terminal, live-capable
 3 Multi-primitive         believe    strata column (interactive)
 4 Time travel             believe    scroll-scrub — THE ONLY scrub piece
-5 Native inference        believe    typed live demo
+5 Native inference        believe    native pipeline demo
 6 Resources               deepen     three quiet cards
 7 Install & start         act        five surfaces + the command close
 ```
@@ -44,18 +44,20 @@ full-viewport overlay of the same instance (state carries over; not a route —
 demos always land their beat, and live views can't be art-directed against arbitrary
 visitor data. One seed dataset feeds the hero engine and all choreographed demos, so the
 world is coherent across the page. Engine states, fetch policy, fullscreen per 03 §4.
-*(Recorded future option, not in scope: cross-section liveness via the unchanged
+_(Recorded future option, not in scope: cross-section liveness via the unchanged
 EngineProvider contract — e.g., the time-travel strip showing the visitor's own hero
-writes.)*
+writes.)_
 
 ## 1. Global elements
 
 ### Nav (launch config, per 01 §4)
+
 Sticky, 64px, `--bg-void`/85 + blur, hairline. Layer glyph + "StrataDB" · `Docs ·
 Architecture · Changelog` · GitHub (star count) · **"Get Started"** →
 `/docs/getting-started`. Mobile: sheet menu.
 
 ### Footer (per 01 §4)
+
 **Product** (Strata Foundry → repo, Changelog) · **Documentation** (Getting Started,
 Guides, Cookbook, Reference) · **Internals** (Architecture, strata-core, strata-foundry,
 stratahub) · **For agents** (`llms.txt`, For AI agents, MCP reference). Meta row:
@@ -63,9 +65,9 @@ stratahub) · **For agents** (`llms.txt`, For AI agents, MCP reference). Meta ro
 
 ### Section rules — the drafting system (v2, 2026-06-12)
 
-*(Ani: "still doesn't look world class — look at supermemory.ai. A bit busy, but the
+_(Ani: "still doesn't look world class — look at supermemory.ai. A bit busy, but the
 polish is genuinely impressive." The transferable thing under the busy-ness is its
-RULING SYSTEM — the page reads as one engineered document. Ours, quieter:)*
+RULING SYSTEM — the page reads as one engineered document. Ours, quieter:)_
 
 Every section after the hero opens with a **SectionRule** band: a full-bleed hairline,
 and inside the 70rem column `+ ⟩ EYEBROW` (mono, registration mark, ember chevron) on
@@ -86,17 +88,18 @@ mono footer (`03 / 05 · json — documents with path-level writes`).
 terminal 1.0×, stat strip 1.04×.
 
 **Copy** (v3, 2026-06-12 — the hero is the acquisition surface).
+
 - Badge: `Research preview · v{version}` → `/changelog`
 - H1 (`display-xl`): **"Strata is the embedded database with git-like powers"** —
   Ani's wording verbatim (2026-06-12), superseding "An embedded database." The
   understatement experiment served its month; with the river artwork behind it, the
-  fuller claim carries. *(Noted, not normalized: uses the family name "Strata" and
-  "the" — both deliberate in Ani's phrasing; 02 §2 naming table records the exception.)*
+  fuller claim carries. _(Noted, not normalized: uses the family name "Strata" and
+  "the" — both deliberate in Ani's phrasing; 02 §2 naming table records the exception.)_
 - **The acquisition pair** (v2 of the control, 2026-06-12 — the joined group read as one
   copy-widget and "Foundry" assumed name-knowledge): two visibly different species —
   a filled ember **button, "Get the desktop app"** (app-window icon; R1 interim →
   strata-foundry repo; label flips to "Download…" when artifacts exist; the Foundry
-  *name* is taught later, in the install tab) beside the quiet mono **curl chip**.
+  _name_ is taught later, in the install tab) beside the quiet mono **curl chip**.
   Beneath them, **the agent door as an action** (v2, 2026-06-12; pattern: mem0.ai's
   "Set up for agents"): a pill button — "Set up with your agent" — that copies a
   ready-to-paste instruction pointing at the for-agents recipe's `.md` mirror, with
@@ -113,15 +116,15 @@ terminal 1.0×, stat strip 1.04×.
 loop + 4s hold. First frame (SSR'd): completed `strata:main › kv put greeting "hello"`
 → `(version) 1`.
 
-| Beat | Executor events | Choreography |
-|---|---|---|
-| 1 | `cmd: branch create experiment` → `OK` | Tier-1 typing; 300ms beat |
-| 2 | `split` | Fork on `spring-settle`: main sits half-width centered pre-split and **translates left** while the fork panel slides in — transform-only by construction *(amended 2026-06-12: the original full-width→half "slide apart" was a layout animation and leaked CLS; end state identical)*. 1px branch line arcs; right title `experiment`, prompt `strata:experiment ›` |
-| 3 | right: `cmd: kv put config.theme "midnight"` → `(version) 1` | Typing in right panel |
-| 4 | left: `cmd: kv get config.theme` → `(nil)` | **Isolation beat** — `(nil)` in `--text-low` |
-| 5 | left: `cmd: branch diff experiment` → `+1 key · config.theme` | **Verb beat** — the full model, not fork-and-pray |
-| 6 | left: `cmd: branch merge experiment` → `merged` + `merge` | Panels rejoin on `spring-settle`; `+1 key` chip flashes ok-green |
-| 7 | left: `cmd: kv get config.theme` → `"midnight"` | Payoff; hold 4s; fade-restart |
+| Beat | Executor events                                               | Choreography                                                                                                                                                                                                                                                                                                                                                         |
+| ---- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | `cmd: branch create experiment` → `OK`                        | Tier-1 typing; 300ms beat                                                                                                                                                                                                                                                                                                                                            |
+| 2    | `split`                                                       | Fork on `spring-settle`: main sits half-width centered pre-split and **translates left** while the fork panel slides in — transform-only by construction _(amended 2026-06-12: the original full-width→half "slide apart" was a layout animation and leaked CLS; end state identical)_. 1px branch line arcs; right title `experiment`, prompt `strata:experiment ›` |
+| 3    | right: `cmd: kv put config.theme "midnight"` → `(version) 1`  | Typing in right panel                                                                                                                                                                                                                                                                                                                                                |
+| 4    | left: `cmd: kv get config.theme` → `(nil)`                    | **Isolation beat** — `(nil)` in `--text-low`                                                                                                                                                                                                                                                                                                                         |
+| 5    | left: `cmd: branch diff experiment` → `+1 key · config.theme` | **Verb beat** — the full model, not fork-and-pray                                                                                                                                                                                                                                                                                                                    |
+| 6    | left: `cmd: branch merge experiment` → `merged` + `merge`     | Panels rejoin on `spring-settle`; `+1 key` chip flashes ok-green                                                                                                                                                                                                                                                                                                     |
+| 7    | left: `cmd: kv get config.theme` → `"midnight"`               | Payoff; hold 4s; fade-restart                                                                                                                                                                                                                                                                                                                                        |
 
 Conformance: trigger ≥50% in view · tier 1+executor · transform/opacity ·
 reduced-motion = completed two-panel transcript, static branch line · mobile = vertical
@@ -144,31 +147,53 @@ holds toward main's, and a dim ember strand bends back down to meet it — fork 
 merge as ambient artwork. Slower than the hero (9–14s), desktop pin only (Doc 03 §5
 cap amended to 3 infinite animations). On mobile/reduced the head renders in flow.
 
-Eyebrow `BRANCH`; H2 **"Try anything. Keep what works."**; intro: "A branch is a
-complete database — fork it, change it, diff it, merge it back. Forking copies
-nothing, so it's instant at any size." *(2026-06-12, Ani: "People don't understand
-O(1)" — the human-facing copy states the fact in plain terms; O(1) survives only on
-agent surfaces (llms.txt, for-agents) and in the architecture deep-dives, where the
-reader speaks it natively. Same fix in the scrub's Fork caption: "The whole
-database, forked instantly. Nothing copied." — "database", not "portfolio": the verb
-acts on the database term, the portfolio is just the data inside it.)*
+**v6 (2026-08-30, Ani): section breaks dock where scroll is owned.** The rule
+band is not a loose divider. Branches and Primitives are scroll-owned sections:
+their rule band docks below the sticky nav while the pinned frame advances.
+Static sections use the same rule band at entry, but it scrolls away with the
+section so an old label never sits over the next section's content. Hash links
+target the section boundary first; any richer state change, such as selecting
+`#primitive-json`, happens after the visitor lands at the section.
+
+**v7 (2026-08-30, Ani): section entry owns the frame.** Branch pins below the
+nav/rule stack instead of the viewport top. Primitives pairs its title rail and
+artifact in one centered pinned frame. Native Inference uses a centered
+non-sticky chapter frame, so old section labels do not blend into it. Primitive
+links and tabs select the matching view in place; they never call
+`window.scrollTo` after the browser lands at the hash target.
+
+**v8 (2026-08-30, Ani): Time Travel needs a stop.** Time Travel is scroll-owned
+again: its rule band docks under the nav and its head/instrument sit in one
+centered pinned frame. The instrument is still direct manipulation; the page
+stop exists to give the self-playing playhead enough time to be noticed during
+normal scrolling.
+
+Eyebrow `BRANCHES`; H2 **"Branch the whole database."**; intro: "Test agent
+writes, migrations, and risky data changes away from default. Compare the branch,
+preview the merge, and promote only what should land." Use chips: `agent runs`,
+`migrations`, `what-if changes`, `review before merge`. _(2026-08-30, Ani:
+"Fork the portfolio" made the sample data sound like the feature. The section now
+names the product behavior first; the portfolio remains only the concrete demo
+object. 2026-06-12 plain-language rule still holds: O(1) survives only on agent
+surfaces and architecture deep-dives.)_
 
 **Set-piece: the branch story, v4 (2026-06-12) — finance domain, session panel, stage
 lights.** The document is `json · portfolio` from the seed world —
 `{ strategy: "balanced", stocks: 60, bonds: 30, cash: 10, rebalance, currency }` —
-because *nobody experiments on live money, which is exactly what branching is for*. The
+because _nobody experiments on live money, which is exactly what branching is for_. The
 risky branch tries the aggressive allocation: four writes (strategy, stocks, bonds,
 cash). Full pin, 340vh (≈2.4 vh ownership, cap 2.5), 4/8 grid:
 
-- **Left — the act header + session terminal**: verb at title scale, finance-flavored
-  caption ("Every change, exactly — before real money moves."), progress bars; beneath,
+- **Left — the act header + session terminal**: verb at title scale, plain feature/use
+  captions, progress bars; beneath,
   a `strata — session` terminal where the commands ACCUMULATE like a real CLI
   transcript — the current act's lines flash in bright (scroll-driven, first 6% of each
   band), history dims above. By the merge, the whole session is on screen.
 - **Right — the color-coded worlds**: main = cool slate surfaces (stable), risky =
   ember-warm (experimental); spread ±40%, geometry verified non-overlapping with the
   session panel. Acts as v3 (fork-peel → four cascading ValueSwaps → unified diff card
-  `4 keys` → convergence, warm dissolving into cool, `merged` chip).
+  `4 changes · clean` with `preview: 0 conflicts` → convergence, warm dissolving into
+  cool, `merged` chip).
 - **Stage lights (the section's pop, hero-equivalent)**: two large radial fields behind
   the cards — cool constant behind main's side; **ember scroll-driven**: blooms as the
   branch spreads (0.12→0.62 opacity), dies as it merges. Scroll-driven, not infinite —
@@ -176,8 +201,8 @@ cash). Full pin, 340vh (≈2.4 vh ownership, cap 2.5), 4/8 grid:
 
 Conformance: tier-2 scrub, spring-scrub, band 0 clamped · transform/opacity only ·
 reduced motion = static acts + steppers (session panel included) · mobile = swipeable
-acts with session + key artifact · all text real DOM · no scroll hijacking. *(History:
-v2 line-diagram → v3 settings-doc cards → v4; each supersession same-day in the log.)*
+acts with session + key artifact · all text real DOM · no scroll hijacking. _(History:
+v2 line-diagram → v3 settings-doc cards → v4; each supersession same-day in the log.)_
 
 ## 4. Section 3 — Multi-primitive: The Strata Column
 
@@ -190,13 +215,13 @@ so the motif survives: five layers, each with its hue on the left edge, the acti
 layer lit (`bg-raised`, ink-hi). The content area is a terminal-chrome demo card —
 each primitive plays a short beat sequence from the seed world on activation:
 
-| Tab | Demo (all seed-true) |
-|---|---|
-| kv | `kv put config.theme "midnight"` → v3; `kv history` → 3 versions stagger in, v3 lit |
-| event | `event append deploys {deploy.fail…}` → #3; `event list` → stream replays, fail in err |
-| json | `json get profile` → doc; `json set $.user.role "admin"` → path flash, value swap |
-| vector | `vector search docs "why did the deploy fail?" -k 2` → d1/d2 rise with score bars |
-| graph | nodes pop, edges draw, `graph bfs alice` → traversal lights the reachable set |
+| Tab    | Demo (all seed-true)                                                                   |
+| ------ | -------------------------------------------------------------------------------------- |
+| kv     | `kv put config.theme "midnight"` → v3; `kv history` → 3 versions stagger in, v3 lit    |
+| event  | `event append deploys {deploy.fail…}` → #3; `event list` → stream replays, fail in err |
+| json   | `json get profile` → doc; `json set $.user.role "admin"` → path flash, value swap      |
+| vector | `vector search docs "why did the deploy fail?" -k 2` → d1/d2 rise with score bars      |
+| graph  | nodes pop, edges draw, `graph bfs alice` → traversal lights the reachable set          |
 
 Each demo ends on a deadpan caption (mono-sm, ink-low): "every write keeps its
 past…", "nothing is overwritten…", "one path written…", "search was ready before
@@ -204,10 +229,10 @@ you asked", "not a join table in disguise". Beats play once per tab activation
 (manual tabs, no auto-rotate — no new infinite animation); SSR = completed state;
 reduced motion = final frames, instant tab swap; mobile = horizontal scrollable
 rail. Supersedes the v1 hover-rows + accordion (and 05's CSS-only rule for this
-section — it is now an island). Guides linked per tab below the demo. *(Same-day
+section — it is now an island). Guides linked per tab below the demo. _(Same-day
 amendment, Ani: "too much whitespace around the content" — the head stays in the
 70rem prose column; the rail + demo break out to an 88rem stage, demo type up to
-17px/36 with p-8, rail tabs roomier.)*
+17px/36 with p-8, rail tabs roomier.)_
 
 **v3 (2026-06-12, Ani: "good but not yet world class — animations, color scheme,
 lighting, background can be 10x better"): the lit stage.** The active primitive's
@@ -261,39 +286,49 @@ of Foundry's redesign in the shared design language (02 §B):
 - The 88rem stage, lighting, ruled mono footer (0n / 05) and guide links survive
   unchanged.
 
-**v6 (2026-06-12, Ani: "make it so the scroll doesn't just blow past it… visitors
-need a way to know the component is interactive"): the pin + the invitation.**
-The window pins for 260vh (scrub #2 of 2 — the slot the time-travel conversion
-freed) and continued scrolling walks the five views, one band each — the tour
-itself demonstrates that the sidebar is live. Clicking a view never fights the
-pin: it JUMPS the scroll to that view's band, so pointer and scroll always agree
-(keyboard arrows do the same). An ember **"interactive — click around" pill** in
-the titlebar pulses twice on arrival and fades permanently on first touch
-(opacity+visibility — the a11y rule). Desktop only; reduced motion and mobile
-keep the unpinned manual window.
+**v7 (2026-08-30, Ani: "the scroll blows past the title and stops at the
+animation"): the section head rides the primitive frame.** The window still pins
+on desktop and continued scrolling walks the five views, one band each, but the
+section head now lives in the same pinned viewport as a left rail. Clicking a view
+or arriving from `#primitive-json` changes the active tab in place; it does not
+drive page scroll. An ember **"interactive — click around" pill** in the titlebar
+pulses twice on arrival and fades permanently on first touch (opacity+visibility —
+the a11y rule). Desktop only; reduced motion and mobile keep the unpinned manual
+window.
+
+**v8 (2026-08-30, Ani: "The rest lives beside it doesn't make sense" + VS Code
+extension direction): sharpen the primitive promise and make the artifact
+editor-native.** The primitive head now states the actual model: multi-modal data
+in one embedded file. Section 2 owns branching; Section 3 should not re-sell it.
+The artifact keeps the same interaction contract, but its chrome shifts toward
+the real VS Code mental model and palette: activity bar, Explorer panel,
+command/search bar, file tab, dark editor surface, and blue Strata status bar.
+The titlebar may say `StrataDB for VS Code` once the extension is available.
 
 **v1 layout (superseded).** Full-width cross-section: five layers — `kv` (surface)
 down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thickens
-+8px, surfaces the API line in `mono-sm`. *(Branch is not a layer — branching is the
++8px, surfaces the API line in `mono-sm`. _(Branch is not a layer — branching is the
 model the layers live inside; it owns section 2 and wears terracotta as brand, not
-as a primitive hue.)*
+as a primitive hue.)_
 
-**Copy.** Eyebrow `PRIMITIVES`; H2 **"Every kind of data. One file."** *(alternate held:
-"Five primitives. One file.")*; intro: "Purpose-built stores that share one engine, one
-transaction model, and one branch tree."
+**Copy.** Eyebrow `PRIMITIVES`; H2 **"Store every kind of app data in one
+embedded database."**; intro: "Use keys for settings, JSON for records, events
+for logs, vectors for embeddings, and graphs for relationships. They live
+together in the same local file, so your app does not need a separate store for
+each shape."
 
-| Layer | Role line | API line |
-|---|---|---|
-| kv | "Versioned key-value. History included." | `kv put user:1 {…} · kv history user:1` |
-| event | "Append-only streams. Replay anything." | `event append actions {…} · event list actions` |
-| json | "Documents with path-level writes." | `json set profile $.user.role "admin"` |
-| vector | "Embeddings with HNSW search." | `vector search docs <query> -k 5` |
-| graph | "Nodes, edges, typed links. Traverse anything." | `graph add-edge alice knows bob · graph bfs alice` |
+| Layer  | Role line                                       | API line                                           |
+| ------ | ----------------------------------------------- | -------------------------------------------------- |
+| kv     | "Versioned key-value. History included."        | `kv put user:1 {…} · kv history user:1`            |
+| event  | "Append-only streams. Replay anything."         | `event append actions {…} · event list actions`    |
+| json   | "Documents with path-level writes."             | `json set profile $.user.role "admin"`             |
+| vector | "Embeddings with HNSW search."                  | `vector search docs <query> -k 5`                  |
+| graph  | "Nodes, edges, typed links. Traverse anything." | `graph add-edge alice knows bob · graph bfs alice` |
 
 Motion: layers reveal bottom-up (geology accretes), 60ms stagger ≤800ms · entry drift
 ±12px within the seam budget (03 §3.1) · hover thicken `--dur-2` · reduced-motion: no
 drift, thicken→border-bright · mobile: tap-to-expand accordion · keyboard traversable.
-*(No live counts — scoped 2026-06-11; the column is CSS-only, see 05.)*
+_(No live counts — scoped 2026-06-11; the column is CSS-only, see 05.)_
 
 ## 5. Section 4 — Time travel · the instrument (v2, 2026-06-12)
 
@@ -304,13 +339,9 @@ manipulation**: the visitor owns a playhead.
 
 **The artifact — TimeScrubber.** A terminal card (primitives material: ember border,
 bloom, dot-grid body, ruled mono footer) running the live read
-`kv get portfolio.value --as-of "<timestamp>"`. *(Domain v2.1, same day — Ani: "dark,
-dusk, midnight doesn't pop." The FINANCE THREAD continues from the branch story:
-`portfolio.value` is $98,400 on 06-09, DIPS to $91,750 on 06-10, then the aggressive
-strategy merged in section 2 pays off — $111,080 on 06-11. Scrubbing tells that story
-in dollars; `config.theme` remains the ops thread for hero/inference.)* A draggable
-ember playhead rides a ruled timeline spanning the seed world's three days
-(2026-06-09 → now); the command's timestamp and the answer update as you drag. The
+`kv get portfolio.value --as-of <version>`. A draggable ember playhead rides a
+ruled timeline spanning the seed world's three days (2026-06-09 → now); the
+command's version and the answer update as you drag. The
 answer row: the dollar value at stat scale (tabular nums), version chip, signed delta
 vs the previous write (▲ ok-green / ▼ err-red — functional colors as data), written-at.
 **Scrub before the first write and the key honestly does not exist yet** ("∅ nothing
@@ -318,9 +349,10 @@ here yet"). Write markers light ember as the playhead passes them; the elapsed s
 tints. Footer: "drag the playhead — every read accepts --as-of" · "3 versions ·
 0 overwrites".
 
-**Copy.** H2 **"Go back to any moment."** (eyebrow lives in the section rule); intro:
-"Every write is a version. Nothing is overwritten — drag the playhead and read the
-past."
+**Copy.** H2 **"Read any past version of your data."** (eyebrow lives in the
+section rule); intro: "Every write records a version. Use `--as-of` to see what
+the database returned before a later change, without restoring a backup or
+copying data aside."
 
 Interaction: pointer drag + click-to-jump (pointer capture, touch-none) · keyboard =
 real slider (role=slider, aria-valuetext speaks the moment + version; arrows snap
@@ -337,48 +369,43 @@ playhead** (clamped off the card edges) until the first real interaction, then f
 Under reduced motion the demo is skipped; the pill is not — the label still teaches. Head in the prose column,
 instrument on the 80rem stage with one quiet ember field.
 
-*(v1 — the 1.5vh sticky version strip — retired 2026-06-12; its "choreographed
+_(v1 — the 1.5vh sticky version strip — retired 2026-06-12; its "choreographed
 permanently" scoping is superseded by this direct-manipulation form. The live variant
 — the instrument reading the visitor's own hero writes — remains the R8 future
-option.)*
+option.)_
 
 ## 6. Section 5 — Native inference
 
-**v2 (2026-06-12, Ani): the UNIFIED INFERENCE LAYER.** "This section is a bit unique
-because databases usually don't have this. It is a unified inference layer that lets
-you run inference on any model from HF as well as OpenAI, Anthropic, and Google. So
-you get a built-in primitive that you can quickly query and get embeddings, generate
-tokens, etc. Super useful if you're building an app that needs LLMs but will be
-deployed in a bunch of places." The story upgrades from "ask your data" to **one
-inference primitive, any model, travels with the file** — the portability pitch is
-the headline value.
+**v3 (2026-08-30, Ani): native inference is database work, not a command sampler.**
+The old transcript proved breadth but did not show why the feature changes the product.
+The new section shows the workflow a developer actually wants: inspect a model, gather
+records that already live in the embedded file, embed the question, rank useful context,
+and generate a grounded answer without adding a separate AI service layer. Inference is
+a compute layer over data, not a stored primitive.
 
 **Copy.** H2 **"Inference is built in."** (eyebrow `NATIVE INFERENCE` lives in the
-section rule). Intro: "A unified inference layer — embeddings, generation, and search
-through one primitive, with models from Hugging Face or hosted ones from OpenAI,
-Anthropic, and Google. Wire it once; it runs wherever the file does." Provider chips
-beneath (mono pills): Hugging Face · OpenAI · Anthropic · Google. *(v1 H2 "Just ask."
-retired with the reframe; the plain-language ask now lives inside the demo's generate
-beat. Same-day edit, Ani: "Don't say databases don't do this" — the comparative
-opener cut; the H2 already states the fact, the copy doesn't editorialize about other
-databases.)*
+section rule). Intro: "Run model work where the data already lives. Strata can embed
+text from records, rank context, generate answers, tokenize text, and inspect model
+capability through one layer that works with local models or hosted providers."
+Capability chips beneath (mono pills): embed · rank · generate · tokenize · model
+checks.
 
-**Layout.** The escalation pattern: head in the prose column, demo card (`infer`,
-shared TermCard material) on the 80rem stage with one quiet ember field.
+**Layout.** Head in the prose column; artifact on the 80rem stage with one quiet ember
+field. Native Inference remains a static centered chapter, not a scroll-owned stop.
 
-**The demo — three beats, all one primitive (typed per 03 §2, plays once ≥35%):**
-1. `infer embed "why did the deploy fail?"` → `[ 0.0182, −0.0441, 0.0976, … ] ·
-   384 dims · bge-small-en (local)` — a Hugging Face model, locally.
-2. `infer generate "What changed before the deploy failed?" --model anthropic/claude`
-   → the answer STREAMS in word chunks (token rhythm; height reserved, CLS-zero):
-   "config.theme changed to 'dusk' at 09:30:02 — ninety seconds before deploy v2.3
-   failed its healthcheck." — seed-true, data-aware generation.
-3. `infer use openai/gpt-4o` → `OK — same call, new model` — the unified-layer
-   punchline; closing caption "wire it once — inference runs wherever the file does".
-Ruled mono footer under the card: "one layer · embed, generate, search" ·
-"hugging face · openai · anthropic · google". Reduced motion = completed transcript;
-SSR = completed state; the generate answer remains authored against the seed dataset
-(truth rule via the transcript verifier at cutover).
+**The demo — five beats, one native inference layer (plays once ≥35%):**
+
+1. Capability check: `inference capability openai:gpt-4o-mini` lights model support
+   without pretending a provider request was sent.
+2. Context gather: KV `portfolio.value`, JSON allocation, merge event, and vector note
+   appear as records inside the same database file.
+3. Embed: `inference embed miniLM "why did portfolio.value move?"` sends the question
+   through a local model and lights the vector path.
+4. Rank: `inference rank jina-reranker-v1-tiny ...` reorders database context by score.
+5. Generate: `inference generate openai:gpt-4o-mini ...` streams the seed-true answer:
+   "The portfolio value moved from 98400 to 111080 after the no-conflict merge..."
+   Provider rail shows local GGUF, OpenAI, Anthropic, and Google as routes through the
+   same layer. Reduced motion and SSR render the completed workbench.
 
 ## 7. Section 6 — Resources
 
@@ -390,11 +417,11 @@ junction, not a show — but structured like the rest of the document. **Render 
 what exists** (truth rule). H2 (small, `title` scale): **"Go deeper."** (eyebrow in
 the section rule).
 
-| Row | Copy | Meta | → |
-|---|---|---|---|
-| **01 Documentation** | "Concepts, guides, and the full reference." | concepts · guides · reference | `/docs` |
-| **02 Examples & quickstarts** | "First database in thirty seconds; real patterns after that." | quickstarts · cookbook | `/docs/getting-started` |
-| **03 Whitepapers** | "The internals, written down: storage engine, concurrency model, durability and recovery." | storage · concurrency · recovery | `/architecture` |
+| Row                           | Copy                                                                                       | Meta                             | →                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------- | ----------------------- |
+| **01 Documentation**          | "Concepts, guides, and the full reference."                                                | concepts · guides · reference    | `/docs`                 |
+| **02 Examples & quickstarts** | "First database in thirty seconds; real patterns after that."                              | quickstarts · cookbook           | `/docs/getting-started` |
+| **03 Whitepapers**            | "The internals, written down: storage engine, concurrency model, durability and recovery." | storage · concurrency · recovery | `/architecture`         |
 
 Standard reveal. (Decided 2026-06-11: **the architecture deep-dives ARE the whitepaper
 collection** — long-form, technical, argued; the label is honest today. Future standalone
@@ -438,18 +465,18 @@ re-measurement cutover gate; `benchmarks.json` + StatStrip remain for the specim
 and docs. Hero parallax census: glow 0.85× · terminal 1.0×.
 
 **Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
-*(same testable claim, imperative form; alternate held: "Thirty seconds to first
-write.")*
+_(same testable claim, imperative form; alternate held: "Thirty seconds to first
+write.")_
 
 Tabs (each renders only if its path works — truth rule):
 
-| Tab | Content |
-|---|---|
-| **Python** | `pip install stratadb` + 4-line first-write snippet |
-| **CLI** | `cargo install strata-cli` · the curl chip (no brew — no tap exists, decided 2026-06-11) + first-write session: `strata --cache` → `kv put hello world` → `(version) 1` → `kv get hello` → `"world"` |
-| **Node** | `npm install @stratadb/core` + snippet |
+| Tab         | Content                                                                                                                                                                                                                                                                                |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Python**  | `pip install stratadb` + 4-line first-write snippet                                                                                                                                                                                                                                    |
+| **CLI**     | `cargo install strata-cli` · the curl chip (no brew — no tap exists, decided 2026-06-11) + first-write session: `strata --cache` → `kv put hello world` → `(version) 1` → `kv get hello` → `"world"`                                                                                   |
+| **Node**    | `npm install @stratadb/core` + snippet                                                                                                                                                                                                                                                 |
 | **Foundry** | "The desktop studio — browse keys, switch branches, diff and merge visually. macOS first." CTA per R1: **"Star strata-foundry"** → repo, auto-upgrades to **"Download Foundry"** when artifacts exist. Optional small static frame (R2 rules: real capabilities, target dark identity) |
-| **MCP** | The agent door (absorbs the "For your agent" card): copyable MCP config (verified against the MCP reference) · `stratadb.org/llms.txt` in mono · "For AI agents →" `/docs/getting-started/for-agents` |
+| **MCP**     | The agent door (absorbs the "For your agent" card): copyable MCP config (verified against the MCP reference) · `stratadb.org/llms.txt` in mono · "For AI agents →" `/docs/getting-started/for-agents`                                                                                  |
 
 Beneath the tabs, **the close** — the page's final statement:
 

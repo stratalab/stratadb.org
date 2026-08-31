@@ -9,61 +9,73 @@ import Heading from '../foundation/Heading.astro';
 const items = [
   {
     n: '01',
-    title: 'Documentation',
-    body: 'Concepts, guides, and the full reference.',
-    meta: 'concepts · guides · reference',
+    title: 'Docs',
+    body: 'Install, write the first value, fork a branch, and keep moving.',
+    meta: 'install · first database · guides',
     href: '/docs',
   },
   {
     n: '02',
-    title: 'Examples & quickstarts',
-    body: 'First database in thirty seconds; real patterns after that.',
-    meta: 'quickstarts · cookbook',
-    href: '/docs/getting-started',
+    title: 'Architecture',
+    body: 'The storage model, versioning system, durability path, and runtime modes.',
+    meta: 'commits · storage · recovery',
+    href: '/architecture',
   },
   {
     n: '03',
-    title: 'Whitepapers',
-    body: 'The internals, written down: storage engine, concurrency model, durability and recovery.',
-    meta: 'storage · concurrency · recovery',
-    href: '/architecture',
+    title: 'Changelog',
+    body: 'Current release metadata and what changed in the shipped engine.',
+    meta: 'release · version · notes',
+    href: '/changelog',
+  },
+  {
+    n: '04',
+    title: 'Agents',
+    body: 'Machine-readable docs, MCP setup, and command metadata for coding agents.',
+    meta: 'llms.txt · mcp · command index',
+    href: '/docs/agents',
   },
 ];
 ---
 
-<SectionRule label="RESOURCES" index="06" />
-<SectionShell id="resources">
-  <div class="reveal mb-12">
-    <Heading size="title">Go deeper.</Heading>
-  </div>
-  <div class="space-y-4">
-    {
-      items.map((item, i) => (
-        <div class="reveal" style={`transition-delay: ${i * 60}ms`}>
-          <a
-            href={item.href}
-            class="group grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-4 rounded-(--radius-card) border border-line-hover bg-raised px-6 py-6 shadow-[var(--shadow-float)] transition-colors duration-200 hover:border-[rgba(255,122,82,0.4)] max-md:grid-cols-[2.5rem_1fr_auto] max-md:px-4"
-          >
-            <span
-              class="font-mono text-mono-body text-ink-mid transition-colors duration-200 group-hover:text-terracotta-400"
-              aria-hidden="true"
+<section id="resources" class="relative min-h-[100svh] scroll-mt-16">
+  <SectionRule label="NEXT" index="06" />
+  <SectionShell>
+    <div class="reveal mb-12 max-w-[42rem]">
+      <Heading size="title">Go deeper.</Heading>
+      <p class="mt-4 text-body-lg text-ink-mid">
+        The landing page makes the model concrete. These are the durable surfaces behind it.
+      </p>
+    </div>
+    <div class="space-y-4">
+      {
+        items.map((item, i) => (
+          <div class="reveal" style={`transition-delay: ${i * 60}ms`}>
+            <a
+              href={item.href}
+              class="group grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-4 rounded-(--radius-card) border border-line-hover bg-raised px-6 py-6 shadow-[var(--shadow-float)] transition-colors duration-200 hover:border-terracotta-500/40 max-md:grid-cols-[2.5rem_1fr_auto] max-md:px-4"
             >
-              {item.n}
-            </span>
-            <span>
-              <span class="block text-heading text-ink-hi">{item.title}</span>
-              <span class="mt-2 block max-w-[38rem] text-body text-ink-mid">{item.body}</span>
-              <span class="mt-2.5 block font-mono text-mono-sm text-ink-mid">{item.meta}</span>
-            </span>
-            <span
-              class="self-center pr-2 text-ink-low transition-all duration-200 group-hover:translate-x-1 group-hover:text-terracotta-400"
-              aria-hidden="true"
-            >
-              →
-            </span>
-          </a>
-        </div>
-      ))
-    }
-  </div>
-</SectionShell>
+              <span
+                class="font-mono text-mono-body text-ink-mid transition-colors duration-200 group-hover:text-terracotta-400"
+                aria-hidden="true"
+              >
+                {item.n}
+              </span>
+              <span>
+                <span class="block text-heading text-ink-hi">{item.title}</span>
+                <span class="mt-2 block max-w-[38rem] text-body text-ink-mid">{item.body}</span>
+                <span class="mt-2.5 block font-mono text-mono-sm text-ink-mid">{item.meta}</span>
+              </span>
+              <span
+                class="self-center pr-2 text-ink-low transition-all duration-200 group-hover:translate-x-1 group-hover:text-terracotta-400"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </a>
+          </div>
+        ))
+      }
+    </div>
+  </SectionShell>
+</section>

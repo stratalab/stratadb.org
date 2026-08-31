@@ -4,9 +4,15 @@
 import { chromium } from 'playwright';
 import { readFile } from 'node:fs/promises';
 
-const font = (await readFile(new URL('../public/fonts/GeneralSans-Variable.woff2', import.meta.url))).toString('base64');
-const mono = (await readFile(new URL('../public/fonts/CommitMono-400.woff2', import.meta.url))).toString('base64');
-const release = JSON.parse(await readFile(new URL('../src/data/release.json', import.meta.url), 'utf8'));
+const font = (
+  await readFile(new URL('../public/fonts/GeneralSans-Variable.woff2', import.meta.url))
+).toString('base64');
+const mono = (
+  await readFile(new URL('../public/fonts/CommitMono-400.woff2', import.meta.url))
+).toString('base64');
+const release = JSON.parse(
+  await readFile(new URL('../src/data/release.json', import.meta.url), 'utf8'),
+);
 
 const html = `<!doctype html><html><head><style>
 @font-face{font-family:GS;src:url(data:font/woff2;base64,${font}) format('woff2');font-weight:200 700}

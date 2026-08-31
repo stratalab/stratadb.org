@@ -16,7 +16,7 @@
 //   src/content/docs/reference/<family>/<op>.md   (git-ignored; regenerated)
 //   src/data/command-index.json                   (git-ignored; sidebar + machine)
 
-import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -87,6 +87,18 @@ function makeLinkRewriter(families) {
   return (md) => md.replace(pattern, '](/docs/reference/$1/');
 }
 
+function normalizeCommandIndexDocs(index, families) {
+  const familySet = new Set(families);
+  for (const command of index.commands ?? []) {
+    if (typeof command.docs !== 'string') continue;
+    const match = command.docs.match(/^\/docs\/([^/]+)\/(.+)$/);
+    if (match && familySet.has(match[1])) {
+      command.docs = `/docs/reference/${match[1]}/${match[2]}`;
+    }
+  }
+  return index;
+}
+
 async function stageFamily(srcDocs, family, rewriteLinks) {
   const srcDir = join(srcDocs, family);
   if (!existsSync(srcDir)) return 0;
@@ -108,7 +120,7 @@ async function main() {
   const source = await resolveSource();
   if (!source || source.error) {
     console.warn(
-      `fetch-docs: ${source?.error ?? 'no source'}; keeping the committed reference floor`
+      `fetch-docs: ${source?.error ?? 'no source'}; keeping the committed reference floor`,
     );
     return;
   }
@@ -132,7 +144,8 @@ async function main() {
   const indexSrc = join(source.dir, 'command-index.json');
   if (existsSync(indexSrc)) {
     await mkdir(join(INDEX_OUT, '..'), { recursive: true });
-    await cp(indexSrc, INDEX_OUT);
+    const index = normalizeCommandIndexDocs(JSON.parse(await readFile(indexSrc, 'utf8')), families);
+    await writeFile(INDEX_OUT, `${JSON.stringify(index, null, 2)}\n`);
   }
 
   console.log(`fetch-docs: staged ${total} reference pages from ${source.label}`);

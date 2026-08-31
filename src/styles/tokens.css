@@ -69,6 +69,19 @@
   --color-strata-vector: #ff8cc6;
   --color-strata-graph: #b89cff;
 
+  /* ---- VS Code dark theme, used by the extension-style primitive demo ---- */
+  --color-vscode-titlebar: #3c3c3c;
+  --color-vscode-activitybar: #333333;
+  --color-vscode-sidebar: #252526;
+  --color-vscode-editor: #1e1e1e;
+  --color-vscode-tab: #2d2d2d;
+  --color-vscode-input: #3c3c3c;
+  --color-vscode-status: #007acc;
+  --color-vscode-selection: #094771;
+  --color-vscode-border: #3e3e42;
+  --color-vscode-text: #cccccc;
+  --color-vscode-muted: #858585;
+
   /* ---- functional, on-dark (02 §4.4; ember-luminous) ---- */
   --color-ok: #3fe3a4;
   --color-warn: #ffc66e;
@@ -135,6 +148,12 @@
 
 /* Non-Tailwind tokens: consumed as plain CSS vars / by JS islands */
 :root {
+  /* Channel tokens for alpha colors in JS islands and inline CSS. */
+  --rgb-white: 255 255 255;
+  --rgb-black: 0 0 0;
+  --rgb-terracotta-500: 255 122 82;
+  --rgb-strata-kv: 124 170 255;
+
   /* durations (03 §1) */
   --dur-1: 120ms;
   --dur-2: 200ms;
@@ -164,8 +183,7 @@
   --color-branch-risky-well: #1d0e06;
 
   /* floating set-piece shadow (02 §12) */
-  --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset,
-    0 24px 64px -32px rgba(0, 0, 0, 0.7);
+  --shadow-float: 0 1px 0 rgba(245, 240, 235, 0.06) inset, 0 24px 64px -32px rgba(0, 0, 0, 0.7);
 }
 
 /* ===== /internals "pitch" surface — warm-light spec-sheet theme. The raw hex

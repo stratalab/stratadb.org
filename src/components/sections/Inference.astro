@@ -1,50 +1,49 @@
 ---
-// Section 5 (04 §6 v2): "Inference is built in." — the unified inference
-// layer. Databases usually don't have this: one built-in primitive for
-// embeddings, generation, and search, with models from Hugging Face or
-// OpenAI / Anthropic / Google. The pitch is portability — an app that
-// needs LLMs gets deployed in a bunch of places; the layer travels with
-// the file. Head in the prose column, demo on the 80rem stage.
-import SectionShell from '../foundation/SectionShell.astro';
+// Section 5 (04 §6 v3): "Inference is built in." The section now shows
+// native inference as database work: inspect a model, gather records, embed,
+// rank, and generate without adding a separate AI service layer. The copy and
+// demo share one centered chapter frame; this section does not hold scroll.
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import InferenceDemo from './inference/InferenceDemo.tsx';
 
-const providers = ['Hugging Face', 'OpenAI', 'Anthropic', 'Google'];
+const capabilities = ['embed', 'rank', 'generate', 'tokenize', 'model checks'];
 ---
 
-<SectionRule label="NATIVE INFERENCE" index="05" />
-<SectionShell id="inference" class="!pb-0">
-  <div class="reveal max-w-[44rem]">
-    <Heading size="display">Inference is built in.</Heading>
-    <p class="mt-6 text-body-lg text-ink-mid">
-      A unified inference layer — embeddings, generation, and search through one primitive,
-      with models from Hugging Face or hosted ones from OpenAI, Anthropic, and Google. Wire
-      it once; it runs wherever the file does.
-    </p>
-    <div class="mt-8 flex flex-wrap gap-2.5">
-      {
-        providers.map((p) => (
-          <span class="rounded-full border border-line bg-panel px-3.5 py-1.5 font-mono text-mono-sm text-ink-mid">
-            {p}
-          </span>
-        ))
-      }
+<section id="inference" class="relative min-h-[100svh] scroll-mt-16">
+  <SectionRule label="NATIVE INFERENCE" index="05" />
+  <div
+    class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:grid-cols-[minmax(17rem,0.28fr)_minmax(0,1fr)] lg:items-center lg:gap-10 lg:py-0 xl:grid-cols-[minmax(19rem,0.35fr)_minmax(0,1fr)] xl:gap-16"
+  >
+    <div class="reveal max-w-[44rem] lg:max-w-none">
+      <Heading size="title">Inference is built in.</Heading>
+      <p class="mt-6 text-body-lg text-ink-mid">
+        Run model work where the data already lives. Strata can embed text from records, rank
+        context, generate answers, tokenize text, and inspect model capability through one layer
+        that works with local models or hosted providers.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-2.5">
+        {
+          capabilities.map((p) => (
+            <span class="rounded-full border border-line bg-panel px-3.5 py-1.5 font-mono text-mono-sm text-ink-mid">
+              {p}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="relative mt-14 min-w-0 lg:mt-0">
+      <!-- one quiet stage light, the page's temperature -->
+      <div
+        class="pointer-events-none absolute -inset-x-16 -inset-y-10"
+        style="background: radial-gradient(46% 60% at 50% 45%, rgb(var(--rgb-terracotta-500) / 0.09), transparent 70%);"
+        aria-hidden="true"
+      >
+      </div>
+      <div class="relative">
+        <InferenceDemo client:visible />
+      </div>
     </div>
   </div>
-</SectionShell>
-
-<div
-  class="relative mx-auto w-full max-w-[80rem] overflow-x-clip px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4"
->
-  <!-- one quiet stage light, the page's temperature -->
-  <div
-    class="pointer-events-none absolute -inset-x-16 -inset-y-10"
-    style="background: radial-gradient(46% 60% at 50% 45%, rgba(255, 122, 82, 0.09), transparent 70%);"
-    aria-hidden="true"
-  >
-  </div>
-  <div class="relative">
-    <InferenceDemo client:visible />
-  </div>
-</div>
+</section>

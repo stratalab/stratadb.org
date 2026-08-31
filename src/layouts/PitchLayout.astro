@@ -24,9 +24,27 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
-    <link rel="preload" href="/fonts/GeneralSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/CommitMono-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/CommitMono-700.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      href="/fonts/GeneralSans-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/CommitMono-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/CommitMono-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <script is:inline>
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -35,7 +53,9 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
   </head>
 
   <body class="pitch-light min-h-screen">
-    {/* warm-light "pitch" theme tokens live in src/styles/tokens.css (.pitch-light) — literal-drift rule */}
+    {
+      /* warm-light "pitch" theme tokens live in src/styles/tokens.css (.pitch-light) — literal-drift rule */
+    }
 
     <div class="pitch-shell">
       <!-- Sticky section rail — the index -->
@@ -61,7 +81,7 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
         </ol>
 
         <div class="rail-foot">
-          <span class="rail-foot-line" aria-hidden="true" />
+          <span class="rail-foot-line" aria-hidden="true"></span>
           <span class="rail-foot-meta">{sections.length} sections · scroll</span>
         </div>
       </nav>
@@ -191,7 +211,9 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
         border-radius: 50%;
         background: var(--color-void);
         box-shadow: inset 0 0 0 1.5px var(--color-ink-low);
-        transition: box-shadow var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
+        transition:
+          box-shadow var(--dur-2) var(--ease-out),
+          background var(--dur-2) var(--ease-out);
       }
       .rail-num {
         font-family: var(--font-mono);
@@ -215,7 +237,9 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
       }
       .rail-item.is-active .rail-dot {
         background: var(--ember);
-        box-shadow: inset 0 0 0 1.5px var(--ember), 0 0 0 3px var(--ember-soft);
+        box-shadow:
+          inset 0 0 0 1.5px var(--ember),
+          0 0 0 3px var(--ember-soft);
       }
       .rail-item.is-active .rail-num {
         color: var(--ember);
@@ -246,8 +270,16 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
         min-width: 0;
         background-color: var(--color-void);
         background-image:
-          linear-gradient(to right, color-mix(in srgb, var(--color-ink-hi) 3%, transparent) 1px, transparent 1px),
-          linear-gradient(to bottom, color-mix(in srgb, var(--color-ink-hi) 3%, transparent) 1px, transparent 1px);
+          linear-gradient(
+            to right,
+            color-mix(in srgb, var(--color-ink-hi) 3%, transparent) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            color-mix(in srgb, var(--color-ink-hi) 3%, transparent) 1px,
+            transparent 1px
+          );
         background-size: 46px 46px;
       }
       @media (max-width: 900px) {
@@ -277,7 +309,7 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
               .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
             if (visible[0]?.target.id) setActive(visible[0].target.id);
           },
-          { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+          { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
         );
         sections.forEach((s) => io.observe(s));
         setActive(sections[0].id);
@@ -295,7 +327,7 @@ const { title = 'Strata — engine internals', sections } = Astro.props;
               }
             }
           },
-          { threshold: 0.15 }
+          { threshold: 0.15 },
         );
         revealed.forEach((el) => ro.observe(el));
       }

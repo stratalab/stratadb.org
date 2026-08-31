@@ -2,7 +2,7 @@
 title: "Durability"
 section: "concepts"
 description: "A durable database is backed by a write-ahead log and recovers on reopen; a cache database is pure in-memory and writes nothing to disk."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 StrataDB has two ways to hold data, and you choose between them when you open the database: a **durable** database backed by disk, or a **cache** database that lives entirely in memory. There is no in-between mode to configure and no per-write durability flag — durability is a property of the database you opened.

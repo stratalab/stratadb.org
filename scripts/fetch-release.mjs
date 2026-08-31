@@ -6,8 +6,10 @@ const FILE = new URL('../src/data/release.json', import.meta.url);
 const API = 'https://api.github.com/repos/stratalab/strata-core';
 
 async function gh(path) {
+  const headers = { Accept: 'application/vnd.github+json' };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   const res = await fetch(`${API}${path}`, {
-    headers: { Accept: 'application/vnd.github+json' },
+    headers,
     signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
@@ -27,7 +29,11 @@ try {
   }
   await writeFile(
     FILE,
-    JSON.stringify({ version, source, fetched_at: new Date().toISOString().slice(0, 10) }, null, 2) + '\n'
+    JSON.stringify(
+      { version, source, fetched_at: new Date().toISOString().slice(0, 10) },
+      null,
+      2,
+    ) + '\n',
   );
   console.log(`release.json: ${version} (${source})`);
 } catch (err) {

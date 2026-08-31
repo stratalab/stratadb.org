@@ -16,7 +16,7 @@ interface TabsProps {
 export default function Tabs({ tabs, defaultTab, className = '' }: TabsProps) {
   const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
 
-  const activeContent = tabs.find(tab => tab.id === activeTab)?.content;
+  const activeContent = tabs.find((tab) => tab.id === activeTab)?.content;
 
   return (
     <div className={className}>
@@ -39,9 +39,7 @@ export default function Tabs({ tabs, defaultTab, className = '' }: TabsProps) {
       </div>
 
       {/* Tab content */}
-      <div className="mt-4">
-        {activeContent}
-      </div>
+      <div className="mt-4">{activeContent}</div>
     </div>
   );
 }
@@ -61,7 +59,7 @@ interface CodeTabsProps {
 export function CodeTabs({ tabs, className = '' }: CodeTabsProps) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.lang);
 
-  const activeCode = tabs.find(tab => tab.lang === activeTab)?.code;
+  const activeCode = tabs.find((tab) => tab.lang === activeTab)?.code;
 
   return (
     <div className={`rounded-xl overflow-hidden border border-border ${className}`}>
@@ -92,7 +90,12 @@ export function CodeTabs({ tabs, className = '' }: CodeTabsProps) {
           className="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-1"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+            />
           </svg>
           Copy
         </button>
@@ -100,9 +103,7 @@ export function CodeTabs({ tabs, className = '' }: CodeTabsProps) {
 
       {/* Code content */}
       <pre className="p-4 bg-gray-900 overflow-x-auto">
-        <code className="text-sm font-mono text-gray-100">
-          {activeCode}
-        </code>
+        <code className="text-sm font-mono text-gray-100">{activeCode}</code>
       </pre>
     </div>
   );

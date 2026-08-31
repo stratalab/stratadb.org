@@ -2,15 +2,14 @@
 title: "Error Handling"
 section: "guides"
 description: "Read Strata's coded errors, recover by class and retry policy, and parse the JSON error shape."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 
 Every failure carries a stable code, a one-line hint, and a link to a per-code
 doc page. Recover by code and class, never by matching the message text — the
 message can change, the code will not. The full registry ships in the binary
-(`strata agents errors --json`, 204 codes today) and online in the
-[Error Reference](/docs/reference/error-reference).
+(`strata agents errors --json`) and online at [`/e/`](/e/).
 
 ## Anatomy of a code
 

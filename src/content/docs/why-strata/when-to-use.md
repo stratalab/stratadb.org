@@ -1,69 +1,48 @@
 ---
 title: "When to use StrataDB"
 section: "why-strata"
-description: "The workloads StrataDB is built for, and the honest boundaries — what it deliberately is not."
+description: "The workloads StrataDB is built for, and the cases where another database is the better choice."
 source: "strata-core@v1.1.0"
 ---
 
-StrataDB is opinionated about what it is good at. This page is the honest version:
-where it fits, and where it does not.
+Use StrataDB when the branch and history model matters. Use something else when
+you only need one specialized database shape.
 
-## Good fits
+## Good Fits
 
-- **Agent memory and state.** An agent needs durable, structured memory it can
-  branch per session and roll back when a path fails. KV and JSON for working
-  state, an event log for the action history, vectors for recall, a graph for
-  relationships — one database, isolated per session with a
-  [branch](/docs/concepts/branches).
-- **Experiment isolation.** Fork the whole database, try a change, and discard
-  the fork if it goes wrong — without copying data up front or touching the
-  parent. Cheap [branches](/docs/concepts/branches) make "try it on a copy" the
-  default, not a chore.
-- **Replayable history.** When you need to answer "what did this look like last
-  Tuesday?" or replay an event stream deterministically, per-commit
-  [time travel](/docs/concepts/time-travel) and a hash-linked
-  [event log](/docs/data/events) give you the past as a first-class read.
-- **Multi-model in one place.** When a single workload genuinely spans key-value,
-  documents, vectors, events, and relationships, keeping them on one substrate —
-  branched and versioned together — beats gluing four systems together.
-- **Embedded and edge.** In-process, single-directory, no server to operate — a
-  fit for local-first apps, CLIs, notebooks, and constrained environments where
-  running a database daemon is not an option.
+| Workload | Why StrataDB fits |
+|---|---|
+| Agent memory | Each run can get its own branch; events record actions; JSON and KV hold working state; vectors and graph support recall. |
+| Experiments | Fork the database, try a change, compare it, then merge or delete the fork. |
+| Replayable state | Commits and events let you answer what the database looked like at a point in time. |
+| Local-first tools | The database is a local directory opened in-process. |
+| Mixed data shapes | Use documents, events, vectors, graph, and simple keys without five separate stores. |
 
-## Poor fits (use something else)
+The deciding question is: do you need branch-isolated, versioned state across
+more than one data shape? If yes, StrataDB is worth considering.
 
-- **Primary relational application data.** If your data is fundamentally
-  relational and you need SQL, joins, and a mature query planner, use Postgres or
-  SQLite. StrataDB complements a relational store; it does not replace one.
-- **A shared network cache.** StrataDB is embedded and in-process — there is **no
-  server or network mode** in this line. For a cache shared across many
-  processes or machines, use Redis.
-- **Cross-machine sync or fleet coordination.** A StrataDB database is a local
-  directory. Sharing prepared datasets is done by
-  [cloning from a hub](/docs/concepts/hub-and-clone); live multi-writer sync
-  across machines is out of scope for this line.
-- **Git-style automatic merge resolution.** `branch merge` promotes one branch's
-  KV, JSON, and vector changes onto another, but under the default `strict`
-  strategy it refuses when both sides changed the same entity rather than
-  auto-resolving, and it does not merge event or graph data. If you need
-  three-way conflict resolution across divergent edits, resolve it in your
-  application (or take the source side with `--strategy source-wins`).
+## Poor Fits
 
-## The honest boundaries
+- **Primary relational data.** If you need SQL, joins, relational constraints,
+  and a mature planner, use Postgres or SQLite.
+- **Shared network cache.** StrataDB is embedded. It is not Redis and does not
+  provide a network server in this line.
+- **Fleet coordination or live sync.** A StrataDB database is a local directory.
+  Prepared datasets can be cloned, but live multi-writer sync is out of scope.
+- **Massive specialized vector search.** StrataDB has vector collections. A
+  dedicated vector database will go deeper when vector search is the whole
+  product.
+- **Automatic conflict resolution.** `branch merge` applies KV, JSON, and vector
+  changes. Under the default strict strategy it refuses conflicts instead of
+  inventing a winner; events and graphs are compared, not merged.
 
-A few capabilities are deliberately out of this line, so you are not surprised:
+## Boundaries In This Release
 
-- **No local model execution in the released binary.** Inference runs through
-  cloud providers by default; local GGUF execution is a build-time feature. See
-  [Inference](/docs/inference).
-- **No Node SDK yet.** The supported surfaces today are the `strata` CLI, its
-  [MCP server](/docs/agents/mcp-server), and the
-  [Python SDK](/docs/python) (`stratadb` on PyPI); a Node SDK is post-V1.
-- **No standalone search surface.** Vector similarity search is here; the broader
-  search product and its optimizer are deferred.
+- The supported surfaces are the CLI, Python SDK, generated machine docs, and MCP
+  server. A Node SDK is not part of `v1.1.0`.
+- Local model execution is a build feature. Cloud inference is available when a
+  provider key is configured.
+- Broad search is not a separate product surface. Vector similarity search is
+  the shipped search path.
 
-When a fit is marginal, the deciding question is usually: *do you need
-branch-isolated, versioned, multi-model state?* If yes, StrataDB earns its place
-alongside your primary store. If no, a single-purpose tool is probably simpler.
-
-See [Comparisons](/docs/why-strata/comparisons) for the head-to-head.
+For head-to-head choices, read [Comparisons](/docs/why-strata/comparisons).

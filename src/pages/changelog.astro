@@ -13,15 +13,26 @@ interface Release {
   date: string;
   body: string;
 }
+interface GitHubRelease {
+  tag_name: string;
+  name: string | null;
+  published_at: string | null;
+  body: string | null;
+}
 
 let releases: Release[] = [];
 try {
-  const res = await fetch('https://api.github.com/repos/stratalab/strata-core/releases?per_page=20', {
-    headers: { Accept: 'application/vnd.github+json' },
-  });
+  const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  const res = await fetch(
+    'https://api.github.com/repos/stratalab/strata-core/releases?per_page=20',
+    {
+      headers,
+    },
+  );
   if (res.ok) {
-    const data = await res.json();
-    releases = data.map((r: any) => ({
+    const data = (await res.json()) as GitHubRelease[];
+    releases = data.map((r) => ({
       tag: r.tag_name,
       name: r.name || r.tag_name,
       date: (r.published_at ?? '').slice(0, 10),
@@ -37,13 +48,16 @@ if (!releases.length) {
       tag: `v${release.version}`,
       name: `v${release.version}`,
       date: release.fetched_at,
-      body: 'Release notes on GitHub.',
+      body: `Full GitHub release notes were not available at build time. Metadata came from ${release.source}.`,
     },
   ];
 }
 ---
 
-<BaseLayout title="Changelog — StrataDB" description="StrataDB release history, generated from GitHub releases.">
+<BaseLayout
+  title="Changelog — StrataDB"
+  description="StrataDB release history, generated from GitHub releases."
+>
   <SectionShell eyebrow="CHANGELOG">
     <div class="mb-12 max-w-[42rem]">
       <Heading level={1} size="display">Every version. Here too.</Heading>
@@ -63,7 +77,10 @@ if (!releases.length) {
           <article id={r.tag} class="border-l-2 border-line pl-6">
             <div class="flex items-baseline gap-3">
               <h2 class="font-mono text-heading text-ink-hi">
-                <a href={`#${r.tag}`} class="transition-colors duration-200 hover:text-terracotta-400">
+                <a
+                  href={`#${r.tag}`}
+                  class="transition-colors duration-200 hover:text-terracotta-400"
+                >
                   {r.tag}
                 </a>
               </h2>
@@ -74,7 +91,11 @@ if (!releases.length) {
               )}
               <span class="font-mono text-mono-sm text-ink-low">{r.date}</span>
             </div>
-            {r.body && <pre class="mt-4 whitespace-pre-wrap font-sans text-small leading-6 text-ink-mid">{r.body}</pre>}
+            {r.body && (
+              <pre class="mt-4 whitespace-pre-wrap font-sans text-small leading-6 text-ink-mid">
+                {r.body}
+              </pre>
+            )}
           </article>
         ))
       }

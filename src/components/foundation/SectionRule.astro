@@ -8,12 +8,27 @@ interface Props {
   label: string;
   index: string;
   total?: string;
+  sticky?: boolean;
+  class?: string;
 }
-const { label, index, total = '07' } = Astro.props;
+const { label, index, total = '07', sticky = false, class: className = '' } = Astro.props;
+const ruleId = label
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '');
 ---
 
-<div class="border-t border-line">
-  <div class="mx-auto flex w-full max-w-[70rem] items-baseline justify-between px-6 pt-3 max-[480px]:px-4">
+<div
+  data-section-rule={ruleId}
+  class:list={[
+    'border-t border-line',
+    sticky && 'sticky top-16 z-40 bg-void/92 backdrop-blur-xl',
+    className,
+  ]}
+>
+  <div
+    class="mx-auto flex w-full max-w-[70rem] items-baseline justify-between px-6 pt-3 max-[480px]:px-4"
+  >
     <p class="font-mono text-eyebrow uppercase text-ink-low">
       <span class="mr-3 select-none text-ink-low" aria-hidden="true">+</span>
       <span class="text-terracotta-500" aria-hidden="true">⟩</span>

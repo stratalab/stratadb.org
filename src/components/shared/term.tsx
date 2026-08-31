@@ -7,8 +7,11 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 
 export const EASE = [0.16, 1, 0.3, 1] as const;
-export const EMBER = (a: number) => `rgba(255, 122, 82, ${a})`;
-export const COOL = (a: number) => `rgba(124, 170, 255, ${a})`;
+const alpha = (channel: string, a: number) => `rgb(var(${channel}) / ${a})`;
+export const EMBER = (a: number) => alpha('--rgb-terracotta-500', a);
+export const COOL = (a: number) => alpha('--rgb-strata-kv', a);
+export const INK = (a: number) => alpha('--rgb-white', a);
+export const VOID = (a: number) => alpha('--rgb-black', a);
 
 // Typing time for a command (03 §2: 24–40ms jittered) + a settle beat.
 export const T = (cmd: string) => Math.round(cmd.length * 30) + 500;
@@ -61,7 +64,17 @@ export function useTyped(text: string, live: boolean, start: boolean) {
   return n;
 }
 
-export function Cmd({ branch = 'main', cmd, on, live }: { branch?: string; cmd: string; on: boolean; live: boolean }) {
+export function Cmd({
+  branch = 'main',
+  cmd,
+  on,
+  live,
+}: {
+  branch?: string;
+  cmd: string;
+  on: boolean;
+  live: boolean;
+}) {
   const n = useTyped(cmd, live, on);
   const typing = live && on && n < cmd.length;
   return (
@@ -73,14 +86,25 @@ export function Cmd({ branch = 'main', cmd, on, live }: { branch?: string; cmd: 
       <span className="text-terracotta-500">›</span>
       <span className="text-ink-hi"> {cmd.slice(0, n)}</span>
       {typing && (
-        <span className="ml-px inline-block h-[1.05em] w-[0.55ch] translate-y-[3px] bg-ink-hi/80" aria-hidden="true" />
+        <span
+          className="ml-px inline-block h-[1.05em] w-[0.55ch] translate-y-[3px] bg-ink-hi/80"
+          aria-hidden="true"
+        />
       )}
     </div>
   );
 }
 
 // One enter treatment for every OUTPUT line: flash in, settle.
-export function Line({ on, children, className = '' }: { on: boolean; children: ReactNode; className?: string }) {
+export function Line({
+  on,
+  children,
+  className = '',
+}: {
+  on: boolean;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <motion.div
       initial={false}
@@ -129,7 +153,7 @@ export function TermCard({
         className={`p-6 font-mono text-mono-body leading-8 md:p-8 md:text-[1.0625rem] md:leading-9 ${bodyClassName}`}
         style={{
           backgroundColor: 'var(--color-inset)',
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${INK(0.04)} 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%)`,
           backgroundSize: '22px 22px, 100% 100%',
         }}
       >

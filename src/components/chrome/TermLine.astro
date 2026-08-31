@@ -20,7 +20,10 @@ const toneClass = {
       <span>
         <span class="text-ink-low">strata:{branch} </span>
         <span class="text-terracotta-500">›</span>
-        <span class="text-ink-hi"> <slot /></span>
+        <span class="text-ink-hi">
+          {' '}
+          <slot />
+        </span>
       </span>
     ) : (
       <span class={toneClass}>

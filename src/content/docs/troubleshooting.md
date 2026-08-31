@@ -1,7 +1,7 @@
 ---
 title: "Troubleshooting"
 description: "Real failure modes, the error codes they carry, and how to diagnose them."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 

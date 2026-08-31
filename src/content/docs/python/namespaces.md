@@ -2,7 +2,7 @@
 title: "Namespaces"
 section: "python"
 description: "The data-plane API: ten namespaces over one handle, plus db.at() scoping, as_of reads, and metadata filters."
-source: "strata-python@v1.0.0"
+source: "strata-python@v1.1.0"
 ---
 
 A `Strata` handle exposes the whole surface through **namespaces** — one per

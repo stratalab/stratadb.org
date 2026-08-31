@@ -1,8 +1,9 @@
 ---
-// Footer per 01 §4 / 04 §1. Real links only; "For agents" targets land in Phase 5.
+// Footer per the current product lock. Real links only; frozen surfaces stay out
+// of the public acquisition path.
 const columns: Record<string, { label: string; href: string; external?: boolean }[]> = {
   Product: [
-    { label: 'Strata Foundry', href: 'https://github.com/stratalab/strata-foundry', external: true },
+    { label: 'Playground', href: '/playground' },
     { label: 'Changelog', href: '/changelog' },
   ],
   Documentation: [
@@ -14,13 +15,11 @@ const columns: Record<string, { label: string; href: string; external?: boolean 
   Internals: [
     { label: 'Architecture', href: '/architecture' },
     { label: 'strata-core', href: 'https://github.com/stratalab/strata-core', external: true },
-    { label: 'strata-foundry', href: 'https://github.com/stratalab/strata-foundry', external: true },
-    { label: 'stratahub', href: 'https://github.com/stratalab/stratahub', external: true },
   ],
   'For agents': [
     { label: 'llms.txt', href: '/llms.txt' },
-    { label: 'For AI agents', href: '/docs/getting-started/for-agents' },
-    { label: 'MCP reference', href: '/docs/reference/mcp' },
+    { label: 'For AI agents', href: '/docs/agents' },
+    { label: 'MCP server', href: '/docs/agents/mcp-server' },
   ],
 };
 const year = new Date().getFullYear();

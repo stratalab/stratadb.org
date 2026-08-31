@@ -1,42 +1,39 @@
 ---
 title: "Installation"
 section: "getting-started"
-description: "Install the strata CLI with the installer script, Homebrew, or from source."
+description: "Install the strata CLI and verify the binary with a cache-mode ping."
 source: "strata-core@v1.1.0"
 ---
 
+Install the `strata` CLI, then run one command to prove the binary works.
 
-## Install the CLI
-
-### Installer script (recommended)
+## Installer Script
 
 ```bash
 curl -fsSL https://stratadb.org/install.sh | sh
 ```
 
-The installer downloads the latest release for your platform, verifies its
-SHA-256 checksum against the release manifest, installs the binary to
-`~/.strata/bin`, and adds that directory to your shell's PATH.
+The installer downloads the release for your platform, verifies the SHA-256
+checksum from the release manifest, installs into `~/.strata/bin`, and updates
+your shell path.
 
-Two environment variables override the defaults:
+Pin a version or change the install directory when you need repeatable setup:
 
 ```bash
-# Pin a specific version instead of latest
-curl -fsSL https://stratadb.org/install.sh | STRATA_VERSION=<version> sh
-
-# Install somewhere else
+curl -fsSL https://stratadb.org/install.sh | STRATA_VERSION=1.1.0 sh
 curl -fsSL https://stratadb.org/install.sh | STRATA_INSTALL_DIR=$HOME/bin sh
 ```
 
-### Homebrew
+## Homebrew
 
 ```bash
 brew install stratalab/tap/strata
 ```
 
-### From source
+## From Source
 
-Requires Rust 1.91 or newer.
+Use this path when you are developing StrataDB itself or need a custom build.
+It requires Rust 1.91 or newer.
 
 ```bash
 git clone https://github.com/stratalab/strata-core.git
@@ -44,24 +41,9 @@ cd strata-core
 cargo build --release -p strata-cli
 ```
 
-The binary is located at `target/release/strata`.
+The binary is `target/release/strata`.
 
-### Running Tests (development)
-
-```bash
-# All tests across the workspace
-cargo test --workspace
-
-# Specific crate
-cargo test -p strata-executor
-
-# With output
-cargo test --workspace -- --nocapture
-```
-
-## Verify Installation
-
-Run a quick command to confirm the CLI is working:
+## Verify
 
 ```bash
 strata --cache ping
@@ -71,55 +53,39 @@ strata --cache ping
 pong 1.1.0
 ```
 
-If something looks off, run the built-in diagnostic:
+`--cache` opens an in-memory database for this one process, so the check leaves
+no database directory behind.
+
+If the command is not found, open a new shell or add the install directory to
+`PATH`. If the binary runs but the environment looks wrong, use:
 
 ```bash
 strata doctor
 ```
 
-It reports the binary version, platform, Strata home, and PATH visibility —
-and, when pointed at a database directory, a health summary. Every finding
-carries an error code and a fix hint, and the command exits non-zero when
-anything is wrong. [Troubleshooting](/docs/troubleshooting) starts from its
-output.
-
-You can also try a quick interactive session:
-
-```
-$ strata --cache
-strata:default/default> kv put hello world
-created hello applied=true
-strata:default/default> kv get hello
-world
-strata:default/default> quit
-```
-
-If you see the output above, you are ready to go. Continue to [Your First Database](first-database) for a complete tutorial.
+`doctor` reports the binary version, platform, Strata home, path visibility, and
+database health when you give it a path.
 
 ## Uninstall
 
-If you installed with the installer script, remove the binary directory and
-the PATH line the installer added:
+Installer-script install:
 
 ```bash
-rm -rf ~/.strata/bin
+rm -r ~/.strata/bin
 ```
 
-(Use your `STRATA_INSTALL_DIR` if you overrode the default.) Then delete the
-`# Strata` block from your shell config — `~/.zshrc`, `~/.bashrc`,
-`~/.config/fish/config.fish`, or `~/.profile`.
+Then remove the `# Strata` path block from your shell config. If you changed
+`STRATA_INSTALL_DIR`, remove that directory instead.
 
-If you installed with Homebrew:
+Homebrew install:
 
 ```bash
 brew uninstall strata
 ```
 
-Uninstalling removes only the binary. Your databases stay wherever you created
-them, and the global config remains at `~/.config/strata/config.toml` — delete
-those yourself if you want a clean slate.
+Uninstalling the binary does not delete databases you created. It also leaves
+global config at `~/.config/strata/config.toml`.
 
 ## Next
 
-- [Your First Database](first-database) — hands-on tutorial
-- [Concepts](/docs/concepts) — understand the mental model
+Continue with [Your first database](/docs/getting-started/first-database).

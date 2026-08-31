@@ -8,7 +8,8 @@ export default defineConfig({
   site: 'https://stratadb.org',
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/404') && !page.includes('/specimen') && !page.includes('/playground'),
+      filter: (page) =>
+        !page.includes('/404') && !page.includes('/specimen') && !page.includes('/internals'),
     }),
     mdx({
       shikiConfig: {

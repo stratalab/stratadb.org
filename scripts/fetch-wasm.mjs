@@ -51,7 +51,9 @@ async function main() {
 
   const v = await version();
   if (!v) {
-    console.warn('fetch-wasm: no release version in release.json; skipping (playground bundle absent).');
+    console.warn(
+      'fetch-wasm: no release version in release.json; skipping (playground bundle absent).',
+    );
     return;
   }
 

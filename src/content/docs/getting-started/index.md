@@ -1,58 +1,41 @@
 ---
 title: "Getting Started"
 section: "getting-started"
-description: "The path from installing the CLI to running your first database."
-source: "strata-core@v1.0.0"
+description: "Install the CLI, create a database, fork a branch, and hand StrataDB to an agent."
+source: "strata-core@v1.1.0"
 ---
 
+Start here if you want to run StrataDB, not read around it.
 
-New to StrataDB? Take these three steps in order. (Still deciding whether it
-fits your problem? Start with [Why Strata](/docs/why-strata) — what it is,
-[when to use it](/docs/why-strata/when-to-use), and
-[how it compares](/docs/why-strata/comparisons).)
+1. [Install the CLI](/docs/getting-started/installation).
+2. [Create your first database](/docs/getting-started/first-database).
+3. Use the generated [command reference](/docs/reference) when you need exact
+   syntax.
 
-1. **[Installation](/docs/getting-started/installation)** — install the `strata`
-   CLI and confirm it runs.
-2. **[Your first database](/docs/getting-started/first-database)** — create a
-   durable database, work in the REPL and one-shot forms, write across the KV
-   and JSON capabilities, fork a branch, and read an earlier version.
-3. **[For AI agents](/docs/agents)** — if you are wiring
-   StrataDB into a coding agent or an MCP client, start here for the integration
-   recipe.
+StrataDB is embedded. You point the binary at a local directory and the database
+opens in-process. Use `--cache` only for a throwaway single-process run; separate
+CLI invocations do not share an in-memory database.
 
-## What you are installing
+## What You Will Do
 
-StrataDB is embedded: it runs inside your process against a local directory,
-the way SQLite or DuckDB does. There is no server to start, no port to open, and
-no daemon to keep alive. You install one binary, `strata`, and point it at a
-path — that directory is your database.
+The first tutorial uses one durable database:
 
-That one binary carries five data capabilities over a single storage substrate —
-key-value, JSON documents, an event log, vectors, and a graph — plus git-style
-branches and per-commit time travel. The same binary is also a Model Context
-Protocol server, so an AI agent can drive it with no extra package.
+- write a key-value record;
+- write a JSON document;
+- fork `default` to `risky`;
+- change the fork without touching `default`;
+- preview and merge the fork;
+- read an earlier value with `--as-of`.
 
-## What each step gives you
+That path is the core product model. The rest of the docs expand it.
 
-The **installation** page covers the installer script, Homebrew, and building
-from source, and ends with a one-line check that the CLI works.
+## After The First Run
 
-The **first database** tutorial is hands-on against the real binary: you create
-a database on disk, write and read data, open the interactive REPL, fork a
-branch to isolate a change, and read a value as it stood at an earlier commit.
-Every command and output on that page comes from a live run.
+- Pick a data shape in [Working with data](/docs/data).
+- Learn the model in [Concepts](/docs/concepts).
+- Use [Inference](/docs/inference) for generation, embeddings, ranking, and
+  tokenization.
+- Use [For AI agents](/docs/agents) for MCP and the self-describing binary.
 
-The **for AI agents** page is the tight integration recipe — how the binary
-describes its own commands and errors, how to onboard a repository, and how to
-run the built-in MCP server.
-
-## After the tutorial
-
-Once the moves feel familiar, read [Concepts](/docs/concepts/branches) to
-understand [branches](/docs/concepts/branches), [commits](/docs/concepts/commits),
-and [durability](/docs/concepts/durability). Then use the
-[Guides](/docs/data/key-value) to go deep on one capability at a time, and the
-[Cookbook](/docs/cookbook/agent-state-management) for end-to-end patterns.
-
-If something breaks, [Troubleshooting](/docs/troubleshooting) lists real failure
-modes and the error codes they carry.
+Still deciding whether the product fits? Read [Why Strata](/docs/why-strata)
+before installing.

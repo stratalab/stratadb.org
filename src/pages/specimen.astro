@@ -24,9 +24,8 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
   <SectionShell eyebrow="SPECIMEN · PHASE 1">
     <Heading level={1} size="title">Tokens, type, and chrome — the font-veto page.</Heading>
     <p class="mt-3 max-w-[42.5rem] text-body text-ink-mid">
-      Everything below renders from <code class="font-mono text-mono-sm">tokens.css</code> only.
-      General Sans carries display and body; Commit Mono carries everything that is code,
-      data, or a measurement.
+      Everything below renders from <code class="font-mono text-mono-sm">tokens.css</code> only. General
+      Sans carries display and body; Commit Mono carries everything that is code, data, or a measurement.
     </p>
   </SectionShell>
 
@@ -38,7 +37,7 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
       </div>
       <div>
         <p class="mb-2 font-mono text-mono-sm text-ink-low">display · 64/1.02 · 600 · −2.5%</p>
-        <p class="text-display text-ink-hi">Try anything. Keep what works.</p>
+        <p class="text-display text-ink-hi">Branch the whole database.</p>
       </div>
       <div>
         <p class="mb-2 font-mono text-mono-sm text-ink-low">title · 40/1.1 · 600 · −1.5%</p>
@@ -51,16 +50,15 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
       <div>
         <p class="mb-2 font-mono text-mono-sm text-ink-low">body-lg · 19/1.55</p>
         <p class="max-w-[42.5rem] text-body-lg text-ink-mid">
-          Forking copies nothing, so it's instant at any size. A branch is a complete
-          database: diff it, merge it, cherry-pick a single change across.
+          Forking copies nothing, so it's instant at any size. A branch is a complete database: diff
+          it, preview it, merge it, or delete it.
         </p>
       </div>
       <div>
         <p class="mb-2 font-mono text-mono-sm text-ink-low">body · 16/1.6</p>
         <p class="max-w-[42.5rem] text-body text-ink-mid">
-          Ask in plain language. One flag embeds every write as it lands; hybrid retrieval
-          searches every primitive at once. Point it at any OpenAI-compatible endpoint — or
-          run models locally.
+          Run model calls beside the database when the app needs them. Store embeddings in vectors,
+          keep source records in KV or JSON, and choose hosted or local providers.
         </p>
       </div>
       <div>
@@ -68,7 +66,9 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
         <Eyebrow>Time travel</Eyebrow>
       </div>
       <div>
-        <p class="mb-2 font-mono text-mono-sm text-ink-low">stat · 56/1 · 500 · tabular (Commit Mono)</p>
+        <p class="mb-2 font-mono text-mono-sm text-ink-low">
+          stat · 56/1 · 500 · tabular (Commit Mono)
+        </p>
         <p class="font-mono text-stat text-ink-hi">250K · &lt;1 ms · 0</p>
       </div>
     </div>
@@ -77,19 +77,35 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
   <SectionShell eyebrow="COLOR">
     <div class="space-y-8">
       <div>
-        <p class="mb-3 font-mono text-mono-sm text-ink-low">terracotta — identity, used surgically</p>
+        <p class="mb-3 font-mono text-mono-sm text-ink-low">
+          terracotta — identity, used surgically
+        </p>
         <div class="flex overflow-hidden rounded-(--radius-control)">
-          {terracotta.map((step) => (
-            <div class="h-12 flex-1" style={`background: var(--color-terracotta-${step})`} title={`terracotta-${step}`} />
-          ))}
+          {
+            terracotta.map((step) => (
+              <div
+                class="h-12 flex-1"
+                style={`background: var(--color-terracotta-${step})`}
+                title={`terracotta-${step}`}
+              />
+            ))
+          }
         </div>
       </div>
       <div>
-        <p class="mb-3 font-mono text-mono-sm text-ink-low">sediment — warm neutrals, never blue-gray</p>
+        <p class="mb-3 font-mono text-mono-sm text-ink-low">
+          sediment — warm neutrals, never blue-gray
+        </p>
         <div class="flex overflow-hidden rounded-(--radius-control)">
-          {sediment.map((step) => (
-            <div class="h-12 flex-1" style={`background: var(--color-sediment-${step})`} title={`sediment-${step}`} />
-          ))}
+          {
+            sediment.map((step) => (
+              <div
+                class="h-12 flex-1"
+                style={`background: var(--color-sediment-${step})`}
+                title={`sediment-${step}`}
+              />
+            ))
+          }
         </div>
       </div>
       <div>
@@ -108,10 +124,26 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
       <div>
         <p class="mb-3 font-mono text-mono-sm text-ink-low">surfaces</p>
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div class="rounded-(--radius-card) border border-line bg-void p-4 font-mono text-mono-sm text-ink-low">void</div>
-          <div class="rounded-(--radius-card) border border-line bg-panel p-4 font-mono text-mono-sm text-ink-low">panel</div>
-          <div class="rounded-(--radius-card) border border-line bg-raised p-4 font-mono text-mono-sm text-ink-low">raised</div>
-          <div class="rounded-(--radius-card) border border-line bg-inset p-4 font-mono text-mono-sm text-ink-low">inset</div>
+          <div
+            class="rounded-(--radius-card) border border-line bg-void p-4 font-mono text-mono-sm text-ink-low"
+          >
+            void
+          </div>
+          <div
+            class="rounded-(--radius-card) border border-line bg-panel p-4 font-mono text-mono-sm text-ink-low"
+          >
+            panel
+          </div>
+          <div
+            class="rounded-(--radius-card) border border-line bg-raised p-4 font-mono text-mono-sm text-ink-low"
+          >
+            raised
+          </div>
+          <div
+            class="rounded-(--radius-card) border border-line bg-inset p-4 font-mono text-mono-sm text-ink-low"
+          >
+            inset
+          </div>
         </div>
       </div>
     </div>
@@ -143,11 +175,15 @@ const strata = ['kv', 'event', 'json', 'vector', 'graph'];
         </Card>
         <Card href="#">
           <h3 class="mb-2 text-heading text-ink-hi">Examples &amp; quickstarts</h3>
-          <p class="text-small text-ink-mid">First database in thirty seconds; real patterns after that.</p>
+          <p class="text-small text-ink-mid">
+            First database in thirty seconds; real patterns after that.
+          </p>
         </Card>
         <Card href="#">
-          <h3 class="mb-2 text-heading text-ink-hi">Whitepapers</h3>
-          <p class="text-small text-ink-mid">The internals, written down: storage engine, concurrency model, durability and recovery.</p>
+          <h3 class="mb-2 text-heading text-ink-hi">Architecture</h3>
+          <p class="text-small text-ink-mid">
+            The internals, written down: storage engine, concurrency model, durability and recovery.
+          </p>
         </Card>
       </div>
     </div>

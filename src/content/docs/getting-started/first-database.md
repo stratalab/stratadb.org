@@ -1,184 +1,170 @@
 ---
 title: "Your First Database"
 section: "getting-started"
-description: "Create a durable database, write across capabilities, fork a branch, and read history."
-source: "strata-core@v1.0.0"
+description: "Create a durable database, fork a branch, merge it, and read an earlier version."
+source: "strata-core@v1.1.0"
 ---
 
+This page uses a durable database at `./mydb`. StrataDB creates the directory on
+the first write. There is no server and no separate create step.
 
-This tutorial creates a real on-disk database and walks through the everyday
-moves: writing and reading, working in the REPL, forking a branch, and reading
-an earlier version. Every command and output below comes from a live run.
-
-## Prerequisites
-
-- The [CLI installed](/docs/getting-started/installation).
-
-## Create a database
-
-A database is a directory. Name a path and StrataDB creates it on first write —
-no separate "create" step:
+## Write A Value
 
 ```bash
-strata ./mydb kv put greeting hello
+strata ./mydb kv put portfolio.value 98400
+strata ./mydb kv get portfolio.value
 ```
 
 ```text
-created greeting applied=true
+created portfolio.value applied=true
+98400
 ```
 
-Read it back:
+That write created a local database directory and committed the first value.
+
+## Add A Document
+
+Use JSON when the value has fields you want to update directly.
 
 ```bash
-strata ./mydb kv get greeting
+strata ./mydb json set portfolio '$' '{"strategy":"balanced","stocks":60,"bonds":30,"cash":10}'
+strata ./mydb json get portfolio '$'
 ```
 
 ```text
-hello
+created portfolio applied=true
+{"bonds":30,"cash":10,"stocks":60,"strategy":"balanced"}
 ```
 
-That directory now holds a write-ahead log and a manifest. It is durable: the
-data survives the process exiting. For a throwaway database that never touches
-disk, swap the path for `--cache` (for example `strata --cache kv put a b`).
+`$` means the document root. Later, paths like `$.stocks` update one field.
 
-## Two ways to run
+## Fork The Database
 
-Everything above used the **one-shot** form: `strata <db> <command>`, one
-command per invocation, good for scripts.
-
-For an interactive session, pass just the path to open a **REPL**:
-
-```text
-$ strata ./mydb
-strata:default/default> kv put agent:model gpt-4
-created agent:model applied=true
-strata:default/default> kv get agent:model
-gpt-4
-strata:default/default> kv list
-agent:model
-greeting
-strata:default/default> quit
-```
-
-The prompt shows your current branch and space (`default/default`). Inside the
-REPL, type commands without the leading `strata`. A few meta-commands help you
-move around: `use <branch>` (optionally `use <branch>/<space>`) switches context,
-`help` prints the command list, and `quit`, `exit`, or Ctrl-D leaves. Quote rules
-differ from the shell, so for JSON documents the one-shot form below is easier to
-get right.
-
-## Write JSON documents
-
-The JSON capability stores documents you address by key and mutate at JSON
-paths. `$` is the document root:
+Fork `default` into a branch named `risky`:
 
 ```bash
-strata ./mydb json set profile '$' '{"name":"Ada","score":95}'
+strata ./mydb branch fork default risky
 ```
+
+The output includes the new branch and the parent commit it forked from:
 
 ```text
-created profile applied=true
-```
-
-Read the whole document, then a single path:
-
-```bash
-strata ./mydb json get profile '$'
-```
-
-```text
-{"name":"Ada","score":95}
-```
-
-```bash
-strata ./mydb json get profile '$.score'
-```
-
-```text
-95
-```
-
-Updating one path leaves the rest of the document untouched:
-
-```bash
-strata ./mydb json set profile '$.score' 99
-```
-
-```text
-updated profile applied=true
-```
-
-KV and JSON both live in the same database on the same branch — one store, many
-shapes of data.
-
-## Fork a branch
-
-A branch is an isolated line of data. Fork the current one and writes on the
-fork stay off the parent. First put a value on `default`:
-
-```bash
-strata ./mydb kv put city tokyo
-strata ./mydb branch fork default experiment
-```
-
-```text
-created city applied=true
 {
-  "branch_id": "1a29fdd4-745b-5b66-ad18-75b3cf51cef6",
-  "created_at": 6,
-  "deleted_at": null,
-  "generation": 1,
-  "name": "experiment",
+  "name": "risky",
   "parent": {
-    "branch_id": "00000000-0000-0000-0000-000000000000",
-    "fork_timestamp": null,
-    "fork_version": 6,
-    "generation": 1,
-    "name": "default"
+    "name": "default",
+    "fork_version": 4
   },
-  "state_revision": 0,
   "status": "active"
 }
 ```
 
-The fork starts as a copy of its parent, so `city` already reads `tokyo` on
-`experiment`. Overwrite it there and check both branches:
+The numeric version in your output may differ. The important part is that the
+branch starts from `default` without copying the whole database.
+
+## Change The Fork
+
+Write the aggressive allocation on `risky`:
 
 ```bash
-strata ./mydb kv put city kyoto --branch experiment
-strata ./mydb kv get city --branch experiment
-strata ./mydb kv get city
+strata ./mydb --branch risky json set portfolio '$.strategy' '"aggressive"'
+strata ./mydb --branch risky json set portfolio '$.stocks' 80
+strata ./mydb --branch risky json set portfolio '$.bonds' 15
+strata ./mydb --branch risky json set portfolio '$.cash' 5
 ```
 
 ```text
-updated city applied=true
-kyoto
-tokyo
+updated portfolio applied=true
+updated portfolio applied=true
+updated portfolio applied=true
+updated portfolio applied=true
 ```
 
-`experiment` sees `kyoto`; `default` still reads `tokyo`. The write on the fork
-was invisible to its parent. (The `created_at` and `fork_version` numbers above
-track your database's own commit history, so yours will differ.)
+`default` is still balanced. `risky` now has the aggressive allocation.
 
-## Read an earlier version
+## Compare And Preview
 
-Every write returns a commit. Ask for the commit's timestamp with `--json`:
+Diff is read-only:
+
+```bash
+strata ./mydb branch diff default risky
+```
+
+Output is grouped by capability and space. This run reports one modified JSON
+document:
+
+```text
+{
+  "branch_a": "default",
+  "branch_b": "risky",
+  "spaces": [
+    {
+      "capability": "json",
+      "modified": [
+        { "identity": "cG9ydGZvbGlv", "version": 11 }
+      ],
+      "space": "default"
+    }
+  ]
+}
+```
+
+Preview the promotion before mutating either branch:
+
+```bash
+strata ./mydb branch preview risky default
+```
+
+```text
+{
+  "source": "risky",
+  "target": "default",
+  "strategy": "strict",
+  "conflicts": []
+}
+```
+
+No conflicts means the merge can apply cleanly under the default strict strategy.
+
+## Merge Back
+
+```bash
+strata ./mydb branch merge risky default
+strata ./mydb json get portfolio '$'
+```
+
+The merge output is a structured receipt. The final read shows the result:
+
+```text
+{
+  "source": "risky",
+  "target": "default",
+  "conflicts": []
+}
+{"bonds":15,"cash":5,"stocks":80,"strategy":"aggressive"}
+```
+
+In `v1.1.0`, branch merge applies key-value, JSON, and vector changes. Events
+and graphs are compared but not merged.
+
+## Read The Past
+
+Every write has a commit timestamp. Ask for the JSON receipt when you need it:
 
 ```bash
 strata --json ./mydb kv put note first
 ```
 
 ```text
-{"data":{"commit":{"delete_count":0,"durable":true,"put_count":1,"timestamp":11,"version":11},"effect":{"affected_count":1,"applied":true,"kind":"created","matched":false},"key":"bm90ZQ=="},"type":"write_result"}
+{"data":{"commit":{"timestamp":16,"version":16},"effect":{"kind":"created","applied":true},"key":"bm90ZQ=="},"type":"write_result"}
 ```
 
-Note `data.commit.timestamp` (here `11`). Overwrite the key, then read it back
-both live and as of that earlier commit with `--as-of`:
+Your timestamp may differ. Use the timestamp from your own receipt:
 
 ```bash
 strata ./mydb kv put note second
 strata ./mydb kv get note
-strata ./mydb kv get note --as-of 11
+strata ./mydb kv get note --as-of 16
 ```
 
 ```text
@@ -187,66 +173,22 @@ second
 first
 ```
 
-The live read returns `second`; the `--as-of` read returns the value as it
-stood at that commit. Time travel works the same way for JSON, vectors, events,
-and the graph.
+The live value is `second`. The `--as-of` read returns the value at the earlier
+commit.
 
-## Look at the whole database
-
-`describe` prints a compact summary — branches, capabilities, and per-capability
-counts (the `version` field is omitted here):
+## Inspect The Database
 
 ```bash
 strata ./mydb describe
 ```
 
-```text
-{
-  "branch": "default",
-  "branches": [
-    "default",
-    "experiment"
-  ],
-  "capabilities": {
-    "arrow": true,
-    "event": true,
-    "graph_core": true,
-    "inference": true,
-    "json": true,
-    "kv": true,
-    "vector": true,
-    "vector_index": true
-  },
-  "config": {
-    "created": false,
-    "default_branch": "default",
-    "durable": true,
-    "target": "durable_local"
-  },
-  "default_branch": "default",
-  "primitives": {
-    "event_count": 0,
-    "graphs": [],
-    "json_count": 1,
-    "kv_count": 4,
-    "vector_collections": []
-  },
-  "spaces": [
-    "default"
-  ],
-  "target": "durable_local"
-}
-```
-
-`strata ./mydb info` gives the shorter version — branch count, durability, and
-target.
+`describe` returns the active branch, available capabilities, spaces, and
+per-primitive counts. Use it when you want to confirm what a database contains.
 
 ## Next
 
-- [Concepts: branches](/docs/concepts/branches) and
-  [commits](/docs/concepts/commits) — the model behind fork and `--as-of`.
-- [Guides](/docs/data/key-value) — each capability in depth:
-  [KV](/docs/data/key-value), [JSON](/docs/data/json),
-  [event log](/docs/data/events), [vectors](/docs/data/vectors),
-  [graph](/docs/data/graph).
-- [For AI agents](/docs/agents) — wire this into an agent.
+- [Working with data](/docs/data) to choose the right primitive.
+- [Branches](/docs/concepts/branches) for fork, preview, and merge behavior.
+- [Time travel](/docs/concepts/time-travel) for `--as-of` reads and historical
+  forks.
+- [For AI agents](/docs/agents) to expose the same database over MCP.

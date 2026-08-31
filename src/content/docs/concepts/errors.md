@@ -2,7 +2,7 @@
 title: "Errors"
 section: "concepts"
 description: "Strata's error contract: stable class.area.detail codes you recover by, a fixed class taxonomy, and per-occurrence diagnostics."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Strata treats errors as part of its contract, not as prose. Every failure carries

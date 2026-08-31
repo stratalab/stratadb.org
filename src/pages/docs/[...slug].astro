@@ -2,22 +2,24 @@
 // Docs routes (Phase 5). `/docs` itself is the designed landing at
 // pages/docs/index.astro; the content index.md stays in the collection as the
 // machine mirror (/docs/index.md + llms-full) but does not render HTML here.
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 
 export async function getStaticPaths() {
+  const htmlSlug = (id: string) => id.replace(/\/index$/, '');
   const docs = await getCollection('docs');
   return docs
-    .filter((entry) => entry.slug !== 'index')
+    .filter((entry) => entry.id !== 'index')
     .map((entry) => ({
-      params: { slug: entry.slug },
+      params: { slug: htmlSlug(entry.id) },
       props: { entry },
     }));
 }
 
 const { entry } = Astro.props;
-const { Content, headings } = await entry.render();
-const mdHref = `/docs/${entry.slug}.md`;
+const { Content, headings } = await render(entry);
+const mdPath = entry.id === 'index' ? 'index' : entry.id.replace(/\/index$/, '');
+const mdHref = `/docs/${mdPath}.md`;
 ---
 
 <DocsLayout

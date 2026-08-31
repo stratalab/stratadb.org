@@ -1,13 +1,14 @@
 // Scrub #2 of 2 (03 §3.2) — v5 (2026-06-12): the head rides the pin.
-// A portfolio document forks into two color-coded worlds (main = cool slate,
-// risky = ember-warm); the aggressive allocation lands as four cascading
-// writes; a true diff rises; the merge dissolves warm into cool. Commands
+// A database branch splits into two color-coded worlds (main = cool slate,
+// risky = ember-warm); the sample portfolio document changes there so the
+// user sees the actual verbs: branch, change, diff, preview, merge. Commands
 // accumulate in a session terminal on the left like a real CLI transcript;
 // scroll-driven light fields color the stage, and the branch river flows
 // behind it (03 §5 infinite animation #3, sanctioned 2026-06-12).
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { motion, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react';
 import { SEED } from '../../../data/seed';
+import { COOL, EMBER } from '../../shared/term';
 
 const SCRUB = { stiffness: 120, damping: 28, mass: 1.1 };
 const BANDS = [0, 0.28, 0.55, 0.8];
@@ -26,33 +27,37 @@ const CHANGES: Record<string, string | number> = {
 const FIELDS = Object.keys(DOC);
 
 const ACTS = [
-  { verb: 'Fork', line: 'The whole database, forked instantly. Nothing copied.' },
-  { verb: 'Modify', line: 'Four writes land on the branch. main is untouched.' },
-  { verb: 'Diff', line: 'Every change, exactly — before real money moves.' },
-  { verb: 'Merge', line: 'Keep the strategy that works.' },
+  { verb: 'Branch', line: 'Create a branch in an instant, without copying the database.' },
+  { verb: 'Change', line: 'Run risky work there: agent writes, migrations, experiments.' },
+  { verb: 'Review', line: 'Diff the branch and preview the merge before default changes.' },
+  { verb: 'Promote', line: 'Merge the result when it is right. Discard it when it is not.' },
 ];
+
+const USES = ['agent runs', 'migrations', 'what-if changes', 'review before merge'];
 
 // The section head lives inside the island (04 §3 v5) so it can ride the
 // pin. The eyebrow moved to the SectionRule band (04 §1 v2).
 const HEAD = {
-  h2: 'Try anything. Keep what works.',
+  h2: 'Branch the whole database.',
   intro:
-    "A branch is a complete database — fork it, change it, diff it, merge it back. Forking copies nothing, so it's instant at any size.",
+    'Test agent writes, migrations, and risky data changes away from default. Compare the branch, preview the merge, and promote only what should land.',
 };
 
 // The accumulated session (left terminal). Lines flash in with their act,
 // then dim into history.
 const SESSION: { act: number; cmd?: string; out?: string; branch?: string }[] = [
   { act: 0, cmd: 'branch fork default risky', branch: 'default' },
-  { act: 0, out: 'OK' },
+  { act: 0, out: '"name": "risky"' },
   { act: 1, cmd: 'json set portfolio $.strategy "aggressive"', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.stocks 80', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.bonds 15', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.cash 5', branch: 'risky' },
   { act: 2, cmd: 'branch diff default risky', branch: 'default' },
-  { act: 2, out: '4 keys changed' },
+  { act: 2, out: '"capability": "json"' },
+  { act: 2, cmd: 'branch preview risky default', branch: 'default' },
+  { act: 2, out: '"conflicts": []' },
   { act: 3, cmd: 'branch merge risky default', branch: 'default' },
-  { act: 3, out: 'merged' },
+  { act: 3, out: '"target": "default"' },
 ];
 
 type Driver = MotionValue<number> | number;
@@ -61,15 +66,23 @@ const inv = (d: Driver) => (typeof d === 'number' ? 1 - d : useTransform(d, (v) 
 // "visible" to checkers as unreadable text (the session-panel lesson,
 // applied stage-wide).
 const visOf = (d: Driver) =>
-  typeof d === 'number' ? (d <= 0.01 ? 'hidden' : 'visible') : useTransform(d, (v) => (v <= 0.01 ? 'hidden' : 'visible'));
+  typeof d === 'number'
+    ? d <= 0.01
+      ? 'hidden'
+      : 'visible'
+    : useTransform(d, (v) => (v <= 0.01 ? 'hidden' : 'visible'));
 
 function ValueSwap({ from, to, swapped }: { from: string; to: string; swapped: Driver }) {
   const oldY = typeof swapped === 'number' ? -swapped * 10 : useTransform(swapped, (v) => -v * 10);
-  const newY = typeof swapped === 'number' ? (1 - swapped) * 10 : useTransform(swapped, (v) => (1 - v) * 10);
+  const newY =
+    typeof swapped === 'number' ? (1 - swapped) * 10 : useTransform(swapped, (v) => (1 - v) * 10);
   const gone = inv(swapped);
   return (
     <span className="relative inline-grid">
-      <motion.span className="col-start-1 row-start-1" style={{ opacity: gone, y: oldY, visibility: visOf(gone) }}>
+      <motion.span
+        className="col-start-1 row-start-1"
+        style={{ opacity: gone, y: oldY, visibility: visOf(gone) }}
+      >
         {from}
       </motion.span>
       <motion.span
@@ -99,20 +112,20 @@ function JsonCard({
       className="w-[28rem] max-w-[94vw] overflow-hidden rounded-(--radius-frame)"
       style={{
         background: cool ? 'var(--color-branch-main-surface)' : 'var(--color-branch-risky-surface)',
-        border: `1px solid ${cool ? 'rgba(124, 170, 255, 0.28)' : 'rgba(255, 122, 82, 0.32)'}`,
+        border: `1px solid ${cool ? COOL(0.28) : EMBER(0.32)}`,
         boxShadow: 'var(--shadow-float)',
       }}
     >
       <div
         className="flex h-11 items-center gap-2.5 px-5"
-        style={{ borderBottom: `1px solid ${cool ? 'rgba(124, 170, 255, 0.18)' : 'rgba(255, 122, 82, 0.2)'}` }}
+        style={{ borderBottom: `1px solid ${cool ? COOL(0.18) : EMBER(0.2)}` }}
       >
         <span
           className="h-2.5 w-2.5 rounded-full"
           style={{ background: cool ? 'var(--color-strata-kv)' : 'var(--color-terracotta-500)' }}
           aria-hidden="true"
         />
-        <span className="font-mono text-mono-body text-ink-hi">{kind}</span>
+        <span className="font-mono text-mono-body text-ink-hi">{cool ? 'default' : 'risky'}</span>
         <span className="ml-auto font-mono text-mono-sm text-ink-low">json · portfolio</span>
         {chip !== undefined && (
           <motion.span
@@ -125,7 +138,9 @@ function JsonCard({
       </div>
       <div
         className="p-6 font-mono text-[1.0625rem] leading-9 text-ink-mid"
-        style={{ background: cool ? 'var(--color-branch-main-well)' : 'var(--color-branch-risky-well)' }}
+        style={{
+          background: cool ? 'var(--color-branch-main-well)' : 'var(--color-branch-risky-well)',
+        }}
       >
         <div>{'{'}</div>
         {FIELDS.map((key, i) => {
@@ -144,7 +159,11 @@ function JsonCard({
                 {'  '}
                 <span className="text-strata-json">"{key}"</span>:{' '}
                 {changed ? (
-                  <ValueSwap from={show(DOC[key]) + comma} to={show(CHANGES[key]) + comma} swapped={swaps[key]} />
+                  <ValueSwap
+                    from={show(DOC[key]) + comma}
+                    to={show(CHANGES[key]) + comma}
+                    swapped={swaps[key]}
+                  />
                 ) : (
                   <span className="text-ink-hi">
                     {show(DOC[key])}
@@ -162,15 +181,23 @@ function JsonCard({
 }
 
 function DiffCard({ visible }: { visible: Driver }) {
-  const scale = typeof visible === 'number' ? 0.94 + visible * 0.06 : useTransform(visible, (v) => 0.94 + v * 0.06);
+  const scale =
+    typeof visible === 'number'
+      ? 0.94 + visible * 0.06
+      : useTransform(visible, (v) => 0.94 + v * 0.06);
   return (
     <motion.div
       className="w-[26rem] max-w-[90vw] overflow-hidden rounded-(--radius-frame) border border-line-hover bg-raised"
-      style={{ opacity: visible, scale, visibility: visOf(visible), boxShadow: 'var(--shadow-float)' }}
+      style={{
+        opacity: visible,
+        scale,
+        visibility: visOf(visible),
+        boxShadow: 'var(--shadow-float)',
+      }}
     >
       <div className="flex h-11 items-center gap-2.5 border-b border-line px-5">
-        <span className="font-mono text-mono-body text-ink-mid">branch diff default risky</span>
-        <span className="ml-auto font-mono text-mono-sm text-ok">4 keys</span>
+        <span className="font-mono text-mono-body text-ink-mid">branch review</span>
+        <span className="ml-auto font-mono text-mono-sm text-ok">4 changes · clean</span>
       </div>
       <div className="bg-inset p-6 font-mono text-mono-body leading-8">
         {FIELDS.map((key) =>
@@ -187,8 +214,11 @@ function DiffCard({ visible }: { visible: Driver }) {
             <div key={key} className="text-ink-low">
               {'  '}"{key}": {show(DOC[key])},
             </div>
-          )
+          ),
         )}
+      </div>
+      <div className="border-t border-line bg-panel px-5 py-3 font-mono text-mono-sm text-ink-low">
+        preview: 0 conflicts · ready to merge
       </div>
     </motion.div>
   );
@@ -215,7 +245,7 @@ function SessionPanel({ active, lineIn }: { active: number; lineIn?: Driver }) {
         </span>
         <span className="ml-2 font-mono text-mono-sm text-ink-low">strata — session</span>
       </div>
-      <div className="min-h-[20rem] bg-inset p-4 font-mono text-mono-sm leading-7">
+      <div className="h-[17rem] overflow-hidden bg-inset p-4 font-mono text-[0.75rem] leading-5 xl:h-[20rem] xl:text-mono-sm xl:leading-7">
         {SESSION.map((entry, i) => {
           if (entry.act > active) return null;
           const current = entry.act === active;
@@ -266,14 +296,28 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
   const swapCash = drive(0.42, 0.47, (s) => (s >= 1 ? 1 : 0));
   const flash = drive(0.29, 0.34, (s) => (s === 1 ? 1 : 0));
   const diffIn =
-    staticScene !== undefined ? (staticScene === 2 ? 1 : 0) : useTransform(mv, [0.57, 0.65, 0.76, 0.82], [0, 1, 1, 0], clampOpt);
+    staticScene !== undefined
+      ? staticScene === 2
+        ? 1
+        : 0
+      : useTransform(mv, [0.57, 0.65, 0.76, 0.82], [0, 1, 1, 0], clampOpt);
   const converge = drive(0.82, 0.94, (s) => (s >= 3 ? 1 : 0));
   const riskyGone = drive(0.88, 0.97, (s) => (s >= 3 ? 1 : 0));
   const mainSwapAll = drive(0.84, 0.9, (s) => (s >= 3 ? 1 : 0));
   const mergedChip = drive(0.92, 1, (s) => (s >= 3 ? 1 : 0));
 
-  const riskySwaps = { strategy: swapStrategy, stocks: swapStocks, bonds: swapBonds, cash: swapCash };
-  const mainSwaps = { strategy: mainSwapAll, stocks: mainSwapAll, bonds: mainSwapAll, cash: mainSwapAll };
+  const riskySwaps = {
+    strategy: swapStrategy,
+    stocks: swapStocks,
+    bonds: swapBonds,
+    cash: swapCash,
+  };
+  const mainSwaps = {
+    strategy: mainSwapAll,
+    stocks: mainSwapAll,
+    bonds: mainSwapAll,
+    cash: mainSwapAll,
+  };
 
   // scroll-driven stage light: ember blooms with the branch, dies with the merge
   const emberGlow =
@@ -281,41 +325,58 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
       ? staticScene >= 3
         ? 0.12
         : 0.55
-      : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => 0.12 + s * (1 - g) * 0.5);
+      : useTransform(
+          [spread as MotionValue<number>, riskyGone as MotionValue<number>],
+          ([s, g]: number[]) => 0.12 + s * (1 - g) * 0.5,
+        );
 
   const sep = (s: number, c: number) => s * (1 - c);
   const mainX =
     staticScene !== undefined
       ? `${-50 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
-      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${-50 * sep(s, c)}%`);
+      : useTransform(
+          [spread as MotionValue<number>, converge as MotionValue<number>],
+          ([s, c]: number[]) => `${-50 * sep(s, c)}%`,
+        );
   const riskyX =
     staticScene !== undefined
       ? `${62 * sep(staticScene < 3 ? 1 : 0, staticScene >= 3 ? 1 : 0)}%`
-      : useTransform([spread as MotionValue<number>, converge as MotionValue<number>], ([s, c]: number[]) => `${62 * sep(s, c)}%`);
+      : useTransform(
+          [spread as MotionValue<number>, converge as MotionValue<number>],
+          ([s, c]: number[]) => `${62 * sep(s, c)}%`,
+        );
   const riskyOpacity =
     staticScene !== undefined
       ? staticScene >= 3
         ? 0
         : 1
-      : useTransform([spread as MotionValue<number>, riskyGone as MotionValue<number>], ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g));
+      : useTransform(
+          [spread as MotionValue<number>, riskyGone as MotionValue<number>],
+          ([s, g]: number[]) => Math.min(s * 3, 1) * (1 - g),
+        );
 
   return (
-    <div className="relative flex h-full min-h-[30rem] items-center justify-center">
+    <div className="relative flex h-full min-h-[26rem] items-center justify-center xl:min-h-[30rem]">
       {/* stage light: cool constant behind main's side; ember follows the branch's life */}
       <div
         className="pointer-events-none absolute -inset-x-16 inset-y-0"
-        style={{ background: 'radial-gradient(58% 75% at 28% 50%, rgba(124, 170, 255, 0.13), transparent 65%)' }}
+        style={{
+          background: `radial-gradient(58% 75% at 28% 50%, ${COOL(0.13)}, transparent 65%)`,
+        }}
         aria-hidden="true"
       />
       <motion.div
         className="pointer-events-none absolute -inset-x-16 inset-y-0"
         style={{
           opacity: emberGlow,
-          background: 'radial-gradient(58% 75% at 74% 50%, rgba(255, 122, 82, 0.28), transparent 65%)',
+          background: `radial-gradient(58% 75% at 74% 50%, ${EMBER(0.28)}, transparent 65%)`,
         }}
         aria-hidden="true"
       />
-      <motion.div className="absolute z-10" style={{ x: riskyX, opacity: riskyOpacity, visibility: visOf(riskyOpacity) }}>
+      <motion.div
+        className="absolute z-10"
+        style={{ x: riskyX, opacity: riskyOpacity, visibility: visOf(riskyOpacity) }}
+      >
         <JsonCard kind="risky" swaps={riskySwaps} flash={flash} />
       </motion.div>
       <motion.div className="absolute z-10" style={{ x: mainX }}>
@@ -329,11 +390,27 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
 }
 
 // Stacked head for in-flow layouts (mobile, reduced motion).
+function UseCases({ className = '' }: { className?: string }) {
+  return (
+    <div className={`flex flex-wrap gap-2.5 ${className}`} aria-label="Branch use cases">
+      {USES.map((use) => (
+        <span
+          key={use}
+          className="rounded-full border border-line bg-panel/80 px-3 py-1 font-mono text-mono-sm text-ink-mid"
+        >
+          {use}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function FlowHead() {
   return (
     <div className="max-w-[42rem]">
       <h2 className="text-display text-balance text-ink-hi">{HEAD.h2}</h2>
       <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
+      <UseCases className="mt-7" />
     </div>
   );
 }
@@ -375,8 +452,16 @@ function BranchRiver() {
       >
         {RIVER.map((p) => (
           <g key={p.tone}>
-            <path d={p.d} className={`br-glow br-${p.tone}`} style={{ '--dur': p.dur } as CSSProperties} />
-            <path d={p.d} className={`br-core br-${p.tone}`} style={{ '--dur': p.dur } as CSSProperties} />
+            <path
+              d={p.d}
+              className={`br-glow br-${p.tone}`}
+              style={{ '--dur': p.dur } as CSSProperties}
+            />
+            <path
+              d={p.d}
+              className={`br-core br-${p.tone}`}
+              style={{ '--dur': p.dur } as CSSProperties}
+            />
           </g>
         ))}
       </svg>
@@ -446,7 +531,7 @@ export default function BranchScrub() {
         for (let k = 0; k < BANDS.length; k++) if (v >= BANDS[k]) i = k;
         setActive(i);
       }),
-    [progress]
+    [progress],
   );
 
   if (reduced) {
@@ -490,26 +575,27 @@ export default function BranchScrub() {
 
   return (
     <>
-      <div ref={ref} className="relative hidden md:block" style={{ height: '340vh' }}>
-        {/* The pinned screen owns the whole composition: river behind, head on
-            top (visible for the full scrub), session + stage filling the rest. */}
-        <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
+      <div ref={ref} className="relative hidden md:block" style={{ height: '260vh' }}>
+        {/* The pinned screen owns the whole composition below the nav + rule band. */}
+        <div className="sticky top-[calc(4rem+1.625rem)] flex h-[calc(100svh-5.625rem)] flex-col justify-center overflow-hidden">
           <BranchRiver />
-          {/* pt clears the fixed nav so the head stays readable while pinned */}
-          <div className="relative z-10 mx-auto w-full max-w-[96rem] px-12 pt-24">
-            {/* second h2 lives in the mobile branch — only one is ever displayed */}
-            <h2 className="text-display text-balance text-ink-hi">{HEAD.h2}</h2>
-            <p className="mt-5 max-w-[44rem] text-body-lg text-ink-mid">{HEAD.intro}</p>
-          </div>
-          <div className="relative z-10 mx-auto grid w-full max-w-[96rem] flex-1 items-center gap-16 px-12 pb-8 lg:grid-cols-12">
-            <div className="flex flex-col justify-center lg:col-span-4">
-              <ActHeader active={active} />
-              <div className="mt-10">
-                <SessionPanel active={active} lineIn={lineIn} />
-              </div>
+          <div className="relative z-10">
+            <div className="mx-auto w-full max-w-[96rem] px-12">
+              {/* second h2 lives in the mobile branch — only one is ever displayed */}
+              <h2 className="text-title text-balance text-ink-hi xl:text-display">{HEAD.h2}</h2>
+              <p className="mt-5 max-w-[44rem] text-body-lg text-ink-mid">{HEAD.intro}</p>
+              <UseCases className="mt-6" />
             </div>
-            <div className="h-full min-h-[30rem] lg:col-span-8">
-              <Stage p={progress} />
+            <div className="mx-auto mt-8 grid w-full max-w-[96rem] items-center gap-12 px-12 lg:grid-cols-12 xl:gap-16">
+              <div className="flex flex-col justify-center lg:col-span-4">
+                <ActHeader active={active} />
+                <div className="mt-6">
+                  <SessionPanel active={active} lineIn={lineIn} />
+                </div>
+              </div>
+              <div className="h-full min-h-[30rem] lg:col-span-8">
+                <Stage p={progress} />
+              </div>
             </div>
           </div>
         </div>
@@ -520,30 +606,39 @@ export default function BranchScrub() {
           <FlowHead />
         </div>
         <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-20">
-        {ACTS.map((act, i) => (
-          <div key={act.verb} className="w-[92vw] shrink-0 snap-center">
-            <p className="text-heading font-semibold text-ink-hi">{act.verb}</p>
-            <p className="mb-4 mt-1 text-small text-ink-mid">{act.line}</p>
-            <div className="mb-4">
-              <SessionPanel active={i} />
-            </div>
-            <div className="flex flex-col items-center gap-4">
-              {i === 2 ? (
-                <DiffCard visible={1} />
-              ) : i === 3 ? (
-                <JsonCard kind="main" swaps={{ strategy: 1, stocks: 1, bonds: 1, cash: 1 }} chip={1} />
-              ) : (
-                <>
-                  <JsonCard kind="main" swaps={{}} />
+          {ACTS.map((act, i) => (
+            <div key={act.verb} className="w-[92vw] shrink-0 snap-center">
+              <p className="text-heading font-semibold text-ink-hi">{act.verb}</p>
+              <p className="mb-4 mt-1 text-small text-ink-mid">{act.line}</p>
+              <div className="mb-4">
+                <SessionPanel active={i} />
+              </div>
+              <div className="flex flex-col items-center gap-4">
+                {i === 2 ? (
+                  <DiffCard visible={1} />
+                ) : i === 3 ? (
                   <JsonCard
-                    kind="risky"
-                    swaps={{ strategy: i >= 1 ? 1 : 0, stocks: i >= 1 ? 1 : 0, bonds: i >= 1 ? 1 : 0, cash: i >= 1 ? 1 : 0 }}
+                    kind="main"
+                    swaps={{ strategy: 1, stocks: 1, bonds: 1, cash: 1 }}
+                    chip={1}
                   />
-                </>
-              )}
+                ) : (
+                  <>
+                    <JsonCard kind="main" swaps={{}} />
+                    <JsonCard
+                      kind="risky"
+                      swaps={{
+                        strategy: i >= 1 ? 1 : 0,
+                        stocks: i >= 1 ? 1 : 0,
+                        bonds: i >= 1 ? 1 : 0,
+                        cash: i >= 1 ? 1 : 0,
+                      }}
+                    />
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
       </div>
     </>

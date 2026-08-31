@@ -2,7 +2,7 @@
 title: "Spaces"
 section: "guides"
 description: "Group data into named product spaces within a branch, and manage them with the space verbs."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 

@@ -1,5 +1,9 @@
 # StrataDB.org Redesign — Design Brief (v2)
 
+Status: historical. This was the June 2026 design exploration brief. The current
+repo truth lives in `docs/product/README.md`, and the active remediation sequence
+lives in `docs/product/13-world-class-remediation-plan.md`.
+
 Phase 0 deliverable. Nothing in `src/` changes until this brief is signed off.
 
 **Direction (locked with Ani, 2026-06-11):** refined dark · terracotta + strata identity ·

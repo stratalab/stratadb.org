@@ -51,20 +51,29 @@ const COMMIT_MEANING: Record<string, string> = {
       <div>
         <dt class="font-mono text-mono-sm uppercase text-ink-low">retry</dt>
         <dd class="mt-1 text-small text-ink-mid">
-          <code class="font-mono">{entry.retry_policy}</code> — {RETRY_MEANING[entry.retry_policy] ?? ''}
+          <code class="font-mono">{entry.retry_policy}</code> — {
+            RETRY_MEANING[entry.retry_policy] ?? ''
+          }
         </dd>
       </div>
       <div>
         <dt class="font-mono text-mono-sm uppercase text-ink-low">commit outcome</dt>
         <dd class="mt-1 text-small text-ink-mid">
-          <code class="font-mono">{entry.commit_outcome}</code> — {COMMIT_MEANING[entry.commit_outcome] ?? ''}
+          <code class="font-mono">{entry.commit_outcome}</code> — {
+            COMMIT_MEANING[entry.commit_outcome] ?? ''
+          }
         </dd>
       </div>
     </dl>
 
     <div class="mt-10 flex gap-6 font-mono text-mono-sm">
-      <a href="/docs/reference/error-reference" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Error model</a>
-      <a href="/e" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">All codes</a>
+      <a
+        href="/docs/reference/error-reference"
+        class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Error model</a
+      >
+      <a href="/e" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+        >All codes</a
+      >
       <a href="/docs" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Docs</a>
     </div>
   </div>

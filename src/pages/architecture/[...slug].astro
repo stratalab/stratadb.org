@@ -1,29 +1,37 @@
 ---
-// Whitepaper pages, re-skinned (Phase 5). Content untouched.
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const architecture = await getCollection('architecture');
   return architecture
-    .filter((entry) => entry.slug !== 'index')
-    .map((entry) => ({ params: { slug: entry.slug }, props: { entry } }));
+    .filter((entry) => entry.id !== 'index')
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 ---
 
-<BaseLayout title={`${entry.data.title} — StrataDB Whitepapers`} description={entry.data.description}>
+<BaseLayout
+  title={`${entry.data.title} - StrataDB Architecture`}
+  description={entry.data.description}
+>
   <div class="mx-auto w-full max-w-[46rem] px-6 py-16 max-[480px]:px-4">
     <p class="mb-3 text-eyebrow font-medium uppercase text-ink-low">
-      <a href="/architecture" class="transition-colors duration-200 hover:text-ink-mid">Whitepapers</a>
+      <a href="/architecture" class="transition-colors duration-200 hover:text-ink-mid"
+        >Architecture</a
+      >
     </p>
     <article class="prose-docs">
       <Content />
     </article>
     <p class="mt-16 border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
-      agents: this page as markdown → <a href={`/architecture/${entry.slug}.md`} class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">/architecture/{entry.slug}.md</a>
+      agents: this page as markdown -&gt; <a
+        href={`/architecture/${entry.id}.md`}
+        class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+        >/architecture/{entry.id}.md</a
+      >
     </p>
   </div>
 </BaseLayout>

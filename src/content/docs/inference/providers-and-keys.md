@@ -1,98 +1,79 @@
 ---
 title: "Providers & API keys"
 section: "inference"
-description: "Route to OpenAI, Anthropic, or Google with a provider:model spec, and supply the API key by environment variable or stored config."
-source: "strata-core@v1.0.0"
+description: "Configure OpenAI, Anthropic, and Google provider keys for cloud inference."
+source: "strata-core@v1.1.0"
 ---
 
-Cloud inference routes on the spec prefix: `openai:`, `anthropic:`, or `google:`
-(the fourth provider, `local:`, runs [on-device](/docs/inference/local-models)).
-Each cloud provider needs an API key. Strata never bundles one — you bring your
-own — and reads it from one of two places.
+Cloud inference uses a `provider:model` spec and a key you supply.
 
-## The providers
-
-| Provider | Spec prefix | Key variable | Get a key |
-|----------|-------------|--------------|-----------|
+| Provider | Spec prefix | Environment variable | Key page |
+|---|---|---|---|
 | OpenAI | `openai:` | `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | Anthropic | `anthropic:` | `ANTHROPIC_API_KEY` | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
 | Google | `google:` | `GOOGLE_API_KEY` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
 
-A spec like `openai:gpt-4o-mini` picks the provider and the model in one token.
-`inference capability <spec>` reports `requires_api_key` and `requires_network`
-for a spec without calling the provider.
-
-## Supply the key by environment variable
-
-The simplest path: export the provider's variable. The inference runtime reads it
-directly.
+## Use An Environment Variable
 
 ```bash
-export OPENAI_API_KEY="sk-…"
-strata --cache inference generate openai:gpt-4o-mini "Write a haiku about databases" --max-tokens 40
+export OPENAI_API_KEY="sk-..."
+strata --cache inference generate openai:gpt-4o-mini "Write one sentence about branch isolation." --max-tokens 40
 ```
 
-With the key unset, the call refuses **before** touching the network:
+Environment variables are the simplest path for local shells and CI jobs.
+
+## Store A Default Key
+
+Use Strata config when you want a default key outside the shell environment:
 
 ```bash
-strata --cache inference generate openai:gpt-4o-mini "Write a haiku about databases" --max-tokens 40
-```
-
-```text
-inference.missing_api_key: provider error: OPENAI_API_KEY not set (required for openai provider)
-  hint: Set the provider API key and retry.
-  ref: https://stratadb.org/e/inference.missing_api_key
-```
-
-## Store the key in config
-
-To avoid exporting a variable in every shell, store the key in the global Strata
-config with `strata config set <provider>.api_key`. The settable keys are
-`openai.api_key`, `anthropic.api_key`, and `google.api_key` (plus `hub.url`).
-Keys are written with `0600` permissions and are never echoed back in plaintext.
-
-```bash
-strata config set openai.api_key "sk-…"
+strata config set openai.api_key "sk-..."
 strata config get-key openai.api_key
 ```
 
-```text
-{"key":"openai.api_key","set":true,"value":"sk-…"}
+`get-key` reports whether the key is set and returns a redacted preview. Remove a
+stored key with:
+
+```bash
+strata config unset openai.api_key
 ```
 
-`config get-key` reports whether a key is set and shows only a redacted preview,
-never the raw value. Remove one with `strata config unset openai.api_key`, and
-print the config file's location with `strata config path`.
+Stored keys live in the global Strata config file with restricted permissions.
+Find the file with:
 
-## Resolution order
+```bash
+strata config path
+```
 
-When both are present, **the environment variable wins.** On startup Strata
-copies any stored key into its environment variable *only if that variable is
-not already set*, so an exported `OPENAI_API_KEY` always overrides the stored
-one. This lets you keep a default key in config and override it per-shell or
-per-CI-job without editing the file.
+## Resolution Order
 
-1. `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY` in the environment.
-2. Otherwise, the key stored by `strata config set <provider>.api_key`.
-3. Otherwise, the call refuses with `inference.missing_api_key`.
+Environment wins over config:
 
-## Errors worth knowing
+1. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GOOGLE_API_KEY`.
+2. A key stored by `strata config set <provider>.api_key`.
+3. No key: the call fails before network access.
 
-- [`inference.missing_api_key`](/e/inference.missing_api_key) — no key for the
-  provider (from either source).
-- [`inference.provider_auth_failed`](/e/inference.provider_auth_failed) — the
+## Check A Model
+
+```bash
+strata --cache inference capability openai:gpt-4o-mini
+```
+
+Use `requires_api_key` and `requires_network` to decide whether a call can run in
+the current environment.
+
+## Errors To Handle
+
+- [`inference.missing_api_key`](/e/inference.missing_api_key): no key for the
+  selected provider.
+- [`inference.provider_auth_failed`](/e/inference.provider_auth_failed): the
   provider rejected the key.
-- [`inference.provider_unavailable`](/e/inference.provider_unavailable) — unknown
-  provider prefix, or the provider could not be reached.
-- [`inference.provider_rate_limited`](/e/inference.provider_rate_limited) and
-  [`inference.provider_timeout`](/e/inference.provider_timeout) — transient
-  provider conditions; retry per the error's policy.
-
-Match on the code, never the message — see
-[error handling](/docs/guides/error-handling).
+- [`inference.provider_rate_limited`](/e/inference.provider_rate_limited): retry
+  according to the error policy.
+- [`inference.provider_timeout`](/e/inference.provider_timeout): provider request
+  timed out.
 
 ## Related
 
-- [Inference](/docs/inference) — the model, catalog, and operations
-- [Local models](/docs/inference/local-models) — the on-device alternative that
-  needs no key
+- [Inference](/docs/inference)
+- [Local models](/docs/inference/local-models)

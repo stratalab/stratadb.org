@@ -1,46 +1,35 @@
 ---
 title: "Guides"
 section: "guides"
-description: "Cross-cutting how-to: branching, time travel, spaces, configuration, import/export, deployment, and migration — the surfaces that apply across every primitive."
-source: "strata-core@v1.0.0"
+description: "Cross-cutting workflows: branching, time travel, spaces, configuration, import/export, deployment, and migration."
+source: "strata-core@v1.1.0"
 ---
 
-These guides are the **cross-cutting** how-to — the surfaces that apply across
-every capability rather than to one data shape. Each is a hands-on walkthrough
-you can follow against a running database; every command and output shown was
-produced by the shipped `strata` binary.
-
-Looking for a specific data primitive? Those live in
-[Working with Data](/docs/data/key-value). Running models is
-[Inference](/docs/inference); driving Strata from an agent is
-[For AI agents](/docs/agents). If you are brand new, start with
-[Your first database](/docs/getting-started/first-database).
+Guides cover workflows that cut across data shapes. Start with the primitive
+docs when you are choosing where data belongs; come here when you need operating
+rules, movement, or deployment shape.
 
 ## History and isolation
 
-- [Branching workflows](/docs/guides/branching-workflows) — list, create empty branches, fork from the tip or a past point, and delete.
-- [Time travel](/docs/guides/time-travel) — read the past with `--as-of`, list history, and reproduce state at a point in time.
-- [Spaces](/docs/guides/spaces) — organize data into named product spaces within a branch.
+- [Branching workflows](/docs/guides/branching-workflows)
+- [Time travel](/docs/guides/time-travel)
+- [Spaces](/docs/guides/spaces)
 
 ## Operating a database
 
-- [Configuration](/docs/guides/configuration) — the `strata config` verbs and hub URL resolution.
-- [Error handling](/docs/guides/error-handling) — the coded error model, retry policy, and JSON error shape.
-- [Observability](/docs/guides/observability) — `ping`, `info`, `health`, `metrics`, `describe`, and `doctor`.
+- [Configuration](/docs/guides/configuration)
+- [Error handling](/docs/guides/error-handling)
+- [Observability](/docs/guides/observability)
 
-## Moving data in and out
+## Moving data
 
-- [Import & export](/docs/guides/import-export) — move primitives to and from Parquet, CSV, and JSON lines.
-- [Cloning datasets](/docs/guides/cloning-datasets) — clone a prepared dataset from a hub into a local database.
-- [Migrating](/docs/guides/migrating) — bring data over from SQLite, DuckDB, or Redis.
+- [Import and export](/docs/guides/import-export)
+- [Cloning datasets](/docs/guides/cloning-datasets)
+- [Migrating](/docs/guides/migrating)
 
-## Shipping it
+## Shipping
 
-- [Deploying](/docs/guides/deploying) — embed in an app, run in the browser, and target the edge.
+- [Deploying](/docs/guides/deploying)
 
-## Reference
-
-When you want the exhaustive surface rather than a walkthrough, see the
-[CLI reference](/docs/reference/cli), the generated
-[command reference](/docs/reference/kv), and the
-[error reference](/docs/reference/error-reference).
+For exhaustive command syntax, use the [reference](/docs/reference). For the
+first hands-on path, use [Your first database](/docs/getting-started/first-database).

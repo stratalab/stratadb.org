@@ -7,7 +7,9 @@ interface Props {
 const { items, class: className = '' } = Astro.props;
 ---
 
-<ul class={`flex flex-wrap items-center justify-center font-mono text-mono-sm text-ink-mid ${className}`}>
+<ul
+  class={`flex flex-wrap items-center justify-center font-mono text-mono-sm text-ink-mid ${className}`}
+>
   {
     items.map((item, i) => (
       <li class="flex items-center">

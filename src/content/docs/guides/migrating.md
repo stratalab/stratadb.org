@@ -2,7 +2,7 @@
 title: "Migrating"
 section: "guides"
 description: "Bring data over from SQLite, DuckDB, or Redis by exporting to a columnar file and importing it into a primitive."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Strata is not a relational database, so migrating into it is a **mapping**

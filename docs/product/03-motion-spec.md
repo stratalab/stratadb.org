@@ -1,15 +1,15 @@
 # Motion Spec — stratadb.org
 
-| | |
-|---|---|
-| Status | **Signed off** (2026-06-11) |
-| Owner | Ani (product) · Claude (drafting) |
-| Last updated | 2026-06-11 |
-| Upstream | 02-design-language.md §8 (brand motion principles), 00-prd.md R8 (executor) |
-| Downstream | 04-experience (storyboards must conform), 05-components, 06-engineering |
+|              |                                                                             |
+| ------------ | --------------------------------------------------------------------------- |
+| Status       | **Signed off** (2026-06-11)                                                 |
+| Owner        | Ani (product) · Claude (drafting)                                           |
+| Last updated | 2026-06-11                                                                  |
+| Upstream     | 02-design-language.md §8 (brand motion principles), 00-prd.md R8 (executor) |
+| Downstream   | 04-experience (storyboards must conform), 05-components, 06-engineering     |
 
-This is the site's motion *system* — the vocabulary, budgets, and gates every animation
-obeys. Doc 04's storyboards choreograph *with* this system; they may not extend it.
+This is the site's motion _system_ — the vocabulary, budgets, and gates every animation
+obeys. Doc 04's storyboards choreograph _with_ this system; they may not extend it.
 Foundry and the Hub apply the five brand principles (02 §8) directly and ignore Tier 2.
 
 **The prime directive, inherited from 02 §8: motion shows what the system did.** Forks
@@ -21,6 +21,7 @@ depicting a data operation or guiding attention gets cut in review.
 ## 1. Motion tokens
 
 ### Durations (CSS custom properties)
+
 ```
 --dur-1: 120ms   instant feedback (press, focus-adjacent)
 --dur-2: 200ms   hover, color/border state
@@ -30,6 +31,7 @@ depicting a data operation or guiding attention gets cut in review.
 ```
 
 ### Easings
+
 ```
 --ease-out:    cubic-bezier(0.16, 1, 0.3, 1)    entrances, reveals (fast arrival, soft landing)
 --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)   A→B movement within the canvas
@@ -37,6 +39,7 @@ linear                                           scrub interpolation only
 ```
 
 ### Springs (motion/react, JS islands only)
+
 ```
 spring-snap:   { stiffness: 500, damping: 30 }            presses, toggles, chips
 spring-settle: { stiffness: 260, damping: 26 }            panels splitting/joining (the terminal fork)
@@ -53,8 +56,8 @@ same property. No values outside this table without a spec amendment.
   as one); triggers at 20% visibility via one shared IntersectionObserver; plays **once**.
 - **Micro-interactions:** hover = color/border only at `--dur-2`; press = 1px translateY
   at `--dur-1`; focus rings appear instantly (never animated — a11y).
-- **Terminal typing:** 24–40ms jittered per keystroke for *commands*; a 300ms beat; then
-  *output* prints line-by-line at 40ms stagger with no per-character animation (commands
+- **Terminal typing:** 24–40ms jittered per keystroke for _commands_; a 300ms beat; then
+  _output_ prints line-by-line at 40ms stagger with no per-character animation (commands
   are typed, output is printed — the distinction reads as real).
 - **Cursor blink:** 1.06s `steps(2)` — the **only infinite animation on the site**.
 - Hover may never move layout. Reveals may never re-trigger.
@@ -63,9 +66,10 @@ same property. No values outside this table without a spec amendment.
 
 **The covenant: never hijack scroll.** The page always scrolls 1:1 with the user's
 input — no scroll-jacking, no synthetic smoothing, no momentum overrides. Scroll position
-*drives values*; it is never driven.
+_drives values_; it is never driven.
 
 ### 3.1 Parallax (depth, exactly two sites)
+
 - **Hero:** horizon glow at 0.85×, set-piece at 1.0×, stat strip at 1.04×. Max relative
   drift 48px across the hero's scroll range.
 - **Section seams:** decorative layers may drift ±24px max as sections enter.
@@ -73,13 +77,14 @@ input — no scroll-jacking, no synthetic smoothing, no momentum overrides. Scro
 - Touch devices: parallax off entirely (jank risk + no hover-class hardware).
 
 ### 3.2 Scrub set-pieces (max two per page)
+
 The **branch story** (fork → modify → diff → merge; added 2026-06-12 — the slot freed
 when the Foundry scrub was cut in the seven-section restructure) and the **time-travel
 strip**. At the cap. Mechanics:
 
 - Sticky container; scroll ownership ≤ 2.5 viewport-heights per piece.
 - Scenes occupy progress bands; transitions crossfade/transform over a 12% progress
-  window — *soft* boundaries, no magnetic snapping (snapping is scroll-hijacking).
+  window — _soft_ boundaries, no magnetic snapping (snapping is scroll-hijacking).
 - Scrubbed values pass through `spring-scrub` for smoothing; interpolation itself is
   linear.
 - A caption rail advances with scenes; captions are real DOM text (selectable,
@@ -88,6 +93,7 @@ strip**. At the cap. Mechanics:
   scenes, same captions.
 
 ### 3.3 Implementation constraints
+
 - `motion/react` `useScroll` + motion values; values bypass React re-render (no
   setState-per-frame).
 - One passive scroll sampler per page, shared.
@@ -107,6 +113,7 @@ WasmExecutor   — same events, outputs produced live by the engine (when R8 lan
 ```
 
 Motion-layer rules that make the swap invisible:
+
 - Command typing always uses Tier-1 cadence regardless of executor.
 - Output waits a minimum 300ms beat (real wasm may be faster — hold the beat) and a
   maximum 1.2s; beyond that, show a dim `…` in the output position (no spinners inside
@@ -142,8 +149,9 @@ the engine.
 - Max 2 scrub pieces (census 2026-06-12, twice-revised: branch + the PRIMITIVES PIN —
   the slot freed by the time-travel slider conversion was reclaimed same day by the
   Foundry-window tab tour, Ani: "make it so the scroll doesn't just blow past it";
-  the pin steps the five views, and clicking a view JUMPS the scroll to its band so
-  pointer and pin never fight), max 2 parallax sites, **3 infinite animations** — the
+  the pin steps the five views, while pointer/keyboard selection changes the active
+  view in place and never drives page scroll), max 2 parallax sites, **3 infinite
+  animations** — the
   cursor;
   (amendment 2026-06-12, Ani: "the hero shouldn't be static") the hero's breathing
   backdrop: three light fields, transform-only, 22–36s periods, off under reduced
@@ -157,15 +165,15 @@ the engine.
 `prefers-reduced-motion` is honored via one source of truth (`data-motion="reduced"` on
 `<html>`, set pre-paint). Parity map:
 
-| Effect | Reduced behavior |
-|---|---|
-| Entrance reveals | Opacity-only, 200ms |
-| Parallax | Off |
-| Scrub set-pieces | Static scenes with visible Prev/Next steppers — same content, user-controlled |
-| Terminal typing | Completed transcript rendered immediately |
-| Split/merge choreography | Final state shown; before/after as static panels |
-| Cursor blink | Steady block |
-| Micro-interactions | Color/border changes keep `--dur-2`; transforms drop |
+| Effect                   | Reduced behavior                                                              |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| Entrance reveals         | Opacity-only, 200ms                                                           |
+| Parallax                 | Off                                                                           |
+| Scrub set-pieces         | Static scenes with visible Prev/Next steppers — same content, user-controlled |
+| Terminal typing          | Completed transcript rendered immediately                                     |
+| Split/merge choreography | Final state shown; before/after as static panels                              |
+| Cursor blink             | Steady block                                                                  |
+| Micro-interactions       | Color/border changes keep `--dur-2`; transforms drop                          |
 
 Reduced motion is never less content, navigation, or meaning — only less movement.
 

@@ -30,7 +30,8 @@ export function completedState(script: ScriptEvent[]): TerminalState {
   const state: TerminalState = { main: [], fork: [], split: false, merged: false };
   for (const e of script) {
     if (e.type === 'cmd') state[e.panel].push({ kind: 'cmd', text: e.text, branch: e.branch });
-    else if (e.type === 'output') state[e.panel].push({ kind: 'output', text: e.text, tone: e.tone });
+    else if (e.type === 'output')
+      state[e.panel].push({ kind: 'output', text: e.text, tone: e.tone });
     else if (e.type === 'split') state.split = true;
     else if (e.type === 'merge') state.merged = true;
   }

@@ -1,88 +1,84 @@
 ---
 title: "Local models"
 section: "inference"
-description: "Run GGUF models in-process — pulling them, the model directory, the resident-model cache, and the local build feature."
-source: "strata-core@v1.0.0"
+description: "Run local GGUF models when the installed binary was built with local inference support."
+source: "strata-core@v1.1.0"
 ---
 
-Local inference runs a GGUF model **in-process**, with no network and no API key.
-Generation, embedding, ranking, and tokenization all work against a local model
-named by a bare spec (`tinyllama`, `miniLM`). This is the path for offline,
-private, or air-gapped use — the data and the model never leave the machine.
+Local inference runs GGUF models in the Strata process. Use it when you want a
+model call without a hosted provider, or when you need embeddings and test
+generation to work offline.
 
-## The local build feature
+Local support is a build capability. The default product path is still explicit:
+inspect the model before you rely on it.
 
-Local execution paths require a binary **built with the local inference
-feature**. The default distribution is cloud-first; when the local feature is
-absent, a local call refuses with a clear code rather than silently doing
-nothing:
+## Check a model
 
 ```bash
-strata --cache inference generate tinyllama "Hello" --max-tokens 5
+strata --cache inference capability miniLM
 ```
 
-```text
-inference.unsupported_operation: not supported: local generation requires the local feature
-  hint: Inspect inference configuration and retry with supported settings.
-  ref: https://stratadb.org/e/inference.unsupported_operation
-```
+The capability response tells you whether the model can embed, generate, rank,
+or tokenize, whether it needs an API key, and whether it is available locally.
+For scripts, add `--json` and branch on the returned fields instead of parsing
+human text.
 
-Check `provider_feature_enabled` in `inference capability <spec>` before relying
-on a local model in a script. When the feature is present, the operations
-documented in [Inference](/docs/inference#the-operations) run against local
-models, and two `generate` refinements become available: `--stop-token <id>` and
-`--grammar <gbnf>`.
-
-GPU acceleration for local models ships separately from the default CPU build
-(for example, the `stratadb[cuda]` Python wheel); the base CLI runs local models
-on CPU.
-
-## Pulling models
-
-`inference models pull <spec>` downloads a model into the local model directory.
-It reads:
-
-- `STRATA_MODELS_DIR` — the destination directory for downloaded models.
-- `STRATA_HF_ENDPOINT` — the Hugging Face endpoint to fetch from.
-- `STRATA_HF_TOKEN` (or `HF_TOKEN`) — a token for gated repositories.
-
-Pulling requires network access. Once pulled, a model appears in `inference
-models local` and runs offline thereafter.
+## List and pull
 
 ```bash
+strata --cache inference models list
 strata --cache inference models local
+strata --cache inference models pull miniLM
 ```
 
-```text
-miniLM	embed	bert	f16	local	42.9 MB
-tinyllama	generate	llama	q4_k_m	local	638.9 MB
+`models list` shows the catalog. `models local` shows artifacts already present
+on disk. `models pull` downloads a catalog model or model spec into the local
+model directory.
+
+The pull command honors:
+
+- `STRATA_MODELS_DIR`
+- `STRATA_HF_ENDPOINT`
+- `STRATA_HF_TOKEN` or `HF_TOKEN` for gated repositories
+
+## Run
+
+Use the same inference verbs as hosted providers. The model name decides whether
+the call is local or remote.
+
+```bash
+strata --cache inference embed miniLM "branch-aware database"
+strata --cache inference rank jina-reranker-v1-tiny "database branches" "fork a database" "store a blob"
+strata --cache inference generate tinyllama "Explain MVCC in one paragraph." --max-tokens 120
 ```
 
-## The resident-model cache
+Generation has local-only options for constrained decoding and load behavior:
 
-Local models stay resident after first use, so repeated calls skip the load cost.
-`inference cache-status` reports what is currently loaded:
+```bash
+strata --cache inference generate tinyllama "Return a JSON object." \
+  --response-schema schema.json \
+  --n-ctx 4096 \
+  --n-gpu-layers -1
+```
+
+If a provider or model does not support the requested operation, Strata returns
+`inference.unsupported_operation`. If the artifact is missing, it returns
+`inference.missing_model`.
+
+## Model cache
+
+Loaded local models stay in the process cache while the process is alive.
 
 ```bash
 strata --cache inference cache-status
+strata --cache inference unload tinyllama
+strata --cache inference unload
 ```
 
-```text
-{
-  "embedding_models": [],
-  "generation_models": [],
-  "ranking_models": []
-}
-```
-
-`inference unload <spec>` evicts one cached model; `inference unload` with no
-argument evicts everything. When nothing matches, it reports `no cached entry`.
-Unloading frees memory without deleting the model from disk — the next call
-reloads it.
+Omit the model name on `unload` to clear the cache.
 
 ## Related
 
-- [Inference](/docs/inference) — the model, catalog, and operations
-- [Providers & API keys](/docs/inference/providers-and-keys) — the cloud
-  alternative
-- [Vectors](/docs/data/vectors) — where local embeddings are stored and searched
+- [Inference](/docs/inference)
+- [Providers and keys](/docs/inference/providers-and-keys)
+- [Inference reference](/docs/reference/inference)

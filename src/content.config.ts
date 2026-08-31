@@ -1,7 +1,16 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+const markdownId = ({ entry }: { entry: string }) =>
+  entry.replace(/\.(?:md|mdx)$/, '').replaceAll('\\', '/');
 
 const docsCollection = defineCollection({
-  type: 'content',
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/docs',
+    generateId: markdownId,
+  }),
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
@@ -13,7 +22,11 @@ const docsCollection = defineCollection({
 });
 
 const architectureCollection = defineCollection({
-  type: 'content',
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/architecture',
+    generateId: markdownId,
+  }),
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
@@ -21,7 +34,6 @@ const architectureCollection = defineCollection({
   }),
 });
 
-// (The unused `reference` collection was removed 2026-06-12 — 01 §6 cleanup.)
 export const collections = {
   docs: docsCollection,
   architecture: architectureCollection,

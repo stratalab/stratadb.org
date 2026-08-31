@@ -1,107 +1,54 @@
 ---
 title: "Branches"
 section: "concepts"
-description: "Branches are the isolation model: every value lives in a branch, forks are cheap, and writes on one branch stay invisible to another."
+description: "Branches isolate database state: fork a branch, change it, preview a merge, and promote the result."
 source: "strata-core@v1.1.0"
 ---
 
-A **branch** is an isolated namespace for data. Every value in StrataDB lives inside a branch, and every capability — KV, JSON, event log, vectors, graphs — is branch-aware. Branches are how you keep one agent session, experiment, or tenant from seeing another's data, without copying the whole database.
+A branch is an isolated database view. Every key, document, event, vector, and
+graph row belongs to a branch. A new database starts with `default`.
 
-A database always has a `default` branch. You never create it; it is there the moment the database exists.
+## Fork
 
-## Forking a branch
-
-`branch fork` creates a new branch from an existing one. The fork starts as a copy-on-write view of its parent — you see the parent's data, but your writes go only to your branch.
+`branch fork <source> <name>` creates a copy-on-write branch. It sees the
+source branch at the fork point, but later writes stay on the fork.
 
 ```bash
 strata ./db kv put city london
 strata ./db branch fork default experiment
-strata ./db kv put city tokyo --branch experiment
+strata ./db --branch experiment kv put city tokyo
 ```
 
-Reading each branch shows the isolation:
+```bash
+strata ./db --branch experiment kv get city
+strata ./db --branch default kv get city
+```
 
 ```text
-$ strata ./db kv get city --branch experiment
 tokyo
-$ strata ./db kv get city
 london
 ```
 
-The write on `experiment` never touched `default`. Forking is cheap because nothing is copied up front; the branch records its parent and the commit version it forked from:
+Nothing is copied up front. The branch records its parent and fork version.
 
-```text
-$ strata ./db branch get experiment
-{
-  "branch_id": "1a29fdd4-745b-5b66-ad18-75b3cf51cef6",
-  "created_at": 3,
-  "deleted_at": null,
-  "generation": 1,
-  "name": "experiment",
-  "parent": {
-    "branch_id": "00000000-0000-0000-0000-000000000000",
-    "fork_timestamp": null,
-    "fork_version": 3,
-    "generation": 1,
-    "name": "default"
-  },
-  "state_revision": 0,
-  "status": "active"
-}
+## Create An Empty Branch
+
+`branch create <name>` makes a root branch with no parent data:
+
+```bash
+strata ./db branch create scratch
+strata ./db --branch scratch kv get city
 ```
 
-The `parent` block names the branch you forked from and the `fork_version` you forked at; `default` always has the all-zero `branch_id`.
-
-## Empty branches
-
-`branch create` makes a fresh **root** branch with no parent and no data — useful when you want a clean namespace rather than a fork of existing state.
-
 ```text
-$ strata ./db branch create fresh
-$ strata ./db kv get city --branch fresh
 (nil)
 ```
 
-## Listing and inspecting
+Use `create` for a clean namespace. Use `fork` when you want existing state.
 
-```bash
-strata ./db branch list            # every branch, one per line
-strata ./db branch get experiment  # one branch's metadata
-strata ./db branch delete fresh    # remove a branch and its data
-```
+## Compare Before You Promote
 
-Branch generations are monotonic per name: delete a branch and create it again, and the new one has a higher generation, so stale references never silently resolve to fresh data.
-
-## Forking a point in time
-
-A fork does not have to start from the tip. Pass `--version` or `--timestamp` to fork from a retained point in the source branch's history:
-
-```bash
-strata ./db branch fork default older --version 3
-```
-
-The new branch sees the source exactly as it stood at that version, while the source keeps moving forward:
-
-```text
-$ strata ./db kv get x --branch older
-v1
-$ strata ./db kv get x
-v2
-```
-
-## Safety rules
-
-- The `default` branch cannot be deleted. Attempting it fails with `invalid_argument.engine.branch_delete`.
-- Cross-branch references are rejected — you cannot point an operation at data in a branch other than the one it targets.
-- Promotion is deliberate, never a silent auto-resolve: `branch merge` refuses divergent conflicts under the default `strict` strategy (`conflict.engine.promotion`) rather than guessing a winner. See [Comparing and promoting branches](#comparing-and-promoting-branches).
-
-## Comparing and promoting branches
-
-Diverged branches are not a dead end. Three verbs inspect and reconcile them:
-
-- `branch diff <a> <b>` reports what differs between two branches across every capability — KV, JSON, vectors, events, and graphs — grouped by space, as entries added, removed, or modified. It is read-only and directional from `a` to `b`.
-- `branch preview <source> <target>` runs a three-way comparison from the fork point and reports the conflicts a promotion would hit, without touching either branch.
-- `branch merge <source> <target>` promotes the source's changes into the target as a single atomic commit, leaving the source unchanged.
+Use three verbs when a branch is ready to come back:
 
 ```bash
 strata ./db branch diff default experiment
@@ -109,38 +56,55 @@ strata ./db branch preview experiment default
 strata ./db branch merge experiment default
 ```
 
-Promotion applies to KV, JSON, and vector data (with their collection configs). Event streams and graphs are compared but never merged — divergent append-only and structural data cannot be three-way merged — so a promotion leaves them untouched.
+- `diff` is read-only. It reports changes by capability and space.
+- `preview` reports the conflicts a merge would hit.
+- `merge` applies the source into the target as one commit.
 
-By default (`--strategy strict`) a promotion refuses with `conflict.engine.promotion` and mutates nothing when both branches changed the same entity differently since the fork point. `--strategy source-wins` instead applies the source's value or tombstone for each conflict. Branches with no shared fork lineage are rejected with `invalid_argument.engine.branch_point`.
+In `v1.1.0`, merge applies key-value, JSON, and vector changes. Events and
+graphs are compared but not merged.
 
-## Choosing a branch per command
+The default merge strategy is `strict`: if both sides changed the same entity
+since the fork point, the merge refuses with `conflict.engine.promotion`.
+`--strategy source-wins` takes the source side for conflicts.
 
-One-shot commands take `--branch <name>`; without it they target `default`. This is the clearest way to script against a specific branch, because each process is independent:
+## Fork From The Past
+
+A fork can start from a retained point in history:
 
 ```bash
-strata ./db kv put status ready --branch session-42
-strata ./db kv get status --branch session-42
+strata ./db branch fork default older --version 3
+strata ./db branch fork default yesterday --timestamp 12
 ```
 
-In the interactive REPL (`strata ./db` with no command), the branch is sticky: `use <branch>` — or passing `--branch` on any line — switches the current branch for the lines that follow, and the prompt reflects it.
+Use a version or commit timestamp from the source branch. The new branch starts
+at that point while the source keeps moving.
+
+## Choose A Branch
+
+One-shot commands default to `default`. Pass `--branch` when you want another
+branch:
+
+```bash
+strata ./db --branch experiment kv get city
+```
+
+In the REPL, switch the current context:
 
 ```text
 strata:default/default> use experiment
 strata:experiment/default>
 ```
 
-## When to use branches
+## Safety Rules
 
-| Scenario | Pattern |
-|----------|---------|
-| Each agent session gets its own state | One branch per session id |
-| A/B testing two strategies | One branch per variant, compare, keep the winner |
-| Safe experiments | Fork, try changes, delete the branch if it goes wrong |
-| Multi-tenant isolation | One branch per tenant |
-| Reproducible snapshots | Fork at a known point and read it later |
+- `default` cannot be deleted.
+- Deleted branch names get a new generation if reused.
+- Cross-branch references are rejected.
+- Merge is explicit; StrataDB does not auto-promote branch changes.
 
 ## Next
 
-- [Commits](/docs/concepts/commits) — how writes on a branch become versioned and durable
-- [Branch Management Guide](/docs/guides/branching-workflows) — the full branch API
-- [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches) and [Multi-Agent Coordination](/docs/cookbook/multi-agent-coordination) — worked patterns
+- [Commits](/docs/concepts/commits) for write versions.
+- [Time travel](/docs/concepts/time-travel) for `--as-of`.
+- [Branching workflows](/docs/guides/branching-workflows) for the command-level
+  guide.

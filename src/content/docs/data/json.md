@@ -1,213 +1,107 @@
 ---
 title: "JSON documents"
 section: "data"
-description: "Store JSON documents, read and update them by path, and index fields."
-source: "strata-core@v1.0.0"
+description: "Store JSON documents, update fields by path, and index fields when lookup matters."
+source: "strata-core@v1.1.0"
 ---
 
-The JSON store keeps a JSON document under a string key and lets you read or
-write individual values inside it by path. Use it when your data has structure
-you want to address directly — a user record, a config object, an agent's
-working state — rather than an opaque blob. Like every
-[primitive](/docs/concepts/primitives), documents are branch-aware and
-versioned.
+Use JSON when the value has structure you want to address directly: user records,
+configuration, agent working memory, portfolio state, or any document where a
+single field may change without replacing the whole thing.
 
-Examples below were run against the shipped binary. Use a directory path for a
-durable database or `--cache` for a throwaway run.
+Use [KV](/docs/data/key-value) for opaque values. Use [events](/docs/data/events)
+when changes should be append-only.
 
-## Set and get by path
+## Set And Get
 
-`json set <key> <path> <value>` writes a value at a path. The path `$` is the
-whole document; `$.field` addresses a top-level field, and paths nest with dots.
-The value is parsed as JSON — text that is not valid JSON is stored as a string;
-use `@path` or `-f <file>` to read the value from a file.
+`$` is the document root. Paths like `$.score` address fields.
 
 ```bash
-strata ./mydb json set user:1 '$' '{"name":"Ada","age":36,"tags":["math","logic"]}'
+strata ./mydb json set user:1 '$' '{"name":"Ada","score":95}'
 strata ./mydb json get user:1 '$'
-strata ./mydb json get user:1 '$.name'
+strata ./mydb json get user:1 '$.score'
 ```
 
 ```text
 created user:1 applied=true
-{"age":36,"name":"Ada","tags":["math","logic"]}
-"Ada"
+{"name":"Ada","score":95}
+95
 ```
 
-Update one field without rewriting the document, and add a new field the same
-way:
+Update one field:
 
 ```bash
-strata ./mydb json set user:1 '$.age' 37
-strata ./mydb json set user:1 '$.email' '"ada@example.com"'
-strata ./mydb json get user:1 '$'
+strata ./mydb json set user:1 '$.score' 99
 ```
 
 ```text
 updated user:1 applied=true
-updated user:1 applied=true
-{"age":37,"email":"ada@example.com","name":"Ada","tags":["math","logic"]}
 ```
 
-Writing `$` again replaces the entire document — JSON merge in this release is
-document-level, not field-level, so a full-document set overwrites fields you
-omit. To change one field, target its path.
+Setting `$` again replaces the whole document. To change one field, target that
+field's path.
 
-## Delete a path
-
-`json delete <key> <path>` removes a value. Deleting `$` removes the whole
-document; deleting `$.email` removes just that field.
+## Delete
 
 ```bash
-strata ./mydb json delete user:1 '$.email'
+strata ./mydb json delete user:1 '$.score'
 ```
 
-```text
-deleted user:1 applied=true
-```
+Deleting `$` removes the document. Deleting a nested path removes that field.
 
-Reading a missing path or a missing document is not an error — it reports that
-nothing was found:
+A missing document or path is represented as not found. It is not the same as an
+invalid request.
+
+## Find Documents
+
+These commands operate on document keys:
 
 ```bash
-strata --json ./mydb json get user:1 '$.nope'
-```
-
-```text
-{"data":{"found":false,"value":null},"type":"json_versioned_value"}
-```
-
-## List, count, exists, sample
-
-These operate on document keys, mirroring the KV verbs:
-
-```bash
-strata ./mydb json list
+strata ./mydb json list --prefix user:
 strata ./mydb json count
-strata ./mydb json exists user:2
+strata ./mydb json exists user:1
+strata ./mydb json sample --count 5
 ```
 
-```text
-user:1
-user:2
-user:3
-3
-true
-```
-
-`json list --prefix <p>` filters by key prefix and pages via `--cursor`;
-`json sample --count <n>` returns an arbitrary handful of documents.
-
-## History and time travel
-
-Each write retains prior document versions. `json history` lists them
-newest-first, and every read verb accepts `--as-of <timestamp>` (the
-`commit.timestamp` from a write receipt) to read an earlier snapshot.
+Create a secondary index when a field becomes a common lookup dimension:
 
 ```bash
-strata ./mydb json history user:1
-```
-
-```text
-{"document_version":4,"timestamp":6,"tombstone":false,"value":{"age":37,"name":"Ada","tags":["math","logic"]},"version":6}
-{"document_version":3,"timestamp":5,"tombstone":false,"value":{"age":37,"email":"ada@example.com","name":"Ada","tags":["math","logic"]},"version":5}
-```
-
-Documents are branch-scoped. Fork a branch, write there, and the parent branch
-keeps its own version. See [Branches](/docs/concepts/branches).
-
-## Secondary indexes
-
-Index a field to accelerate retrieval over it. `json index create <name>
-<field-path>` supports three index types — `tag` (default, string equality),
-`numeric`, and `text` (lowercased).
-
-```bash
-strata ./mydb json index create by_age '$.age' --index-type numeric
-```
-
-```text
-{
-  "created_timestamp": 9,
-  "created_version": 9,
-  "field_path": "age",
-  "index_type": "numeric",
-  "name": "by_age",
-  "space": "default"
-}
-```
-
-`json index list` then shows the index, one compact record per line:
-
-```bash
+strata ./mydb json index create by_score '$.score' --index-type numeric
 strata ./mydb json index list
 ```
 
-```text
-{"created_timestamp":9,"created_version":9,"field_path":"age","index_type":"numeric","name":"by_age","space":"default"}
-```
+Index types are `tag`, `numeric`, and `text`.
 
-`json index drop <name>` removes it. Creating an index whose name already exists
-fails:
+## History And Branches
 
-```bash
-strata --json ./mydb json index create by_age '$.age' --index-type numeric
-```
-
-```text
-{"error":{"class":"already_exists","code":"already_exists.engine.json_index","retry_policy":"never","retryable":false,"commit_outcome":"not_started","message":"JSON index already exists","suggested_fix":"Reload the current state and retry the operation against the latest version.","docs_url":"https://stratadb.org/e/already_exists.engine.json_index","reference_id":"err_local_009f7060_000001"}}
-```
-
-## Error cases worth knowing
-
-Writing into a path whose parent is the wrong type is rejected — here, setting
-`$.name.first` when `name` is a string:
+JSON writes are versioned and branch-scoped.
 
 ```bash
-strata --json ./mydb json set user:1 '$.name.first' '"x"'
+strata ./mydb json history user:1
+strata ./mydb json get user:1 '$' --as-of <timestamp-from-receipt>
 ```
 
-```text
-{"error":{"class":"invalid_argument","code":"invalid_argument.engine.json_path_type","retry_policy":"never","retryable":false,"commit_outcome":"not_started","message":"JSON path expected object","suggested_fix":"Correct the request input and retry the operation.","docs_url":"https://stratadb.org/e/invalid_argument.engine.json_path_type","reference_id":"err_local_0e8cc4e8_000001"}}
+Fork a branch to try document changes in isolation:
+
+```bash
+strata ./mydb branch fork default experiment
+strata ./mydb --branch experiment json set user:1 '$.score' 100
+strata ./mydb --branch default json get user:1 '$.score'
 ```
 
-Related codes include
-[/e/invalid_argument.engine.json_document](/e/invalid_argument.engine.json_document)
-for an invalid document id and
-[/e/already_exists.engine.json_index](/e/already_exists.engine.json_index).
-Match on the code, not the message — see
-[error handling](/docs/guides/error-handling).
+`branch merge` can promote JSON changes back to the target branch. In `v1.1.0`,
+JSON merge is whole-document granularity.
 
-## When to use JSON vs other primitives
+## Errors To Handle
 
-- Use **JSON** when you address fields inside a document by path or index by
-  field.
-- Use [KV](/docs/data/key-value) for opaque values with no structure to query.
-- Use [Vectors](/docs/data/vectors) for similarity search.
-- Use the [Event Log](/docs/data/events) for an append-only, ordered
-  history.
+Writing through the wrong parent type fails with
+[`invalid_argument.engine.json_path_type`](/e/invalid_argument.engine.json_path_type).
+Creating an index with a taken name fails with
+[`already_exists.engine.json_index`](/e/already_exists.engine.json_index).
 
-See the [CLI reference](/docs/reference/cli) for the full verb list and
-[value types](/docs/concepts/value-types) for how JSON values are represented.
-
-## From Python
-
-The same surface, from the [Python SDK](/docs/python) — documents are Python
-objects, addressed by path:
-
-```python
-import stratadb
-
-db = stratadb.open("./mydb")
-db.json.set("user:1", "$", {"name": "Ada", "age": 36})
-db.json.get("user:1", "$.name")   # "Ada"
-db.close()
-```
-
-See [namespaces](/docs/python/namespaces) for indexes, history, and `as_of`
-reads.
+Recover by code. See [Error handling](/docs/guides/error-handling).
 
 ## Reference
 
-Every JSON command — parameters, returns, errors, and runnable CLI/wire/Python
-examples — is in the generated [JSON command reference](/docs/reference/json).
+Exact parameters, return shapes, indexes, batch commands, and error lists are
+generated in the [JSON command reference](/docs/reference/json).

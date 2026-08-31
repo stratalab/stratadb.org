@@ -2,7 +2,7 @@
 title: "Agent State Management"
 section: "cookbook"
 description: "Hold agent config in KV, working memory in a JSON document, and an action log in events, then inspect any earlier state with versioned reads."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Goal: keep an agent's configuration, working memory, and action history in the

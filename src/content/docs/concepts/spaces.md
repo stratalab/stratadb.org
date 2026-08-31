@@ -2,7 +2,7 @@
 title: "Spaces"
 section: "concepts"
 description: "The second organizing dimension: a named partition of data within a branch. How spaces relate to branches and primitives."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 A **space** is a named partition of data *inside* a branch. Spaces and

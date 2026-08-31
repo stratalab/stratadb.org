@@ -7,7 +7,11 @@ interface Props {
 const { dim = false } = Astro.props;
 ---
 
-<div class="horizon-glow pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true" style={dim ? 'opacity:0.6' : ''}>
+<div
+  class="horizon-glow pointer-events-none absolute inset-x-0 bottom-0"
+  aria-hidden="true"
+  style={dim ? 'opacity:0.6' : ''}
+>
   <div
     class="absolute inset-x-0 bottom-0 h-[420px]"
     style="background: radial-gradient(60% 100% at 50% 100%, var(--horizon-glow), transparent 70%);"
@@ -20,12 +24,14 @@ const { dim = false } = Astro.props;
   </div>
 </div>
 
-<script>
-  if (import.meta.env.DEV) {
-    const count = document.querySelectorAll('.horizon-glow').length;
-    if (count > 2)
-      throw new Error(
-        `HorizonGlow: ${count} instances mounted — the cap is two per page (02 §10).`
-      );
-  }
+<script is:inline data-enabled={import.meta.env.DEV ? 'true' : 'false'}>
+  (() => {
+    const script = document.currentScript;
+    if (script?.dataset.enabled === 'true') {
+      const count = document.querySelectorAll('.horizon-glow').length;
+      if (count > 2) {
+        throw new Error('HorizonGlow: ' + count + ' instances mounted - the cap is two per page.');
+      }
+    }
+  })();
 </script>

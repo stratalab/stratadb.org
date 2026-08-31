@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.claude/
+
+package-lock.json
+public/playground/pkg/
+
+# Generated or release-fetched reference data.
+src/content/docs/reference/**/*.md
+src/data/command-index.json
+src/data/error-registry.json
+src/data/release.json
+
+# Historical product-planning archive. Current status is tracked in docs/product/README.md.
+DESIGN.md
+docs/product/

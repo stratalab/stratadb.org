@@ -2,7 +2,7 @@
 title: "Cloning Datasets"
 section: "guides"
 description: "Clone a prepared dataset from a hub into a local database, and control which hub is used through flags, environment, and config."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 `strata clone` pulls a prepared dataset from a hub into a new local database. A cloned database is an ordinary database — it opens, branches, and queries like any other, and it remembers where it came from.
@@ -92,9 +92,9 @@ strata clone demo ./demo --hub not-a-url
 ```
 
 ```text
-failed_precondition.executor.hub_url: --hub: not a valid URL: relative URL without a base
+invalid_argument.executor.hub_url: --hub: not a valid URL: relative URL without a base
   hint: Provide a valid URL via --hub, STRATA_HUB_URL, or hub.url in a project or global strata config.
-  ref: https://stratadb.org/e/failed_precondition.executor.hub_url
+  ref: https://stratadb.org/e/invalid_argument.executor.hub_url
 ```
 
 A reachable-URL but unreachable host surfaces a transport error, marked retryable:

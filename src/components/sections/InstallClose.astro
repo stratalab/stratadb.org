@@ -10,13 +10,17 @@ import HorizonGlow from '../foundation/HorizonGlow.astro';
 import InstallTabs from './install/InstallTabs.tsx';
 ---
 
-<section id="install" class="relative overflow-hidden">
+<section id="install" class="relative min-h-[100svh] scroll-mt-16 overflow-hidden">
   <SectionRule label="INSTALL" index="07" />
   <HorizonGlow dim />
   <div class="relative">
     <SectionShell>
       <div class="reveal mb-10 max-w-[42rem]">
         <Heading size="display">Start in thirty seconds.</Heading>
+        <p class="mt-6 text-body-lg text-ink-mid">
+          Install the library, open the CLI, or hand the setup to an agent. The same branch workflow
+          is available from each path.
+        </p>
       </div>
 
       <div class="reveal mx-auto max-w-[52rem]">

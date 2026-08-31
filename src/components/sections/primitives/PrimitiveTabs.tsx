@@ -1,17 +1,7 @@
-// Section 3 (04 §4 v5, 2026-06-12): the Foundry window. Ani: "I don't
-// think it's a good idea to overuse the CLI animation. It is in every
-// section now. We want to show some stuff from Foundry — that would be
-// much more beautiful." So this section now shows the desktop app itself:
-// ONE Foundry window whose real sidebar (Key–Value · Events · JSON ·
-// Vectors · Graph, with the app's other views dimmed below) is the tab
-// rail, and whose content area renders each primitive's actual view —
-// master–detail key browser with history, the event stream, the JSON
-// tree, vector search, the graph canvas. Structure is faithful to
-// strata-foundry/src (Sidebar, KvView, JsonTree, GraphCanvas …); the skin
-// is the shared design language Foundry adopts in Doc 02 §B. GUI
-// choreography per activation — no typed commands here. SSR renders
-// completed states; reduced motion shows final frames.
+// Section 3: a compact VS Code-style Strata file browser for the data shapes
+// that live in one embedded multi-modal store.
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -21,21 +11,58 @@ import {
 } from 'react';
 import { AnimatePresence, motion, useScroll } from 'motion/react';
 import { SEED } from '../../../data/seed';
-import { COOL, EASE, EMBER, Line, useBeats } from '../../shared/term';
+import { EASE, INK, Line, useBeats } from '../../shared/term';
 
 const PRIMS = [
-  { id: 'kv', label: 'Key–Value', role: 'Versioned key-value. History included.', guide: '/docs/guides/kv-store' },
-  { id: 'event', label: 'Events', role: 'Append-only streams. Replay anything.', guide: '/docs/guides/event-log' },
-  { id: 'json', label: 'JSON', role: 'Documents with path-level writes.', guide: '/docs/guides/json-store' },
-  { id: 'vector', label: 'Vectors', role: 'Embeddings with HNSW search.', guide: '/docs/guides/vector-store' },
-  { id: 'graph', label: 'Graph', role: 'Nodes, edges, typed links. Traverse anything.', guide: '/docs/guides/graph' },
+  {
+    id: 'kv',
+    label: 'Key–Value',
+    role: 'Versioned key-value. History included.',
+    guide: '/docs/data/key-value',
+  },
+  {
+    id: 'event',
+    label: 'Events',
+    role: 'Append-only streams. Replay anything.',
+    guide: '/docs/data/events',
+  },
+  {
+    id: 'json',
+    label: 'JSON',
+    role: 'Documents with path-level writes.',
+    guide: '/docs/data/json',
+  },
+  {
+    id: 'vector',
+    label: 'Vectors',
+    role: 'Embeddings with HNSW search.',
+    guide: '/docs/data/vectors',
+  },
+  {
+    id: 'graph',
+    label: 'Graph',
+    role: 'Nodes, edges, typed links. Traverse anything.',
+    guide: '/docs/data/graph',
+  },
 ] as const;
 
-// The rest of the real app's nav — present and dimmed: Foundry is bigger
-// than five views, and the other stories live in other sections.
-const MORE_NAV = ['Branches', 'Generate', 'Models', 'Inference', 'Search'];
+const MORE_NAV = ['Queries', 'Models', 'Inference'];
+
+const HEAD = {
+  h2: 'Store every kind of app data in one embedded database.',
+  intro:
+    'Use keys for settings, JSON for records, events for logs, vectors for embeddings, and graphs for relationships. They live together in the same local file, so your app does not need a separate store for each shape.',
+};
 
 type PrimId = (typeof PRIMS)[number]['id'];
+
+function primitiveFromHash(hash: string): PrimId | null {
+  const id = hash.replace(/^#primitive-/, '');
+  return PRIMS.some((p) => p.id === id) ? (id as PrimId) : null;
+}
+
+const VS_BLUE = (amount: number) =>
+  `color-mix(in srgb, var(--color-vscode-status) ${amount}%, transparent)`;
 
 // ---- shared GUI bits -------------------------------------------------------
 
@@ -56,7 +83,14 @@ function SelectableRow({
         className={`flex items-baseline justify-between gap-3 rounded-(--radius-control) px-2.5 py-1.5 ${mono ? 'font-mono text-mono-sm' : 'text-small'} ${
           selected ? 'text-ink-hi' : 'text-ink-mid'
         }`}
-        style={selected ? { background: EMBER(0.13), boxShadow: `inset 2px 0 0 var(--color-terracotta-500)` } : undefined}
+        style={
+          selected
+            ? {
+                background: 'var(--color-vscode-selection)',
+                boxShadow: 'inset 2px 0 0 var(--color-vscode-status)',
+              }
+            : undefined
+        }
       >
         {children}
       </div>
@@ -74,8 +108,8 @@ function Chip({ children, tone = 'ember' }: { children: ReactNode; tone?: 'ember
       className="rounded px-1.5 py-0.5 font-mono text-mono-sm"
       style={
         tone === 'ember'
-          ? { background: EMBER(0.16), color: 'var(--color-terracotta-300)' }
-          : { background: 'rgba(255, 255, 255, 0.06)', color: 'var(--color-ink-mid)' }
+          ? { background: VS_BLUE(20), color: 'var(--color-vscode-text)' }
+          : { background: INK(0.06), color: 'var(--color-vscode-muted)' }
       }
     >
       {children}
@@ -83,10 +117,99 @@ function Chip({ children, tone = 'ember' }: { children: ReactNode; tone?: 'ember
   );
 }
 
+type ActivityKind = 'files' | 'find' | 'schema' | 'extension';
+
+const ACTIVITY_NAV: { kind: ActivityKind; label: string }[] = [
+  { kind: 'files', label: 'Explorer' },
+  { kind: 'find', label: 'Search' },
+  { kind: 'schema', label: 'Schema' },
+  { kind: 'extension', label: 'Extensions' },
+];
+
+function ActivityIcon({ kind }: { kind: ActivityKind }) {
+  const classes = 'h-5 w-5';
+  if (kind === 'files') {
+    return (
+      <svg className={classes} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M5 4.5h5.1l1.7 2H19a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  if (kind === 'find') {
+    return (
+      <svg className={classes} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="5.8" stroke="currentColor" strokeWidth="1.6" />
+        <path d="m15 15 4.8 4.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kind === 'schema') {
+    return (
+      <svg className={classes} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 4.5 19 8.4v7.2l-7 3.9-7-3.9V8.4l7-3.9Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M5.5 8.7 12 12.4l6.5-3.7M12 12.4v7"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg className={classes} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M8.5 4.5h7v4h4v7h-4v4h-7v-4h-4v-7h4v-4Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ActivityRail() {
+  return (
+    <div
+      className="hidden w-12 shrink-0 flex-col items-center gap-1 border-r py-2.5 md:flex"
+      style={{
+        background: 'var(--color-vscode-activitybar)',
+        borderColor: 'var(--color-vscode-border)',
+        color: 'var(--color-vscode-muted)',
+      }}
+    >
+      {ACTIVITY_NAV.map((item, i) => (
+        <span
+          key={item.kind}
+          title={item.label}
+          className={`flex h-9 w-9 items-center justify-center rounded-(--radius-control) transition-colors ${
+            i === 0 ? 'text-vscode-text shadow-[inset_2px_0_0_var(--color-vscode-status)]' : ''
+          }`}
+          style={i === 0 ? { background: 'var(--color-vscode-selection)' } : undefined}
+          aria-hidden="true"
+        >
+          <ActivityIcon kind={item.kind} />
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // ---- Key–Value: the master–detail browser, history open -------------------
 function KvView({ live }: { live: boolean }) {
   const beat = useBeats([300, 250, 250, 350, 400, 300, 300, 300], live);
-  const keys = ['config.theme', 'greeting', 'portfolio.value', 'user:1'];
+  const keys = ['portfolio.value', 'portfolio.currency', 'portfolio.strategy', 'portfolio.risk'];
   const history = (SEED.kv['portfolio.value'].history ?? []).slice().reverse();
   return (
     <div className="flex h-full max-md:flex-col">
@@ -106,7 +229,10 @@ function KvView({ live }: { live: boolean }) {
           <Chip>v3</Chip>
           <Chip tone="dim">int</Chip>
         </Line>
-        <Line on={beat >= 5} className="mt-3 rounded-(--radius-card) border border-line bg-inset p-4">
+        <Line
+          on={beat >= 5}
+          className="mt-3 rounded-(--radius-card) border border-line bg-inset p-4"
+        >
           <span className="font-mono text-[1.4rem] text-ink-hi tabular-nums">111080</span>
         </Line>
         <div className="mt-5">
@@ -115,7 +241,9 @@ function KvView({ live }: { live: boolean }) {
             {history.map((h, i) => (
               <SelectableRow key={h.version} on={beat >= 6 + i} selected={i === 0 && beat >= 8}>
                 <span className="flex items-baseline gap-3">
-                  <span className={i === 0 ? 'text-terracotta-300' : 'text-ink-low'}>v{h.version}</span>
+                  <span className={i === 0 ? 'text-vscode-text' : 'text-ink-low'}>
+                    v{h.version}
+                  </span>
                   <span className="tabular-nums">{Number(h.value).toLocaleString('en-US')}</span>
                 </span>
                 {/* ink-mid on the selected row — the ember wash eats ink-low's margin */}
@@ -134,20 +262,15 @@ function KvView({ live }: { live: boolean }) {
 // ---- Events: the append-only stream ----------------------------------------
 function EventsView({ live }: { live: boolean }) {
   const beat = useBeats([350, 400, 400, 400, 350], live);
-  const rows = SEED.events.deploys.map((e) => ({
-    t: e.at.slice(11, 19),
-    action: String(e.payload.action),
-    detail:
-      e.payload.action === 'config.update'
-        ? `${e.payload.key} → "${e.payload.to}"`
-        : e.payload.action === 'deploy.start'
-          ? String(e.payload.version)
-          : String(e.payload.reason),
-  }));
+  const rows = [
+    { t: '14:02:11', action: 'portfolio.seed', detail: 'value, allocation, and policy stored' },
+    { t: '09:31:47', action: 'allocation.rebalance', detail: 'stocks 60 -> 80, bonds 30 -> 15' },
+    { t: '16:55:03', action: 'portfolio.valued', detail: 'portfolio.value 111080' },
+  ];
   return (
     <div className="flex h-full flex-col p-5">
       <Line on={beat >= 1} className="flex items-center gap-3">
-        <span className="font-mono text-mono-body text-ink-hi">deploys</span>
+        <span className="font-mono text-mono-body text-ink-hi">portfolio</span>
         <Chip tone="dim">stream</Chip>
         <span className="ml-auto font-mono text-mono-sm text-ink-low">append-only</span>
       </Line>
@@ -161,17 +284,19 @@ function EventsView({ live }: { live: boolean }) {
           <Line key={r.t} on={beat >= 2 + i}>
             <div
               className={`grid grid-cols-[6rem_1fr_1.2fr] gap-3 px-4 py-2.5 font-mono text-mono-sm max-sm:grid-cols-[6rem_1fr] ${i < rows.length - 1 ? 'border-b border-line' : ''}`}
-              style={i === rows.length - 1 && beat >= 4 ? { background: EMBER(0.07) } : undefined}
+              style={i === rows.length - 1 && beat >= 4 ? { background: VS_BLUE(12) } : undefined}
             >
               <span className="text-ink-low tabular-nums">{r.t}</span>
-              <span className={r.action === 'deploy.fail' ? 'text-err' : 'text-ink-hi'}>{r.action}</span>
+              <span className={r.action === 'portfolio.valued' ? 'text-ok' : 'text-ink-hi'}>
+                {r.action}
+              </span>
               <span className="text-ink-mid max-sm:hidden">{r.detail}</span>
             </div>
           </Line>
         ))}
       </div>
       <Line on={beat >= 5} className="mt-3 font-mono text-mono-sm text-ink-low">
-        3 events · nothing is overwritten — the stream is the record
+        3 events · a typed stream is ready for replay
       </Line>
     </div>
   );
@@ -197,7 +322,10 @@ function TreeRow({
     <Line on={on}>
       <div
         className="relative flex items-baseline gap-2 rounded px-2 py-1 font-mono text-mono-sm"
-        style={{ paddingLeft: `${depth * 1.25 + 0.5}rem`, background: hot ? EMBER(0.12) : undefined }}
+        style={{
+          paddingLeft: `${depth * 1.25 + 0.5}rem`,
+          background: hot ? VS_BLUE(16) : undefined,
+        }}
       >
         {caret !== undefined && (
           <span className="text-ink-low" aria-hidden="true">
@@ -208,7 +336,7 @@ function TreeRow({
         {v !== undefined && (
           <>
             <span className="text-ink-low">:</span>
-            <span className={hot ? 'text-terracotta-300' : 'text-ink-hi'}>{v}</span>
+            <span className={hot ? 'text-vscode-text' : 'text-ink-hi'}>{v}</span>
           </>
         )}
       </div>
@@ -218,14 +346,14 @@ function TreeRow({
 
 function JsonView({ live }: { live: boolean }) {
   const beat = useBeats([300, 250, 250, 400, 250, 250, 300, 250, 450], live);
-  const docs = ['config', 'portfolio', 'profile'];
+  const docs = ['portfolio', 'allocation.policy', 'risk.snapshot'];
   return (
     <div className="flex h-full max-md:flex-col">
       <div className="w-56 shrink-0 border-r border-line p-3 max-md:w-full max-md:border-b max-md:border-r-0">
         <PanelLabel>Documents</PanelLabel>
         <div className="mt-2">
           {docs.map((d, i) => (
-            <SelectableRow key={d} on={beat >= 1 + i} selected={d === 'profile' && beat >= 4}>
+            <SelectableRow key={d} on={beat >= 1 + i} selected={d === 'portfolio' && beat >= 4}>
               <span>{d}</span>
             </SelectableRow>
           ))}
@@ -233,18 +361,19 @@ function JsonView({ live }: { live: boolean }) {
       </div>
       <div className="min-w-0 flex-1 p-5">
         <Line on={beat >= 4} className="flex items-center gap-3">
-          <span className="font-mono text-mono-body text-ink-hi">profile</span>
-          <Chip tone="dim">2 levels</Chip>
+          <span className="font-mono text-mono-body text-ink-hi">portfolio</span>
+          <Chip tone="dim">5 fields</Chip>
         </Line>
         <div className="mt-3 rounded-(--radius-card) border border-line bg-inset py-2">
-          <TreeRow on={beat >= 5} depth={0} caret k="user" />
-          <TreeRow on={beat >= 6} depth={1} k="name" v={'"Alice"'} />
-          <TreeRow on={beat >= 7} depth={1} k="role" v={'"admin"'} hot={beat >= 9} />
-          <TreeRow on={beat >= 8} depth={1} caret k="prefs" />
-          <TreeRow on={beat >= 8} depth={2} k="theme" v={'"midnight"'} />
+          <TreeRow on={beat >= 5} depth={0} caret k="portfolio" />
+          <TreeRow on={beat >= 6} depth={1} k="strategy" v={'"aggressive"'} hot={beat >= 9} />
+          <TreeRow on={beat >= 7} depth={1} k="stocks" v="80" hot={beat >= 9} />
+          <TreeRow on={beat >= 8} depth={1} k="bonds" v="15" hot={beat >= 9} />
+          <TreeRow on={beat >= 8} depth={1} k="cash" v="5" hot={beat >= 9} />
+          <TreeRow on={beat >= 8} depth={1} k="rebalance" v={'"quarterly"'} />
         </div>
         <Line on={beat >= 9} className="mt-3 font-mono text-mono-sm text-ink-low">
-          $.user.role written in place — the rest untouched
+          allocation fields updated — rebalance stayed put
         </Line>
       </div>
     </div>
@@ -273,8 +402,12 @@ function CountUp({ to, on, live }: { to: number; on: boolean; live: boolean }) {
 }
 
 const HITS = [
-  { id: 'd1', score: 0.91, text: SEED.vectors.docs[0].text },
-  { id: 'd2', score: 0.84, text: SEED.vectors.docs[1].text },
+  { id: 'd1', score: 0.91, text: 'portfolio.value moved after allocation shifted toward stocks.' },
+  {
+    id: 'd2',
+    score: 0.84,
+    text: 'the risk policy kept rebalancing quarterly while exposure changed.',
+  },
 ];
 
 function VectorView({ live }: { live: boolean }) {
@@ -282,17 +415,27 @@ function VectorView({ live }: { live: boolean }) {
   return (
     <div className="flex h-full flex-col p-5">
       <Line on={beat >= 1} className="flex items-center gap-3">
-        <span className="font-mono text-mono-body text-ink-hi">docs</span>
+        <span className="font-mono text-mono-body text-ink-hi">notes</span>
         <Chip tone="dim">384 dims · HNSW</Chip>
       </Line>
       <Line on={beat >= 2} className="mt-3">
         <div className="flex items-center gap-2.5 rounded-(--radius-control) border border-line bg-panel px-3 py-2.5">
-          <svg className="h-4 w-4 shrink-0 text-ink-low" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <svg
+            className="h-4 w-4 shrink-0 text-ink-low"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+          >
             <circle cx="11" cy="11" r="7" />
             <path d="m21 21-4.3-4.3" strokeLinecap="round" />
           </svg>
-          <span className="font-mono text-mono-sm text-ink-hi">why did the deploy fail?</span>
-          <span className="ml-auto rounded bg-terracotta-500/15 px-2 py-0.5 font-mono text-mono-sm text-terracotta-300">
+          <span className="font-mono text-mono-sm text-ink-hi">why did portfolio.value move?</span>
+          <span
+            className="ml-auto rounded px-2 py-0.5 font-mono text-mono-sm"
+            style={{ background: VS_BLUE(18), color: 'var(--color-vscode-text)' }}
+          >
             k = 2
           </span>
         </div>
@@ -302,14 +445,19 @@ function VectorView({ live }: { live: boolean }) {
           <Line key={hit.id} on={beat >= 3 + i}>
             <div className="rounded-(--radius-card) border border-line bg-panel p-3.5">
               <div className="flex items-baseline gap-4">
-                <span className="font-mono text-mono-sm text-terracotta-400">{hit.id}</span>
+                <span className="font-mono text-mono-sm text-vscode-text">{hit.id}</span>
                 <span className="font-mono text-mono-sm text-ink-hi tabular-nums">
                   <CountUp to={hit.score} on={beat >= 3 + i} live={live} />
                 </span>
-                <span className="relative h-1.5 w-40 self-center overflow-hidden rounded-full bg-raised" aria-hidden="true">
+                <span
+                  className="relative h-1.5 w-40 self-center overflow-hidden rounded-full bg-raised"
+                  aria-hidden="true"
+                >
                   <motion.span
                     className="absolute inset-y-0 left-0 rounded-full"
-                    style={{ background: `linear-gradient(90deg, ${EMBER(0.45)}, var(--color-terracotta-400))` }}
+                    style={{
+                      background: `linear-gradient(90deg, ${VS_BLUE(42)}, var(--color-vscode-status))`,
+                    }}
                     initial={false}
                     animate={{ width: beat >= 3 + i ? `${hit.score * 100}%` : '0%' }}
                     transition={{ duration: 0.6, ease: EASE }}
@@ -322,7 +470,7 @@ function VectorView({ live }: { live: boolean }) {
         ))}
       </div>
       <Line on={beat >= 5} className="mt-3 font-mono text-mono-sm text-ink-low">
-        embedded on write — search was ready before you asked
+        embedded on write — vector query was ready before you asked
       </Line>
     </div>
   );
@@ -330,13 +478,13 @@ function VectorView({ live }: { live: boolean }) {
 
 // ---- Graph: the canvas -------------------------------------------------------
 const NODES = [
-  { id: 'alice', x: 70, y: 64 },
-  { id: 'bob', x: 268, y: 52 },
-  { id: 'deploy-v2.3', x: 196, y: 156 },
+  { id: 'portfolio', x: 80, y: 78 },
+  { id: 'policy', x: 262, y: 62 },
+  { id: 'note', x: 192, y: 158 },
 ];
 const EDGES = [
-  { from: NODES[0], rel: 'knows', to: NODES[1] },
-  { from: NODES[0], rel: 'triggered', to: NODES[2] },
+  { from: NODES[0], rel: 'uses', to: NODES[1] },
+  { from: NODES[2], rel: 'explains', to: NODES[0] },
 ];
 
 function GraphView({ live }: { live: boolean }) {
@@ -347,18 +495,23 @@ function GraphView({ live }: { live: boolean }) {
         <span className="font-mono text-mono-body text-ink-hi">graph</span>
         <Chip tone="dim">3 nodes · 2 edges</Chip>
         <span className="ml-auto flex items-center gap-2 font-mono text-mono-sm text-ink-low">
-          bfs from <Chip>alice</Chip> depth <Chip tone="dim">1</Chip>
+          bfs from <Chip>portfolio</Chip> depth <Chip tone="dim">1</Chip>
         </span>
       </Line>
       <div
         className="mt-3 flex flex-1 items-center justify-center rounded-(--radius-card) border border-line"
         style={{
           backgroundColor: 'var(--color-inset)',
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 1.6px)',
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${INK(0.05)} 1px, transparent 1.6px)`,
           backgroundSize: '22px 22px',
         }}
       >
-        <svg viewBox="0 0 340 200" className="h-[13rem] w-full max-w-[26rem]" fill="none" aria-hidden="true">
+        <svg
+          viewBox="0 0 340 200"
+          className="h-[13rem] w-full max-w-[26rem]"
+          fill="none"
+          aria-hidden="true"
+        >
           {EDGES.map((e) => (
             <g key={e.rel}>
               <motion.line
@@ -377,7 +530,7 @@ function GraphView({ live }: { live: boolean }) {
                 y1={e.from.y}
                 x2={e.to.x}
                 y2={e.to.y}
-                stroke="var(--color-terracotta-400)"
+                stroke="var(--color-vscode-status)"
                 strokeWidth="2"
                 initial={false}
                 animate={{ pathLength: beat >= 4 ? 1 : 0, opacity: beat >= 4 ? 0.9 : 0 }}
@@ -386,8 +539,8 @@ function GraphView({ live }: { live: boolean }) {
               {live && beat >= 4 && (
                 <motion.circle
                   r="4"
-                  fill="var(--color-terracotta-400)"
-                  style={{ filter: `drop-shadow(0 0 6px ${EMBER(0.9)})` }}
+                  fill="var(--color-vscode-status)"
+                  style={{ filter: `drop-shadow(0 0 6px ${VS_BLUE(90)})` }}
                   initial={{ cx: e.from.x, cy: e.from.y, opacity: 0 }}
                   animate={{ cx: e.to.x, cy: e.to.y, opacity: [0, 1, 1, 0] }}
                   transition={{ duration: 0.6, ease: 'easeInOut' }}
@@ -409,7 +562,7 @@ function GraphView({ live }: { live: boolean }) {
             </g>
           ))}
           {NODES.map((n, i) => {
-            const lit = beat >= 4 || (n.id === 'alice' && beat >= 3);
+            const lit = beat >= 4 || (n.id === 'portfolio' && beat >= 3);
             return (
               <motion.g
                 key={n.id}
@@ -422,10 +575,10 @@ function GraphView({ live }: { live: boolean }) {
                   cx={n.x}
                   cy={n.y}
                   r="7"
-                  fill={lit ? 'var(--color-terracotta-500)' : 'var(--color-raised)'}
-                  stroke={lit ? 'var(--color-terracotta-400)' : 'var(--color-ink-low)'}
+                  fill={lit ? 'var(--color-vscode-selection)' : 'var(--color-vscode-tab)'}
+                  stroke={lit ? 'var(--color-vscode-status)' : 'var(--color-vscode-muted)'}
                   strokeWidth="1.5"
-                  style={lit ? { filter: `drop-shadow(0 0 8px ${EMBER(0.7)})` } : undefined}
+                  style={lit ? { filter: `drop-shadow(0 0 8px ${VS_BLUE(70)})` } : undefined}
                 />
                 <text
                   x={n.x}
@@ -457,15 +610,10 @@ const VIEWS: Record<PrimId, ComponentType<{ live: boolean }>> = {
   graph: GraphView,
 };
 
-// ---- the Foundry window ----------------------------------------------------
-// v6 (2026-06-12, Ani): "make it so the scroll doesn't just blow past it" —
-// the window PINS (scrub #2 of 2; the slot freed by the time-travel
-// conversion) and continued scrolling walks the five views, one band each.
-// Clicking a view never fights the scroll: it JUMPS the scroll position to
-// that view's band, so pointer and pin always agree. Desktop only; reduced
-// motion and mobile keep the unpinned manual window.
-const PIN_VH = 260; // 100vh screen + 5 bands of dwell
-
+// ---- the Strata file window ------------------------------------------------
+// The window pins on desktop and continued scrolling walks the five views, one
+// band each. The section head rides in the same pinned viewport; clicking a
+// view only changes state, never the page's scroll position.
 const isPinned = () => window.matchMedia('(min-width: 1024px)').matches;
 
 export default function PrimitiveTabs() {
@@ -486,7 +634,7 @@ export default function PrimitiveTabs() {
           io.disconnect();
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0.25 },
     );
     if (rootRef.current) io.observe(rootRef.current);
     return () => io.disconnect();
@@ -501,22 +649,39 @@ export default function PrimitiveTabs() {
         const i = Math.min(PRIMS.length - 1, Math.max(0, Math.floor(v * PRIMS.length)));
         setSelected(PRIMS[i].id);
       }),
-    [scrollYProgress, reduced]
+    [scrollYProgress, reduced],
   );
 
-  // Clicking a view jumps the scroll to its band — pointer and pin agree.
-  const goTo = (i: number) => {
+  const selectIndex = useCallback((i: number) => {
     setTouched(true);
-    const el = pinRef.current;
-    if (el && !reduced && isPinned()) {
-      const scrollable = el.offsetHeight - window.innerHeight;
-      if (scrollable > 0) {
-        const top = window.scrollY + el.getBoundingClientRect().top;
-        window.scrollTo({ top: Math.round(top + (scrollable * (i + 0.5)) / PRIMS.length), behavior: 'auto' });
-      }
-    }
     setSelected(PRIMS[i].id);
-  };
+  }, []);
+
+  const selectPrimitive = useCallback(
+    (primitive?: string | null) => {
+      if (!primitive) return;
+      const i = PRIMS.findIndex((p) => p.id === primitive);
+      if (i >= 0) selectIndex(i);
+    },
+    [selectIndex],
+  );
+
+  useEffect(() => {
+    const syncFromHash = () => selectPrimitive(primitiveFromHash(window.location.hash));
+    const onPrimitiveRequest = (event: Event) => {
+      selectPrimitive((event as CustomEvent<{ primitive?: string }>).detail?.primitive);
+    };
+
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    window.addEventListener('popstate', syncFromHash);
+    window.addEventListener('strata:primitive-request', onPrimitiveRequest);
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash);
+      window.removeEventListener('popstate', syncFromHash);
+      window.removeEventListener('strata:primitive-request', onPrimitiveRequest);
+    };
+  }, [selectPrimitive]);
 
   const live = seen && !reduced;
   const ActiveView = VIEWS[selected];
@@ -525,160 +690,255 @@ export default function PrimitiveTabs() {
 
   const onKeys = (e: KeyboardEvent) => {
     const delta =
-      e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+      e.key === 'ArrowDown' || e.key === 'ArrowRight'
+        ? 1
+        : e.key === 'ArrowUp' || e.key === 'ArrowLeft'
+          ? -1
+          : 0;
     let next = activeIdx;
     if (delta) next = (activeIdx + delta + PRIMS.length) % PRIMS.length;
     else if (e.key === 'Home') next = 0;
     else if (e.key === 'End') next = PRIMS.length - 1;
     else return;
     e.preventDefault();
-    goTo(next);
+    selectIndex(next);
     tabRefs.current[next]?.focus();
   };
 
   return (
-    <div ref={pinRef} className={reduced ? '' : 'lg:h-[260vh]'}>
-      <div ref={rootRef} className={`relative ${reduced ? '' : 'lg:sticky lg:top-24'}`}>
-        {/* stage lights: the page's one pair */}
-        <div
-          className="pointer-events-none absolute -inset-x-20 -inset-y-16"
-          aria-hidden="true"
-          style={{
-            background: `radial-gradient(44% 58% at 60% 40%, ${EMBER(0.11)}, transparent 70%), radial-gradient(30% 44% at 10% 80%, ${COOL(0.07)}, transparent 72%)`,
-          }}
-        />
-
-        <div className="relative" onPointerDownCapture={() => setTouched(true)}>
-        {/* the window */}
-        <div
-          className="overflow-hidden rounded-(--radius-frame)"
-          style={{
-            background: 'var(--color-panel)',
-            border: `1px solid ${EMBER(0.22)}`,
-            boxShadow: `var(--shadow-float), 0 0 110px -28px ${EMBER(0.35)}`,
-          }}
-        >
-          {/* titlebar */}
-          <div
-            className="flex h-12 items-center gap-3 px-4"
-            style={{ borderBottom: `1px solid ${EMBER(0.14)}`, background: EMBER(0.04) }}
-          >
-            <span className="flex gap-1.5" aria-hidden="true">
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
-            </span>
-            <span className="font-mono text-mono-sm text-ink-low">Strata Foundry</span>
-            <span className="flex items-center gap-2 rounded-(--radius-control) border border-line bg-raised px-2.5 py-1 font-mono text-mono-sm text-ink-hi">
-              <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
-              portfolio.strata
-            </span>
-            {/* the invitation — fades on first touch */}
-            <motion.span
-              className="rounded-full px-2.5 py-0.5 font-mono text-mono-sm max-[560px]:hidden"
-              style={{ background: EMBER(0.14), color: 'var(--color-terracotta-300)' }}
-              initial={false}
-              animate={
-                touched
-                  ? { opacity: 0, visibility: 'hidden' }
-                  : { opacity: [1, 0.55, 1, 0.55, 1], visibility: 'visible' }
-              }
-              transition={touched ? { duration: 0.3 } : { duration: 3.2, ease: 'easeInOut' }}
-              aria-hidden={touched}
-            >
-              interactive — click around
-            </motion.span>
-            <span className="ml-auto flex items-center gap-2 font-mono text-mono-sm text-ink-low max-sm:hidden">
-              <span className="rounded-(--radius-control) border border-line px-2 py-0.5">⎇ main</span>
-              <span className="rounded-(--radius-control) border border-line px-2 py-0.5 max-md:hidden">space: default</span>
-            </span>
+    <div ref={pinRef} className={reduced ? '' : 'lg:h-[190vh]'}>
+      <div
+        ref={rootRef}
+        className={`relative ${
+          reduced
+            ? ''
+            : 'lg:sticky lg:top-[calc(4rem+1.625rem)] lg:flex lg:h-[calc(100svh-5.625rem)] lg:items-center'
+        }`}
+      >
+        <div className="grid w-full gap-10 lg:grid-cols-[minmax(19rem,0.35fr)_minmax(0,1fr)] lg:items-center xl:gap-14">
+          <div className="max-w-[42rem] lg:max-w-none">
+            <h2 className="text-display text-balance text-ink-hi lg:text-title">{HEAD.h2}</h2>
+            <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
           </div>
 
-          <div className="flex min-h-[32rem] max-md:flex-col">
-            {/* the sidebar IS the strata column: five numbered layers, the
-                active one lit by ember — plus the app's other views, dimmed */}
+          <div className="relative min-w-0" onPointerDownCapture={() => setTouched(true)}>
+            {/* stage lights: the page's one pair */}
             <div
-              role="tablist"
-              aria-label="Foundry views — the five primitives"
-              aria-orientation="vertical"
-              onKeyDown={onKeys}
-              className="flex w-56 shrink-0 flex-col gap-0.5 border-r border-line bg-raised/40 p-3 max-md:w-full max-md:flex-row max-md:overflow-x-auto max-md:border-b max-md:border-r-0"
-            >
-              {PRIMS.map((p, i) => {
-                const isActive = p.id === selected;
-                return (
-                  <button
-                    key={p.id}
-                    ref={(el) => {
-                      tabRefs.current[i] = el;
-                    }}
-                    type="button"
-                    role="tab"
-                    id={`prim-tab-${p.id}`}
-                    aria-selected={isActive}
-                    aria-controls="prim-panel"
-                    tabIndex={isActive ? 0 : -1}
-                    onClick={() => goTo(i)}
-                    className={`flex shrink-0 items-center gap-2.5 rounded-(--radius-control) px-3 py-2 text-left text-small outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-terracotta-500 ${
-                      isActive ? 'text-ink-hi' : 'text-ink-mid hover:bg-raised'
-                    }`}
-                    style={
-                      isActive
-                        ? { background: `linear-gradient(90deg, ${EMBER(0.16)}, ${EMBER(0.05)})`, boxShadow: `inset 2px 0 0 var(--color-terracotta-500)` }
-                        : undefined
-                    }
-                  >
-                    <span
-                      className={`font-mono text-mono-sm ${isActive ? 'text-terracotta-400' : 'text-ink-low'}`}
-                      aria-hidden="true"
-                    >
-                      0{i + 1}
-                    </span>
-                    {p.label}
-                  </button>
-                );
-              })}
-              <div className="my-2 border-t border-line max-md:hidden" aria-hidden="true" />
-              <div className="flex flex-col gap-0.5 max-md:hidden" aria-hidden="true">
-                {MORE_NAV.map((label) => (
-                  <span key={label} className="px-3 py-1.5 text-small text-ink-low">
-                    {label}
+              className="pointer-events-none absolute -inset-x-20 -inset-y-16"
+              aria-hidden="true"
+              style={{
+                background: `radial-gradient(44% 58% at 60% 40%, ${VS_BLUE(18)}, transparent 70%), radial-gradient(30% 44% at 10% 80%, ${VS_BLUE(8)}, transparent 72%)`,
+              }}
+            />
+
+            <div className="relative">
+              {/* the window */}
+              <div
+                className="overflow-hidden rounded-(--radius-frame)"
+                style={{
+                  background: 'var(--color-vscode-editor)',
+                  border: '1px solid var(--color-vscode-border)',
+                  boxShadow: `var(--shadow-float), 0 0 110px -30px ${VS_BLUE(42)}`,
+                }}
+              >
+                {/* titlebar */}
+                <div
+                  className="flex h-11 min-w-0 items-center gap-2 overflow-hidden px-3"
+                  style={{
+                    borderBottom: '1px solid var(--color-vscode-border)',
+                    background: 'var(--color-vscode-titlebar)',
+                  }}
+                >
+                  <span className="flex shrink-0 gap-1.5" aria-hidden="true">
+                    <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-ink-low/40" />
                   </span>
-                ))}
+                  <span className="hidden shrink-0 font-mono text-mono-sm text-vscode-muted sm:inline">
+                    StrataDB for VS Code
+                  </span>
+                  <span
+                    className="mx-auto flex min-w-0 max-w-[29rem] flex-1 items-center gap-2 rounded-(--radius-control) border px-2.5 py-1 font-mono text-mono-sm"
+                    style={{
+                      background: 'var(--color-vscode-input)',
+                      borderColor: 'var(--color-vscode-border)',
+                      color: 'var(--color-vscode-text)',
+                    }}
+                  >
+                    <ActivityIcon kind="find" />
+                    <span className="truncate">Strata: open data view in portfolio.strata</span>
+                  </span>
+                  {/* the invitation — fades on first touch */}
+                  <motion.span
+                    className="rounded-full px-2.5 py-0.5 font-mono text-mono-sm max-[560px]:hidden"
+                    style={{ background: VS_BLUE(22), color: 'var(--color-vscode-text)' }}
+                    initial={false}
+                    animate={
+                      touched
+                        ? { opacity: 0, visibility: 'hidden' }
+                        : { opacity: [1, 0.55, 1, 0.55, 1], visibility: 'visible' }
+                    }
+                    transition={touched ? { duration: 0.3 } : { duration: 3.2, ease: 'easeInOut' }}
+                    aria-hidden={touched}
+                  >
+                    click around
+                  </motion.span>
+                  <span className="ml-auto hidden items-center gap-2 font-mono text-mono-sm text-vscode-muted lg:flex">
+                    <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
+                    ready
+                  </span>
+                </div>
+
+                <div className="flex min-h-[32rem] max-md:flex-col lg:min-h-[28rem] xl:min-h-[32rem]">
+                  <ActivityRail />
+
+                  {/* the sidebar is the Strata explorer: five numbered data views,
+                active one lit by ember — plus the app's other surfaces, dimmed */}
+                  <div
+                    role="tablist"
+                    aria-label="Strata data views"
+                    aria-orientation="vertical"
+                    onKeyDown={onKeys}
+                    className="flex w-60 shrink-0 flex-col gap-0.5 border-r p-2.5 max-md:w-full max-md:flex-row max-md:overflow-x-auto max-md:border-b max-md:border-r-0"
+                    style={{
+                      background: 'var(--color-vscode-sidebar)',
+                      borderColor: 'var(--color-vscode-border)',
+                    }}
+                  >
+                    <div className="mb-2 px-2 max-md:hidden">
+                      <PanelLabel>Explorer</PanelLabel>
+                      <div
+                        className="mt-2 rounded-(--radius-control) border px-2.5 py-1.5 font-mono text-mono-sm"
+                        style={{
+                          background: 'var(--color-vscode-input)',
+                          borderColor: 'var(--color-vscode-border)',
+                          color: 'var(--color-vscode-text)',
+                        }}
+                      >
+                        portfolio.strata
+                      </div>
+                    </div>
+                    {PRIMS.map((p, i) => {
+                      const isActive = p.id === selected;
+                      return (
+                        <button
+                          key={p.id}
+                          ref={(el) => {
+                            tabRefs.current[i] = el;
+                          }}
+                          type="button"
+                          role="tab"
+                          id={`prim-tab-${p.id}`}
+                          aria-selected={isActive}
+                          aria-controls="prim-panel"
+                          tabIndex={isActive ? 0 : -1}
+                          onClick={() => selectIndex(i)}
+                          className={`flex shrink-0 items-center gap-2.5 rounded-(--radius-control) px-3 py-2 text-left text-small outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-vscode-status ${
+                            isActive ? 'text-vscode-text' : 'text-vscode-muted'
+                          }`}
+                          style={
+                            isActive
+                              ? {
+                                  background: 'var(--color-vscode-selection)',
+                                  boxShadow: 'inset 2px 0 0 var(--color-vscode-status)',
+                                }
+                              : undefined
+                          }
+                        >
+                          <span
+                            className={`font-mono text-mono-sm ${
+                              isActive ? 'text-vscode-text' : 'text-vscode-muted'
+                            }`}
+                            aria-hidden="true"
+                          >
+                            0{i + 1}
+                          </span>
+                          {p.label}
+                        </button>
+                      );
+                    })}
+                    <div className="my-2 border-t border-line max-md:hidden" aria-hidden="true" />
+                    <div className="flex flex-col gap-0.5 max-md:hidden" aria-hidden="true">
+                      {MORE_NAV.map((label) => (
+                        <span key={label} className="px-3 py-1.5 text-small text-vscode-muted">
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* the content view */}
+                  <div
+                    className="flex min-w-0 flex-1 flex-col"
+                    style={{ background: 'var(--color-vscode-editor)' }}
+                  >
+                    <div
+                      className="flex h-10 shrink-0 items-center gap-1 border-b px-2"
+                      style={{
+                        background: 'var(--color-vscode-titlebar)',
+                        borderColor: 'var(--color-vscode-border)',
+                      }}
+                    >
+                      <span
+                        className="flex h-full items-center border-x px-3 font-mono text-mono-sm"
+                        style={{
+                          background: 'var(--color-vscode-editor)',
+                          borderColor: 'var(--color-vscode-border)',
+                          color: 'var(--color-vscode-text)',
+                        }}
+                      >
+                        portfolio.strata
+                      </span>
+                      <span className="hidden font-mono text-mono-sm text-vscode-muted sm:inline">
+                        {active.label}
+                      </span>
+                    </div>
+                    <div
+                      id="prim-panel"
+                      role="tabpanel"
+                      aria-labelledby={`prim-tab-${selected}`}
+                      className="min-h-0 flex-1"
+                    >
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                          key={selected}
+                          className="h-full"
+                          initial={reduced ? false : { opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={reduced ? undefined : { opacity: 0, y: -6 }}
+                          transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
+                        >
+                          <ActiveView live={live} />
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                    <div className="flex h-7 shrink-0 items-center gap-3 bg-vscode-status px-3 font-mono text-[0.72rem] text-white/95 max-sm:hidden">
+                      <span>Strata extension active</span>
+                      <span>local engine</span>
+                      <span>portfolio.strata</span>
+                      <span className="ml-auto">{active.id} · local file</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* the ruled footer, drafting voice */}
+              <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3">
+                <p className="font-mono text-mono-sm text-ink-low">
+                  <span className="text-vscode-status">0{activeIdx + 1}</span> / 05 · {active.id} —{' '}
+                  <span className="max-sm:hidden">
+                    {active.role.toLowerCase().replace(/\.$/, '')}
+                  </span>
+                </p>
+                <a
+                  href={active.guide}
+                  className="shrink-0 text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
+                >
+                  Read the {active.id} guide →
+                </a>
               </div>
             </div>
-
-            {/* the content view */}
-            <div id="prim-panel" role="tabpanel" aria-labelledby={`prim-tab-${selected}`} className="min-w-0 flex-1 bg-void/40">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={selected}
-                  className="h-full"
-                  initial={reduced ? false : { opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduced ? undefined : { opacity: 0, y: -6 }}
-                  transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
-                >
-                  <ActiveView live={live} />
-                </motion.div>
-              </AnimatePresence>
-            </div>
           </div>
-        </div>
-
-        {/* the ruled footer, drafting voice */}
-        <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3">
-          <p className="font-mono text-mono-sm text-ink-low">
-            <span className="text-terracotta-400">0{activeIdx + 1}</span> / 05 · {active.id} —{' '}
-            <span className="max-sm:hidden">{active.role.toLowerCase().replace(/\.$/, '')}</span>
-          </p>
-          <a
-            href={active.guide}
-            className="shrink-0 text-small text-ink-mid underline decoration-line underline-offset-4 transition-colors duration-200 hover:text-ink-hi"
-          >
-            Read the {active.id} guide →
-          </a>
-        </div>
         </div>
       </div>
     </div>

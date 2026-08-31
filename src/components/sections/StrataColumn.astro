@@ -2,28 +2,28 @@
 // Section 3 (04 §5 v2, 2026-06-12): tabs + content per the claude.com
 // reference — each primitive is a tab; the content area plays its demo.
 // The vertical tab rail preserves the motif's load-bearing appearance:
-// it IS the strata column, five hued layers stacked. (Supersedes the
-// CSS-only rule of 05 §5 — this section is now an island.)
-import SectionShell from '../foundation/SectionShell.astro';
+// it IS the strata column, five layers stacked. The section head now rides
+// with the pinned viewport so the entry point does not scroll away before
+// the demo takes over.
 import SectionRule from '../foundation/SectionRule.astro';
-import Heading from '../foundation/Heading.astro';
 import PrimitiveTabs from './primitives/PrimitiveTabs.tsx';
+
+const primitiveAnchors = ['kv', 'event', 'json', 'vector', 'graph'];
 ---
 
-<SectionRule label="PRIMITIVES" index="03" />
-<SectionShell id="primitives" class="!pb-0">
-  <div class="reveal max-w-[42rem]">
-    <Heading size="display">Every kind of data. One file.</Heading>
-    <p class="mt-6 text-body-lg text-ink-mid">
-      Purpose-built stores that share one engine, one transaction model, and one branch tree.
-    </p>
+<section id="primitives" class="relative min-h-[100svh] scroll-mt-16">
+  <div aria-hidden="true">
+    {primitiveAnchors.map((id) => <span id={`primitive-${id}`} class="block h-0 scroll-mt-16" />)}
   </div>
-</SectionShell>
 
-<!-- The tabs + content stage breaks out of the prose column (same move as
-     the branch scene): the rail and demo card take the wide stage. -->
-<!-- overflow-x-clip: the stage lights bleed past the container on purpose;
-     clip them at the viewport without cutting vertical glow. -->
-<div class="relative mx-auto w-full max-w-[88rem] overflow-x-clip px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4">
-  <PrimitiveTabs client:visible />
-</div>
+  <SectionRule label="PRIMITIVES" index="03" sticky />
+  <!-- The tabs + content stage owns the section viewport. The section head is
+       inside the island so it remains visible while the pinned demo advances. -->
+  <!-- overflow-x-clip: the stage lights bleed past the container on purpose;
+       clip them at the viewport without cutting vertical glow. -->
+  <div
+    class="relative mx-auto w-full max-w-[88rem] overflow-x-clip px-6 pb-32 pt-14 max-md:pb-20 max-[480px]:px-4 lg:py-0"
+  >
+    <PrimitiveTabs client:visible />
+  </div>
+</section>

@@ -1,94 +1,67 @@
 ---
 title: "The layered stack"
-description: "Five crates from shared vocabulary to model execution, and the dependency rules the build enforces to keep meaning and mechanics apart."
+description: "The workspace layers and dependency rules that keep storage mechanics separate from database meaning."
 order: 1
 ---
 
-StrataDB is a Rust workspace of five layers. Each has one job, and the
-dependency graph between them is enforced by a workspace guard so the boundaries
-cannot erode over time.
+StrataDB is split into layers so persistence mechanics do not leak into product
+behavior, and model execution cannot affect durability.
 
 ```text
-core  ←  storage  ←  engine  ←  intelligence  ←  executor / CLI / SDK
-                              ←  inference     ←
+core <- storage <- engine <- intelligence <- executor / CLI / SDK
+                         <- inference
 ```
 
-Arrows point in the direction of *depends on*. Read top to bottom, each layer may
-only reach the layer below it through that layer's public contract.
+Arrows point in the direction of dependency.
 
-## What each layer owns
+## Ownership
 
 ### core
 
-The smallest shared contract layer — vocabulary that genuinely belongs below both
-storage and engine. It holds stable IDs and transparent newtypes, version and
-timestamp types, branch and space identifiers, and the shared error-category
-building blocks. It deliberately does **not** hold storage IO, product behavior,
-CLI or SDK affordances, data-capability objects, or general-purpose helpers. Every
-public type in core has to justify itself by naming which lower layers need the
-same concept.
+`core` holds shared vocabulary that belongs below both storage and engine:
+stable IDs, version and timestamp types, branch and space identifiers, and error
+categories. It should stay small.
 
 ### storage
 
-The persistence substrate. It stores generic rows over a single physical
-primitive and owns backend access, the physical keyspace, commit-unit
-persistence, and the write-ahead log, manifest, snapshot, checkpoint, compaction,
-retention, and recovery mechanics. It knows nothing about JSON paths, event
-meaning, embeddings, graph ontology, or search ranking. Details:
-[the storage substrate](/architecture/storage-substrate).
+`storage` owns the physical lifecycle: backends, row encoding, WAL, manifests,
+snapshots, checkpoints, compaction, retention, and recovery. It does not know
+what a JSON path, event type, embedding, graph edge, or search result means.
 
 ### engine
 
-The database-semantics layer, and the heart of the product. It owns open policy;
-branch, space, version, history, time-travel, and restore behavior; the six data
-capabilities; derived-state management; commit and batch semantics; the public
-error surface; and the serializable command boundary that the CLI, IPC, tests,
-and agents all speak. Details: [data capabilities](/architecture/data-capabilities).
+`engine` owns database meaning: opening policy, branches, spaces, versions, time
+travel, restores, five data shapes, derived state, commit behavior, batch
+behavior, public errors, and the serializable command boundary.
 
 ### intelligence
 
-The database-aware AI and retrieval orchestration layer. It provides retrieval
-recipes, query expansion and reranking, RAG and answer generation, and
-explanations of which branches, records, versions, and models contributed to a
-result. It depends on the engine for database state and on inference for models —
-and it never bypasses the engine to touch storage.
+`intelligence` owns retrieval orchestration: query expansion, reranking, RAG,
+and provenance for which branches, records, versions, and models contributed to
+a result. It uses engine APIs for state and inference APIs for model calls.
 
 ### inference
 
-The model and provider execution layer. It provides provider adapters, local or
-remote execution, and tokenization, embedding, and generation utilities. It is
-**not a database layer**: it depends on nothing from storage or engine, and it
-never makes an implicit network call without explicit configuration.
+`inference` owns provider adapters, local model execution, tokenization,
+embedding, ranking, and generation. It does not depend on storage or engine.
 
-## The dependency rules
-
-The guard test enforces these on every change:
+## Dependency rules
 
 1. Storage may depend on core.
 2. Engine may depend on storage and core.
 3. Intelligence may depend on engine, core, and inference.
-4. Product crates above the engine — executor, CLI, SDK, Strata AI — must **not**
-   depend on storage.
-5. Inference must **not** depend on engine or storage.
-6. Everything above the engine consumes engine and intelligence APIs, not storage
-   APIs.
+4. Product surfaces above the engine should not depend on storage directly.
+5. Inference should not depend on engine or storage.
+6. Upper layers consume engine and intelligence APIs, not storage APIs.
 
-Two consequences fall out of these rules and matter enough to state directly:
+Two consequences matter in practice:
 
-- **Only the engine consumes storage.** If an upper layer needs storage-backed
-  behavior, the answer is a new engine API, never a direct storage import. The
-  allowed exceptions — tests, benches, fuzz targets, diagnostic and migration
-  tools — are explicit.
-- **Optional model and provider features cannot affect durability.** Because
-  inference sits off to the side and never reaches into storage, enabling or
-  disabling a model feature can never change what a committed write means.
+- If an upper layer needs storage-backed behavior, add an engine API.
+- Optional model features cannot change what a committed write means.
 
-## Why the split is worth it
+## Why it matters
 
-Keeping meaning (engine) strictly above mechanics (storage), with a thin shared
-vocabulary (core) below both, is what lets the same substrate carry six
-capabilities, lets storage be fault-injected and crash-tested without any product
-semantics, and lets the AI layers be optional without ever putting database
-correctness at risk. The boundaries are not stylistic — they are the reason the
-[storage substrate](/architecture/storage-substrate) can stay simple while the
-[data capabilities](/architecture/data-capabilities) stay rich.
+The split lets one storage substrate carry five data shapes while preserving one
+commit clock, one branch model, and one recovery story. It also lets inference
+stay optional: enabling a model provider should change model calls, not database
+correctness.

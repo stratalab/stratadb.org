@@ -1,197 +1,97 @@
 ---
 title: "Events"
 section: "data"
-description: "Append hash-linked events and read them back by sequence, type, or time."
-source: "strata-core@v1.0.0"
+description: "Append typed events, list them by sequence or type, and verify the hash-linked log."
+source: "strata-core@v1.1.0"
 ---
 
-The event log is an append-only, ordered sequence of typed events. Each event
-gets a monotonic sequence number and is hash-linked to the one before it, so the
-log is tamper-evident. Use it for audit trails, agent action histories, change
-feeds, or anything where the order and integrity of what happened matters. Like
-every [primitive](/docs/concepts/primitives), the log is branch-aware and
-versioned.
+Use events when the order of what happened matters. The event log is append-only:
+you add typed JSON payloads, read them back by sequence, and can verify the
+hash chain.
 
-Examples below were run against the shipped binary. Use a directory path for a
-durable database or `--cache` for a throwaway run.
+Use [JSON](/docs/data/json) or [KV](/docs/data/key-value) for mutable current
+state. Use events for the record that should not be overwritten.
 
-## Append events
-
-`event append <type> <payload>` adds one event. The payload is parsed as JSON;
-use `@path` or `-f <file>` to read it from a file. Appends auto-commit.
+## Append
 
 ```bash
 strata ./mydb event append order.created '{"id":"A1","total":42}'
+strata ./mydb event append order.paid '{"id":"A1"}'
 ```
 
 ```text
 created applied=true
+created applied=true
 ```
 
-The `--json` envelope shows the assigned sequence. Sequences start at 0:
+Use `--json` when you need the assigned sequence and commit facts:
 
 ```bash
-strata --json ./mydb event append order.paid '{"id":"A1"}'
+strata --json ./mydb event append order.shipped '{"id":"A1"}'
 ```
 
-```text
-{"data":{"commit":{"delete_count":0,"durable":true,"put_count":3,"timestamp":4,"version":4},"effect":{"affected_count":1,"applied":true,"kind":"created","matched":false},"event_type":"order.paid","sequence":1,"timestamp":4,"version":4},"type":"event_append_result"}
-```
+Sequences start at `0` inside the branch and space.
 
-## Read one event
-
-`event get <sequence>` returns a single event. Alongside the payload and type
-it carries a `hash`, the `previous_hash` it links to, and an internal wall-clock
-`timestamp` in microseconds.
+## Read
 
 ```bash
 strata ./mydb event get 0
+strata ./mydb event count
+strata ./mydb event exists 99
 ```
 
-```text
-{
-  "event": {
-    "event_type": "order.created",
-    "hash": "82e2c6af52801cb5376a91937ddf98f0dddb10bf335b797035308179b0de29f6",
-    "payload": {
-      "id": "A1",
-      "total": 42
-    },
-    "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-    "sequence": 0,
-    "timestamp": 1783735254224134
-  },
-  "timestamp": 3,
-  "version": 3
-}
-```
+`event get` returns the event payload, type, sequence, hash, previous hash, and
+commit version. A missing sequence returns a not-found value instead of throwing.
 
-The first event links to an all-zero `previous_hash`. Reading a sequence that
-does not exist is not an error — it returns null and exits zero. `event exists
-<sequence>` returns `true`/`false`, and `event count` counts visible events.
-
-## List, filter by type
-
-`event list` returns events in order; `--limit`, `--event-type`, and
-`--after-sequence` (an exclusive cursor) page and filter it. `event types` lists
-the distinct types present, and `event by-type <type>` returns only that type.
+## List And Filter
 
 ```bash
+strata ./mydb event list --limit 20
 strata ./mydb event types
 strata ./mydb event by-type order.created --limit 5
 ```
 
-```text
-order.created
-order.paid
-order.shipped
-{"event":{"event_type":"order.created","hash":"82e2c6af52801cb5376a91937ddf98f0dddb10bf335b797035308179b0de29f6","payload":{"id":"A1","total":42},"previous_hash":"0000000000000000000000000000000000000000000000000000000000000000","sequence":0,"timestamp":1783735254224134},"timestamp":3,"version":3}
-{"event":{"event_type":"order.created","hash":"3d44143df25625c0833ba804cff9530e502b0fc8bfd4ba2514f64afce1cee341","payload":{"id":"A2","total":17},"previous_hash":"4dc2683aad6b5f2ac92da28bfc738b21bc0d4db3424840abd8de7f4bc46a0c22","sequence":2,"timestamp":1783735254242541},"timestamp":5,"version":5}
-```
-
-## Read ranges by sequence
-
-`event range <start-seq>` reads from a sequence forward; `--end-seq` is an
-exclusive upper bound, `--limit` caps the page, and `--direction reverse` walks
-backward from the start. A trailing `-- more:` line carries the next cursor.
+For paging, use `--after-sequence`. For a window, use sequence or event
+wall-clock time:
 
 ```bash
-strata ./mydb event range 3 --direction reverse --limit 2
+strata ./mydb event range 0 --limit 50
+strata ./mydb event range-time <start-event-timestamp> --end-ts <end-event-timestamp>
 ```
 
-```text
-{"event":{"event_type":"order.shipped","hash":"ac28ae25f43d627ca1503c3ec49be79930781526e747039283f158a027685387","payload":{"id":"A1"},"previous_hash":"3d44143df25625c0833ba804cff9530e502b0fc8bfd4ba2514f64afce1cee341","sequence":3,"timestamp":1783735254251352},"timestamp":6,"version":6}
-{"event":{"event_type":"order.created","hash":"3d44143df25625c0833ba804cff9530e502b0fc8bfd4ba2514f64afce1cee341","payload":{"id":"A2","total":17},"previous_hash":"4dc2683aad6b5f2ac92da28bfc738b21bc0d4db3424840abd8de7f4bc46a0c22","sequence":2,"timestamp":1783735254242541},"timestamp":5,"version":5}
--- more: 2
-```
+Event wall-clock timestamps are not the same as `--as-of` commit timestamps.
 
-## Read ranges by time
-
-`event range-time <start-ts>` selects events by their wall-clock timestamp
-(microseconds, as printed in each event). `--end-ts` is an inclusive upper
-bound; `--direction` and `--event-type` work as with sequence ranges.
-
-```bash
-strata ./mydb event range-time 1783735254224134 --end-ts 1783735254251352
-```
-
-This returns every event whose internal timestamp falls in that window. Note
-the distinction from `--as-of`: the internal event `timestamp` is wall-clock,
-while `--as-of <timestamp>` on reads uses the commit clock (the small
-`commit.timestamp` from a write receipt) to view a historical snapshot of the
-log.
-
-## Verify the chain
-
-`event verify-chain` walks the log and confirms both that sequence numbers are
-dense and that each event's hash links to its predecessor.
+## Verify The Chain
 
 ```bash
 strata ./mydb event verify-chain
 ```
 
-```text
-{
-  "error": null,
-  "first_invalid": null,
-  "length": 4,
-  "valid": true
-}
+The command checks dense sequence numbers and each event's link to the previous
+hash. Use it when the log is part of an audit or replay path.
+
+## Branches And History
+
+Each branch has its own event sequence. Forking a branch lets a session append
+events without touching the parent stream.
+
+Read an earlier log snapshot with the commit timestamp from a write receipt:
+
+```bash
+strata ./mydb event list --as-of <timestamp-from-receipt>
 ```
 
-If a link were broken, `valid` would be `false` and `first_invalid` would name
-the offending sequence.
+In `v1.1.0`, branch merge compares event streams but does not merge them.
 
-## Branches and time travel
+## Errors To Handle
 
-The log is branch-scoped — each branch has its own sequence. Fork a branch to
-record a separate stream of events without touching the parent, and pass
-`--as-of` to any read verb (including `event count`) to see the log as of an
-earlier commit. See [Branches](/docs/concepts/branches) and
-[Commits](/docs/concepts/commits).
+Invalid event types and oversized payloads are rejected with codes such as
+[`invalid_argument.engine.event_type`](/e/invalid_argument.engine.event_type) and
+[`invalid_argument.engine.event_payload_too_large`](/e/invalid_argument.engine.event_payload_too_large).
 
-## Error cases worth knowing
-
-An invalid event type or an oversized payload is rejected with a coded error —
-for example [/e/invalid_argument.engine.event_type](/e/invalid_argument.engine.event_type)
-or
-[/e/invalid_argument.engine.event_payload_too_large](/e/invalid_argument.engine.event_payload_too_large).
-A payload that is not valid JSON fails to parse before it reaches the log.
-Recover by code, never by message — see
-[error handling](/docs/guides/error-handling).
-
-## When to use the event log vs other primitives
-
-- Use the **event log** when order and integrity matter and you only ever
-  append.
-- Use [KV](/docs/data/key-value) or [JSON](/docs/data/json) for mutable
-  state you overwrite in place.
-- Use [Vectors](/docs/data/vectors) for similarity search.
-
-For a worked pattern, see
-[deterministic replay](/docs/cookbook/deterministic-replay). The full verb list
-is in the [CLI reference](/docs/reference/cli).
-
-## From Python
-
-The same surface, from the [Python SDK](/docs/python) — note the count method
-is `len()`:
-
-```python
-import stratadb
-
-db = stratadb.open("./mydb")
-record = db.events.append("deploy", {"ok": True})
-record.sequence      # 0
-db.events.len()      # 1
-db.events.verify_chain()
-db.close()
-```
-
-See [namespaces](/docs/python/namespaces) for ranges, type filters, and
-`as_of` reads.
+Recover by code. See [Error handling](/docs/guides/error-handling).
 
 ## Reference
 
-Every event command — parameters, returns, errors, and runnable CLI/wire/Python
-examples — is in the generated [Event command reference](/docs/reference/event).
+Exact parameters, return shapes, range commands, and error lists are generated in
+the [Event command reference](/docs/reference/event).

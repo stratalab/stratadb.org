@@ -1,23 +1,18 @@
 // Section 4 (04 §5 v2, 2026-06-12): time travel as DIRECT MANIPULATION.
 // Ani: "an interactive component that the user can scrub back and forth and
-// see how the value changes — not another parallax scroll." The page's
-// scroll-scrub count drops to one (branch); this is a Tier-1 user-driven
+// see how the value changes — not another parallax scroll." The section may
+// pin long enough to be noticed, but the playhead remains a Tier-1 user-driven
 // control, alive under reduced motion (it only moves when the user moves).
 //
-// The artifact: a terminal card running `kv get portfolio.value --as-of <t>`
-// (domain v2.1, Ani: "dark, dusk, midnight doesn't pop" — the finance
-// thread continues from the branch story: the value dips on 06-10, then
-// the merged aggressive strategy pays off on 06-11). A draggable playhead
-// rides a ruled timeline of the seed world's three days; the command's
-// timestamp and the answer update live. Scrub before the first write and
-// the key honestly does not exist yet. SSR renders the playhead at "now"
-// (completed state).
+// The artifact: a terminal card running `kv get portfolio.value --as-of <version>`.
+// A draggable playhead rides a ruled timeline of the seed world's three days;
+// the command's version and the answer update live. Scrub before the first
+// write and the key honestly does not exist yet. SSR renders the playhead at
+// "now" (completed state).
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { SEED } from '../../../data/seed';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
-const EMBER = (a: number) => `rgba(255, 122, 82, ${a})`;
+import { EASE, EMBER, INK } from '../../shared/term';
 
 const HISTORY = (SEED.kv['portfolio.value'].history ?? []).map((h) => ({
   version: h.version,
@@ -101,7 +96,7 @@ export default function TimeScrubber() {
         };
         raf = requestAnimationFrame(step);
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
     io.observe(el);
     return () => {
@@ -115,6 +110,7 @@ export default function TimeScrubber() {
   let idx = -1;
   for (let i = 0; i < HISTORY.length; i++) if (HISTORY[i].ts <= ts) idx = i;
   const cur = idx >= 0 ? HISTORY[idx] : null;
+  const asOf = cur?.version ?? 0;
 
   const seek = (clientX: number) => {
     const r = trackRef.current?.getBoundingClientRect();
@@ -138,7 +134,8 @@ export default function TimeScrubber() {
     const EPS = 1e-6;
     let next: number | null = null;
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') next = STOPS.find((s) => s > t + EPS) ?? 1;
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = [...STOPS].reverse().find((s) => s < t - EPS) ?? 0;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown')
+      next = [...STOPS].reverse().find((s) => s < t - EPS) ?? 0;
     else if (e.key === 'Home') next = 0;
     else if (e.key === 'End') next = 1;
     if (next === null) return;
@@ -165,24 +162,24 @@ export default function TimeScrubber() {
           style={{ background: 'var(--color-terracotta-500)', boxShadow: `0 0 10px ${EMBER(0.8)}` }}
           aria-hidden="true"
         />
-        <span className="font-mono text-mono-body text-ink-hi">time travel</span>
-        <span className="ml-auto font-mono text-mono-sm text-ink-low">strata · main</span>
+        <span className="font-mono text-mono-body text-ink-hi">version history</span>
+        <span className="ml-auto font-mono text-mono-sm text-ink-low">strata · --as-of</span>
       </div>
 
       <div
         className="p-6 font-mono text-mono-body leading-8 md:p-8 md:text-[1.0625rem] md:leading-9"
         style={{
           backgroundColor: 'var(--color-inset)',
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${INK(0.04)} 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.035)}, transparent 38%)`,
           backgroundSize: '22px 22px, 100% 100%',
         }}
       >
         {/* the read, live: the timestamp is the playhead */}
         <div className="[overflow-wrap:anywhere]">
-          <span className="text-ink-low">strata:main </span>
+          <span className="text-ink-low">strata </span>
           <span className="text-terracotta-500">›</span>
           <span className="text-ink-hi"> kv get portfolio.value --as-of </span>
-          <span className="text-terracotta-300 tabular-nums">"{fmt(ts)}"</span>
+          <span className="text-terracotta-300 tabular-nums">{asOf}</span>
         </div>
 
         {/* the answer — fixed height, swap-animated on version change */}
@@ -218,7 +215,9 @@ export default function TimeScrubber() {
                         </span>
                       )}
                     </span>
-                    <span className="font-mono text-mono-sm text-ink-low max-sm:hidden">written {fmtFull(cur.ts)}</span>
+                    <span className="font-mono text-mono-sm text-ink-low max-sm:hidden">
+                      written {fmtFull(cur.ts)}
+                    </span>
                   </span>
                 </>
               ) : (
@@ -239,7 +238,11 @@ export default function TimeScrubber() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(t * 100)}
-          aria-valuetext={cur ? `${fmt(ts)} — v${cur.version}, ${usd(cur.value)}` : `${fmt(ts)} — before the first write`}
+          aria-valuetext={
+            cur
+              ? `${fmt(ts)} — v${cur.version}, ${usd(cur.value)}`
+              : `${fmt(ts)} — before the first write`
+          }
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
@@ -263,9 +266,16 @@ export default function TimeScrubber() {
             aria-hidden="true"
           />
           {/* day labels */}
-          <div className="absolute inset-x-0 top-12 font-mono text-mono-sm text-ink-low" aria-hidden="true">
+          <div
+            className="absolute inset-x-0 top-12 font-mono text-mono-sm text-ink-low"
+            aria-hidden="true"
+          >
             {['06-09', '06-10', '06-11'].map((d, i) => (
-              <span key={d} className="absolute -translate-x-1/2" style={{ left: `${(i / 3) * 100}%` }}>
+              <span
+                key={d}
+                className="absolute -translate-x-1/2"
+                style={{ left: `${(i / 3) * 100}%` }}
+              >
                 {d}
               </span>
             ))}
@@ -278,7 +288,10 @@ export default function TimeScrubber() {
               <span
                 key={h.version}
                 className="absolute top-3 h-8 w-px"
-                style={{ left: `${pos(h.ts) * 100}%`, background: passed ? 'var(--color-terracotta-500)' : 'var(--color-ink-low)' }}
+                style={{
+                  left: `${pos(h.ts) * 100}%`,
+                  background: passed ? 'var(--color-terracotta-500)' : 'var(--color-ink-low)',
+                }}
                 aria-hidden="true"
               >
                 <span
@@ -300,12 +313,19 @@ export default function TimeScrubber() {
           {/* the playhead */}
           <div
             className="absolute top-1 h-12 w-px"
-            style={{ left: `${t * 100}%`, background: 'var(--color-terracotta-400)', boxShadow: `0 0 10px ${EMBER(0.7)}` }}
+            style={{
+              left: `${t * 100}%`,
+              background: 'var(--color-terracotta-400)',
+              boxShadow: `0 0 10px ${EMBER(0.7)}`,
+            }}
             aria-hidden="true"
           >
             <motion.span
               className="absolute -top-1 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full border-2"
-              style={{ background: 'var(--color-terracotta-500)', borderColor: 'var(--color-ink-hi)' }}
+              style={{
+                background: 'var(--color-terracotta-500)',
+                borderColor: 'var(--color-ink-hi)',
+              }}
               animate={{ scale: dragging || demoing ? 1.25 : 1 }}
               transition={{ duration: 0.15, ease: EASE }}
             />
@@ -326,7 +346,8 @@ export default function TimeScrubber() {
         {/* the ruled footer, drafting voice */}
         <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-3 font-mono text-mono-sm text-ink-low">
           <span>
-            <span className="text-terracotta-400">drag the playhead</span> — every read accepts --as-of
+            <span className="text-terracotta-400">drag the playhead</span> — every read accepts
+            --as-of
           </span>
           <span className="max-sm:hidden">3 versions · 0 overwrites</span>
         </div>

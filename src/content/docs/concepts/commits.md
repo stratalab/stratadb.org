@@ -2,7 +2,7 @@
 title: "Commits"
 section: "concepts"
 description: "Every write auto-commits atomically and returns a commit version and timestamp; there are no manual begin, commit, or rollback calls."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 Every write in StrataDB is a **commit**. When you put a key, set a JSON path, append an event, upsert a vector, or add a graph node, that change is applied atomically and becomes durable on its own — there is no separate step to commit it. This keeps one canonical path for every write and removes a whole class of "did I remember to commit?" bugs.

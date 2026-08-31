@@ -2,7 +2,7 @@
 title: "Installation"
 section: "python"
 description: "Install the stratadb wheel, choose CPU or GPU inference, and get type checking for free."
-source: "strata-python@v1.0.0"
+source: "strata-python@v1.1.0"
 ---
 
 ```bash

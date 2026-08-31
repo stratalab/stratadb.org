@@ -1,63 +1,62 @@
 ---
 title: "The agents guide"
 section: "agents"
-description: "One version-matched usage guide, reachable three ways — the CLI, the Python SDK, and the MCP server."
-source: "strata-core@v1.0.0"
+description: "The version-matched guide that agents can read from the CLI, Python package, or MCP server."
+source: "strata-core@v1.1.0"
 ---
 
-Strata ships a single, complete usage guide generated from the installed build —
-targeting rules, every capability, branches, and time travel. It is the first
-thing to hand an agent that is about to use Strata, and it is reachable three
-ways. All three return the **same** guide, matched to the version you have
-installed, so it can never describe a surface your binary does not have.
+The agents guide is a compact playbook shipped with Strata. It covers database
+targeting, common commands, branches, time travel, output formats, and error
+handling. Use it as the first context block for an agent that can run shell
+commands.
 
-## From the CLI
-
-`strata agents guide` prints the guide as markdown, with no network call:
+## CLI
 
 ```bash
 strata --cache agents guide
 ```
 
+The command prints markdown and does not need a network call. The opening
+section is the most important part:
+
 ```text
 ## Targeting a database
 
-1. Explicit path or `--db <path>` — always wins: `strata ./my-db kv get k`
-2. `STRATA_DB=<path>` — set once per session, used when no path is passed
-3. `--cache` — explicit in-memory database (nothing persisted)
+1. Explicit path or `--db <path>` - always wins: `strata ./my-db kv get k`
+2. `STRATA_DB=<path>` - set once per session, used when no path is passed
+3. `--cache` - explicit in-memory database (nothing persisted)
 ```
 
-Because it is offline and version-matched, it is safe to pipe straight into an
-agent's context at the start of a session.
-
-## From the Python SDK
-
-The `stratadb` package exposes the same guide as a module-level function, so an
-agent working in Python never has to shell out:
+## Python
 
 ```python
 import stratadb
 
-print(stratadb.agents_guide())   # the same guide, matched to the wheel's engine
+print(stratadb.agents_guide())
 ```
 
-## From the MCP server
+The Python package exposes the same kind of guidance for agents that are already
+working inside a Python process.
 
-Over MCP, the guide is the `strata_guide` tool — the server's own instructions
-tell a client to call it first when unsure how anything works. See
-[The MCP server](/docs/agents/mcp-server).
+## MCP
 
-## Why three front doors
+Over MCP, call `strata_guide`. The server advertises it alongside the database
+tools so a client can recover when it is unsure which command to use.
 
-An agent might reach Strata through a shell, through Python, or through an MCP
-client. Each entry point returns the identical guide from the identical source,
-so whichever way the agent arrives, it gets the same authoritative instructions —
-and they always match the installed version. When you need the *structured*
-surface rather than the prose, use [the command index](/docs/agents/command-index).
+## When to use the catalog instead
+
+The guide is prose. For routing, schema generation, retries, and codegen, use
+the structured catalogs:
+
+```bash
+strata agents commands --json
+strata agents errors --json
+```
+
+Those catalogs are covered in [The command index](/docs/agents/command-index).
 
 ## Related
 
-- [For AI agents](/docs/agents) — the section overview.
-- [The command index](/docs/agents/command-index) — the machine-readable catalogs.
-- [Repo onboarding](/docs/agents#onboard-a-repository) — `strata agents init`
-  drops a pointer to this guide into a repo.
+- [For AI agents](/docs/agents)
+- [The MCP server](/docs/agents/mcp-server)
+- [Machine-readable docs](/docs/agents/machine-docs)

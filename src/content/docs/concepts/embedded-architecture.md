@@ -2,7 +2,7 @@
 title: "Embedded architecture"
 section: "concepts"
 description: "StrataDB runs in-process against a local directory — no server, no port. What that means for how you deploy and reason about it."
-source: "strata-core@v1.0.0"
+source: "strata-core@v1.1.0"
 ---
 
 StrataDB is **embedded**: it runs inside your process, against a local directory,

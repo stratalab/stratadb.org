@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useInView } from 'motion/react';
 import {
   completedState,
-  type ScriptEvent,
   type TerminalState,
   type TermLineData,
   type PanelId,
@@ -95,7 +94,9 @@ function Panel({
 export default function ForkingTerminal() {
   // SSR first frame = completed state (03 §7); hydration resets and plays.
   const [state, setState] = useState<TerminalState>(DONE);
-  const [typing, setTyping] = useState<{ panel: PanelId; branch: string; text: string } | null>(null);
+  const [typing, setTyping] = useState<{ panel: PanelId; branch: string; text: string } | null>(
+    null,
+  );
   const [playing, setPlaying] = useState(true);
   const [reduced, setReduced] = useState(false);
   const [fading, setFading] = useState(false);
@@ -176,7 +177,6 @@ export default function ForkingTerminal() {
     (async () => {
       try {
         await waitForView();
-        // eslint-disable-next-line no-constant-condition
         while (true) await runOnce();
       } catch {
         // cancelled: restore a safe, complete state (never a blank frame)
@@ -214,7 +214,7 @@ export default function ForkingTerminal() {
         >
           <Panel
             title="strata"
-            status="engine: scripted replay"
+            status="engine: verified replay"
             lines={state.main}
             {...typedFor('main')}
           />
@@ -230,7 +230,7 @@ export default function ForkingTerminal() {
           style={{ pointerEvents: showFork ? 'auto' : 'none' }}
           aria-hidden={!showFork}
         >
-          <Panel title="experiment" lines={state.fork} {...typedFor('fork')} />
+          <Panel title="risky" lines={state.fork} {...typedFor('fork')} />
         </motion.div>
       </motion.div>
 

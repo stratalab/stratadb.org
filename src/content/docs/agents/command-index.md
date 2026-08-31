@@ -1,65 +1,60 @@
 ---
 title: "The command index"
 section: "agents"
-description: "The machine-readable command and error catalogs the binary emits — the same IDL the generated reference is built from."
-source: "strata-core@v1.0.0"
+description: "The structured command and error catalogs emitted by the Strata binary."
+source: "strata-core@v1.1.0"
 ---
 
-Where [the agents guide](/docs/agents/agents-guide) is prose, the command index is
-**structured**: two JSON catalogs an agent can load and enumerate directly, so it
-never has to guess a verb or the meaning of an error. Both come straight from the
-installed binary, and both are the same source the generated
-[command reference](/docs/reference/kv) is built from.
+The command index is the machine surface behind the docs. It tells an agent what
+commands exist, how they are classified, where their reference pages live, and
+which errors each command can return.
 
-## The command catalog
-
-`strata agents commands --json` returns the command catalog — each command with
-its access class, batching and commit behavior, description, docs path, and the
-error codes it can raise:
+## Commands
 
 ```bash
 strata --cache agents commands --json
 ```
 
-```text
-{"data":{"command_count":130,"commands":[{"access":"write","batch":"itemwise", ... }]}}
-```
+The response includes command IDs, families, path displays, input and output
+models, access class, commit behavior, pagination shape, reference URLs, and
+possible errors. Use it when an agent needs to enumerate the product instead of
+guessing from examples.
 
-Each entry is fully described: its path, access mode (`read`/`write`), batch
-semantics, commit behavior, response model, and the exact error codes it can
-return. An agent can route on those fields — for example, only calling `write`
-commands inside a branch it forked, or knowing in advance which codes a command
-may raise.
+Typical uses:
 
-## The error registry
+- allow only `read` commands in an inspection step
+- put `write` commands on an isolated branch
+- route help links from `docs`
+- precompute which error codes a command may return
+- generate a client-side command palette
 
-`strata agents errors --json` returns the public error registry — every code with
-its class, hint, retry policy, and reference URL:
+## Errors
 
 ```bash
 strata --cache agents errors --json
 ```
 
-```text
-{"data":{"count":204,"errors":[{"class":"invalid_argument","code":"invalid_argument.engine.branch_catalog","commit_outcome":"not_started","hint":"Correct the invalid field named by the error message and retry the operation.","message":"The request contains invalid input.","ref":"https://stratadb.org/e/invalid_argument.engine.branch_catalog","retry_policy":"never"}, ... ]}}
-```
+The error registry includes each public code, class, message, hint, retry
+policy, commit outcome, and reference URL. Runtime errors should be handled by
+`code`, not by human message text.
 
-This is the same registry that backs the browsable [`/e/<code>`](/e/) pages and
-the [error reference](/docs/reference/error-reference). Recover by **code**, never
-by message text — the message is for humans and may change; the code is stable.
+CLI guardrail errors, such as `invalid_argument.cli.no_database`, can be emitted
+before a database opens. They are useful to humans and agents, but they are not
+part of the public `/e/` registry.
 
-## One source, many renderings
+## Generated reference
 
-The command index is the IDL: the machine-readable contract for every command.
-The generated [command reference](/docs/reference/kv) on this site, the CLI's own
-help, and the MCP tool schemas are all renderings of it. Because they share one
-source, they cannot drift — if a page and the binary ever disagree, the binary
-wins, and you should check that your installed version matches these docs.
+The generated command reference is a human rendering of the same product
+contract. If you need exact current syntax, use:
+
+- [Command Reference](/docs/reference/command-reference)
+- [Error Reference](/docs/reference/error-reference)
+- [Value Type Reference](/docs/reference/value-type-reference)
+
+For the live binary in your environment, prefer `strata agents commands --json`.
 
 ## Related
 
-- [For AI agents](/docs/agents) — the section overview.
-- [The agents guide](/docs/agents/agents-guide) — the prose counterpart.
-- [Machine-readable docs](/docs/agents/machine-docs) — the website's own machine
-  surface (`llms.txt`, `.md` mirrors, the `/e/` registry).
-- [Command reference](/docs/reference/kv) — the human-readable rendering, per family.
+- [For AI agents](/docs/agents)
+- [The agents guide](/docs/agents/agents-guide)
+- [Machine-readable docs](/docs/agents/machine-docs)

@@ -1,21 +1,44 @@
 ---
 title: "Reference"
 section: "reference"
-description: "Exact specifications for the strata CLI, its command surface, configuration, errors, value types, and MCP server."
-source: "strata-core@v1.0.0"
+description: "Generated command facts, CLI rules, configuration, errors, and value types for the Strata binary."
+source: "strata-core@v1.1.0"
 ---
 
-Precise, verified specifications for the `strata` binary and the database it opens. These pages describe exactly what the shipping CLI does.
+# Reference
 
-## Pages
+Use the reference when you need exact syntax or machine-shaped facts. The
+narrative docs explain how to think about Strata; these pages stay close to the
+binary surface.
 
-- **[CLI](/docs/reference/cli)** — invoking `strata`: targeting a database, global options, output formats, and the interactive REPL.
-- **[Command Reference](/docs/reference/command-reference)** — every command in every family, with its syntax and a one-line description.
-- **[API Quick Reference](/docs/reference/api-quick-reference)** — a one-page cheat sheet of the most common operation per capability.
-- **[Configuration Reference](/docs/reference/configuration-reference)** — database options, durability, and the resolved hub configuration.
-- **[Error Reference](/docs/reference/error-reference)** — the error model and the public error-code registry.
-- **[Value Type Reference](/docs/reference/value-type-reference)** — the value types stored and returned across capabilities.
+## Core pages
 
-The Model Context Protocol server now lives in [For AI agents](/docs/agents/mcp-server).
+- [CLI](/docs/reference/cli): database targeting, global flags, output formats,
+  and REPL behavior.
+- [Command Reference](/docs/reference/command-reference): command families and
+  verbs generated from the command catalog.
+- [API Quick Reference](/docs/reference/api-quick-reference): the most common
+  operation in each capability.
+- [Configuration Reference](/docs/reference/configuration-reference): local
+  config and hub URL resolution.
+- [Error Reference](/docs/reference/error-reference): the public error model and
+  error-code registry.
+- [Value Type Reference](/docs/reference/value-type-reference): values stored
+  and returned across capabilities.
 
-The Node and Python SDKs are in progress; their references will be generated from the same command index that will eventually generate these pages.
+## Command families
+
+- [Key-value](/docs/reference/kv)
+- [JSON](/docs/reference/json)
+- [Events](/docs/reference/event)
+- [Vectors](/docs/reference/vector)
+- [Graph](/docs/reference/graph)
+- [Branches](/docs/reference/branch)
+- [Spaces](/docs/reference/space)
+- [Inference](/docs/reference/inference)
+- [Admin](/docs/reference/admin)
+- [Arrow import/export](/docs/reference/arrow)
+
+For agent-driven discovery, use `strata agents commands --json` and
+`strata agents errors --json`. The MCP server is documented in
+[For AI agents](/docs/agents/mcp-server).

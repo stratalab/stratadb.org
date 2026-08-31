@@ -11,7 +11,7 @@
       "title": "Read sanitized config",
       "summary": "Read sanitized configuration facts.",
       "description": "Returns sanitized configuration facts: the open target, whether this open created the database, durability, and the default branch. Only allowlisted, non-sensitive facts are exposed; no filesystem paths, credentials, or provider keys are ever returned.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/config",
+      "docs": "/docs/reference/admin/config",
       "cli": {
         "path": [
           "config",
@@ -58,7 +58,7 @@
       "title": "Read one config value",
       "summary": "Read one sanitized configuration value by key.",
       "description": "Returns one sanitized configuration value from the allowlist by key, or a null value when the key is not recognized. Only allowlisted, non-sensitive keys are served; an empty key is rejected with `invalid_argument.engine.config_key`.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/admin/config_key",
+      "docs": "/docs/reference/admin/config_key",
       "cli": {
         "path": [
           "config",
@@ -109,7 +109,7 @@
       "title": "Describe database",
       "summary": "Read a compact description of the database.",
       "description": "Returns a compact description of the database for one branch: engine version, open target, the default and described branches, all active branches, the registered product spaces, per-primitive counts (KV, JSON, event, plus vector-collection and graph summaries), the sanitized config, and the available capabilities. The branch defaults to the handle branch when omitted.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/describe",
+      "docs": "/docs/reference/admin/describe",
       "cli": {
         "path": [
           "describe"
@@ -163,7 +163,7 @@
       "title": "Read database health",
       "summary": "Read control-plane health facts.",
       "description": "Returns control-plane health facts: the worst overall status plus per-subsystem status for identity, registry, branch catalog, and the optional branch-local space catalog. Also reports the default branch and active branch count. A healthy result means every required control-plane fact is present and readable.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/health",
+      "docs": "/docs/reference/admin/health",
       "cli": {
         "path": [
           "health"
@@ -217,7 +217,7 @@
       "title": "Clone hub dataset",
       "summary": "Clone a dataset from a hub into a new local database.",
       "description": "Clones a dataset from a hub into a new local database directory. Resolution, download, verification, reconstitution, and origin recording run once behind this command; the session database is not touched. The destination directory must not exist or must be empty. When the hub URL is not given, the layered resolver selects it from the flag, environment, and config layers.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/hub_clone",
+      "docs": "/docs/reference/admin/hub_clone",
       "cli": {
         "path": [
           "clone"
@@ -288,7 +288,7 @@
       "title": "Read database info",
       "summary": "Read database identity and a catalog summary.",
       "description": "Returns database identity and a catalog summary for one branch: engine version, open target, whether this open created the database, durability, the default branch, the active branch count, the registered space count for the selected branch, and the resolved storage `memory_budget` (its `total_bytes` and its `source` — `explicit`, `derived_from_host`, or `fixed_default`). When no budget is set, the engine derives the default from host memory at open — 25% of usable memory, clamped to a ceiling — so `memory_budget` reveals what the database is actually sized to. The branch defaults to the handle branch when omitted.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/info",
+      "docs": "/docs/reference/admin/info",
       "cli": {
         "path": [
           "info"
@@ -342,7 +342,7 @@
       "title": "Read IPC status",
       "summary": "Report this process's multi-process IPC state.",
       "description": "Reports the same-machine multi-process state for this handle: whether this process owns the store (holds the writer lock) or is a client of another owner, whether it is hosting a broker socket, the socket path and owning process id when one exists, and the number of clients currently connected to the host. A single-process open (cache, or a durable open with IPC off) reports `is_owner: true`, `hosting: false`, and no socket.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/ipc_status",
+      "docs": "/docs/reference/admin/ipc_status",
       "cli": {
         "path": [
           "ipc",
@@ -389,7 +389,7 @@
       "title": "Stop IPC hosting",
       "summary": "Stop hosting the multi-process broker socket.",
       "description": "Stops hosting the same-machine broker socket for this store: the listener stops accepting connections and the store is no longer reachable by new clients. Run from a client, it forwards to the owner, which stops hosting (ending that client's own connection). The store stays open in this process; the socket files are unlinked when the owner closes. Idempotent — a process that was not hosting reports `stopped: false`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/ipc_stop",
+      "docs": "/docs/reference/admin/ipc_stop",
       "cli": {
         "path": [
           "ipc",
@@ -436,7 +436,7 @@
       "title": "Read database metrics",
       "summary": "Read lightweight database metrics.",
       "description": "Returns lightweight database metrics: the open target, durability, whether the handle is open, the active branch count, the registered space count for the selected branch, and the control-plane health status. The branch defaults to the handle branch when omitted.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/metrics",
+      "docs": "/docs/reference/admin/metrics",
       "cli": {
         "path": [
           "metrics"
@@ -490,7 +490,7 @@
       "title": "Ping database",
       "summary": "Check that the database handle is live.",
       "description": "Lightweight liveness check. Returns the engine package version without touching branches, spaces, or primitive data. Use it to confirm the handle is open and responsive before issuing heavier commands.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/admin/ping",
+      "docs": "/docs/reference/admin/ping",
       "cli": {
         "path": [
           "ping"
@@ -536,7 +536,7 @@
       "title": "Read remote origin",
       "summary": "Read where this database was cloned from.",
       "description": "Reads the remote origin recorded when this database was cloned from a hub: the remote URL, dataset, branch, manifest hash, fetch time, and per-branch base frontier. Returns a null origin when the database was created locally and never cloned.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/admin/remote",
+      "docs": "/docs/reference/admin/remote",
       "cli": {
         "path": [
           "remote"
@@ -582,7 +582,7 @@
       "title": "Export Arrow file",
       "summary": "Export a product primitive to an Arrow-compatible file.",
       "description": "Exports a product primitive from the selected branch and space to an Arrow-compatible file (Parquet, CSV, or JSONL). Graph exports treat the path as a stem and write separate node and edge files. Returns a summary of the exported primitive, the concrete output paths, the row count, and the total output size.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/arrow/export",
+      "docs": "/docs/reference/arrow/export",
       "cli": {
         "path": [
           "arrow",
@@ -678,7 +678,7 @@
       "title": "Import Arrow file",
       "summary": "Import an Arrow-compatible file into a product primitive.",
       "description": "Imports an Arrow-compatible file (Parquet, CSV, or JSONL) into a product primitive on the selected branch and space. Rows are written through the standard batch commands, so the import commits like any other write. Returns a summary of the target primitive, the input file, and the imported, skipped, and batch counts.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/arrow/import",
+      "docs": "/docs/reference/arrow/import",
       "cli": {
         "path": [
           "arrow",
@@ -782,7 +782,7 @@
       "title": "Create empty branch",
       "summary": "Create a new empty root branch.",
       "description": "Creates an empty root branch with no parent and no data. This is not a fork: the new branch starts from nothing, and its `parent` is null. Use `branch.fork` to start from an existing branch's data. Creating a name that already exists fails with `already_exists.engine.branch`; names reserved for engine control data are rejected.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/branch/create",
+      "docs": "/docs/reference/branch/create",
       "cli": {
         "path": [
           "branch",
@@ -850,7 +850,7 @@
       "title": "Delete branch",
       "summary": "Delete an active branch and release its storage claims.",
       "description": "Deletes an active branch and reports the deleted branch summary, generation facts, and storage cleanup counts. The `default` branch refuses deletion with `invalid_argument.engine.branch_delete`. Deletion discards the branch's work — promote anything worth keeping onto another branch with `branch merge` before deleting, or keep working on the branch instead.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/branch/delete",
+      "docs": "/docs/reference/branch/delete",
       "cli": {
         "path": [
           "branch",
@@ -916,7 +916,7 @@
       "title": "Compare branches",
       "summary": "Compare two branches and report the entities that differ across every primitive.",
       "description": "Compares two branches and reports the authored entities that differ, grouped by\ncapability and space: entries `added` on `branch_b`, `removed` relative to\n`branch_a`, and `modified` on both sides. The comparison is directional from\n`branch_a` to `branch_b`.\n\nEvery data primitive is compared — key-value, JSON documents, vectors, event\nstreams, and graphs. Graph changes are reported per row class: nodes, edges, and\nontology appear as separate capabilities in the result. Derived rows (search and\nvector indexes, graph reverse maps) are omitted. A missing branch is rejected\nwith `not_found.engine.branch`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/branch/diff",
+      "docs": "/docs/reference/branch/diff",
       "cli": {
         "path": [
           "branch",
@@ -979,7 +979,7 @@
       "title": "Fork branch from current head",
       "summary": "Fork a new branch from the current head of a source branch.",
       "description": "Forks a new branch from the source branch's current head. The new branch sees all data visible on the source at fork time; later writes on either branch stay isolated. The returned branch summary records the parent name, fork version, and generation.\n\nOn the CLI, all three fork commands share the single verb `strata branch fork <SOURCE> <BRANCH>`: with no flags it runs this command, while `--version` routes to `branch.fork_at_version` and `--timestamp` routes to `branch.fork_at_timestamp` (both wire-surface commands).\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/branch/fork",
+      "docs": "/docs/reference/branch/fork",
       "cli": {
         "path": [
           "branch",
@@ -1045,7 +1045,7 @@
       "title": "Fork branch at timestamp",
       "summary": "Fork a new branch from a retained source timestamp.",
       "description": "Forks a new branch anchored at a retained source timestamp (microseconds, on Strata's logical commit clock). The engine resolves the timestamp to the covering retained commit; the returned parent lineage records both the fork timestamp and the resolved fork version. A timestamp outside retained history fails with `history_unavailable.engine.persistence_history`.\n\nThis command has no dedicated CLI verb: the CLI expresses it as `strata branch fork <SOURCE> <BRANCH> --timestamp <TIMESTAMP>` (one shared `branch fork` verb routes to all three fork commands, so only `branch.fork` owns the CLI path). It remains fully reachable through the generic wire surface — `strata command run`, MCP, and SDKs.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/branch/fork_at_timestamp",
+      "docs": "/docs/reference/branch/fork_at_timestamp",
       "cli": {
         "path": [
           "branch",
@@ -1115,7 +1115,7 @@
       "title": "Fork branch at version",
       "summary": "Fork a new branch from a retained source commit version.",
       "description": "Forks a new branch anchored at a retained commit version of the source branch, giving time-travel semantics: the new branch sees exactly the data visible at that version. A version outside retained history fails with `history_unavailable.engine.persistence_history`.\n\nThis command has no dedicated CLI verb: the CLI expresses it as `strata branch fork <SOURCE> <BRANCH> --version <VERSION>` (one shared `branch fork` verb routes to all three fork commands, so only `branch.fork` owns the CLI path). It remains fully reachable through the generic wire surface — `strata command run`, MCP, and SDKs.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/branch/fork_at_version",
+      "docs": "/docs/reference/branch/fork_at_version",
       "cli": {
         "path": [
           "branch",
@@ -1185,7 +1185,7 @@
       "title": "Read one branch",
       "summary": "Read one branch summary by name.",
       "description": "Reads the summary for one branch: name, deterministic branch id, generation, status, parent lineage, and logical creation version. A branch that does not exist is a `not_found.engine.branch` error, not an empty result.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/branch/get",
+      "docs": "/docs/reference/branch/get",
       "cli": {
         "path": [
           "branch",
@@ -1247,7 +1247,7 @@
       "title": "List branches",
       "summary": "List active branches with their lineage facts.",
       "description": "Lists every active branch as a terminal page. Each item carries the branch name, deterministic branch id, generation, status, parent lineage (fork version and timestamp when forked), and logical creation version.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/branch/list",
+      "docs": "/docs/reference/branch/list",
       "cli": {
         "path": [
           "branch",
@@ -1297,7 +1297,7 @@
       "title": "Promote branch",
       "summary": "Promote one branch's changes into another as a single atomic commit.",
       "description": "Promotes the `source` branch's changes into the `target` branch as a single\natomic commit, leaving the source unchanged. The branch point is derived from\nthe recorded fork lineage, and a three-way merge applies every change the source\nmade since that point.\n\nMerge applies to key-value, JSON, and vector data. Event streams and graphs are\ncompared (see `branch.diff`) but never merged — divergent append-only and\nstructural data cannot be three-way merged — so a promotion leaves them\nuntouched.\n\nThe `strict` strategy (the default) refuses with `conflict.engine.promotion`,\nmutating nothing, when the two branches changed the same entity differently since\nthe branch point. The `source_wins` strategy applies the source side's value or\ntombstone for each such conflict and reports every overwritten or deleted target\nentry. A promotion that applies nothing writes no commit and leaves the target\nunchanged.\n\nBranches with no shared fork lineage are rejected with\n`invalid_argument.engine.branch_point`; a missing branch with\n`not_found.engine.branch`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/branch/merge",
+      "docs": "/docs/reference/branch/merge",
       "cli": {
         "path": [
           "branch",
@@ -1388,7 +1388,7 @@
       "title": "Preview branch promotion",
       "summary": "Preview promoting one branch into another, reporting conflicts without mutating either branch.",
       "description": "Previews promoting the `source` branch into the `target` branch: it derives the\nbranch point from the recorded fork lineage, runs a three-way comparison, and\nreports the conflicts a promotion would hit — entries both branches changed\ndifferently since the branch point. Preview is read-only: it mutates neither\nbranch.\n\nEach conflict reports what the selected `strategy` would do — `strict` refuses\n(`refused`), `source_wins` overwrites the target with the source value. A preview\nwith no conflicts is clean and a promotion under `strict` would apply. Preview\ncovers the capabilities a promotion applies — key-value, JSON, and vectors;\nevents and graphs are diff-only and never appear as promotion conflicts.\nBranches with no shared fork lineage are rejected with\n`invalid_argument.engine.branch_point`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/branch/preview",
+      "docs": "/docs/reference/branch/preview",
       "cli": {
         "path": [
           "branch",
@@ -1466,7 +1466,7 @@
       "title": "Append event",
       "summary": "Append one event to the branch event log.",
       "description": "Appends one event to the selected branch and space. Strata assigns the next sequence number, stamps the event with its append timestamp, and links it into the tamper-evident hash chain. Events are immutable once appended.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/event/append",
+      "docs": "/docs/reference/event/append",
       "cli": {
         "path": [
           "event",
@@ -1539,7 +1539,7 @@
       "title": "Batch append events",
       "summary": "Append multiple events in one commit.",
       "description": "Appends multiple events to the selected branch and space in one engine commit. Sequences are assigned in entry order. Entries that fail validation report a positional item error while valid entries still append.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/event/batch_append",
+      "docs": "/docs/reference/event/batch_append",
       "cli": {
         "path": [
           "event",
@@ -1610,7 +1610,7 @@
       "title": "Count events",
       "summary": "Count visible events in the log.",
       "description": "Counts events visible in the selected branch and space. The optional timestamp counts the events visible at that commit time.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/event/count",
+      "docs": "/docs/reference/event/count",
       "cli": {
         "path": [
           "event",
@@ -1669,7 +1669,7 @@
       "title": "Check event existence",
       "summary": "Check whether an event sequence exists.",
       "description": "Checks whether one event sequence exists in the selected branch and space without returning the record.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/event/exists",
+      "docs": "/docs/reference/event/exists",
       "cli": {
         "path": [
           "event",
@@ -1727,7 +1727,7 @@
       "title": "Get event",
       "summary": "Read one event by sequence number.",
       "description": "Reads one event from the selected branch and space by sequence number. The optional timestamp reads the record visible at that commit time. The record carries its payload, append timestamp, and hash-chain facts.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/event/get",
+      "docs": "/docs/reference/event/get",
       "cli": {
         "path": [
           "event",
@@ -1786,7 +1786,7 @@
       "title": "List events",
       "summary": "List events with optional type filter and cursor.",
       "description": "Lists events from the selected branch and space in sequence order. An optional event type narrows the results, the sequence cursor continues a previous page, and the optional timestamp reads the log visible at that commit time.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/event/list",
+      "docs": "/docs/reference/event/list",
       "cli": {
         "path": [
           "event",
@@ -1854,7 +1854,7 @@
       "title": "Read event sequence range",
       "summary": "Read a range of events by sequence number.",
       "description": "Reads events from the selected branch and space by sequence range. The start sequence is inclusive and the optional end sequence is exclusive; reverse direction walks backward from the start sequence. An optional event type narrows the results.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/event/range",
+      "docs": "/docs/reference/event/range",
       "cli": {
         "path": [
           "event",
@@ -1922,7 +1922,7 @@
       "title": "Read event time range",
       "summary": "Read a range of events by occurrence time.",
       "description": "Reads events from the selected branch and space whose append timestamps fall inside an inclusive microsecond window. This queries when events occurred; historical log states are the timestamped read commands' job. An optional event type narrows the results.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/event/range_time",
+      "docs": "/docs/reference/event/range_time",
       "cli": {
         "path": [
           "event",
@@ -1990,7 +1990,7 @@
       "title": "List event types",
       "summary": "List distinct event types in the log.",
       "description": "Lists the distinct event types visible in the selected branch and space in sorted order. The optional timestamp lists the types visible at that commit time.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/event/types",
+      "docs": "/docs/reference/event/types",
       "cli": {
         "path": [
           "event",
@@ -2049,7 +2049,7 @@
       "title": "Verify event chain",
       "summary": "Verify event log density and hash linkage.",
       "description": "Verifies that the visible event log in the selected branch and space is dense and hash-linked: sequences are contiguous from zero, the genesis record links to the all-zeros hash, and every record's hash matches its content and predecessor.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/event/verify_chain",
+      "docs": "/docs/reference/event/verify_chain",
       "cli": {
         "path": [
           "event",
@@ -2108,7 +2108,7 @@
       "title": "Traverse graph breadth-first",
       "summary": "Run a bounded breadth-first traversal.",
       "description": "Runs a breadth-first traversal from a start node over a consistent snapshot, bounded by `max_depth` (default 100) and `max_nodes` (default 10000). Returns visited node ids in traversal order, a depth per node, and the tree edges in discovery order. Direction defaults to `outgoing`; an optional edge-type list restricts every hop. The start node must exist (`not_found.engine.graph_node`).\n\nAnalytics commands compute over a consistent snapshot of the visible graph and return a complete result payload in one response. They accept optional snapshot budgets and an `as_of` timestamp for time travel; results are deterministic for a fixed graph state.",
-      "docs": "/docs/graph/analytics/bfs",
+      "docs": "/docs/reference/graph/analytics/bfs",
       "cli": {
         "path": [
           "graph",
@@ -2199,7 +2199,7 @@
       "title": "Detect graph communities",
       "summary": "Detect communities via label propagation.",
       "description": "Detects communities by label propagation over a consistent snapshot: every node repeatedly adopts the most common label among its neighbors until labels stabilize or the iteration bound (default 10) is reached. Every node maps to its community representative node id. Propagation direction defaults to `both`. Accepts an optional snapshot budget and `as_of` for time travel.\n\nAnalytics commands compute over a consistent snapshot of the visible graph and return a complete result payload in one response. They accept optional snapshot budgets and an `as_of` timestamp for time travel; results are deterministic for a fixed graph state.",
-      "docs": "/docs/graph/analytics/cdlp",
+      "docs": "/docs/reference/graph/analytics/cdlp",
       "cli": {
         "path": [
           "graph",
@@ -2280,7 +2280,7 @@
       "title": "Compute graph clustering coefficients",
       "summary": "Compute local clustering coefficients.",
       "description": "Computes the local clustering coefficient for every node over a consistent snapshot: the fraction of a node's neighbor pairs that are themselves connected. Nodes in fully-triangulated neighborhoods score 1.0. Accepts an optional snapshot budget and `as_of` for time travel.\n\nAnalytics commands compute over a consistent snapshot of the visible graph and return a complete result payload in one response. They accept optional snapshot budgets and an `as_of` timestamp for time travel; results are deterministic for a fixed graph state.",
-      "docs": "/docs/graph/analytics/lcc",
+      "docs": "/docs/reference/graph/analytics/lcc",
       "cli": {
         "path": [
           "graph",
@@ -2360,7 +2360,7 @@
       "title": "Compute graph pagerank",
       "summary": "Compute PageRank importance scores.",
       "description": "Computes PageRank over a consistent snapshot. Tunable damping (default 0.85), iteration bound (default 20), and convergence tolerance (default 1e-6); the response reports how many iterations actually ran. Optional personalization seeds steer both teleport and dangling mass toward weighted nodes, and the response flags `personalized: true`. Results are deterministic for a fixed graph state. Accepts an optional snapshot budget and `as_of` for time travel.\n\nAnalytics commands compute over a consistent snapshot of the visible graph and return a complete result payload in one response. They accept optional snapshot budgets and an `as_of` timestamp for time travel; results are deterministic for a fixed graph state.",
-      "docs": "/docs/graph/analytics/pagerank",
+      "docs": "/docs/reference/graph/analytics/pagerank",
       "cli": {
         "path": [
           "graph",
@@ -2449,7 +2449,7 @@
       "title": "Compute graph shortest paths",
       "summary": "Compute shortest-path distances from a source.",
       "description": "Computes weighted shortest-path distances from a source node over a consistent snapshot. Edge weights (default 1.0) accumulate along paths; unreachable nodes are omitted from the result. Direction defaults to `outgoing`. The source node must exist (`not_found.engine.graph_node`). Accepts an optional snapshot budget and `as_of` for time travel.\n\nAnalytics commands compute over a consistent snapshot of the visible graph and return a complete result payload in one response. They accept optional snapshot budgets and an `as_of` timestamp for time travel; results are deterministic for a fixed graph state.",
-      "docs": "/docs/graph/analytics/sssp",
+      "docs": "/docs/reference/graph/analytics/sssp",
       "cli": {
         "path": [
           "graph",
@@ -2536,7 +2536,7 @@
       "title": "Compute graph connected components",
       "summary": "Compute weakly connected components.",
       "description": "Computes weakly connected components over a consistent snapshot of the graph, ignoring edge direction. Every node maps to its component representative - the smallest node id in its component - and the response carries the distinct component count. Accepts an optional snapshot budget and `as_of` for time travel.\n\nAnalytics commands compute over a consistent snapshot of the visible graph and return a complete result payload in one response. They accept optional snapshot budgets and an `as_of` timestamp for time travel; results are deterministic for a fixed graph state.",
-      "docs": "/docs/graph/analytics/wcc",
+      "docs": "/docs/reference/graph/analytics/wcc",
       "cli": {
         "path": [
           "graph",
@@ -2617,7 +2617,7 @@
       "title": "Apply graph delete policy",
       "summary": "Apply a delete policy to bound graph facts.",
       "description": "Applies an explicit policy to every graph node bound to the given entity target: `cascade` deletes the bound nodes and their incident edges, `detach` keeps the nodes but removes their bindings, and `keep_dangling` preserves the bindings so traversal can report the target's status. The acknowledgement reports how many bound nodes the policy covered.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/apply_delete_policy",
+      "docs": "/docs/reference/graph/apply_delete_policy",
       "cli": {
         "path": [
           "graph",
@@ -2680,7 +2680,7 @@
       "title": "Batch write graph",
       "summary": "Apply graph mutations atomically.",
       "description": "Applies a list of graph operations - `upsert_node`, `delete_node`, `upsert_edge`, `delete_edge` - in one engine commit. Validation failures (bad ids, missing edge endpoints, frozen-ontology violations) reject the whole batch; nothing is partially applied. The response reports one positional item result per operation, all sharing the same commit receipt.\n\nAtomic batches validate every operation up front and apply all of them in one engine commit, or none at all. The response still reports one positional item result per operation; all item results share the same commit receipt.",
-      "docs": "/docs/graph/batch_write",
+      "docs": "/docs/reference/graph/batch_write",
       "cli": {
         "path": [
           "graph",
@@ -2770,7 +2770,7 @@
       "title": "List graph bindings for entity",
       "summary": "Find graph nodes bound to an entity.",
       "description": "Searches every graph in the selected branch and space for nodes whose entity binding matches the given target (primitive, space, key). This is the reverse index of node bindings: given an entity, find the graph facts attached to it. Results paginate by an opaque cursor.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/graph/bindings",
+      "docs": "/docs/reference/graph/bindings",
       "cli": {
         "path": [
           "graph",
@@ -2833,7 +2833,7 @@
       "title": "Bulk insert graph data",
       "summary": "Bulk-load nodes and edges in chunks.",
       "description": "Ingests a payload of nodes and edges in chunked commits: nodes first, then edges, so edges may reference nodes from the same payload. Node objects use the key `node_id`; edges use `src`, `edge_type`, `dst`, and optional `weight` (default 1.0) and `properties`. `chunk_size` bounds items per commit (default 512, clamped at 800). The acknowledgement reports inserted counts, the number of chunk commits, and the final chunk's commit receipt.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/bulk_insert",
+      "docs": "/docs/reference/graph/bulk_insert",
       "cli": {
         "path": [
           "graph",
@@ -2935,7 +2935,7 @@
       "title": "Create graph",
       "summary": "Create a named graph.",
       "description": "Creates an empty named graph in the selected space and returns its metadata, including node and edge counts (zero at creation) and the create commit coordinates. A database can hold many graphs; graph names are unique per branch and space. Creating a name that already exists fails with `already_exists.engine.graph`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/create",
+      "docs": "/docs/reference/graph/create",
       "cli": {
         "path": [
           "graph",
@@ -3015,7 +3015,7 @@
       "title": "Delete graph",
       "summary": "Delete a graph and its visible data.",
       "description": "Deletes a named graph and every visible node, edge, binding, and ontology row it owns. Deleting a graph that does not exist is not an error: the acknowledgement reports `deleted: false` with a `not_found` effect. Earlier states remain readable through time travel on other commands.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/delete",
+      "docs": "/docs/reference/graph/delete",
       "cli": {
         "path": [
           "graph",
@@ -3081,7 +3081,7 @@
       "title": "Add graph edge",
       "summary": "Add or replace a graph edge.",
       "description": "Adds a directed edge `src -[edge_type]-> dst` or replaces it if the same triple already exists. Both endpoints must already exist; writing an edge to a missing node fails with `invalid_argument.engine.graph_edge_endpoint`. Weight defaults to 1.0 and must not be negative. Once the graph's ontology is frozen, the edge type and its endpoint object types are validated against the declared link types.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/edge/add",
+      "docs": "/docs/reference/graph/edge/add",
       "cli": {
         "path": [
           "graph",
@@ -3189,7 +3189,7 @@
       "title": "Get graph edge",
       "summary": "Read one graph edge.",
       "description": "Reads one edge by its `(src, edge_type, dst)` triple, returning its weight, properties, and last-write commit coordinates. A missing edge reads back as no data. Accepts `as_of` for time travel.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/graph/edge/get",
+      "docs": "/docs/reference/graph/edge/get",
       "cli": {
         "path": [
           "graph",
@@ -3266,7 +3266,7 @@
       "title": "Remove graph edge",
       "summary": "Remove a graph edge.",
       "description": "Removes one directed edge by its `(src, edge_type, dst)` triple. The endpoints are untouched. Removing an edge that does not exist is not an error: the acknowledgement reports `deleted: false`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/edge/remove",
+      "docs": "/docs/reference/graph/edge/remove",
       "cli": {
         "path": [
           "graph",
@@ -3343,7 +3343,7 @@
       "title": "List graphs",
       "summary": "List graph names.",
       "description": "Lists graph names in lexicographic order. Accepts an optional item limit (default 100), an exclusive name cursor for continuation, and an `as_of` timestamp to list the graphs visible at an earlier instant.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/graph/list",
+      "docs": "/docs/reference/graph/list",
       "cli": {
         "path": [
           "graph",
@@ -3405,7 +3405,7 @@
       "title": "Read graph metadata",
       "summary": "Read graph metadata and counts.",
       "description": "Reads a graph's metadata: live node and edge counts plus the create and last-update commit versions and timestamps. Reading a graph that does not exist returns no data rather than an error. Accepts `as_of` for time travel.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/graph/meta",
+      "docs": "/docs/reference/graph/meta",
       "cli": {
         "path": [
           "graph",
@@ -3474,7 +3474,7 @@
       "title": "List graph neighbors",
       "summary": "List a node's neighbors.",
       "description": "Walks a node's edges and returns one hit per traversed edge. Direction is `outgoing`, `incoming`, or `both`; an optional edge-type filter restricts the walk. Each hit embeds both the traversed edge and the neighbor node in full, so a follow-up read is rarely needed. A missing node yields an empty page.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/graph/neighbors",
+      "docs": "/docs/reference/graph/neighbors",
       "cli": {
         "path": [
           "graph",
@@ -3553,7 +3553,7 @@
       "title": "Add graph node",
       "summary": "Add or replace a graph node.",
       "description": "Adds a node to a graph or replaces it if the node id already exists. A node carries optional JSON properties, an optional declared object type (validated once the graph's ontology is frozen), and an optional entity binding that links the node to a row in another primitive. Cross-branch bindings are rejected.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/node/add",
+      "docs": "/docs/reference/graph/node/add",
       "cli": {
         "path": [
           "graph",
@@ -3651,7 +3651,7 @@
       "title": "Get graph node",
       "summary": "Read one graph node.",
       "description": "Reads one node by id, returning its properties, declared object type, entity binding, and last-write commit coordinates. A removed or never-written node reads back as no data. Accepts `as_of` for time travel.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/graph/node/get",
+      "docs": "/docs/reference/graph/node/get",
       "cli": {
         "path": [
           "graph",
@@ -3722,7 +3722,7 @@
       "title": "List graph nodes",
       "summary": "List graph nodes.",
       "description": "Lists a graph's nodes in node-id order. Accepts an optional id prefix filter, an item limit (default 100), an exclusive cursor, and `as_of` for time travel. Each item carries the full node payload: properties, declared type, binding, and commit coordinates.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/graph/node/list",
+      "docs": "/docs/reference/graph/node/list",
       "cli": {
         "path": [
           "graph",
@@ -3795,7 +3795,7 @@
       "title": "Remove graph node",
       "summary": "Remove a graph node and its edges.",
       "description": "Removes a node and every edge incident to it in one commit. Removing a node that does not exist is not an error: the acknowledgement reports `deleted: false`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/node/remove",
+      "docs": "/docs/reference/graph/node/remove",
       "cli": {
         "path": [
           "graph",
@@ -3866,7 +3866,7 @@
       "title": "List graph nodes by type",
       "summary": "List nodes declaring an object type.",
       "description": "Lists the nodes that declare a given object type, in node-id order. The type index is maintained from each node's declared `object_type`, so this works whether the ontology is draft or frozen. Accepts a limit, an exclusive cursor, and `as_of` for time travel.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/graph/nodes_by_type",
+      "docs": "/docs/reference/graph/nodes_by_type",
       "cli": {
         "path": [
           "graph",
@@ -3943,7 +3943,7 @@
       "title": "Define graph link type",
       "summary": "Define a graph link type.",
       "description": "Declares a link type in the graph's ontology: a name, its source and target object types, an optional cardinality hint (for example `many-to-one`), and property definitions. Source and target must name declared object types by the time the ontology is frozen. After freezing, this command fails with `failed_precondition.engine.graph_ontology_frozen`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/ontology/define_link_type",
+      "docs": "/docs/reference/graph/ontology/define_link_type",
       "cli": {
         "path": [
           "graph",
@@ -4027,7 +4027,7 @@
       "title": "Define graph object type",
       "summary": "Define a graph object type.",
       "description": "Declares an object type in the graph's ontology: a name plus property definitions (`value_type`, `required`). While the ontology is a draft, redefining a type replaces it freely. After `graph.ontology.freeze`, the ontology is immutable and this command fails with `failed_precondition.engine.graph_ontology_frozen`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/ontology/define_object_type",
+      "docs": "/docs/reference/graph/ontology/define_object_type",
       "cli": {
         "path": [
           "graph",
@@ -4110,7 +4110,7 @@
       "title": "Delete graph link type",
       "summary": "Delete a draft link type.",
       "description": "Removes a link type from the graph's draft ontology. Deleting a type that was never declared is not an error: the acknowledgement reports `deleted: false`. Once the ontology is frozen this command fails with `failed_precondition.engine.graph_ontology_frozen`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/ontology/delete_link_type",
+      "docs": "/docs/reference/graph/ontology/delete_link_type",
       "cli": {
         "path": [
           "graph",
@@ -4187,7 +4187,7 @@
       "title": "Delete graph object type",
       "summary": "Delete a draft object type.",
       "description": "Removes an object type from the graph's draft ontology. Deleting a type that was never declared is not an error: the acknowledgement reports `deleted: false`. Once the ontology is frozen this command fails with `failed_precondition.engine.graph_ontology_frozen`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/ontology/delete_object_type",
+      "docs": "/docs/reference/graph/ontology/delete_object_type",
       "cli": {
         "path": [
           "graph",
@@ -4263,7 +4263,7 @@
       "title": "Freeze graph ontology",
       "summary": "Freeze the graph ontology.",
       "description": "Validates the draft ontology and freezes it. Validation requires at least one declared type and rejects link types whose source or target reference undeclared object types (`failed_precondition.engine.graph_ontology_freeze`). After freezing, writes enforce declared node object types, required properties, and link-type endpoint rules; the ontology itself can no longer change (`failed_precondition.engine.graph_ontology_frozen`).\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/graph/ontology/freeze",
+      "docs": "/docs/reference/graph/ontology/freeze",
       "cli": {
         "path": [
           "graph",
@@ -4340,7 +4340,7 @@
       "title": "Read graph ontology",
       "summary": "Read the graph ontology.",
       "description": "Reads the graph's ontology: its status (`draft` or `frozen`) plus every declared object type and link type with their property definitions. Returns no data before any type has been declared. Accepts `as_of` for time travel.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/graph/ontology/get",
+      "docs": "/docs/reference/graph/ontology/get",
       "cli": {
         "path": [
           "graph",
@@ -4410,7 +4410,7 @@
       "title": "Read graph ontology summary",
       "summary": "Read the ontology with usage counts.",
       "description": "Reads the graph's ontology annotated with per-type usage: a node count for each object type and an edge count for each link type. Returns no data before any type has been declared. Accepts `as_of` for time travel.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/graph/ontology/summary",
+      "docs": "/docs/reference/graph/ontology/summary",
       "cli": {
         "path": [
           "graph",
@@ -4481,7 +4481,7 @@
       "title": "Sample graph nodes",
       "summary": "Sample graph nodes.",
       "description": "Returns a deterministic representative sample of nodes from a graph: the total live node count and up to `count` nodes (default 10), evenly strided over the ordered node ids. Latest state only.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/graph/sample",
+      "docs": "/docs/reference/graph/sample",
       "cli": {
         "path": [
           "graph",
@@ -4550,7 +4550,7 @@
       "title": "Report model cache",
       "summary": "Report loaded model cache state.",
       "description": "Reports the runtime model cache as three lists of specs: the generation, embedding, and ranking models currently loaded in memory. Use it to check what is resident before generating, or to confirm that `inference unload` freed the models you expected. The lists reflect only in-memory engines, not models available on disk.",
-      "docs": "/docs/inference/cache_status",
+      "docs": "/docs/reference/inference/cache_status",
       "cli": {
         "path": [
           "inference",
@@ -4601,7 +4601,7 @@
       "title": "Report model capabilities",
       "summary": "Report capabilities for a model spec.",
       "description": "Parses a model spec into a provider and model name and reports what that combination supports without running the model. The result states whether generation, tokenization, embedding, and ranking are available, whether the operation requires network access or an API key, whether this binary was compiled with the provider feature needed to execute, whether the runtime currently permits network calls, and the known embedding dimension. Model specs are catalog names (`tinyllama`), catalog `name:quant` pairs (`tinyllama:q8_0`), local GGUF paths, or provider specs (`anthropic:claude-...`).",
-      "docs": "/docs/inference/capability",
+      "docs": "/docs/reference/inference/capability",
       "cli": {
         "path": [
           "inference",
@@ -4656,7 +4656,7 @@
       "title": "Detokenize token ids",
       "summary": "Detokenize token ids with a local model.",
       "description": "Decodes an ordered list of token ids back into text using a local model's vocabulary, returning the reconstructed string. Detokenization is a local-only operation: it requires a build with the local execution feature and returns `inference.unsupported_operation` for cloud provider specs.",
-      "docs": "/docs/inference/detokenize",
+      "docs": "/docs/reference/inference/detokenize",
       "cli": {
         "path": [
           "inference",
@@ -4727,7 +4727,7 @@
       "title": "Embed one or more texts",
       "summary": "Embed one or more texts into vectors.",
       "description": "Embeds text with an embedding-capable model and returns one vector per input, in order. The `input` field takes either a single string or an array of strings, so single and batch embedding share one command. The vector dimension is fixed by the model. Local embedding models require a build with the local execution feature; cloud embedding providers (OpenAI, Google) require the matching provider feature and an API key.",
-      "docs": "/docs/inference/embed",
+      "docs": "/docs/reference/inference/embed",
       "cli": {
         "path": [
           "inference",
@@ -4818,7 +4818,7 @@
       "title": "Generate text",
       "summary": "Generate text with an inference model.",
       "description": "Runs a text-generation request against a local or cloud model and returns the completion, the reason generation stopped, and the provider-reported prompt and completion token counts. The request controls the maximum completion tokens, sampling temperature, top-k and top-p cutoffs, an optional deterministic seed, string and token-id stop sequences, and an optional GBNF grammar for constrained generation. Chat models expect their chat template already applied in the prompt. Local models require a build with the local execution feature; cloud providers require the matching provider feature and an API key.",
-      "docs": "/docs/inference/generate",
+      "docs": "/docs/reference/inference/generate",
       "cli": {
         "path": [
           "inference",
@@ -4925,7 +4925,7 @@
       "title": "List catalog models",
       "summary": "List catalog inference models.",
       "description": "Lists every model in Strata's built-in catalog as a terminal page. Each entry reports the model's task (embed, generate, or rank), architecture, default quantization, embedding dimension, HuggingFace repository, approximate artifact size, and whether the model artifact is already present in the local model directory. Use `inference models local` to see only the downloaded models, or `inference models pull` to fetch one.",
-      "docs": "/docs/inference/models/list",
+      "docs": "/docs/reference/inference/models/list",
       "cli": {
         "path": [
           "inference",
@@ -4977,7 +4977,7 @@
       "title": "List local models",
       "summary": "List locally downloaded inference models.",
       "description": "Lists the catalog models that have at least one quantization variant present in the local model directory, as a terminal page. Entries carry the same facts as `inference models list` but are restricted to models that can run without a further download. The local model directory is resolved from `STRATA_MODELS_DIR`, falling back to `~/.strata/models`.",
-      "docs": "/docs/inference/models/local",
+      "docs": "/docs/reference/inference/models/local",
       "cli": {
         "path": [
           "inference",
@@ -5029,7 +5029,7 @@
       "title": "Download a model",
       "summary": "Download an inference model locally.",
       "description": "Resolves a catalog name or model spec and downloads the model artifact into the local model directory, returning the resolved local path. Honors `STRATA_MODELS_DIR` for the destination and `STRATA_HF_ENDPOINT` and `STRATA_HF_TOKEN` (or `HF_TOKEN`) for gated HuggingFace repositories. Downloading requires network access and a build with the local execution feature; cloud-only builds return `inference.unsupported_operation`.",
-      "docs": "/docs/inference/models/pull",
+      "docs": "/docs/reference/inference/models/pull",
       "cli": {
         "path": [
           "inference",
@@ -5105,7 +5105,7 @@
       "title": "Rank passages",
       "summary": "Rank passages against a query.",
       "description": "Scores each candidate passage against a query with a ranking model and returns one outcome per passage. Each item carries the passage's original index and either a relevance score or a per-item error with a stable code and a redacted message, so callers can reorder passages by score while keeping them tied to their inputs. Ranking is a local-only operation: it requires a build with the local execution feature and a ranking-capable model.",
-      "docs": "/docs/inference/rank",
+      "docs": "/docs/reference/inference/rank",
       "cli": {
         "path": [
           "inference",
@@ -5176,7 +5176,7 @@
       "title": "Tokenize text",
       "summary": "Tokenize text with a local model.",
       "description": "Encodes text into the token id sequence a local model would see and returns the ids in order. Set `add_special` to include the model's special tokens (such as beginning-of-sequence markers). Tokenization is a local-only operation: it requires a build with the local execution feature and returns `inference.unsupported_operation` for cloud provider specs.",
-      "docs": "/docs/inference/tokenize",
+      "docs": "/docs/reference/inference/tokenize",
       "cli": {
         "path": [
           "inference",
@@ -5247,7 +5247,7 @@
       "title": "Unload cached models",
       "summary": "Unload cached inference models.",
       "description": "Removes cached model engines from the runtime to free memory. Pass a model spec to unload one entry, or omit it to unload every cached generation, embedding, and ranking model. The result reports whether any cached entry was actually removed. This affects only the in-memory runtime cache; it never deletes downloaded model files from disk.",
-      "docs": "/docs/inference/unload",
+      "docs": "/docs/reference/inference/unload",
       "cli": {
         "path": [
           "inference",
@@ -5298,7 +5298,7 @@
       "title": "Batch delete JSON values",
       "summary": "Delete multiple JSON documents or paths in one itemwise batch.",
       "description": "Deletes multiple document/path entries and returns one positional mutation result per entry. Missing documents and paths are represented as no-op item results; applied items share one engine commit.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/json/batch_delete",
+      "docs": "/docs/reference/json/batch_delete",
       "cli": {
         "path": [
           "json",
@@ -5376,7 +5376,7 @@
       "title": "Batch check JSON document existence",
       "summary": "Check existence for multiple JSON documents.",
       "description": "Checks several JSON documents and returns positional boolean status values. The response preserves the input order.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/json/batch_exists",
+      "docs": "/docs/reference/json/batch_exists",
       "cli": {
         "path": [
           "json",
@@ -5438,7 +5438,7 @@
       "title": "Batch get JSON values",
       "summary": "Read multiple JSON values by document and path.",
       "description": "Reads several document/path entries and returns positional item results. Each item records whether the value was found and includes version metadata when present.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/json/batch_get",
+      "docs": "/docs/reference/json/batch_get",
       "cli": {
         "path": [
           "json",
@@ -5508,7 +5508,7 @@
       "title": "Batch set JSON values",
       "summary": "Set multiple JSON values in one itemwise batch.",
       "description": "Writes multiple document/path/value entries using the executor batch contract. Valid items share one engine commit; entries targeting the same document are merged in order into a single new document version.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/json/batch_set",
+      "docs": "/docs/reference/json/batch_set",
       "cli": {
         "path": [
           "json",
@@ -5603,7 +5603,7 @@
       "title": "Count JSON documents",
       "summary": "Count visible JSON documents.",
       "description": "Counts visible JSON documents in the selected branch and space, optionally constrained by a document key prefix.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/json/count",
+      "docs": "/docs/reference/json/count",
       "cli": {
         "path": [
           "json",
@@ -5665,7 +5665,7 @@
       "title": "Delete JSON value",
       "summary": "Delete a whole JSON document or one path inside it.",
       "description": "Deletes the root path `$` to remove the whole document, or a nested path to remove one field or array element. Missing documents and paths produce a no-op delete acknowledgement rather than an error.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/json/delete",
+      "docs": "/docs/reference/json/delete",
       "cli": {
         "path": [
           "json",
@@ -5736,7 +5736,7 @@
       "title": "Check JSON document existence",
       "summary": "Check whether one JSON document exists.",
       "description": "Returns a boolean status for one JSON document key without loading the stored document.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/json/exists",
+      "docs": "/docs/reference/json/exists",
       "cli": {
         "path": [
           "json",
@@ -5798,7 +5798,7 @@
       "title": "Get JSON value",
       "summary": "Read the current or historical JSON value at a document path.",
       "description": "Reads the JSON value at a path inside a document. Current reads return the value with commit metadata; passing a timestamp returns the bare value visible at that point in time. A missing document or path is a found-false result, distinct from a stored JSON null.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/json/get",
+      "docs": "/docs/reference/json/get",
       "cli": {
         "path": [
           "json",
@@ -5881,7 +5881,7 @@
       "title": "Read JSON document history",
       "summary": "Read retained version history for one JSON document.",
       "description": "Returns retained full-document history rows for a JSON document, newest first, including delete tombstones. A document with no retained history maps to an optional-read result.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/json/history",
+      "docs": "/docs/reference/json/history",
       "cli": {
         "path": [
           "json",
@@ -5944,7 +5944,7 @@
       "title": "Create JSON index",
       "summary": "Create a JSON secondary index on a field path.",
       "description": "Creates a secondary index over one JSON field path with a numeric, tag, or text kind. Existing documents are indexed at creation and future writes maintain the index automatically. The current wire response is a transitional bare index definition.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/json/index/create",
+      "docs": "/docs/reference/json/index/create",
       "cli": {
         "path": [
           "json",
@@ -6020,7 +6020,7 @@
       "title": "Drop JSON index",
       "summary": "Drop a JSON secondary index by name.",
       "description": "Drops the named JSON secondary index and its stored entries. Documents are unaffected. The current wire response is a transitional boolean status.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/json/index/drop",
+      "docs": "/docs/reference/json/index/drop",
       "cli": {
         "path": [
           "json",
@@ -6087,7 +6087,7 @@
       "title": "List JSON indexes",
       "summary": "List JSON secondary indexes.",
       "description": "Lists JSON secondary index definitions in the selected branch and space, including each index's field path and kind.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/json/index/list",
+      "docs": "/docs/reference/json/index/list",
       "cli": {
         "path": [
           "json",
@@ -6146,7 +6146,7 @@
       "title": "List JSON document keys",
       "summary": "List JSON document keys with optional prefix filtering.",
       "description": "Lists visible JSON document keys in byte order. Prefix, cursor, limit, and timestamp parameters constrain the page returned by the executor.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/json/list",
+      "docs": "/docs/reference/json/list",
       "cli": {
         "path": [
           "json",
@@ -6208,7 +6208,7 @@
       "title": "Sample JSON documents",
       "summary": "Sample visible JSON documents.",
       "description": "Returns a bounded sample of visible JSON documents plus the total matching count. Useful for inspecting document shape before writing queries or indexes.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/json/sample",
+      "docs": "/docs/reference/json/sample",
       "cli": {
         "path": [
           "json",
@@ -6270,7 +6270,7 @@
       "title": "Scan JSON documents",
       "summary": "Scan JSON documents with values and version facts.",
       "description": "Scans visible JSON documents starting at an optional document key. Each item includes the key, full document value, and commit metadata exposed by the executor output.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/json/scan",
+      "docs": "/docs/reference/json/scan",
       "cli": {
         "path": [
           "json",
@@ -6332,7 +6332,7 @@
       "title": "Set JSON value",
       "summary": "Set a JSON value at a document path, creating the document when missing.",
       "description": "Writes a JSON value at a path inside a document, creating the document and any missing intermediate objects when needed. Setting the root path `$` replaces the whole document; setting a nested path like `$.profile.name` updates one field and records a new document version.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/json/set",
+      "docs": "/docs/reference/json/set",
       "cli": {
         "path": [
           "json",
@@ -6429,7 +6429,7 @@
       "title": "Batch delete KV values",
       "summary": "Delete multiple KV keys in one itemwise batch.",
       "description": "Deletes multiple KV keys and returns one positional mutation result per key. Missing keys are represented as no-op item results.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/kv/batch_delete",
+      "docs": "/docs/reference/kv/batch_delete",
       "cli": {
         "path": [
           "kv",
@@ -6503,7 +6503,7 @@
       "title": "Batch check KV existence",
       "summary": "Check existence for multiple KV keys.",
       "description": "Checks several KV keys and returns positional boolean status values. The response preserves the input order.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/kv/batch_exists",
+      "docs": "/docs/reference/kv/batch_exists",
       "cli": {
         "path": [
           "kv",
@@ -6569,7 +6569,7 @@
       "title": "Batch get KV values",
       "summary": "Read multiple KV values by key.",
       "description": "Reads several KV keys and returns positional item results. Each item records whether the corresponding key was found and includes value metadata when present.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/kv/batch_get",
+      "docs": "/docs/reference/kv/batch_get",
       "cli": {
         "path": [
           "kv",
@@ -6635,7 +6635,7 @@
       "title": "Batch put KV values",
       "summary": "Store multiple KV values in one itemwise batch.",
       "description": "Writes multiple KV entries using the executor batch contract. Valid items share commit facts where the underlying engine applies them together.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/kv/batch_put",
+      "docs": "/docs/reference/kv/batch_put",
       "cli": {
         "path": [
           "kv",
@@ -6712,7 +6712,7 @@
       "title": "Count KV keys",
       "summary": "Count visible KV keys.",
       "description": "Counts visible KV keys in the selected branch and space, optionally constrained by a key prefix.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/kv/count",
+      "docs": "/docs/reference/kv/count",
       "cli": {
         "path": [
           "kv",
@@ -6774,7 +6774,7 @@
       "title": "Delete KV value",
       "summary": "Delete one visible KV key.",
       "description": "Deletes the current visible value for a KV key. Missing keys produce a no-op delete acknowledgement rather than a read-style missing value.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/kv/delete",
+      "docs": "/docs/reference/kv/delete",
       "cli": {
         "path": [
           "kv",
@@ -6833,7 +6833,7 @@
       "title": "Check KV existence",
       "summary": "Check whether one KV key exists.",
       "description": "Returns a boolean status for one KV key without loading the stored value.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/kv/exists",
+      "docs": "/docs/reference/kv/exists",
       "cli": {
         "path": [
           "kv",
@@ -6895,7 +6895,7 @@
       "title": "Get KV value",
       "summary": "Read the current or historical value for one KV key.",
       "description": "Reads one KV key from the selected branch and space. The optional timestamp reads the value visible at that point in time when history is retained.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/kv/get",
+      "docs": "/docs/reference/kv/get",
       "cli": {
         "path": [
           "kv",
@@ -6968,7 +6968,7 @@
       "title": "Read KV history",
       "summary": "Read retained version history for one KV key.",
       "description": "Returns retained history rows for a KV key when history is available. Missing or unavailable history maps to an optional-read result.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/kv/history",
+      "docs": "/docs/reference/kv/history",
       "cli": {
         "path": [
           "kv",
@@ -7031,7 +7031,7 @@
       "title": "List KV keys",
       "summary": "List KV keys with optional prefix filtering.",
       "description": "Lists visible KV keys in byte order. Prefix, cursor, limit, and timestamp parameters constrain the page returned by the executor.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/kv/list",
+      "docs": "/docs/reference/kv/list",
       "cli": {
         "path": [
           "kv",
@@ -7095,7 +7095,7 @@
       "title": "Put KV value",
       "summary": "Store or replace a KV value by key.",
       "description": "Writes a binary value to the selected KV space. If the key already exists, Strata replaces the visible value and records a new version.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/kv/put",
+      "docs": "/docs/reference/kv/put",
       "cli": {
         "path": [
           "kv",
@@ -7160,7 +7160,7 @@
       "title": "Sample KV rows",
       "summary": "Sample visible KV rows.",
       "description": "Returns a deterministic bounded sample of visible KV rows plus the total matching count.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/kv/sample",
+      "docs": "/docs/reference/kv/sample",
       "cli": {
         "path": [
           "kv",
@@ -7222,7 +7222,7 @@
       "title": "Scan KV rows",
       "summary": "Scan KV rows with values and version facts.",
       "description": "Scans visible KV rows starting at an optional key. Each item includes the key, value, and commit metadata exposed by the executor output.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/kv/scan",
+      "docs": "/docs/reference/kv/scan",
       "cli": {
         "path": [
           "kv",
@@ -7286,7 +7286,7 @@
       "title": "Create product space",
       "summary": "Create a product space on a branch.",
       "description": "Creates a product space in the branch catalog. Creation is idempotent: creating a space that already exists succeeds with `created: false` and no mutation effect. Names reserved for engine control data are rejected with `invalid_argument.engine.product_space_reserved`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/space/create",
+      "docs": "/docs/reference/space/create",
       "cli": {
         "path": [
           "space",
@@ -7345,7 +7345,7 @@
       "title": "Delete product space",
       "summary": "Delete a product space from a branch.",
       "description": "Drops the product space from the branch catalog. The `default` space refuses deletion with `invalid_argument.engine.space_delete_default`. A space that still contains visible data refuses deletion with `failed_precondition.engine.space_not_empty` unless `force: true` is set, which tombstones the visible rows first and reports the count. Deleting a space that does not exist succeeds with `deleted: false`.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/space/delete",
+      "docs": "/docs/reference/space/delete",
       "cli": {
         "path": [
           "space",
@@ -7425,7 +7425,7 @@
       "title": "Check product space existence",
       "summary": "Check whether a product space exists on a branch.",
       "description": "Reports whether the named product space is cataloged on the target branch. A missing space is `false`, not an error; reserved names are rejected with `invalid_argument.engine.product_space_reserved`.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/space/exists",
+      "docs": "/docs/reference/space/exists",
       "cli": {
         "path": [
           "space",
@@ -7487,7 +7487,7 @@
       "title": "List product spaces",
       "summary": "List product spaces on a branch.",
       "description": "Lists the product space names cataloged on the target branch as a terminal page. Every branch has a `default` space; additional spaces isolate data namespaces within the same branch.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/space/list",
+      "docs": "/docs/reference/space/list",
       "cli": {
         "path": [
           "space",
@@ -7541,7 +7541,7 @@
       "title": "Batch delete vectors",
       "summary": "Delete multiple vectors by key.",
       "description": "Deletes multiple vector keys and returns one positional mutation result per input key.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/vector/batch_delete",
+      "docs": "/docs/reference/vector/batch_delete",
       "cli": {
         "path": [
           "vector",
@@ -7621,7 +7621,7 @@
       "title": "Batch check vector existence",
       "summary": "Check existence for multiple vector keys.",
       "description": "Checks several vector keys in one collection and returns positional boolean status values. The response preserves the input order.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/vector/batch_exists",
+      "docs": "/docs/reference/vector/batch_exists",
       "cli": {
         "path": [
           "vector",
@@ -7693,7 +7693,7 @@
       "title": "Batch get vectors",
       "summary": "Read multiple vectors by key.",
       "description": "Reads several vector keys and returns positional item results. Each item records found or missing state.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/vector/batch_get",
+      "docs": "/docs/reference/vector/batch_get",
       "cli": {
         "path": [
           "vector",
@@ -7769,7 +7769,7 @@
       "title": "Batch upsert vectors",
       "summary": "Upsert multiple vectors in one itemwise batch.",
       "description": "Writes multiple vector entries and returns positional mutation results. Valid items share commit facts where the engine applies them together.\n\nItemwise batches return one positional item result per input item. The outer batch status summarizes whether all, some, or none of the items succeeded.",
-      "docs": "/docs/vector/batch_upsert",
+      "docs": "/docs/reference/vector/batch_upsert",
       "cli": {
         "path": [
           "vector",
@@ -7859,7 +7859,7 @@
       "title": "Create vector collection",
       "summary": "Create a vector collection with a dimension and metric.",
       "description": "Creates a collection for dense vectors. The dimension and metric become part of the collection contract for future upserts and queries.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/collection/create",
+      "docs": "/docs/reference/vector/collection/create",
       "cli": {
         "path": [
           "vector",
@@ -7941,7 +7941,7 @@
       "title": "Delete vector collection",
       "summary": "Delete a vector collection.",
       "description": "Deletes the selected vector collection from the current branch and space. The current wire response is a transitional boolean status.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/collection/delete",
+      "docs": "/docs/reference/vector/collection/delete",
       "cli": {
         "path": [
           "vector",
@@ -8012,7 +8012,7 @@
       "title": "List vector collections",
       "summary": "List vector collections.",
       "description": "Lists vector collections visible in the selected branch and space, including collection dimension, metric, and count facts.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/vector/collection/list",
+      "docs": "/docs/reference/vector/collection/list",
       "cli": {
         "path": [
           "vector",
@@ -8083,7 +8083,7 @@
       "title": "Read vector collection stats",
       "summary": "Read facts for one vector collection.",
       "description": "Reads collection-level facts for one vector collection. The current wire response uses the collection-list output with one item.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/vector/collection/stats",
+      "docs": "/docs/reference/vector/collection/stats",
       "cli": {
         "path": [
           "vector",
@@ -8154,7 +8154,7 @@
       "title": "Count vectors",
       "summary": "Count visible vectors in a collection.",
       "description": "Counts vectors visible in the selected collection, branch, and space.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/vector/count",
+      "docs": "/docs/reference/vector/count",
       "cli": {
         "path": [
           "vector",
@@ -8224,7 +8224,7 @@
       "title": "Delete vector",
       "summary": "Delete one vector key.",
       "description": "Deletes one visible vector entry from a collection. Missing keys are represented as no-op mutation acknowledgements.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/delete",
+      "docs": "/docs/reference/vector/delete",
       "cli": {
         "path": [
           "vector",
@@ -8296,7 +8296,7 @@
       "title": "Delete all vectors",
       "summary": "Delete all vectors in a collection.",
       "description": "Deletes all vectors visible in the selected collection while preserving the collection itself.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/delete_all",
+      "docs": "/docs/reference/vector/delete_all",
       "cli": {
         "path": [
           "vector",
@@ -8368,7 +8368,7 @@
       "title": "Delete vectors by filter",
       "summary": "Delete vectors matching a metadata filter.",
       "description": "Scans the collection for visible vectors matching the metadata filter and deletes the matching rows as a bulk mutation.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/delete_by_filter",
+      "docs": "/docs/reference/vector/delete_by_filter",
       "cli": {
         "path": [
           "vector",
@@ -8444,7 +8444,7 @@
       "title": "Check vector existence",
       "summary": "Check whether one vector key exists.",
       "description": "Returns a boolean status for one vector key without loading the embedding.\n\nStatus commands return a scalar or compact status payload and do not mutate database state.",
-      "docs": "/docs/vector/exists",
+      "docs": "/docs/reference/vector/exists",
       "cli": {
         "path": [
           "vector",
@@ -8516,7 +8516,7 @@
       "title": "Get vector",
       "summary": "Read one vector by key.",
       "description": "Reads one visible vector entry. The optional timestamp reads the vector visible at that point in time when retained history allows it.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/vector/get",
+      "docs": "/docs/reference/vector/get",
       "cli": {
         "path": [
           "vector",
@@ -8594,7 +8594,7 @@
       "title": "Read vector history",
       "summary": "Read retained vector history for one key.",
       "description": "Returns retained history rows for one vector key, including vector revision facts and tombstones when present.\n\nOptional reads distinguish present data from missing data. When version or timestamp facts exist on the executor output, SDK mappings should preserve them.",
-      "docs": "/docs/vector/history",
+      "docs": "/docs/reference/vector/history",
       "cli": {
         "path": [
           "vector",
@@ -8666,7 +8666,7 @@
       "title": "Query vector index",
       "summary": "Search vectors and return index diagnostics.",
       "description": "Runs vector search and includes planner diagnostics such as index policy, source usage, artifact status, and fallback facts.\n\nSearch responses return a bounded list of matches ordered by the engine. They are not cursor pages unless a later command explicitly advertises pagination.\n\nDiagnostic responses include operational facts intended for debugging and tuning. They should not be required for application correctness.",
-      "docs": "/docs/vector/index/query",
+      "docs": "/docs/reference/vector/index/query",
       "cli": {
         "path": [
           "vector",
@@ -8747,7 +8747,7 @@
       "title": "List vector keys",
       "summary": "List vector keys in a collection.",
       "description": "Lists visible vector keys with optional prefix and cursor arguments.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/vector/keys",
+      "docs": "/docs/reference/vector/keys",
       "cli": {
         "path": [
           "vector",
@@ -8819,7 +8819,7 @@
       "title": "Update vector metadata",
       "summary": "Patch metadata for one vector.",
       "description": "Applies a top-level metadata patch to one visible vector. Missing vectors return a no-op mutation acknowledgement.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/metadata/update",
+      "docs": "/docs/reference/vector/metadata/update",
       "cli": {
         "path": [
           "vector",
@@ -8895,7 +8895,7 @@
       "title": "Query vectors",
       "summary": "Search a vector collection.",
       "description": "Runs vector search through the engine planner and returns the best matches with scores and optional metadata.\n\nSearch responses return a bounded list of matches ordered by the engine. They are not cursor pages unless a later command explicitly advertises pagination.",
-      "docs": "/docs/vector/query",
+      "docs": "/docs/reference/vector/query",
       "cli": {
         "path": [
           "vector",
@@ -8975,7 +8975,7 @@
       "title": "Sample vectors",
       "summary": "Sample vectors with values and version facts.",
       "description": "Returns a deterministic representative sample of vectors from a collection: the total live count and up to `count` entries (default 10), evenly strided over the ordered keys. Latest state only.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/vector/sample",
+      "docs": "/docs/reference/vector/sample",
       "cli": {
         "path": [
           "vector",
@@ -9047,7 +9047,7 @@
       "title": "Scan vectors",
       "summary": "Scan vectors with values and version facts.",
       "description": "Scans visible vectors in a collection starting at an optional key. Each item includes the key, embedding, metadata, and commit metadata exposed by the executor output.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
-      "docs": "/docs/vector/scan",
+      "docs": "/docs/reference/vector/scan",
       "cli": {
         "path": [
           "vector",
@@ -9119,7 +9119,7 @@
       "title": "Upsert vector",
       "summary": "Insert or replace one vector.",
       "description": "Upserts one vector key with a dense embedding and optional metadata. The vector dimension must match the collection configuration.\n\nSuccessful mutations return an acknowledgement of the outcome: for a state-changing write, the affected target with the mutation effect and commit facts; for mutations that produce a domain result (such as a branch or a promotion outcome), that result object.",
-      "docs": "/docs/vector/upsert",
+      "docs": "/docs/reference/vector/upsert",
       "cli": {
         "path": [
           "vector",

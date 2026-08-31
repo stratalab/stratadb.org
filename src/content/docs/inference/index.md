@@ -1,118 +1,81 @@
 ---
 title: "Inference"
 section: "inference"
-description: "Run generation, embedding, ranking, and tokenization through local GGUF models and cloud providers, and inspect the model catalog offline."
-source: "strata-core@v1.0.0"
+description: "Run generation, embedding, ranking, and tokenization through local models or cloud providers."
+source: "strata-core@v1.1.0"
 ---
 
-Inference is a **capability**, not a stored primitive: the `inference` commands
-execute models — text generation, embeddings, ranking, and tokenization —
-without keeping any model output in the database. Two provider families are
-available: **local** GGUF models that run in-process, and **cloud** providers
-reached over the network. The catalog and capability facts are always available
-offline; running a model needs either a local model on disk
-([Local models](/docs/inference/local-models)) or a configured cloud API key
-([Providers & API keys](/docs/inference/providers-and-keys)).
+Inference runs models. It is not a stored data primitive.
 
-## Model specs
+Use inference to generate text, embed text, rank passages, tokenize, or inspect
+model capability. Store model outputs yourself when they matter: embeddings
+usually go into [vectors](/docs/data/vectors), source text into
+[JSON](/docs/data/json) or [KV](/docs/data/key-value), and decisions into
+[events](/docs/data/events).
 
-Every command takes a model spec. A bare name (`miniLM`, `tinyllama`) resolves
-against the built-in catalog and runs **locally**. A `provider:model` spec routes
-to a **cloud** provider — the supported providers are `local`, `anthropic`,
-`openai`, and `google`. An unknown provider prefix fails fast:
+## Model Specs
 
-```text
-inference.provider_unavailable: provider error: unknown provider: "voyage" (expected: local, anthropic, openai, google)
-  ref: https://stratadb.org/e/inference.provider_unavailable
-```
+Every inference command takes a model spec:
 
-## The catalog
+| Spec | Meaning |
+|---|---|
+| `miniLM` | Bare name; resolved from the local catalog. |
+| `tinyllama` | Bare name; local catalog. |
+| `openai:gpt-4o-mini` | Provider-prefixed cloud model. |
+| `anthropic:<model>` | Provider-prefixed cloud model. |
+| `google:<model>` | Provider-prefixed cloud model. |
 
-`inference models list` prints the catalog — name, task, architecture,
-quantization, availability, and size. `inference models local` narrows it to
-models already on disk:
+Supported providers in this release are `local`, `openai`, `anthropic`, and
+`google`.
+
+## Inspect Before Running
+
+Catalog and capability checks do not need an API key:
 
 ```bash
+strata --cache inference models list
 strata --cache inference models local
-```
-
-```text
-miniLM	embed	bert	f16	local	42.9 MB
-tinyllama	generate	llama	q4_k_m	local	638.9 MB
-```
-
-`inference capability <spec>` reports what a model can do without running it —
-useful for routing decisions in a script:
-
-```bash
 strata --cache inference capability openai:gpt-4o-mini
 ```
 
+Capability output tells you whether the model can generate, embed, rank, or
+tokenize, and whether it requires a key or network.
+
+## Run Operations
+
 ```text
-{
-  "can_embed": true,
-  "can_generate": true,
-  "can_rank": false,
-  "can_tokenize": false,
-  "embedding_dim": 0,
-  "model": "gpt-4o-mini",
-  "network_enabled": true,
-  "provider": "openai",
-  "provider_feature_enabled": true,
-  "requires_api_key": true,
-  "requires_network": true
-}
+strata --cache inference generate openai:gpt-4o-mini "Summarize branch isolation." --max-tokens 80
+strata --cache inference embed <model> "branch isolation"
+strata --cache inference rank <model> "query" "passage one" "passage two"
+strata --cache inference tokenize <model> "hello"
+strata --cache inference detokenize <model> 101 7592
 ```
 
-`requires_api_key` and `requires_network` tell you what a call will need;
-`provider_feature_enabled` tells you whether this binary was built with that
-provider compiled in. Because the catalog and capability are computed offline,
-these two commands never touch the network or a key.
+Cloud calls need a provider key. Local calls need a binary built with local
+inference support and the model present on disk.
 
-## The operations
+## Cloud Providers
 
-Every operation takes a model spec and routes to local or cloud by the rule
-above. The flags are the same regardless of provider; what differs is the
-prerequisite — a cloud spec needs a key, a local spec needs the local build
-feature and a model on disk.
+Use [Providers & API keys](/docs/inference/providers-and-keys) to configure
+OpenAI, Anthropic, or Google. Environment variables win over stored config.
 
-- **`inference generate <spec> <prompt>`** — text generation. Accepts
-  `--max-tokens` (default 256), `--temperature` (default 0.0, greedy), `--top-k`,
-  `--top-p`, `--seed` for deterministic sampling, and a repeatable `--stop <text>`.
-  Chat models expect their chat template verbatim in the prompt. `--stop-token
-  <id>` and `--grammar <gbnf>` are local-only refinements.
-- **`inference embed <spec> <text>`** embeds one string; **`inference embed-batch
-  <spec> <text…>`** embeds several in order. Embedding output feeds the
-  [vector store](/docs/data/vectors) — see
-  [Combining primitives](/docs/data/combining-primitives) for the retrieval flow.
-- **`inference rank <spec> <query> <passage…>`** scores passages against a query.
-  Ranking is a local-model operation; cloud providers do not expose a reranker, so
-  a cloud spec here returns `inference.unsupported_operation`.
-- **`inference tokenize <spec> <text>`** and **`inference detokenize <spec>
-  <ids…>`** convert between text and token ids for a local model; `--special`
-  adds the model's special tokens.
+## Local Models
 
-A cloud call refuses before touching the network when its key is unset, and a
-local call refuses when the binary lacks the local feature — both with a clear
-code. Those prerequisites, and how to satisfy them, are on the two pages below.
+Use [Local models](/docs/inference/local-models) for GGUF models that run
+in-process without a network call.
 
-## In this section
+## Errors To Handle
 
-- **[Providers & API keys](/docs/inference/providers-and-keys)** — the cloud
-  provider families, the environment variables and `strata config` storage for
-  their keys, and where to acquire a key.
-- **[Local models](/docs/inference/local-models)** — running GGUF models
-  in-process: pulling them, the model directory, the resident-model cache, and
-  the local build feature.
+- [`inference.missing_api_key`](/e/inference.missing_api_key): the provider key
+  is not configured.
+- [`inference.unsupported_operation`](/e/inference.unsupported_operation): the
+  model or build cannot run that operation.
+- [`inference.provider_unavailable`](/e/inference.provider_unavailable): the
+  provider prefix is unknown or unavailable.
 
-## Related
-
-- [Vectors](/docs/data/vectors) — where embeddings are stored and searched
-- [Agents and MCP](/docs/agents) — exposing the database to model-driven agents
-- [Error Handling](/docs/guides/error-handling) — reading structured error codes
+Recover by code. See [Error handling](/docs/guides/error-handling).
 
 ## Reference
 
-Every inference command — parameters, returns, errors, and runnable CLI/wire/Python
-examples — is in the generated
+Exact parameters, return shapes, and error lists are generated in the
 [Inference command reference](/docs/reference/inference).

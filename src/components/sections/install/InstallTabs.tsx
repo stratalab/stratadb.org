@@ -1,12 +1,12 @@
 // The act surface, v3 (04 §8, 2026-06-12) — the mem0.ai steal, by Ani's
-// call: INTEGRATION MODES first (Library · CLI · Desktop app · For
-// agents), language pills inside the window chrome, and the code is a
+// call: INTEGRATION MODES first (Library · CLI · For agents), language
+// pills inside the window chrome, and the code is a
 // COMPLETE numbered quickstart with step comments — a script you paste
 // and run, not a fragment. Copy-all in the corner; CLI keeps per-command
 // copy buttons. Selection persists in sessionStorage (05 §3). Every
 // command string is subject to build-time transcript verification.
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { EMBER } from '../../shared/term';
+import { EMBER, INK } from '../../shared/term';
 
 // ---- hand-tokenized quickstarts (one world: the portfolio story) ----------
 // tok classes: c=comment k=keyword s=string i=ink-hi (identifiers/calls)
@@ -18,15 +18,56 @@ const PY: Script = [
   [['c', '#   pip install stratadb']],
   [],
   [['c', '# Step 2 — save as quickstart.py and run: python quickstart.py']],
-  [['k', 'from'], [null, ' stratadb '], ['k', 'import'], [null, ' Strata']],
+  [
+    ['k', 'from'],
+    [null, ' stratadb '],
+    ['k', 'import'],
+    [null, ' Strata'],
+  ],
   [],
-  [[null, 'db = Strata.'], ['i', 'open'], [null, '('], ['s', '"./quickstart.strata"'], [null, ')  '], ['c', '# one file, no server']],
+  [
+    [null, 'db = Strata.'],
+    ['i', 'open'],
+    [null, '('],
+    ['s', '"./quickstart.strata"'],
+    [null, ')  '],
+    ['c', '# one file, no server'],
+  ],
   [],
-  [[null, 'db.kv.'], ['i', 'put'], [null, '('], ['s', '"portfolio.value"'], [null, ', 98400)']],
-  [[null, 'db.kv.'], ['i', 'put'], [null, '('], ['s', '"portfolio.value"'], [null, ', 111080)  '], ['c', '# every write keeps its past']],
+  [
+    [null, 'db.kv.'],
+    ['i', 'put'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, ', 98400)'],
+  ],
+  [
+    [null, 'db.kv.'],
+    ['i', 'put'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, ', 111080)  '],
+    ['c', '# every write keeps its past'],
+  ],
   [],
-  [['i', 'print'], [null, '(db.kv.'], ['i', 'get'], [null, '('], ['s', '"portfolio.value"'], [null, '))      '], ['c', '# 111080']],
-  [['i', 'print'], [null, '(db.kv.'], ['i', 'history'], [null, '('], ['s', '"portfolio.value"'], [null, '))  '], ['c', '# v2: 111080 · v1: 98400']],
+  [
+    ['i', 'print'],
+    [null, '(db.kv.'],
+    ['i', 'get'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, '))      '],
+    ['c', '# 111080'],
+  ],
+  [
+    ['i', 'print'],
+    [null, '(db.kv.'],
+    ['i', 'history'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, '))  '],
+    ['c', '# v2: 111080 · v1: 98400'],
+  ],
 ];
 
 const JS: Script = [
@@ -34,15 +75,67 @@ const JS: Script = [
   [['c', '//   npm install @stratadb/core']],
   [],
   [['c', '// Step 2 — save as quickstart.mjs and run: node quickstart.mjs']],
-  [['k', 'import'], [null, ' { Strata } '], ['k', 'from'], [null, ' '], ['s', '"@stratadb/core"'], [null, ';']],
+  [
+    ['k', 'import'],
+    [null, ' { Strata } '],
+    ['k', 'from'],
+    [null, ' '],
+    ['s', '"@stratadb/core"'],
+    [null, ';'],
+  ],
   [],
-  [['k', 'const'], [null, ' db = '], ['k', 'await'], [null, ' Strata.'], ['i', 'open'], [null, '('], ['s', '"./quickstart.strata"'], [null, ');  '], ['c', '// one file']],
+  [
+    ['k', 'const'],
+    [null, ' db = '],
+    ['k', 'await'],
+    [null, ' Strata.'],
+    ['i', 'open'],
+    [null, '('],
+    ['s', '"./quickstart.strata"'],
+    [null, ');  '],
+    ['c', '// one file'],
+  ],
   [],
-  [['k', 'await'], [null, ' db.kv.'], ['i', 'put'], [null, '('], ['s', '"portfolio.value"'], [null, ', 98400);']],
-  [['k', 'await'], [null, ' db.kv.'], ['i', 'put'], [null, '('], ['s', '"portfolio.value"'], [null, ', 111080);  '], ['c', '// history kept']],
+  [
+    ['k', 'await'],
+    [null, ' db.kv.'],
+    ['i', 'put'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, ', 98400);'],
+  ],
+  [
+    ['k', 'await'],
+    [null, ' db.kv.'],
+    ['i', 'put'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, ', 111080);  '],
+    ['c', '// history kept'],
+  ],
   [],
-  [['i', 'console.log'], [null, '('], ['k', 'await'], [null, ' db.kv.'], ['i', 'get'], [null, '('], ['s', '"portfolio.value"'], [null, '));      '], ['c', '// 111080']],
-  [['i', 'console.log'], [null, '('], ['k', 'await'], [null, ' db.kv.'], ['i', 'history'], [null, '('], ['s', '"portfolio.value"'], [null, '));  '], ['c', '// v2 · v1']],
+  [
+    ['i', 'console.log'],
+    [null, '('],
+    ['k', 'await'],
+    [null, ' db.kv.'],
+    ['i', 'get'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, '));      '],
+    ['c', '// 111080'],
+  ],
+  [
+    ['i', 'console.log'],
+    [null, '('],
+    ['k', 'await'],
+    [null, ' db.kv.'],
+    ['i', 'history'],
+    [null, '('],
+    ['s', '"portfolio.value"'],
+    [null, '));  '],
+    ['c', '// v2 · v1'],
+  ],
 ];
 
 const CLI_LINES = [
@@ -68,7 +161,7 @@ const MCP_JSON = [
 ];
 
 const AGENT_INSTRUCTION =
-  'Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/getting-started/for-agents.md — report the verification output when done.';
+  'Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/agents.md — report the verification output when done.';
 
 const scriptText = (s: Script) => s.map((line) => line.map(([, t]) => t).join('')).join('\n');
 
@@ -82,7 +175,6 @@ const TOK_CLS: Record<string, string> = {
 const MODES = [
   { id: 'library', label: 'Library' },
   { id: 'cli', label: 'CLI' },
-  { id: 'foundry', label: 'Desktop app' },
   { id: 'agents', label: 'For agents' },
 ] as const;
 type ModeId = (typeof MODES)[number]['id'];
@@ -90,18 +182,20 @@ type ModeId = (typeof MODES)[number]['id'];
 const MODE_ICONS: Record<ModeId, ReactNode> = {
   library: <path d="M8 6 4 12l4 6M16 6l4 6-4 6" />,
   cli: <path d="M4 17l6-5-6-5M13 19h7" />,
-  foundry: (
-    <>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <path d="M3 9h18M7 6.5h.01" />
-    </>
-  ),
   agents: <path d="M12 3v3m0 12v3M3 12h3m12 0h3M7 7l2 2m6 6 2 2m0-10-2 2m-6 6-2 2" />,
 };
 
 function CopyIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
       <rect x="9" y="9" width="11" height="11" rx="2" />
       <path d="M5 15V5a2 2 0 0 1 2-2h10" />
     </svg>
@@ -205,7 +299,13 @@ export default function InstallTabs() {
 
   const script = lang === 'py' ? PY : JS;
   const windowTitle =
-    mode === 'library' ? (lang === 'py' ? 'quickstart.py' : 'quickstart.mjs') : mode === 'cli' ? 'terminal' : mode === 'foundry' ? 'Strata Foundry' : 'mcp.json';
+    mode === 'library'
+      ? lang === 'py'
+        ? 'quickstart.py'
+        : 'quickstart.mjs'
+      : mode === 'cli'
+        ? 'terminal'
+        : 'mcp.json';
 
   return (
     <div>
@@ -271,7 +371,11 @@ export default function InstallTabs() {
           <span className="font-mono text-mono-sm text-ink-mid">{windowTitle}</span>
           <span className="ml-auto flex items-center gap-2">
             {mode === 'library' && (
-              <span role="tablist" aria-label="Language" className="flex gap-1 rounded-(--radius-control) border border-line bg-inset p-0.5">
+              <span
+                role="tablist"
+                aria-label="Language"
+                className="flex gap-1 rounded-(--radius-control) border border-line bg-inset p-0.5"
+              >
                 {(['py', 'js'] as const).map((l) => (
                   <button
                     key={l}
@@ -296,7 +400,7 @@ export default function InstallTabs() {
           className="p-6"
           style={{
             backgroundColor: 'var(--color-inset)',
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.03)}, transparent 38%)`,
+            backgroundImage: `radial-gradient(circle at 1px 1px, ${INK(0.04)} 1px, transparent 1.6px), linear-gradient(180deg, ${EMBER(0.03)}, transparent 38%)`,
             backgroundSize: '22px 22px, 100% 100%',
           }}
         >
@@ -311,27 +415,9 @@ export default function InstallTabs() {
                   <div key={i} className={'dim' in l && l.dim ? 'text-ink-low' : 'text-ink-mid'}>
                     {l.text || ' '}
                   </div>
-                )
+                ),
               )}
             </pre>
-          )}
-
-          {mode === 'foundry' && (
-            <div className="space-y-4">
-              <p className="max-w-[36rem] text-body text-ink-mid">
-                The desktop studio — browse keys, switch branches, diff and merge visually. It is the window in
-                section 03, the one the primitives live in. macOS first; Windows and Linux follow.
-              </p>
-              <a
-                href="https://github.com/stratalab/strata-foundry"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block rounded-(--radius-control) border border-line px-4 py-2 text-small text-ink-hi transition-colors duration-200 hover:border-line-hover hover:bg-raised"
-              >
-                Star strata-foundry →
-              </a>
-              <p className="text-small text-ink-low">Release builds are coming; watching the repo gets you notified.</p>
-            </div>
           )}
 
           {mode === 'agents' && (
@@ -345,18 +431,20 @@ export default function InstallTabs() {
               </pre>
               <div className="mt-5 space-y-3 border-t border-line pt-4">
                 <p className="text-small text-ink-mid">
-                  Or skip the config — paste one instruction into your agent and it sets everything up itself:
+                  Or skip the config — paste one instruction into your agent and it sets everything
+                  up itself:
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <CopyAllButton text={AGENT_INSTRUCTION} label="copy agent instructions" />
                   <span className="font-mono text-mono-sm text-ink-low">
-                    points at <span className="text-ink-mid">stratadb.org/docs/getting-started/for-agents.md</span>
+                    points at <span className="text-ink-mid">stratadb.org/docs/agents.md</span>
                   </span>
                 </div>
                 <p className="text-small text-ink-low">
                   Agents can also read{' '}
-                  <span className="font-mono text-mono-sm text-ink-mid">stratadb.org/llms.txt</span> or the{' '}
-                  <a href="/docs/getting-started/for-agents" className="text-terracotta-500 hover:text-terracotta-400">
+                  <span className="font-mono text-mono-sm text-ink-mid">stratadb.org/llms.txt</span>{' '}
+                  or the{' '}
+                  <a href="/docs/agents" className="text-terracotta-500 hover:text-terracotta-400">
                     For AI agents
                   </a>{' '}
                   recipe directly.
