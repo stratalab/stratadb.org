@@ -435,17 +435,16 @@ product experiments.
 prepared Strata databases for RAG, agents, benchmarks, events, and reference
 data. Clone one with schema, examples, branches, and history, then start locally."
 
-**Artifact.** A catalog/workflow surface, not a resources grid:
+**Artifact.** A compact catalog-to-clone surface, not a dashboard:
 
-- Search/filter row with use-case categories: agent memory, retrieval,
-  benchmarks, classification, event streams, reference data.
-- Dataset rows from the StrataHub curated set: `agent-memory-with-experiments`,
-  `movielens-100k`, `stackoverflow`, `github-events`, `titanic`, and
-  `iso-reference`.
-- Clone panel with the copyable command `strata clone movielens-100k ./ml`.
-- Workflow steps: resolve dataset card and compatibility, verify manifest and
-  content-addressed objects, materialize a local database, then experiment
-  offline.
+- Search/filter row with short use-case chips: RAG, agents, benchmarks, events,
+  reference.
+- Four tight dataset rows from the StrataHub curated set: `movielens-100k`,
+  `agent-memory-with-experiments`, `stackoverflow`, and `github-events`.
+  Rows show dataset, use, and one terse include line; no table header, row
+  descriptions, or tag clouds.
+- Clone bar with the selected dataset, the copyable command
+  `strata clone movielens-100k ./ml`, included assets, and local-ready status.
 
 **Handoff.** The hero Hub tile lands on this section, not Install. Hub should not
 introduce a separate CTA pattern; the clone command lives inside the artifact, and

@@ -139,7 +139,7 @@ async function assertHomepageHubSection(page, viewport) {
     'agent-memory-with-experiments',
     'stackoverflow',
     'github-events',
-    'strata clone movielens-100k ./ml',
+    'strata clone movielens-100k',
     'The hub is not in your read path.',
   ];
 

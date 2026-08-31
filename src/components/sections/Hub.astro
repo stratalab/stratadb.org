@@ -9,70 +9,31 @@ import CopyChip from '../foundation/CopyChip.astro';
 
 const datasets = [
   {
-    name: 'agent-memory-with-experiments',
-    use: 'agent memory',
-    body: 'Episodic memory, event trace, working state, and retention-policy branches.',
-    tags: ['JSON', 'events', 'branches'],
-  },
-  {
     name: 'movielens-100k',
     use: 'recommendation',
-    body: 'Movie metadata, catalog aggregates, and precomputed genre vectors.',
-    tags: ['vectors', 'JSON', 'KV'],
+    includes: 'ratings · metadata · vectors',
+    selected: true,
+  },
+  {
+    name: 'agent-memory-with-experiments',
+    use: 'agent memory',
+    includes: 'episodes · events · branches',
   },
   {
     name: 'stackoverflow',
     use: 'Q&A retrieval',
-    body: 'Questions, answers, comments, users, tags, and lookup metadata.',
-    tags: ['JSON', 'KV', 'forum'],
+    includes: 'posts · tags · users',
   },
   {
     name: 'github-events',
     use: 'event stream',
-    body: 'Pushes, issues, pull requests, stars, and per-repository rollups.',
-    tags: ['events', 'KV', 'devtools'],
-  },
-  {
-    name: 'titanic',
-    use: 'classification',
-    body: 'Raw and cleaned branches for model experiments over the same passenger data.',
-    tags: ['branches', 'JSON', 'tutorial'],
-  },
-  {
-    name: 'iso-reference',
-    use: 'reference data',
-    body: 'Country, currency, and language code tables ready for app lookups.',
-    tags: ['KV', 'JSON', 'lookup'],
+    includes: 'issues · PRs · rollups',
   },
 ];
 
-const categories = [
-  'agent memory',
-  'retrieval',
-  'benchmarks',
-  'classification',
-  'event streams',
-  'reference data',
-];
+const categories = ['rag', 'agents', 'benchmarks', 'events', 'reference'];
 
-const cloneSteps = [
-  {
-    label: 'resolve',
-    body: 'Find the dataset card, branch list, license, and required engine version.',
-  },
-  {
-    label: 'verify',
-    body: 'Fetch the manifest and content-addressed objects, checking hashes as they land.',
-  },
-  {
-    label: 'materialize',
-    body: 'Write a normal local Strata database at the path you chose.',
-  },
-  {
-    label: 'experiment',
-    body: 'Branch it, time-travel through it, run inference, and keep working offline.',
-  },
-];
+const cloneFacts = ['schema', 'examples', 'branches', 'history'];
 ---
 
 <section id="hub" class="relative min-h-[100svh] scroll-mt-16 overflow-hidden" data-hub-section>
@@ -128,62 +89,39 @@ const cloneSteps = [
         <div class="hub-stage">
           <div class="hub-results" aria-label="Example prepared datasets">
             {
-              datasets.map((dataset, index) => (
-                <article class="hub-row" style={`--row: ${index}`}>
-                  <div class="min-w-0">
-                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h3 class="font-mono text-mono-body text-ink-hi">{dataset.name}</h3>
-                      <span class="font-mono text-mono-sm text-terracotta-400">{dataset.use}</span>
-                    </div>
-                    <p class="mt-1.5 text-small text-ink-mid">{dataset.body}</p>
+              datasets.map((dataset) => (
+                <article class:list={['hub-row', dataset.selected && 'is-selected']}>
+                  <div class="flex min-w-0 items-baseline justify-between gap-4">
+                    <h3 class="min-w-0 truncate font-mono text-mono-body text-ink-hi">
+                      {dataset.name}
+                    </h3>
+                    <span class="hub-use">{dataset.use}</span>
                   </div>
-                  <div class="hub-tags">
-                    {dataset.tags.map((tag) => (
-                      <span>{tag}</span>
-                    ))}
-                  </div>
+                  <p class="hub-includes">{dataset.includes}</p>
                 </article>
               ))
             }
           </div>
 
-          <aside class="hub-clone-panel" aria-label="Clone workflow">
-            <div class="border-b border-line pb-4">
+          <div class="hub-clone-bar" aria-label="Clone workflow">
+            <div class="hub-selected">
               <p class="font-mono text-mono-sm uppercase text-ink-low">selected dataset</p>
               <h3 class="mt-2 font-mono text-mono-body text-ink-hi">movielens-100k</h3>
-              <p class="mt-2 text-small text-ink-mid">
-                Recommendation sandbox with JSON metadata and vectors ready before the first query.
+            </div>
+
+            <CopyChip
+              value="strata clone movielens-100k ./ml"
+              class="w-full justify-between !gap-2 !bg-inset !px-3 [&_.copy-chip-label]:!text-ink-hi"
+            />
+
+            <div class="hub-ready">
+              <p class="font-mono text-mono-sm text-ok">resolved · verified · local file ready</p>
+              <p class="hub-facts" aria-label="Included database assets">
+                {cloneFacts.map((fact) => <span>{fact}</span>)}
               </p>
+              <p class="mt-1 text-small text-ink-low">The hub is not in your read path.</p>
             </div>
-
-            <div class="mt-4">
-              <CopyChip
-                value="strata clone movielens-100k ./ml"
-                class="w-full justify-between !bg-inset [&_.copy-chip-label]:!text-ink-hi"
-              />
-            </div>
-
-            <ol class="mt-5 space-y-4">
-              {
-                cloneSteps.map((step) => (
-                  <li class="hub-step">
-                    <span class="hub-step-dot" aria-hidden="true" />
-                    <div>
-                      <p class="font-mono text-mono-sm text-ink-hi">{step.label}</p>
-                      <p class="mt-1 text-small text-ink-low">{step.body}</p>
-                    </div>
-                  </li>
-                ))
-              }
-            </ol>
-
-            <div class="mt-5 rounded-(--radius-control) border border-line bg-raised/55 p-3">
-              <p class="font-mono text-mono-sm text-ok">./ml is ready</p>
-              <p class="mt-1 text-small text-ink-low">
-                Same Strata APIs. Same local ownership. The hub is not in your read path.
-              </p>
-            </div>
-          </aside>
+          </div>
         </div>
       </div>
     </div>
@@ -256,7 +194,9 @@ const cloneSteps = [
   }
   .hub-search-row {
     display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.75rem;
+    align-items: center;
   }
   .hub-search {
     display: flex;
@@ -266,7 +206,7 @@ const cloneSteps = [
     border: 1px solid var(--color-vscode-border);
     border-radius: var(--radius-control);
     background: var(--color-vscode-input);
-    padding: 0.75rem 0.875rem;
+    padding: 0.65rem 0.875rem;
     font-family: var(--font-mono);
     font-size: var(--text-mono-sm);
     line-height: var(--text-mono-sm--line-height);
@@ -282,7 +222,7 @@ const cloneSteps = [
     border: 1px solid var(--color-line);
     border-radius: 999px;
     background: rgb(var(--rgb-white) / 0.035);
-    padding: 0.375rem 0.625rem;
+    padding: 0.325rem 0.575rem;
     font-family: var(--font-mono);
     font-size: var(--text-mono-sm);
     line-height: var(--text-mono-sm--line-height);
@@ -296,90 +236,97 @@ const cloneSteps = [
   .hub-results {
     min-width: 0;
     overflow: hidden;
+    align-self: start;
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
     background: rgb(var(--rgb-black) / 0.18);
   }
   .hub-row {
     display: grid;
-    gap: 0.875rem;
+    gap: 0.4rem;
+    min-height: 4.15rem;
     border-bottom: 1px solid var(--color-line);
-    padding: 1rem;
+    padding: 0.875rem;
     transition:
       background 0.2s ease,
       border-color 0.2s ease,
       transform 0.2s ease;
   }
-  .hub-row p {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
   .hub-row:last-child {
     border-bottom: 0;
+  }
+  .hub-row.is-selected {
+    background: rgb(var(--rgb-terracotta-500) / 0.07);
+    box-shadow: inset 2px 0 0 var(--color-terracotta-500);
   }
   .hub-row:hover {
     background: rgb(var(--rgb-terracotta-500) / 0.055);
     transform: translateX(2px);
   }
-  .hub-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-  .hub-tags span {
-    border: 1px solid var(--color-line);
-    border-radius: 999px;
-    padding: 0.25rem 0.5rem;
+  .hub-use,
+  .hub-includes {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-family: var(--font-mono);
     font-size: var(--text-mono-sm);
     line-height: var(--text-mono-sm--line-height);
+  }
+  .hub-use {
+    flex: none;
+    color: var(--color-terracotta-400);
+  }
+  .hub-includes {
     color: var(--color-ink-low);
   }
-  .hub-clone-panel {
+  .hub-clone-bar {
+    display: grid;
     min-width: 0;
+    align-items: center;
+    gap: 1rem;
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
     background: color-mix(in srgb, var(--color-panel) 76%, transparent);
     padding: 1rem;
   }
-  .hub-step {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 0.75rem;
+  .hub-selected,
+  .hub-ready {
+    min-width: 0;
   }
-  .hub-step-dot {
-    margin-top: 0.2rem;
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: 999px;
-    background: var(--color-terracotta-500);
-    box-shadow: 0 0 0 4px rgb(var(--rgb-terracotta-500) / 0.13);
+  .hub-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    margin-top: 0.45rem;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    line-height: var(--text-mono-sm--line-height);
+    color: var(--color-ink-low);
+  }
+  .hub-facts span:not(:last-child)::after {
+    content: '·';
+    margin-left: 0.6rem;
+    color: var(--color-ink-low);
   }
   @media (min-width: 1180px) {
-    .hub-stage {
-      grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.54fr);
-    }
-    .hub-row {
-      min-height: 5.125rem;
-      gap: 0.625rem;
-      padding: 0.75rem 1rem;
-    }
-    .hub-row p {
-      -webkit-line-clamp: 1;
-    }
-    .hub-tags {
-      flex-wrap: nowrap;
-      overflow: hidden;
+    .hub-clone-bar {
+      grid-template-columns: minmax(11rem, 0.42fr) minmax(19rem, 0.58fr) minmax(16rem, 0.52fr);
     }
   }
   @media (max-width: 640px) {
+    .hub-search-row {
+      grid-template-columns: 1fr;
+    }
     .hub-window-body {
       padding: 0.75rem;
     }
     .hub-row {
       padding: 0.875rem;
+    }
+    .hub-clone-bar {
+      gap: 0.875rem;
     }
   }
   html[data-motion='reduced'] .hub-row {
