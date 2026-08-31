@@ -118,7 +118,7 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
   }
 }
 
-async function assertHomepageHubSectionAndInstallMode(page, viewport) {
+async function assertHomepageHubSection(page, viewport) {
   await page.locator('[data-hub-link="true"]').click();
   await page.waitForFunction(() => window.location.hash === '#hub', undefined, {
     timeout: 5_000,
@@ -134,8 +134,8 @@ async function assertHomepageHubSectionAndInstallMode(page, viewport) {
 
   const sectionText = await page.locator('#hub').innerText();
   const sectionRequired = [
-    'DESIGNED FOR THOUSANDS OF PREPARED',
-    'Strata Hub is the catalog for ready-to-use Strata databases.',
+    'Strata Hub is a catalog of prepared Strata databases for RAG',
+    'Clone one with schema, examples, branches, and history',
     'agent-memory-with-experiments',
     'stackoverflow',
     'github-events',
@@ -146,32 +146,6 @@ async function assertHomepageHubSectionAndInstallMode(page, viewport) {
   for (const value of sectionRequired) {
     if (!sectionText.includes(value)) {
       throw new Error(`${viewport.name} /: Hub section is missing "${value}"`);
-    }
-  }
-
-  await page.locator('#hub [data-install-mode="hub"]').click();
-  await page.waitForFunction(() => window.location.hash === '#install', undefined, {
-    timeout: 5_000,
-  });
-
-  await page.locator('#mode-hub[aria-selected="true"]').waitFor({
-    state: 'visible',
-    timeout: 10_000,
-  });
-
-  const panelText = await page.locator('#install-panel').innerText();
-  const required = [
-    'Strata Hub',
-    'prepared databases',
-    'agent-memory-with-experiments',
-    'movielens-100k',
-    'strata clone iris ./iris',
-    'clone records Hub origin',
-  ];
-
-  for (const value of required) {
-    if (!panelText.includes(value)) {
-      throw new Error(`${viewport.name} /: Hub install mode is missing "${value}"`);
     }
   }
 }
@@ -304,6 +278,40 @@ async function assertSectionTitleNotBunched(page, viewport, title, ruleId) {
   }
 }
 
+async function assertSectionFeatureEyebrowVisible(page, viewport, sectionId, feature) {
+  const metrics = await page.evaluate(
+    ({ sectionId, feature }) => {
+      const root = document.getElementById(sectionId);
+      const labels = [...(root?.querySelectorAll('[data-feature-eyebrow]') ?? [])]
+        .filter((el) => {
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          return (
+            rect.width > 0 &&
+            rect.height > 0 &&
+            style.display !== 'none' &&
+            style.visibility !== 'hidden'
+          );
+        })
+        .map((el) => el.textContent?.replace(/\s+/g, ' ').trim() ?? '');
+
+      return {
+        found: labels.includes(feature),
+        labels,
+      };
+    },
+    { sectionId, feature },
+  );
+
+  if (!metrics.found) {
+    throw new Error(
+      `${viewport.name} /: section "${sectionId}" is missing feature eyebrow "${feature}" (found: ${metrics.labels.join(
+        ', ',
+      )})`,
+    );
+  }
+}
+
 async function assertSectionRuleReleased(page, viewport, ruleId) {
   const metrics = await page.locator(`[data-section-rule="${ruleId}"]`).evaluate((el) => {
     const rect = el.getBoundingClientRect();
@@ -341,22 +349,24 @@ async function scrollSectionToNav(page, sectionId) {
 
 async function assertHomepageSectionBreaks(page, viewport) {
   const sections = [
-    ['branch', 'branches', 'Branch the whole database.', 'pinned'],
+    ['branch', 'branches', 'Branch the whole database.', 'pinned', 'Branching'],
     [
       'primitives',
       'primitives',
       'Store every kind of app data in one embedded database.',
       'pinned',
+      'Primitives',
     ],
-    ['time-travel', 'time-travel', 'Read any past version of your data.', 'pinned'],
-    ['inference', 'native-inference', 'Inference is built in.', 'pinned'],
-    ['hub', 'strata-hub', 'Clone the dataset your experiment needs.', 'static'],
+    ['time-travel', 'time-travel', 'Read any past version of your data.', 'pinned', 'Time travel'],
+    ['inference', 'native-inference', 'AI is built-in', 'pinned', 'Inference'],
+    ['hub', 'strata-hub', 'Clone the dataset your experiment needs.', 'static', 'Strata Hub'],
   ];
 
-  for (const [sectionId, ruleId, title, mode] of sections) {
+  for (const [sectionId, ruleId, title, mode, feature] of sections) {
     await scrollSectionToNav(page, sectionId);
     await assertSectionRuleDocked(page, viewport, ruleId);
     await assertSectionTitleVisible(page, viewport, title, ruleId);
+    await assertSectionFeatureEyebrowVisible(page, viewport, sectionId, feature);
     if (viewport.width >= 1024 && sectionId !== 'branch') {
       await assertSectionTitleNotBunched(page, viewport, title, ruleId);
     }
@@ -467,7 +477,7 @@ async function assertPage(browser, route, viewport) {
       await assertHomepageSectionBreaks(page, viewport);
       await assertHomepageInferenceWorkbench(page, viewport);
       await assertHomepagePrimitiveLinks(page, viewport);
-      await assertHomepageHubSectionAndInstallMode(page, viewport);
+      await assertHomepageHubSection(page, viewport);
     }
     if (consoleErrors.length > 0 || pageErrors.length > 0) {
       throw new Error(

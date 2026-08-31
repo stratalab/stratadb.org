@@ -35,9 +35,10 @@ const ACTS = [
 
 const USES = ['agent runs', 'migrations', 'what-if changes', 'review before merge'];
 
-// The section head lives inside the island (04 §3 v5) so it can ride the
-// pin. The eyebrow moved to the SectionRule band (04 §1 v2).
+// The section head lives inside the island (04 §3 v5) so it can ride the pin.
+// The feature name sits above the H2; the SectionRule remains the register mark.
 const HEAD = {
+  eyebrow: 'Branching',
   h2: 'Branch the whole database.',
   intro:
     'Test agent writes, migrations, and risky data changes away from default. Compare the branch, preview the merge, and promote only what should land.',
@@ -408,6 +409,12 @@ function UseCases({ className = '' }: { className?: string }) {
 function FlowHead() {
   return (
     <div className="max-w-[42rem]">
+      <p
+        data-feature-eyebrow="branching"
+        className="mb-4 font-mono text-eyebrow uppercase text-terracotta-400"
+      >
+        {HEAD.eyebrow}
+      </p>
       <h2 className="text-display text-balance text-ink-hi">{HEAD.h2}</h2>
       <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
       <UseCases className="mt-7" />
@@ -582,6 +589,12 @@ export default function BranchScrub() {
           <div className="relative z-10">
             <div className="mx-auto w-full max-w-[96rem] px-12">
               {/* second h2 lives in the mobile branch — only one is ever displayed */}
+              <p
+                data-feature-eyebrow="branching"
+                className="mb-4 font-mono text-eyebrow uppercase text-terracotta-400"
+              >
+                {HEAD.eyebrow}
+              </p>
               <h2 className="text-title text-balance text-ink-hi xl:text-display">{HEAD.h2}</h2>
               <p className="mt-5 max-w-[44rem] text-body-lg text-ink-mid">{HEAD.intro}</p>
               <UseCases className="mt-6" />

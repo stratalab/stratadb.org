@@ -1,10 +1,11 @@
 ---
 interface Props {
   class?: string;
+  [key: string]: unknown;
 }
-const { class: className = '' } = Astro.props;
+const { class: className = '', ...attrs } = Astro.props;
 ---
 
-<p class={`text-eyebrow font-medium uppercase text-ink-low ${className}`}>
+<p {...attrs} class={`text-eyebrow font-medium uppercase text-ink-low ${className}`}>
   <slot />
 </p>

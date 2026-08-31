@@ -38,13 +38,15 @@ const REQUIRED = [
     file: 'src/components/sections/Hub.astro',
     strings: [
       'id="hub"',
-      'Designed for thousands of prepared datasets',
+      'data-feature-eyebrow="strata-hub"',
+      'Strata Hub',
       'Clone the dataset your experiment needs.',
+      'catalog of prepared Strata databases',
+      'Clone one with schema, examples, branches, and history',
       'strata clone movielens-100k ./ml',
       'agent-memory-with-experiments',
       'stackoverflow',
       'github-events',
-      'data-install-mode="hub"',
       'The hub is not in your read path.',
     ],
   },
@@ -69,6 +71,8 @@ const REQUIRED = [
   {
     file: 'src/components/sections/branch/BranchScrub.tsx',
     strings: [
+      'data-feature-eyebrow="branching"',
+      'Branching',
       'Branch the whole database.',
       'branch fork default risky',
       '"name": "risky"',
@@ -87,6 +91,8 @@ const REQUIRED = [
   {
     file: 'src/components/sections/primitives/PrimitiveTabs.tsx',
     strings: [
+      'data-feature-eyebrow="primitives"',
+      'Primitives',
       'portfolio.strata',
       'StrataDB for VS Code',
       'Strata extension active',
@@ -126,6 +132,18 @@ const REQUIRED = [
     ],
   },
   {
+    file: 'src/components/sections/TimeTravel.astro',
+    strings: [
+      'data-feature-eyebrow="time-travel"',
+      'Time travel',
+      'Read any past version of your data.',
+    ],
+  },
+  {
+    file: 'src/components/sections/Inference.astro',
+    strings: ['data-feature-eyebrow="inference"', 'Inference', 'AI is built-in'],
+  },
+  {
     file: 'src/components/sections/install/InstallTabs.tsx',
     strings: ['Library', 'CLI', 'Hub', 'For agents', 'strata clone iris ./iris'],
   },
@@ -150,11 +168,24 @@ const FORBIDDEN = [
   },
   {
     file: 'src/components/sections/branch/BranchScrub.tsx',
-    strings: ["out: 'OK'", "out: 'merged'"],
+    strings: ["out: 'OK'", "out: 'merged'", 'Safe experiments without database copies'],
   },
   {
     file: 'src/components/sections/Inference.astro',
-    strings: ['generation, and search through one primitive'],
+    strings: [
+      'generation, and search through one primitive',
+      'Inference is built in.',
+      'Model work beside your records',
+      'Embed, rank, and generate over stored records',
+    ],
+  },
+  {
+    file: 'src/components/sections/TimeTravel.astro',
+    strings: ['Versioned reads without restores', 'Every write is queryable with --as-of'],
+  },
+  {
+    file: 'src/components/sections/Hub.astro',
+    strings: ['Prepared datasets for experiments', 'Hub removes the preprocessing step.'],
   },
   {
     file: 'src/components/sections/inference/InferenceDemo.tsx',
@@ -175,6 +206,8 @@ const FORBIDDEN = [
   {
     file: 'src/components/sections/primitives/PrimitiveTabs.tsx',
     strings: [
+      'Multimodal data without extra services',
+      'One database for KV, JSON, events, vectors, and graph',
       'Strata Foundry',
       'strata-foundry/src',
       'config.theme',

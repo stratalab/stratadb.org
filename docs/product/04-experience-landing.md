@@ -173,14 +173,21 @@ now follows the same section-break contract as Branches, Primitives, and Time
 Travel: the rule docks, the copy and workbench stay centered in one pinned frame,
 and continued scroll gives the animation time to land before Install begins.
 
-Eyebrow `BRANCHES`; H2 **"Branch the whole database."**; intro: "Test agent
-writes, migrations, and risky data changes away from default. Compare the branch,
-preview the merge, and promote only what should land." Use chips: `agent runs`,
-`migrations`, `what-if changes`, `review before merge`. _(2026-08-30, Ani:
-"Fork the portfolio" made the sample data sound like the feature. The section now
-names the product behavior first; the portfolio remains only the concrete demo
-object. 2026-06-12 plain-language rule still holds: O(1) survives only on agent
-surfaces and architecture deep-dives.)_
+**v10 (2026-08-30, Ani): feature names live above the H2.** The rule band stays
+as the engineered navigation marker: `BRANCHES 02/07`, `PRIMITIVES 03/07`, and so
+on. Each section also gets a terracotta feature-name eyebrow above its H2:
+`Branching`, `Primitives`, `Time travel`, `Inference`, and `Strata Hub`. The
+paragraph below the H2 explains why the feature matters.
+
+Section rule `BRANCHES`; feature eyebrow **"Branching"**; H2 **"Branch the
+whole database."**; intro: "Test agent writes,
+migrations, and risky data changes away from default. Compare the branch, preview
+the merge, and promote only what should land." Use chips: `agent runs`,
+`migrations`, `what-if changes`, `review before merge`. _(2026-08-30, Ani: "Fork
+the portfolio" made the sample data sound like the feature. The section now names
+the product behavior first; the portfolio remains only the concrete demo object.
+2026-06-12 plain-language rule still holds: O(1) survives only on agent surfaces
+and architecture deep-dives.)_
 
 **Set-piece: the branch story, v4 (2026-06-12) — finance domain, session panel, stage
 lights.** The document is `json · portfolio` from the seed world —
@@ -316,11 +323,11 @@ down to `graph` (bedrock). Each: icon + name + role line; hover/tap/focus thicke
 model the layers live inside; it owns section 2 and wears terracotta as brand, not
 as a primitive hue.)_
 
-**Copy.** Eyebrow `PRIMITIVES`; H2 **"Store every kind of app data in one
-embedded database."**; intro: "Use keys for settings, JSON for records, events
-for logs, vectors for embeddings, and graphs for relationships. They live
-together in the same local file, so your app does not need a separate store for
-each shape."
+**Copy.** Section rule `PRIMITIVES`; feature eyebrow **"Primitives"**; H2
+**"Store every kind of app data in one embedded database."**; intro: "Use keys for
+settings, JSON for records, events for logs, vectors for embeddings, and graphs
+for relationships. They live together in the same local file, so your app does
+not need a separate store for each shape."
 
 | Layer  | Role line                                       | API line                                           |
 | ------ | ----------------------------------------------- | -------------------------------------------------- |
@@ -354,10 +361,10 @@ here yet"). Write markers light ember as the playhead passes them; the elapsed s
 tints. Footer: "drag the playhead — every read accepts --as-of" · "3 versions ·
 0 overwrites".
 
-**Copy.** H2 **"Read any past version of your data."** (eyebrow lives in the
-section rule); intro: "Every write records a version. Use `--as-of` to see what
-the database returned before a later change, without restoring a backup or
-copying data aside."
+**Copy.** Section rule `TIME TRAVEL`; feature eyebrow **"Time travel"**; H2
+**"Read any past version of your data."**; intro: "Every write records a version.
+Use `--as-of` to see what the database returned before a later change, without
+restoring a backup or copying data aside."
 
 Interaction: pointer drag + click-to-jump (pointer capture, touch-none) · keyboard =
 real slider (role=slider, aria-valuetext speaks the moment + version; arrows snap
@@ -388,12 +395,12 @@ records that already live in the embedded file, embed the question, rank useful 
 and generate a grounded answer without adding a separate AI service layer. Inference is
 a compute layer over data, not a stored primitive.
 
-**Copy.** H2 **"Inference is built in."** (eyebrow `NATIVE INFERENCE` lives in the
-section rule). Intro: "Run model work where the data already lives. Strata can embed
-text from records, rank context, generate answers, tokenize text, and inspect model
-capability through one layer that works with local models or hosted providers."
-Capability chips beneath (mono pills): embed · rank · generate · tokenize · model
-checks.
+**Copy.** Section rule `NATIVE INFERENCE`; feature eyebrow **"Inference"**; H2
+**"AI is built-in"** Intro: "Run model work where the data already lives.
+Strata can embed text from records, rank context, generate answers, tokenize text,
+and inspect model capability through one layer that works with local models or
+hosted providers." Capability chips beneath (mono pills): embed · rank · generate
+· tokenize · model checks.
 
 **Layout.** Head in the prose column; artifact on the 80rem stage with one quiet ember
 field. Native Inference is scroll-owned: the rule docks below the nav, and the copy
@@ -423,16 +430,10 @@ prepared dataset, and pull it with one command. As Hub grows, the same
 benchmarks, reference data, agent-memory fixtures, classification datasets, and
 product experiments.
 
-**Copy.** Eyebrow `STRATA HUB`; H2 **"Clone the dataset your experiment
-needs."** Intro: "Strata Hub is the catalog for ready-to-use Strata databases.
-Pick a dataset for a RAG prototype, agent-memory test, benchmark,
-classification run, or product experiment. Clone it with one command and start
-working locally." Supporting copy should make the scale promise explicit without
-claiming today that the public catalog already has thousands of entries:
-"Designed for thousands of prepared datasets" and "As the catalog grows toward
-thousands of datasets, the workflow stays the same: `strata clone` gives you
-processed data, schema, branches, history, and examples already packaged as a
-database."
+**Copy.** Section rule `STRATA HUB`; feature eyebrow **"Strata Hub"** H2
+**"Clone the dataset your experiment needs."** Intro: "Strata Hub is a catalog of
+prepared Strata databases for RAG, agents, benchmarks, events, and reference
+data. Clone one with schema, examples, branches, and history, then start locally."
 
 **Artifact.** A catalog/workflow surface, not a resources grid:
 
@@ -446,10 +447,11 @@ database."
   content-addressed objects, materialize a local database, then experiment
   offline.
 
-**Handoff.** The hero Hub tile lands on this section, not Install. The section's
-primary action is "Install and clone," which opens the existing Install Hub tab.
-Internal docs remain the public links until `stratahub.io` and
-`hub.stratahub.io` are reachable without auth/errors.
+**Handoff.** The hero Hub tile lands on this section, not Install. Hub should not
+introduce a separate CTA pattern; the clone command lives inside the artifact, and
+the page's conversion stays in the Install section. Internal docs remain the
+public links until `stratahub.io` and `hub.stratahub.io` are reachable without
+auth/errors.
 
 ## 8. Section 7 — Install & start
 

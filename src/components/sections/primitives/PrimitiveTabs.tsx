@@ -49,6 +49,7 @@ const PRIMS = [
 const MORE_NAV = ['Queries', 'Models', 'Inference'];
 
 const HEAD = {
+  eyebrow: 'Primitives',
   h2: 'Store every kind of app data in one embedded database.',
   intro:
     'Use keys for settings, JSON for records, events for logs, vectors for embeddings, and graphs for relationships. They live together in the same local file, so your app does not need a separate store for each shape.',
@@ -717,6 +718,12 @@ export default function PrimitiveTabs() {
       >
         <div className="grid w-full gap-10 lg:grid-cols-[minmax(19rem,0.35fr)_minmax(0,1fr)] lg:items-center xl:gap-14">
           <div className="max-w-[42rem] lg:max-w-none">
+            <p
+              data-feature-eyebrow="primitives"
+              className="mb-4 font-mono text-eyebrow uppercase text-terracotta-400"
+            >
+              {HEAD.eyebrow}
+            </p>
             <h2 className="text-display text-balance text-ink-hi lg:text-title">{HEAD.h2}</h2>
             <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
           </div>

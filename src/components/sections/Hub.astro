@@ -4,6 +4,7 @@
 // come from before an experiment starts?
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
+import Eyebrow from '../foundation/Eyebrow.astro';
 import CopyChip from '../foundation/CopyChip.astro';
 
 const datasets = [
@@ -86,51 +87,18 @@ const cloneSteps = [
     class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:grid-cols-[minmax(20rem,0.36fr)_minmax(0,1fr)] lg:items-start lg:gap-14 xl:gap-16"
   >
     <div class="reveal max-w-[43rem] lg:max-w-none">
-      <p class="mb-4 font-mono text-eyebrow uppercase text-terracotta-400">
-        Designed for thousands of prepared datasets
-      </p>
+      <Eyebrow
+        data-feature-eyebrow="strata-hub"
+        class="mb-4 font-mono !font-normal !text-terracotta-400"
+      >
+        Strata Hub
+      </Eyebrow>
       <Heading size="title">Clone the dataset your experiment needs.</Heading>
       <p class="mt-6 text-body-lg text-ink-mid">
-        Strata Hub is the catalog for ready-to-use Strata databases. Pick a dataset for a RAG
-        prototype, agent-memory test, benchmark, classification run, or product experiment. Clone it
-        with one command and start working locally.
+        Strata Hub is a catalog of prepared Strata databases for RAG, agents, benchmarks, events,
+        and reference data. Clone one with schema, examples, branches, and history, then start
+        locally.
       </p>
-      <p class="mt-4 text-body text-ink-mid">
-        As the catalog grows toward thousands of datasets, the workflow stays the same: <code
-          class="whitespace-nowrap">strata clone</code
-        > gives you processed data, schema, branches, history, and examples already packaged as a database.
-      </p>
-
-      <div class="mt-8 flex flex-wrap items-center gap-3">
-        <a
-          href="#install"
-          data-install-mode="hub"
-          class="inline-flex items-center justify-center rounded-(--radius-control) bg-terracotta-500 px-5 py-2.5 text-small font-medium text-void transition-colors duration-200 hover:bg-terracotta-400"
-        >
-          Install and clone
-        </a>
-        <a
-          href="/docs/guides/cloning-datasets"
-          class="inline-flex items-center justify-center rounded-(--radius-control) border border-line px-5 py-2.5 text-small font-medium text-ink-hi transition-colors duration-200 hover:border-line-hover hover:bg-raised"
-        >
-          Read the clone guide
-        </a>
-      </div>
-
-      <dl class="mt-8 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
-        <div class="hub-proof">
-          <dt>One command</dt>
-          <dd>clone to local</dd>
-        </div>
-        <div class="hub-proof">
-          <dt>Prepared</dt>
-          <dd>schema and history</dd>
-        </div>
-        <div class="hub-proof">
-          <dt>Offline</dt>
-          <dd>no runtime dependency</dd>
-        </div>
-      </dl>
     </div>
 
     <div class="reveal hub-artifact mt-14 min-w-0 lg:mt-0" data-hub-artifact>
@@ -255,24 +223,6 @@ const cloneSteps = [
       linear-gradient(90deg, rgb(var(--rgb-white) / 0.035) 1px, transparent 1px);
     background-size: 44px 44px;
     mask-image: radial-gradient(circle at 70% 50%, black, transparent 72%);
-  }
-  .hub-proof {
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-card);
-    background: rgb(var(--rgb-white) / 0.035);
-    padding: 0.875rem;
-  }
-  .hub-proof dt {
-    font-family: var(--font-mono);
-    font-size: var(--text-mono-sm);
-    line-height: var(--text-mono-sm--line-height);
-    color: var(--color-ink-hi);
-  }
-  .hub-proof dd {
-    margin-top: 0.25rem;
-    font-size: var(--text-small);
-    line-height: var(--text-small--line-height);
-    color: var(--color-ink-low);
   }
   .hub-artifact {
     overflow: hidden;
@@ -426,9 +376,6 @@ const cloneSteps = [
   }
   @media (max-width: 640px) {
     .hub-window-body {
-      padding: 0.75rem;
-    }
-    .hub-proof {
       padding: 0.75rem;
     }
     .hub-row {

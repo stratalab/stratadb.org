@@ -6,6 +6,7 @@
 // chapter frame so normal scrolling gives the animation time to land.
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
+import Eyebrow from '../foundation/Eyebrow.astro';
 import TimeScrubber from './timetravel/TimeScrubber.tsx';
 ---
 
@@ -15,6 +16,12 @@ import TimeScrubber from './timetravel/TimeScrubber.tsx';
     class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:sticky lg:top-[calc(4rem+1.625rem)] lg:h-[calc(100svh-5.625rem)] lg:min-h-0 lg:grid-cols-[minmax(19rem,0.35fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:py-0 xl:gap-16"
   >
     <div class="reveal max-w-[42rem] lg:max-w-none">
+      <Eyebrow
+        data-feature-eyebrow="time-travel"
+        class="mb-4 font-mono !font-normal !text-terracotta-400"
+      >
+        Time travel
+      </Eyebrow>
       <Heading size="title">Read any past version of your data.</Heading>
       <p class="mt-6 text-body-lg text-ink-mid">
         Every write records a version. Use <code class="whitespace-nowrap">--as-of</code> to see what
