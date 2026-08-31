@@ -118,8 +118,38 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
   }
 }
 
-async function assertHomepageHubInstallMode(page, viewport) {
-  await page.locator('[data-install-mode="hub"]').click();
+async function assertHomepageHubSectionAndInstallMode(page, viewport) {
+  await page.locator('[data-hub-link="true"]').click();
+  await page.waitForFunction(() => window.location.hash === '#hub', undefined, {
+    timeout: 5_000,
+  });
+
+  await assertSectionRuleDocked(page, viewport, 'strata-hub');
+  await assertSectionTitleVisible(
+    page,
+    viewport,
+    'Clone the dataset your experiment needs.',
+    'strata-hub',
+  );
+
+  const sectionText = await page.locator('#hub').innerText();
+  const sectionRequired = [
+    'DESIGNED FOR THOUSANDS OF PREPARED',
+    'Strata Hub is the catalog for ready-to-use Strata databases.',
+    'agent-memory-with-experiments',
+    'stackoverflow',
+    'github-events',
+    'strata clone movielens-100k ./ml',
+    'The hub is not in your read path.',
+  ];
+
+  for (const value of sectionRequired) {
+    if (!sectionText.includes(value)) {
+      throw new Error(`${viewport.name} /: Hub section is missing "${value}"`);
+    }
+  }
+
+  await page.locator('#hub [data-install-mode="hub"]').click();
   await page.waitForFunction(() => window.location.hash === '#install', undefined, {
     timeout: 5_000,
   });
@@ -320,6 +350,7 @@ async function assertHomepageSectionBreaks(page, viewport) {
     ],
     ['time-travel', 'time-travel', 'Read any past version of your data.', 'pinned'],
     ['inference', 'native-inference', 'Inference is built in.', 'pinned'],
+    ['hub', 'strata-hub', 'Clone the dataset your experiment needs.', 'static'],
   ];
 
   for (const [sectionId, ruleId, title, mode] of sections) {
@@ -436,7 +467,7 @@ async function assertPage(browser, route, viewport) {
       await assertHomepageSectionBreaks(page, viewport);
       await assertHomepageInferenceWorkbench(page, viewport);
       await assertHomepagePrimitiveLinks(page, viewport);
-      await assertHomepageHubInstallMode(page, viewport);
+      await assertHomepageHubSectionAndInstallMode(page, viewport);
     }
     if (consoleErrors.length > 0 || pageErrors.length > 0) {
       throw new Error(

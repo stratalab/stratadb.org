@@ -64,10 +64,12 @@ const dataModel = [
   },
   {
     label: 'Hub',
-    href: '#install',
+    href: '#hub',
     primitive: undefined,
-    installMode: 'hub',
-    ariaLabel: 'Jump to the Strata Hub clone setup',
+    installMode: undefined,
+    hub: true,
+    sectionJump: 'hub',
+    ariaLabel: 'Jump to the Strata Hub dataset section',
     icon: '<path class="dm-icon-fill" d="M6.2 9.4 12 6l5.8 3.4v6.8L12 19.6l-5.8-3.4z"/><path d="M6.7 9.7 12 12.8l5.3-3.1M12 12.8v6.1"/><path d="M4 6.5 12 2l8 4.5"/>',
   },
 ];
@@ -201,6 +203,8 @@ const dataModel = [
               class="dm-tile group"
               data-primitive-link={item.primitive}
               data-install-mode={item.installMode}
+              data-hub-link={item.hub}
+              data-section-jump={item.sectionJump}
               aria-label={item.ariaLabel}
             >
               <span class="dm-chip">
@@ -510,34 +514,51 @@ const dataModel = [
     });
   }
 
-  const installLinks = document.querySelectorAll<HTMLAnchorElement>('[data-install-mode]');
-  for (const link of installLinks) {
-    link.addEventListener('click', (event) => {
+  const jumpToSection = (id: string) => {
+    const section = document.getElementById(id);
+    if (!section) return;
+
+    const html = document.documentElement;
+    const previousScrollBehavior = html.style.scrollBehavior;
+    const header = document.querySelector('header');
+    const offset = header?.getBoundingClientRect().height ?? 0;
+    html.style.scrollBehavior = 'auto';
+    history.pushState(null, '', `#${id}`);
+    window.scrollTo({
+      top: Math.round(window.scrollY + section.getBoundingClientRect().top - offset),
+      behavior: 'auto',
+    });
+    window.setTimeout(() => {
+      html.style.scrollBehavior = previousScrollBehavior;
+    }, 0);
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const sectionLink = target.closest<HTMLAnchorElement>('[data-section-jump]');
+    if (sectionLink) {
+      const id = sectionLink.dataset.sectionJump;
+      if (id) {
+        event.preventDefault();
+        jumpToSection(id);
+        return;
+      }
+    }
+
+    const link = target.closest<HTMLAnchorElement>('[data-install-mode]');
+    if (link) {
       const mode = link.dataset.installMode;
       if (!mode) return;
       event.preventDefault();
       sessionStorage.setItem('install-mode', mode);
 
-      const install = document.getElementById('install');
-      if (install) {
-        const html = document.documentElement;
-        const previousScrollBehavior = html.style.scrollBehavior;
-        const header = document.querySelector('header');
-        const offset = header?.getBoundingClientRect().height ?? 0;
-        html.style.scrollBehavior = 'auto';
-        history.pushState(null, '', '#install');
-        window.scrollTo({
-          top: Math.round(window.scrollY + install.getBoundingClientRect().top - offset),
-          behavior: 'auto',
-        });
-        window.setTimeout(() => {
-          html.style.scrollBehavior = previousScrollBehavior;
-        }, 0);
-      }
+      jumpToSection('install');
 
       window.setTimeout(() => {
         window.dispatchEvent(new CustomEvent('strata:install-mode-request', { detail: { mode } }));
       }, 0);
-    });
-  }
+    }
+  });
 </script>

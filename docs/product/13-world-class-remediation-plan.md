@@ -128,14 +128,15 @@ overrides older signed-off planning notes where they conflict.
   verbs.
 - Working homepage proof chain: create data, fork a branch, change data, compare
   branches, merge or preview merge, read history, run model work over the stored
-  context, then install, clone a prepared dataset from Strata Hub, or open docs.
+  context, discover clone-ready datasets in Strata Hub, then install, clone, or
+  open docs.
 
 ### Homepage H1
 
 - Current H1: "Strata is the embedded database for the AI era".
 - The page must still prove the claim through concrete shipped behavior: fork,
   change, compare, preview, merge, rewind, data primitives, inference, install,
-  docs, and playground.
+  Strata Hub, docs, and playground.
 
 ### Playground
 
@@ -176,9 +177,12 @@ overrides older signed-off planning notes where they conflict.
 - MCP ships as `strata mcp serve` plus generated tool metadata. Treat it as an
   agent integration surface, not the product identity.
 - Strata Hub is a core adoption surface: `strata clone` pulls prepared datasets
-  into local databases, and `strata remote` reports the clone origin. Until
-  `stratahub.io` and `hub.stratahub.io` are publicly reachable, homepage links
-  should point to internal clone/hub docs instead of public Hub hosts.
+  into local databases, and `strata remote` reports the clone origin. The
+  homepage should give Hub its own section because the long-term value is a
+  catalog of many ready-to-use datasets for experiments, not just another setup
+  command. Until `stratahub.io` and `hub.stratahub.io` are publicly reachable,
+  homepage links should point to internal clone/hub docs instead of public Hub
+  hosts.
 - Avoid broad "search" claims unless the copy specifies vector similarity search,
   docs search, or another shipped search path.
 
@@ -412,8 +416,9 @@ Tasks:
   and generation.
 - Done: kept the install close as the final handoff and cut the standalone
   Resources junction so the page does not drift after the capability story.
-- Done: brought Strata Hub into the final handoff as a first-class install mode:
-  clone a prepared dataset, then use it as an ordinary local Strata database.
+- Done: promoted Strata Hub into its own section between Native Inference and
+  Install: a catalog of clone-ready datasets for experiments, with the Install
+  Hub mode retained as the command handoff.
 - Done: promoted current navigation surfaces: Docs, Architecture, Changelog, and
   Playground only if Playground remains part of the product.
 - Done: rationalized CTAs so each page has one primary action and a small number of

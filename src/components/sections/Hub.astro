@@ -1,0 +1,446 @@
+---
+// Section 6: Strata Hub as the dataset distribution story, not an install
+// afterthought. Hub answers the cold-start question: where does useful data
+// come from before an experiment starts?
+import SectionRule from '../foundation/SectionRule.astro';
+import Heading from '../foundation/Heading.astro';
+import CopyChip from '../foundation/CopyChip.astro';
+
+const datasets = [
+  {
+    name: 'agent-memory-with-experiments',
+    use: 'agent memory',
+    body: 'Episodic memory, event trace, working state, and retention-policy branches.',
+    tags: ['JSON', 'events', 'branches'],
+  },
+  {
+    name: 'movielens-100k',
+    use: 'recommendation',
+    body: 'Movie metadata, catalog aggregates, and precomputed genre vectors.',
+    tags: ['vectors', 'JSON', 'KV'],
+  },
+  {
+    name: 'stackoverflow',
+    use: 'Q&A retrieval',
+    body: 'Questions, answers, comments, users, tags, and lookup metadata.',
+    tags: ['JSON', 'KV', 'forum'],
+  },
+  {
+    name: 'github-events',
+    use: 'event stream',
+    body: 'Pushes, issues, pull requests, stars, and per-repository rollups.',
+    tags: ['events', 'KV', 'devtools'],
+  },
+  {
+    name: 'titanic',
+    use: 'classification',
+    body: 'Raw and cleaned branches for model experiments over the same passenger data.',
+    tags: ['branches', 'JSON', 'tutorial'],
+  },
+  {
+    name: 'iso-reference',
+    use: 'reference data',
+    body: 'Country, currency, and language code tables ready for app lookups.',
+    tags: ['KV', 'JSON', 'lookup'],
+  },
+];
+
+const categories = [
+  'agent memory',
+  'retrieval',
+  'benchmarks',
+  'classification',
+  'event streams',
+  'reference data',
+];
+
+const cloneSteps = [
+  {
+    label: 'resolve',
+    body: 'Find the dataset card, branch list, license, and required engine version.',
+  },
+  {
+    label: 'verify',
+    body: 'Fetch the manifest and content-addressed objects, checking hashes as they land.',
+  },
+  {
+    label: 'materialize',
+    body: 'Write a normal local Strata database at the path you chose.',
+  },
+  {
+    label: 'experiment',
+    body: 'Branch it, time-travel through it, run inference, and keep working offline.',
+  },
+];
+---
+
+<section id="hub" class="relative min-h-[100svh] scroll-mt-16 overflow-hidden" data-hub-section>
+  <SectionRule label="STRATA HUB" index="06" />
+  <div class="hub-backdrop pointer-events-none absolute inset-0" aria-hidden="true">
+    <div class="hub-light hub-light-ember"></div>
+    <div class="hub-light hub-light-cool"></div>
+    <div class="hub-grid-lines"></div>
+  </div>
+
+  <div
+    class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:grid-cols-[minmax(20rem,0.36fr)_minmax(0,1fr)] lg:items-start lg:gap-14 xl:gap-16"
+  >
+    <div class="reveal max-w-[43rem] lg:max-w-none">
+      <p class="mb-4 font-mono text-eyebrow uppercase text-terracotta-400">
+        Designed for thousands of prepared datasets
+      </p>
+      <Heading size="title">Clone the dataset your experiment needs.</Heading>
+      <p class="mt-6 text-body-lg text-ink-mid">
+        Strata Hub is the catalog for ready-to-use Strata databases. Pick a dataset for a RAG
+        prototype, agent-memory test, benchmark, classification run, or product experiment. Clone it
+        with one command and start working locally.
+      </p>
+      <p class="mt-4 text-body text-ink-mid">
+        As the catalog grows toward thousands of datasets, the workflow stays the same: <code
+          class="whitespace-nowrap">strata clone</code
+        > gives you processed data, schema, branches, history, and examples already packaged as a database.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <a
+          href="#install"
+          data-install-mode="hub"
+          class="inline-flex items-center justify-center rounded-(--radius-control) bg-terracotta-500 px-5 py-2.5 text-small font-medium text-void transition-colors duration-200 hover:bg-terracotta-400"
+        >
+          Install and clone
+        </a>
+        <a
+          href="/docs/guides/cloning-datasets"
+          class="inline-flex items-center justify-center rounded-(--radius-control) border border-line px-5 py-2.5 text-small font-medium text-ink-hi transition-colors duration-200 hover:border-line-hover hover:bg-raised"
+        >
+          Read the clone guide
+        </a>
+      </div>
+
+      <dl class="mt-8 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+        <div class="hub-proof">
+          <dt>One command</dt>
+          <dd>clone to local</dd>
+        </div>
+        <div class="hub-proof">
+          <dt>Prepared</dt>
+          <dd>schema and history</dd>
+        </div>
+        <div class="hub-proof">
+          <dt>Offline</dt>
+          <dd>no runtime dependency</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="reveal hub-artifact mt-14 min-w-0 lg:mt-0" data-hub-artifact>
+      <div class="hub-window-bar">
+        <div class="flex min-w-0 items-center gap-2.5">
+          <span class="h-2.5 w-2.5 rounded-full bg-terracotta-500/80"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-ink-low/35"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-ink-low/35"></span>
+          <span class="min-w-0 truncate font-mono text-mono-sm text-ink-mid">
+            stratahub/catalog
+          </span>
+        </div>
+        <span class="shrink-0 font-mono text-mono-sm text-terracotta-400"> clone-ready </span>
+      </div>
+
+      <div class="hub-window-body">
+        <div class="hub-search-row">
+          <div class="hub-search">
+            <span class="text-ink-low">search</span>
+            <span class="text-ink-hi">retrieval experiment</span>
+          </div>
+          <div class="hub-category-strip" aria-label="Example dataset categories">
+            {categories.map((category) => <span>{category}</span>)}
+          </div>
+        </div>
+
+        <div class="hub-stage">
+          <div class="hub-results" aria-label="Example prepared datasets">
+            {
+              datasets.map((dataset, index) => (
+                <article class="hub-row" style={`--row: ${index}`}>
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <h3 class="font-mono text-mono-body text-ink-hi">{dataset.name}</h3>
+                      <span class="font-mono text-mono-sm text-terracotta-400">{dataset.use}</span>
+                    </div>
+                    <p class="mt-1.5 text-small text-ink-mid">{dataset.body}</p>
+                  </div>
+                  <div class="hub-tags">
+                    {dataset.tags.map((tag) => (
+                      <span>{tag}</span>
+                    ))}
+                  </div>
+                </article>
+              ))
+            }
+          </div>
+
+          <aside class="hub-clone-panel" aria-label="Clone workflow">
+            <div class="border-b border-line pb-4">
+              <p class="font-mono text-mono-sm uppercase text-ink-low">selected dataset</p>
+              <h3 class="mt-2 font-mono text-mono-body text-ink-hi">movielens-100k</h3>
+              <p class="mt-2 text-small text-ink-mid">
+                Recommendation sandbox with JSON metadata and vectors ready before the first query.
+              </p>
+            </div>
+
+            <div class="mt-4">
+              <CopyChip
+                value="strata clone movielens-100k ./ml"
+                class="w-full justify-between !bg-inset [&_.copy-chip-label]:!text-ink-hi"
+              />
+            </div>
+
+            <ol class="mt-5 space-y-4">
+              {
+                cloneSteps.map((step) => (
+                  <li class="hub-step">
+                    <span class="hub-step-dot" aria-hidden="true" />
+                    <div>
+                      <p class="font-mono text-mono-sm text-ink-hi">{step.label}</p>
+                      <p class="mt-1 text-small text-ink-low">{step.body}</p>
+                    </div>
+                  </li>
+                ))
+              }
+            </ol>
+
+            <div class="mt-5 rounded-(--radius-control) border border-line bg-raised/55 p-3">
+              <p class="font-mono text-mono-sm text-ok">./ml is ready</p>
+              <p class="mt-1 text-small text-ink-low">
+                Same Strata APIs. Same local ownership. The hub is not in your read path.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hub-backdrop {
+    background:
+      radial-gradient(46% 58% at 76% 50%, rgb(var(--rgb-terracotta-500) / 0.12), transparent 70%),
+      radial-gradient(38% 52% at 30% 24%, rgb(var(--rgb-strata-kv) / 0.1), transparent 70%);
+  }
+  .hub-light {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(4px);
+  }
+  .hub-light-ember {
+    right: -10%;
+    top: 18%;
+    width: 44rem;
+    height: 28rem;
+    background: radial-gradient(circle, rgb(var(--rgb-terracotta-500) / 0.1), transparent 64%);
+  }
+  .hub-light-cool {
+    left: -14%;
+    bottom: 4%;
+    width: 36rem;
+    height: 24rem;
+    background: radial-gradient(circle, rgb(var(--rgb-strata-kv) / 0.1), transparent 65%);
+  }
+  .hub-grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgb(var(--rgb-white) / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--rgb-white) / 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at 70% 50%, black, transparent 72%);
+  }
+  .hub-proof {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: rgb(var(--rgb-white) / 0.035);
+    padding: 0.875rem;
+  }
+  .hub-proof dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    line-height: var(--text-mono-sm--line-height);
+    color: var(--color-ink-hi);
+  }
+  .hub-proof dd {
+    margin-top: 0.25rem;
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    color: var(--color-ink-low);
+  }
+  .hub-artifact {
+    overflow: hidden;
+    border: 1px solid rgb(var(--rgb-terracotta-500) / 0.22);
+    border-radius: var(--radius-frame);
+    background: var(--color-panel);
+    box-shadow:
+      var(--shadow-float),
+      0 0 110px -34px rgb(var(--rgb-terracotta-500) / 0.42);
+  }
+  .hub-window-bar {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgb(var(--rgb-terracotta-500) / 0.14);
+    background: rgb(var(--rgb-terracotta-500) / 0.04);
+    padding: 0.75rem 1rem;
+  }
+  .hub-window-body {
+    background:
+      radial-gradient(circle at 1px 1px, rgb(var(--rgb-white) / 0.04) 1px, transparent 1.6px),
+      linear-gradient(180deg, rgb(var(--rgb-terracotta-500) / 0.03), transparent 38%),
+      var(--color-inset);
+    background-size:
+      22px 22px,
+      100% 100%,
+      100% 100%;
+    padding: 1rem;
+  }
+  .hub-search-row {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .hub-search {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--color-vscode-border);
+    border-radius: var(--radius-control);
+    background: var(--color-vscode-input);
+    padding: 0.75rem 0.875rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    line-height: var(--text-mono-sm--line-height);
+  }
+  .hub-category-strip {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.125rem;
+  }
+  .hub-category-strip span {
+    flex: none;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: rgb(var(--rgb-white) / 0.035);
+    padding: 0.375rem 0.625rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    line-height: var(--text-mono-sm--line-height);
+    color: var(--color-ink-mid);
+  }
+  .hub-stage {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .hub-results {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: rgb(var(--rgb-black) / 0.18);
+  }
+  .hub-row {
+    display: grid;
+    gap: 0.875rem;
+    border-bottom: 1px solid var(--color-line);
+    padding: 1rem;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+  .hub-row p {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .hub-row:last-child {
+    border-bottom: 0;
+  }
+  .hub-row:hover {
+    background: rgb(var(--rgb-terracotta-500) / 0.055);
+    transform: translateX(2px);
+  }
+  .hub-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .hub-tags span {
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    padding: 0.25rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    line-height: var(--text-mono-sm--line-height);
+    color: var(--color-ink-low);
+  }
+  .hub-clone-panel {
+    min-width: 0;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--color-panel) 76%, transparent);
+    padding: 1rem;
+  }
+  .hub-step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+  .hub-step-dot {
+    margin-top: 0.2rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 999px;
+    background: var(--color-terracotta-500);
+    box-shadow: 0 0 0 4px rgb(var(--rgb-terracotta-500) / 0.13);
+  }
+  @media (min-width: 1180px) {
+    .hub-stage {
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.54fr);
+    }
+    .hub-row {
+      min-height: 5.125rem;
+      gap: 0.625rem;
+      padding: 0.75rem 1rem;
+    }
+    .hub-row p {
+      -webkit-line-clamp: 1;
+    }
+    .hub-tags {
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+  }
+  @media (max-width: 640px) {
+    .hub-window-body {
+      padding: 0.75rem;
+    }
+    .hub-proof {
+      padding: 0.75rem;
+    }
+    .hub-row {
+      padding: 0.875rem;
+    }
+  }
+  html[data-motion='reduced'] .hub-row {
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
+  }
+  html[data-motion='reduced'] .hub-row:hover {
+    transform: none;
+  }
+</style>

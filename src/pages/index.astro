@@ -7,19 +7,21 @@ import Branching from '../components/sections/Branching.astro';
 import StrataColumn from '../components/sections/StrataColumn.astro';
 import TimeTravel from '../components/sections/TimeTravel.astro';
 import Inference from '../components/sections/Inference.astro';
+import Hub from '../components/sections/Hub.astro';
 import InstallClose from '../components/sections/InstallClose.astro';
 import release from '../data/release.json';
 ---
 
 <BaseLayout
   title="StrataDB: the embedded database for the AI era"
-  description="StrataDB is the embedded database for the AI era: zero-copy branches, merge preview, versioned reads, five data primitives, and built-in inference. One file, no server."
+  description="StrataDB is the embedded database for the AI era: zero-copy branches, merge preview, versioned reads, five data primitives, built-in inference, and one-command dataset clones from Strata Hub."
 >
   <Hero />
   <Branching />
   <StrataColumn />
   <TimeTravel />
   <Inference />
+  <Hub />
   <InstallClose />
   <script
     type="application/ld+json"
@@ -29,7 +31,7 @@ import release from '../data/release.json';
       '@type': 'SoftwareApplication',
       name: 'StrataDB',
       description:
-        'The embedded database for the AI era: five data primitives, branch diff, merge preview, time-travel reads, built-in inference, no server.',
+        'The embedded database for the AI era: five data primitives, branch diff, merge preview, time-travel reads, built-in inference, and prepared dataset clones through Strata Hub.',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'macOS, Linux, Windows',
       license: 'https://www.apache.org/licenses/LICENSE-2.0',

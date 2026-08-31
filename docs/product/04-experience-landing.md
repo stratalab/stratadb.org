@@ -22,8 +22,8 @@ renders only if its path actually works.
 
 ## 0. Page skeleton
 
-**Six sections** (restructured 2026-08-30 per Ani: hero + four capability sections +
-install-close). Fixed 128/80 rhythm, 1120px container. Horizon glow at §1 and §6 only.
+**Seven sections** (restructured 2026-08-30 per Ani: hero + four capability sections +
+Hub + install-close). Fixed 128/80 rhythm, 1120px container. Horizon glow at §1 and §7 only.
 No scroll furniture.
 
 ```
@@ -32,7 +32,8 @@ No scroll furniture.
 3 Multi-primitive         believe    strata column (interactive)
 4 Time travel             believe    scroll-scrub — THE ONLY scrub piece
 5 Native inference        believe    native pipeline demo
-6 Install & start         act        library, CLI, Hub, and agent paths
+6 Strata Hub              consequence catalog of clone-ready datasets
+7 Install & start         act        library, CLI, Hub, and agent paths
 ```
 
 **The live hero (target architecture, scoped 2026-06-11).** The real engine powers
@@ -57,9 +58,9 @@ Architecture · Changelog` · GitHub (star count) · **"Get Started"** →
 
 ### Footer (per 01 §4)
 
-**Product** (Strata Foundry → repo, Changelog) · **Documentation** (Getting Started,
-Guides, Cookbook, Reference) · **Internals** (Architecture, strata-core, strata-foundry,
-stratahub) · **For agents** (`llms.txt`, For AI agents, MCP reference). Meta row:
+**Product** (Playground, Strata Hub, Changelog) · **Documentation** (Getting Started,
+Guides, Cookbook, Reference) · **Internals** (Architecture, strata-core) ·
+**For agents** (`llms.txt`, For AI agents, MCP reference). Meta row:
 `© {year} StrataDB · Apache-2.0 · Research preview` + GitHub. Nothing else.
 
 ### Section rules — the drafting system (v2, 2026-06-12)
@@ -70,9 +71,10 @@ RULING SYSTEM — the page reads as one engineered document. Ours, quieter:)_
 
 Every section after the hero opens with a **SectionRule** band: a full-bleed hairline,
 and inside the 70rem column `+ ⟩ EYEBROW` (mono, registration mark, ember chevron) on
-the left and `[ NN / 06 ]` (current index in ember) on the right. The in-flow eyebrows
+the left and `[ NN / 07 ]` (current index in ember) on the right. The in-flow eyebrows
 are RETIRED — the label lives in the rule. Running order: 01 hero (unruled cover) ·
-02 BRANCH · 03 PRIMITIVES · 04 TIME TRAVEL · 05 NATIVE INFERENCE · 06 INSTALL.
+02 BRANCH · 03 PRIMITIVES · 04 TIME TRAVEL · 05 NATIVE INFERENCE · 06 STRATA HUB ·
+07 INSTALL.
 The same drafting voice recurs inside set-pieces: the primitives rail
 numbers its layers (`01`–`05` mono), demo bodies sit on a barely-there dot grid
 (graph paper, rgba(255,255,255,0.04) at 22px), and the tabpanel closes with a ruled
@@ -411,7 +413,45 @@ plus workbench share a centered pinned frame.
    Provider rail shows local GGUF, OpenAI, Anthropic, and Google as routes through the
    same layer. Reduced motion and SSR render the completed workbench.
 
-## 7. Section 6 — Install & start
+## 7. Section 6 — Strata Hub
+
+**v1 (2026-08-30, Ani): Hub needs its own section.** The real value of Hub is
+not that it adds another way to install Strata. It is the dataset distribution
+layer: a developer should be able to decide "I want to run an experiment," find a
+prepared dataset, and pull it with one command. As Hub grows, the same
+`strata clone` workflow should cover tutorials, RAG corpora, event streams,
+benchmarks, reference data, agent-memory fixtures, classification datasets, and
+product experiments.
+
+**Copy.** Eyebrow `STRATA HUB`; H2 **"Clone the dataset your experiment
+needs."** Intro: "Strata Hub is the catalog for ready-to-use Strata databases.
+Pick a dataset for a RAG prototype, agent-memory test, benchmark,
+classification run, or product experiment. Clone it with one command and start
+working locally." Supporting copy should make the scale promise explicit without
+claiming today that the public catalog already has thousands of entries:
+"Designed for thousands of prepared datasets" and "As the catalog grows toward
+thousands of datasets, the workflow stays the same: `strata clone` gives you
+processed data, schema, branches, history, and examples already packaged as a
+database."
+
+**Artifact.** A catalog/workflow surface, not a resources grid:
+
+- Search/filter row with use-case categories: agent memory, retrieval,
+  benchmarks, classification, event streams, reference data.
+- Dataset rows from the StrataHub curated set: `agent-memory-with-experiments`,
+  `movielens-100k`, `stackoverflow`, `github-events`, `titanic`, and
+  `iso-reference`.
+- Clone panel with the copyable command `strata clone movielens-100k ./ml`.
+- Workflow steps: resolve dataset card and compatibility, verify manifest and
+  content-addressed objects, materialize a local database, then experiment
+  offline.
+
+**Handoff.** The hero Hub tile lands on this section, not Install. The section's
+primary action is "Install and clone," which opens the existing Install Hub tab.
+Internal docs remain the public links until `stratahub.io` and
+`hub.stratahub.io` are reachable without auth/errors.
+
+## 8. Section 7 — Install & start
 
 **The act section: four paths, one local database** — humans install, clone from Hub,
 open the CLI, or hand setup to an agent in the same place. Horizon glow, second and
@@ -448,14 +488,16 @@ numbers leave the landing page entirely, which also unblocks the benchmarks
 re-measurement cutover gate; `benchmarks.json` + StatStrip remain for the specimen
 and docs. Hero parallax census: glow 0.85× · terminal 1.0×.
 
-**v4 (2026-08-30, Ani): Strata Hub belongs in the adoption path.** Hub is not a
-generic resources junction. It solves the first-run problem: start from a prepared
-`.strata` dataset instead of an empty file, then work locally. The hero capability
-index gets a Hub tile that lands on Install and selects the Hub mode. The Install
-mode shows curated examples from the StrataHub repo and copyable `strata clone`
-commands, with internal links to the clone guide and hub concept page. Public
-`stratahub.io` / `hub.stratahub.io` CTAs stay out of the page until those hosts are
-publicly reachable.
+**v4 (2026-08-30): Strata Hub enters the adoption path.** The Install mode shows
+curated examples from the StrataHub repo and copyable `strata clone` commands,
+with internal links to the clone guide and hub concept page. Public
+`stratahub.io` / `hub.stratahub.io` CTAs stay out of the page until those hosts
+are publicly reachable.
+
+**v5 (2026-08-30, Ani): Hub promoted above Install.** The Hub value proposition
+now owns a dedicated section before Install. The Install Hub mode remains as the
+copy-command handoff after the product argument has established why clone-ready
+datasets matter.
 
 **Copy.** Eyebrow `INSTALL` (in the section rule); H2 **"Start in thirty seconds."**
 _(same testable claim, imperative form; alternate held: "Thirty seconds to first
@@ -511,7 +553,7 @@ handoff).
 ## Open questions
 
 **None. Signed off 2026-06-11** — all items resolved by Ani: hero H1 confirmed ·
-verb-led head slate approved (all six) · no brew tap, line dropped · seed dataset =
+verb-led head slate approved (current heads) · no brew tap, line dropped · seed dataset =
 curated fictional (authored in Phase 2; designed so every demo beat has a real answer in
 the data) · 404 wit kept · MCP tool count omitted · Resources section retired
 (2026-08-30; page ends on the command) · **the architecture deep-dives are the whitepaper
