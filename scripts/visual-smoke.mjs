@@ -77,7 +77,7 @@ async function assertHomepagePrimitiveLinks(page, viewport) {
 
 async function assertHomepageInferenceWorkbench(page, viewport) {
   await scrollSectionToNav(page, 'inference');
-  await page.locator('text=native inference pipeline').first().waitFor({
+  await page.locator('text=built-in AI loop').first().waitFor({
     state: 'visible',
     timeout: 5_000,
   });
@@ -96,12 +96,14 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
     };
   });
   const required = [
-    'database context',
-    'NATIVE LAYER',
+    'database records',
+    'same file',
+    'built into Strata',
     'grounded answer',
+    'ranked context',
+    'from database context',
+    'embed · rank · generate',
     'The portfolio value moved from 98400 to 111080',
-    'Local GGUF',
-    'OpenAI',
   ];
 
   for (const value of required) {

@@ -1,208 +1,141 @@
-// Section 5 demo (04 §6 v3, 2026-08-30): native inference as a
-// database pipeline, not a CLI sampler. The visible story is the value:
-// inspect a model, gather records already in the embedded file, embed the
-// question, rank database context, then generate an answer. The shipped
-// command family remains represented in source and verifier strings:
-// `inference capability`, `inference embed`, `inference rank`,
-// `inference generate`, `inference tokenize`, `inference cache-status`.
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+// Section 5 demo (04 §6 v4, 2026-08-31): one simple AI loop.
+// The old workbench tried to prove every inference surface at once. This version
+// shows the product idea directly: records stay in Strata, AI runs beside them,
+// and the answer comes back grounded in the database.
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { COOL, EASE, EMBER, INK, T, useBeats } from '../../shared/term';
+import { EASE, EMBER, INK, useBeats } from '../../shared/term';
 
-const COMMANDS = {
-  capability: 'inference capability openai:gpt-4o-mini',
-  embed: 'inference embed miniLM "why did portfolio.value move?"',
-  rank: 'inference rank jina-reranker-v1-tiny "why did portfolio.value move?" "...passages"',
-  generate:
-    'inference generate openai:gpt-4o-mini "Answer from ranked portfolio context." --max-tokens 80',
-  tokenize: 'inference tokenize tinyllama "portfolio.value moved"',
-  cache: 'inference cache-status',
-};
-
-const PHASES = [
-  {
-    label: 'capability',
-    title: 'Know what can run here.',
-    detail: 'Capability checks tell the app which model can generate, embed, rank, or tokenize.',
-  },
-  {
-    label: 'records',
-    title: 'Gather records in place.',
-    detail: 'KV, JSON, events, and vectors stay in the same embedded database file.',
-  },
-  {
-    label: 'embed',
-    title: 'Turn the question into a vector.',
-    detail: 'A local model embeds the query without moving the app state out of process.',
-  },
-  {
-    label: 'rank',
-    title: 'Rank the useful context.',
-    detail: 'A reranker scores the candidate records before generation starts.',
-  },
-  {
-    label: 'generate',
-    title: 'Return a grounded answer.',
-    detail: 'Generation runs through the same inference layer, local or hosted.',
-  },
-] as const;
-
-const DATA_ROWS = [
+const RECORDS = [
   {
     kind: 'KV',
     name: 'portfolio.value',
     value: '111080',
-    meta: 'current value',
     tone: 'var(--color-strata-kv)',
   },
   {
     kind: 'JSON',
-    name: 'portfolio',
+    name: 'allocation',
     value: 'stocks 80 / bonds 15 / cash 5',
-    meta: 'allocation',
     tone: 'var(--color-strata-json)',
   },
   {
     kind: 'Event',
     name: 'branch.merge',
-    value: 'portfolio.value 111080',
-    meta: '16:55:03',
+    value: 'clean merge at 16:55:03',
     tone: 'var(--color-strata-event)',
   },
   {
     kind: 'Vector',
     name: 'notes.d1',
     value: 'risky allocation merged',
-    meta: '384 dims',
     tone: 'var(--color-strata-vector)',
   },
 ];
 
-const CAPABILITIES = [
-  { label: 'capability', detail: 'no request', phase: 0 },
-  { label: 'embed', detail: '384 dims', phase: 2 },
-  { label: 'rank', detail: 'scores', phase: 3 },
-  { label: 'generate', detail: 'stream', phase: 4 },
-  { label: 'tokenize', detail: 'local vocab', phase: 0 },
-  { label: 'cache', detail: 'loaded models', phase: 0 },
-];
-
-const CONTEXT_ROWS = [
-  { source: 'event', label: 'branch.merge', score: 0.94 },
-  { source: 'json', label: 'portfolio allocation', score: 0.88 },
-  { source: 'kv', label: 'portfolio.value', score: 0.83 },
-];
-
-const PROVIDERS = [
-  { label: 'Local GGUF', detail: 'miniLM / tinyllama', active: [0, 2, 3] },
-  { label: 'OpenAI', detail: 'generate / embed', active: [0, 4] },
-  { label: 'Anthropic', detail: 'generate', active: [0, 4] },
-  { label: 'Google', detail: 'embed / generate', active: [0, 2, 4] },
-];
-
-const OPERATIONS = [
-  'check model capability',
-  'read database context',
-  'embed the question',
-  'rank candidate records',
-  'generate from ranked context',
-];
+const STEPS = [
+  ['read', 'records'],
+  ['embed', 'question'],
+  ['rank', 'context'],
+  ['generate', 'answer'],
+] as const;
 
 const ANSWER =
-  'The portfolio value moved from 98400 to 111080 after the no-conflict merge. Ranked context shows stocks 80%, bonds 15%, cash 5%.';
+  'The portfolio value moved from 98400 to 111080 after the branch merge changed the allocation to 80% stocks, 15% bonds, and 5% cash.';
 const ANSWER_WORDS = ANSWER.split(' ');
 
 function phaseFor(beat: number) {
-  return Math.min(beat, PHASES.length - 1);
+  return Math.min(beat, STEPS.length - 1);
 }
 
-function Panel({
-  title,
-  note,
-  children,
-  className = '',
-}: {
-  title: string;
-  note: string;
-  children: ReactNode;
-  className?: string;
-}) {
+function AnswerText({ on, live }: { on: boolean; live: boolean }) {
+  const [count, setCount] = useState(() => (live ? 0 : ANSWER_WORDS.length));
+
+  useEffect(() => {
+    if (!live) {
+      setCount(ANSWER_WORDS.length);
+      return;
+    }
+    if (!on) {
+      setCount(0);
+      return;
+    }
+
+    setCount(0);
+    let i = 0;
+    const timer = window.setInterval(() => {
+      i += 1;
+      setCount(i);
+      if (i >= ANSWER_WORDS.length) window.clearInterval(timer);
+    }, 42);
+
+    return () => window.clearInterval(timer);
+  }, [live, on]);
+
+  const streaming = live && on && count < ANSWER_WORDS.length;
+
   return (
-    <section
-      className={`relative overflow-hidden rounded-lg border border-line bg-panel/80 ${className}`}
-    >
-      <div className="flex min-h-9 items-center gap-3 border-b border-line px-4 xl:min-h-10">
-        <span className="whitespace-nowrap font-mono text-mono-sm text-ink-hi">{title}</span>
-        <span className="ml-auto whitespace-nowrap font-mono text-mono-sm text-ink-low">
-          {note}
-        </span>
-      </div>
-      <div className="p-3 xl:p-4">{children}</div>
-    </section>
+    <p className="min-h-[7.5rem] text-body text-ink-mid">
+      {ANSWER_WORDS.slice(0, count).join(' ')}
+      {streaming && (
+        <span
+          className="ml-1 inline-block h-[1em] w-[0.55ch] translate-y-[2px] bg-ink-mid/70"
+          aria-hidden="true"
+        />
+      )}
+    </p>
   );
 }
 
-function FlowField({ phase }: { phase: number }) {
-  const fromData = phase >= 1 ? 1 : 0;
-  const toRank = phase >= 2 ? 1 : 0;
-  const toAnswer = phase >= 4 ? 1 : 0;
+function FlowLines({ phase }: { phase: number }) {
+  const recordsToAi = phase >= 1 ? 1 : 0;
+  const aiToAnswer = phase >= 3 ? 1 : 0;
 
   return (
     <svg
-      className="pointer-events-none absolute inset-0 hidden h-full w-full md:block"
+      className="pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
       aria-hidden="true"
     >
       <motion.path
-        d="M 30 38 C 38 30 43 32 49 42"
+        d="M 30 34 C 41 30 45 36 51 45"
         fill="none"
-        stroke={EMBER(0.5)}
+        stroke={EMBER(0.52)}
+        strokeLinecap="round"
         strokeWidth="0.32"
-        strokeLinecap="round"
         initial={false}
-        animate={{ pathLength: fromData, opacity: fromData ? 1 : 0 }}
-        transition={{ duration: 0.58, ease: EASE }}
+        animate={{ pathLength: recordsToAi, opacity: recordsToAi ? 1 : 0 }}
+        transition={{ duration: 0.62, ease: EASE }}
       />
       <motion.path
-        d="M 30 62 C 38 70 43 68 49 58"
+        d="M 30 66 C 41 70 45 64 51 55"
         fill="none"
-        stroke={COOL(0.46)}
-        strokeWidth="0.26"
+        stroke={EMBER(0.34)}
         strokeLinecap="round"
+        strokeWidth="0.26"
         initial={false}
-        animate={{ pathLength: toRank, opacity: toRank ? 1 : 0 }}
-        transition={{ duration: 0.58, ease: EASE }}
+        animate={{ pathLength: recordsToAi, opacity: recordsToAi ? 1 : 0 }}
+        transition={{ duration: 0.62, delay: 0.08, ease: EASE }}
       />
       <motion.path
-        d="M 56 50 C 64 50 66 50 72 50"
+        d="M 57 50 C 64 50 68 50 75 50"
         fill="none"
         stroke={EMBER(0.56)}
-        strokeWidth="0.32"
         strokeLinecap="round"
+        strokeWidth="0.34"
         initial={false}
-        animate={{ pathLength: toAnswer, opacity: toAnswer ? 1 : 0 }}
-        transition={{ duration: 0.58, ease: EASE }}
+        animate={{ pathLength: aiToAnswer, opacity: aiToAnswer ? 1 : 0 }}
+        transition={{ duration: 0.62, ease: EASE }}
       />
       <motion.circle
         r="0.8"
         fill={EMBER(0.95)}
         initial={false}
         animate={{
-          cx: phase >= 1 ? 49 : 30,
-          cy: phase >= 1 ? 42 : 38,
-          opacity: phase >= 1 && phase < 4 ? 1 : 0,
-        }}
-        transition={{ duration: 0.7, ease: EASE }}
-      />
-      <motion.circle
-        r="0.72"
-        fill={COOL(0.9)}
-        initial={false}
-        animate={{
-          cx: phase >= 2 ? 49 : 30,
-          cy: phase >= 2 ? 58 : 62,
-          opacity: phase >= 2 && phase < 4 ? 1 : 0,
+          cx: recordsToAi ? 51 : 30,
+          cy: recordsToAi ? 45 : 34,
+          opacity: recordsToAi && !aiToAnswer ? 1 : 0,
         }}
         transition={{ duration: 0.7, ease: EASE }}
       />
@@ -210,234 +143,174 @@ function FlowField({ phase }: { phase: number }) {
         r="0.82"
         fill={EMBER(0.98)}
         initial={false}
-        animate={{
-          cx: phase >= 4 ? 72 : 56,
-          cy: 50,
-          opacity: phase >= 4 ? 1 : 0,
-        }}
+        animate={{ cx: aiToAnswer ? 75 : 57, cy: 50, opacity: aiToAnswer ? 1 : 0 }}
         transition={{ duration: 0.7, ease: EASE }}
       />
     </svg>
   );
 }
 
-function DataColumn({ phase }: { phase: number }) {
-  const active = phase >= 1;
-
+function RecordStack({ phase }: { phase: number }) {
   return (
-    <Panel title="database context" note="same file" className="min-h-[26rem] xl:min-h-[28rem]">
+    <section className="rounded-lg border border-line bg-panel/80 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="font-mono text-mono-body text-ink-hi">database records</h3>
+        <span className="font-mono text-mono-sm text-ink-low">same file</span>
+      </div>
       <div className="space-y-2.5">
-        {DATA_ROWS.map((row, i) => {
-          const on = active || phase >= i + 1;
+        {RECORDS.map((record, index) => {
+          const active = phase >= 1 || index === 0;
+
           return (
             <motion.div
-              key={row.name}
-              className="rounded-md border px-3 py-2"
+              key={record.name}
+              className="relative overflow-hidden rounded-(--radius-control) border px-3 py-2.5"
               style={{
-                borderColor: on ? row.tone : 'var(--color-line)',
-                background: on
-                  ? `color-mix(in srgb, ${row.tone} 10%, var(--color-panel))`
+                borderColor: active ? 'var(--color-line-hover)' : 'var(--color-line)',
+                background: active
+                  ? `color-mix(in srgb, ${record.tone} 4%, var(--color-panel))`
                   : 'var(--color-panel)',
               }}
               initial={false}
-              animate={{ opacity: on ? 1 : 0.5, x: on ? 0 : -8 }}
-              transition={{ duration: 0.34, delay: active ? i * 0.06 : 0, ease: EASE }}
+              animate={{ opacity: active ? 1 : 0.52, x: active ? 0 : -6 }}
+              transition={{
+                duration: 0.34,
+                delay: phase >= 1 ? index * 0.06 : 0,
+                ease: EASE,
+              }}
             >
-              <div className="flex items-center gap-2">
+              <span
+                className="absolute inset-y-0 left-0 w-px"
+                style={{ background: record.tone, opacity: active ? 0.9 : 0.28 }}
+                aria-hidden="true"
+              />
+              <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className="rounded px-1.5 font-mono text-mono-sm"
-                  style={{ background: row.tone, color: 'var(--color-void)' }}
+                  className="rounded border border-line bg-inset px-1.5 py-0.5 font-mono text-mono-sm text-ink-mid"
+                  style={{ borderColor: active ? record.tone : 'var(--color-line)' }}
                 >
-                  {row.kind}
+                  {record.kind}
                 </span>
                 <span className="min-w-0 truncate font-mono text-mono-sm text-ink-hi">
-                  {row.name}
-                </span>
-                <span className="ml-auto whitespace-nowrap font-mono text-mono-sm text-ink-low">
-                  {row.meta}
+                  {record.name}
                 </span>
               </div>
-              <div className="mt-2 truncate font-mono text-mono-sm text-ink-mid">{row.value}</div>
+              <p className="mt-1.5 truncate font-mono text-mono-sm text-ink-low">{record.value}</p>
             </motion.div>
           );
         })}
       </div>
-      <div className="mt-4 border-t border-line pt-3 font-mono text-mono-sm text-ink-low">
-        query: <span className="text-ink-hi">why did portfolio.value move?</span>
-      </div>
-    </Panel>
+    </section>
   );
 }
 
-function InferenceCore({ phase }: { phase: number }) {
-  const activeCapability =
-    phase <= 1 ? 'capability' : phase === 2 ? 'embed' : phase === 3 ? 'rank' : 'generate';
+function AiCore({ phase }: { phase: number }) {
+  const [, detail] = STEPS[phase];
 
   return (
-    <div className="flex min-h-[26rem] flex-col justify-between rounded-lg border border-line bg-raised/70 p-3 xl:min-h-[28rem] xl:p-4">
-      <div className="text-center">
-        <div className="font-mono text-mono-sm uppercase text-ink-low">native layer</div>
-        <motion.div
-          className="mx-auto mt-3 flex h-28 w-full max-w-48 flex-col items-center justify-center rounded-lg border px-4 text-center xl:h-32"
-          style={{
-            borderColor: EMBER(0.34),
-            background: `radial-gradient(70% 90% at 50% 0%, ${EMBER(0.16)}, transparent 70%), var(--color-inset)`,
-            boxShadow: `0 0 72px -28px ${EMBER(0.62)}`,
-          }}
-          initial={false}
-          animate={{ scale: phase >= 1 && phase <= 4 ? 1.03 : 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-        >
-          <span className="font-mono text-mono-body text-ink-hi">inference</span>
-          <span className="mt-1 text-small text-ink-mid">runs beside storage</span>
-        </motion.div>
-      </div>
+    <section className="flex flex-col items-center justify-center rounded-lg border border-line bg-raised/70 p-4 text-center">
+      <motion.div
+        className="flex aspect-square w-full max-w-[11rem] flex-col items-center justify-center rounded-full border"
+        style={{
+          borderColor: EMBER(0.36),
+          background: `radial-gradient(70% 80% at 50% 20%, ${EMBER(0.18)}, transparent 70%), var(--color-inset)`,
+          boxShadow: `0 0 78px -24px ${EMBER(0.62)}`,
+        }}
+        initial={false}
+        animate={{
+          scale: phase >= 1 && phase <= 3 ? [1, 1.035, 1] : 1,
+          borderColor: phase >= 1 ? EMBER(0.56) : EMBER(0.3),
+        }}
+        transition={{ duration: 0.72, ease: EASE }}
+      >
+        <span className="font-mono text-heading text-ink-hi">AI</span>
+        <span className="mt-1 font-mono text-mono-sm text-ink-low">built into Strata</span>
+      </motion.div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {CAPABILITIES.map((cap) => {
-          const on = cap.label === activeCapability || (phase === 0 && cap.phase === 0);
+      <div className="mt-5 flex w-full flex-wrap justify-center gap-2">
+        {['embed', 'rank', 'generate'].map((op, index) => {
+          const active = phase >= index + 1;
+
           return (
-            <motion.div
-              key={cap.label}
-              className="rounded-md border px-2.5 py-2"
+            <motion.span
+              key={op}
+              className="rounded-(--radius-control) border px-2.5 py-1.5 font-mono text-mono-sm"
               style={{
-                borderColor: on ? EMBER(0.4) : 'var(--color-line)',
-                background: on ? EMBER(0.1) : 'var(--color-panel)',
+                borderColor: active ? EMBER(0.36) : 'var(--color-line)',
+                background: active ? EMBER(0.08) : 'var(--color-panel)',
+                color: active ? 'var(--color-ink-hi)' : 'var(--color-ink-low)',
               }}
               initial={false}
-              animate={{ opacity: on ? 1 : 0.56, y: on ? 0 : 3 }}
-              transition={{ duration: 0.26, ease: EASE }}
+              animate={{ opacity: active ? 1 : 0.58, y: active ? 0 : 4 }}
+              transition={{ duration: 0.28, ease: EASE }}
             >
-              <div className="font-mono text-mono-sm text-ink-hi">{cap.label}</div>
-              <div className="mt-0.5 font-mono text-mono-sm text-ink-low">{cap.detail}</div>
-            </motion.div>
+              {op}
+            </motion.span>
           );
         })}
       </div>
-
-      <div className="mt-4 rounded-md border border-line bg-inset px-3 py-2 font-mono text-mono-sm">
-        <span className="text-terracotta-400">operation</span>
-        <div className="mt-1 text-ink-hi">{OPERATIONS[phase]}</div>
-      </div>
-    </div>
+      <p className="mt-4 font-mono text-mono-sm text-terracotta-400">{detail}</p>
+    </section>
   );
 }
 
-function AnswerStream({
-  started,
-  complete,
-  live,
-}: {
-  started: boolean;
-  complete: boolean;
-  live: boolean;
-}) {
-  const [n, setN] = useState(() => (live ? 0 : ANSWER_WORDS.length));
-
-  useEffect(() => {
-    if (!live || complete) {
-      setN(ANSWER_WORDS.length);
-      return;
-    }
-    if (!started) {
-      setN(0);
-      return;
-    }
-    setN(0);
-    let i = 0;
-    let timer: number;
-    const tick = () => {
-      i += 1;
-      setN(i);
-      if (i < ANSWER_WORDS.length) timer = window.setTimeout(tick, 34 + Math.random() * 46);
-    };
-    timer = window.setTimeout(tick, 160);
-    return () => window.clearTimeout(timer);
-  }, [started, complete, live]);
-
-  const streaming = live && started && !complete && n < ANSWER_WORDS.length;
+function AnswerCard({ phase, live }: { phase: number; live: boolean }) {
+  const answering = phase >= 3;
 
   return (
-    <div className="min-h-[5.75rem] text-body text-ink-mid xl:min-h-[7rem]">
-      {ANSWER_WORDS.slice(0, n).join(' ')}
-      {streaming && (
-        <span
-          className="ml-1 inline-block h-[1.05em] w-[0.55ch] translate-y-[3px] bg-ink-mid/70"
-          aria-hidden="true"
-        />
-      )}
-    </div>
-  );
-}
-
-function AnswerColumn({ phase, live }: { phase: number; live: boolean }) {
-  const ranked = phase >= 3;
-  const generating = phase >= 4;
-
-  return (
-    <Panel title="grounded answer" note="ranked context" className="min-h-[26rem] xl:min-h-[28rem]">
-      <div className="rounded-md border border-line bg-inset p-3">
-        <div className="font-mono text-mono-sm text-ink-low">ask</div>
-        <div className="mt-1 text-body text-ink-hi">Why did portfolio.value move?</div>
+    <section className="rounded-lg border border-line bg-panel/80 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="font-mono text-mono-body text-ink-hi">grounded answer</h3>
+        <span className="font-mono text-mono-sm text-ink-low">ranked context</span>
       </div>
-
-      <div className="mt-4 space-y-2.5">
-        {CONTEXT_ROWS.map((row, i) => {
-          const on = ranked;
-          return (
-            <motion.div
-              key={row.label}
-              className="rounded-md border border-line bg-panel px-3 py-2"
-              initial={false}
-              animate={{ opacity: on ? 1 : 0.42, y: on ? 0 : 8 }}
-              transition={{ duration: 0.34, delay: on ? i * 0.08 : 0, ease: EASE }}
-            >
-              <div className="flex items-center gap-2 font-mono text-mono-sm">
-                <span className="text-terracotta-300">{row.source}</span>
-                <span className="min-w-0 truncate text-ink-hi">{row.label}</span>
-                <span className="ml-auto text-ink-low">{row.score.toFixed(2)}</span>
-              </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-raised">
-                <motion.div
-                  className="h-full rounded-full bg-terracotta-500"
-                  initial={false}
-                  animate={{ width: on ? `${row.score * 100}%` : '8%' }}
-                  transition={{ duration: 0.56, delay: on ? i * 0.08 : 0, ease: EASE }}
-                />
-              </div>
-            </motion.div>
-          );
-        })}
+      <div className="rounded-(--radius-control) border border-line bg-inset p-3">
+        <p className="font-mono text-mono-sm text-ink-low">ask</p>
+        <p className="mt-1 text-body text-ink-hi">Why did portfolio.value move?</p>
       </div>
-
-      <div className="mt-4 rounded-md border border-line bg-panel p-3">
+      <div className="mt-3 rounded-(--radius-control) border border-line bg-panel p-3">
         <div className="mb-2 flex items-center gap-2 font-mono text-mono-sm">
           <span className="text-terracotta-300">generate</span>
-          <span className="text-ink-low">openai:gpt-4o-mini</span>
+          <span className="text-ink-low">from database context</span>
         </div>
-        <AnswerStream started={generating} complete={!live || phase > 4} live={live} />
+        <AnswerText on={answering} live={live} />
       </div>
-    </Panel>
+      <div className="mt-3 flex flex-wrap gap-2 font-mono text-mono-sm text-ink-low">
+        {['kv', 'json', 'event', 'vector'].map((source, index) => (
+          <motion.span
+            key={source}
+            className="rounded-full border border-line bg-inset px-2.5 py-1"
+            initial={false}
+            animate={{ opacity: phase >= 2 ? 1 : 0.45, y: phase >= 2 ? 0 : 4 }}
+            transition={{
+              duration: 0.24,
+              delay: phase >= 2 ? index * 0.04 : 0,
+              ease: EASE,
+            }}
+          >
+            {source}
+          </motion.span>
+        ))}
+      </div>
+    </section>
   );
 }
 
-function ProviderRail({ phase }: { phase: number }) {
+function StepRail({ phase }: { phase: number }) {
   return (
-    <div className="mt-3 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4 xl:mt-4">
-      {PROVIDERS.map((provider) => {
-        const on = provider.active.includes(phase);
+    <div className="mt-4 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4">
+      {STEPS.map(([label, detail], index) => {
+        const active = phase >= index;
+
         return (
           <motion.div
-            key={provider.label}
-            className="bg-panel px-3 py-1.5 xl:py-3"
+            key={label}
+            className="bg-panel px-4 py-3"
             initial={false}
-            animate={{ opacity: on ? 1 : 0.58 }}
-            transition={{ duration: 0.28, ease: EASE }}
+            animate={{ opacity: active ? 1 : 0.5 }}
+            transition={{ duration: 0.24, ease: EASE }}
           >
-            <div className="font-mono text-mono-sm text-ink-hi">{provider.label}</div>
-            <div className="mt-0.5 hidden font-mono text-mono-sm text-ink-low xl:block">
-              {provider.detail}
-            </div>
+            <p className="font-mono text-mono-sm text-terracotta-400">{label}</p>
+            <p className="mt-1 font-mono text-mono-sm text-ink-low">{detail}</p>
           </motion.div>
         );
       })}
@@ -452,23 +325,24 @@ export default function InferenceDemo() {
 
   useEffect(() => {
     setReduced(document.documentElement.dataset.motion === 'reduced');
-    const io = new IntersectionObserver(
+
+    const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
           setSeen(true);
-          io.disconnect();
+          observer.disconnect();
         }
       },
       { threshold: 0.35 },
     );
-    if (ref.current) io.observe(ref.current);
-    return () => io.disconnect();
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
   }, []);
 
   const live = seen && !reduced;
-  const beat = useBeats([520, 900, 980, 1040 + T(COMMANDS.generate) / 5], live);
+  const beat = useBeats([620, 820, 820, 1260], live);
   const phase = phaseFor(beat);
-  const phaseInfo = PHASES[phase];
 
   return (
     <div ref={ref}>
@@ -482,32 +356,28 @@ export default function InferenceDemo() {
         }}
       >
         <div
-          className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-5 py-2 xl:min-h-12 xl:py-3"
+          className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 border-b border-line px-5 py-2"
           style={{ background: EMBER(0.04) }}
         >
-          <span className="font-mono text-mono-body text-ink-hi">native inference pipeline</span>
-          <span className="font-mono text-mono-sm text-ink-low">
-            embed · rank · generate · tokenize
-          </span>
-          <span className="font-mono text-mono-sm text-terracotta-400">{phaseInfo.label}</span>
+          <span className="font-mono text-mono-body text-ink-hi">built-in AI loop</span>
+          <span className="font-mono text-mono-sm text-ink-low">embed · rank · generate</span>
           <span className="ml-auto font-mono text-mono-sm text-ink-low">strata · main</span>
         </div>
-
         <div
-          className="relative overflow-hidden p-3 xl:p-5"
+          className="relative overflow-hidden p-4 xl:p-5"
           style={{
             backgroundColor: 'var(--color-inset)',
             backgroundImage: `radial-gradient(circle at 1px 1px, ${INK(0.04)} 1px, transparent 1.6px), radial-gradient(58% 68% at 55% 42%, ${EMBER(0.08)}, transparent 72%)`,
             backgroundSize: '22px 22px, 100% 100%',
           }}
         >
-          <FlowField phase={phase} />
-          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(11rem,0.7fr)_minmax(0,1.1fr)] xl:grid-cols-[minmax(0,1fr)_minmax(14rem,0.82fr)_minmax(0,1.1fr)]">
-            <DataColumn phase={phase} />
-            <InferenceCore phase={phase} />
-            <AnswerColumn phase={phase} live={live} />
+          <FlowLines phase={phase} />
+          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(10rem,0.56fr)_minmax(0,1fr)]">
+            <RecordStack phase={phase} />
+            <AiCore phase={phase} />
+            <AnswerCard phase={phase} live={live} />
           </div>
-          <ProviderRail phase={phase} />
+          <StepRail phase={phase} />
         </div>
       </div>
     </div>

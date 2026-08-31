@@ -31,7 +31,7 @@ No scroll furniture.
 2 Branching               believe    animated terminal, live-capable
 3 Multi-primitive         believe    strata column (interactive)
 4 Time travel             believe    scroll-scrub — THE ONLY scrub piece
-5 Native inference        believe    native pipeline demo
+5 Native inference        believe    built-in AI loop
 6 Strata Hub              consequence catalog of clone-ready datasets
 7 Install & start         act        library, CLI, Hub, and agent paths
 ```
@@ -395,30 +395,30 @@ records that already live in the embedded file, embed the question, rank useful 
 and generate a grounded answer without adding a separate AI service layer. Inference is
 a compute layer over data, not a stored primitive.
 
+**v4 (2026-08-31, Ani): simplify the artifact.** The workbench was still too crowded:
+provider rails, scored context lists, and command inventory competed with the core idea.
+The landing page now shows one loop only: database records stay in Strata, AI runs beside
+them, and a grounded answer returns from database context.
+
 **Copy.** Section rule `NATIVE INFERENCE`; feature eyebrow **"Inference"**; H2
 **"AI is built-in"** Intro: "Run model work where the data already lives.
-Strata can embed text from records, rank context, generate answers, tokenize text,
-and inspect model capability through one layer that works with local models or
-hosted providers." Capability chips beneath (mono pills): embed · rank · generate
-· tokenize · model checks.
+Strata can read records, create embeddings, rank context, and generate an answer
+without moving the app into a separate AI service." Capability chips beneath
+(mono pills): embed · rank · generate.
 
 **Layout.** Head in the prose column; artifact on the 80rem stage with one quiet ember
 field. Native Inference is scroll-owned: the rule docks below the nav, and the copy
 plus workbench share a centered pinned frame.
 
-**The demo — five beats, one native inference layer (plays once ≥35%):**
+**The demo — one built-in AI loop (plays once ≥35%):**
 
-1. Capability check: `inference capability openai:gpt-4o-mini` lights model support
-   without pretending a provider request was sent.
-2. Context gather: KV `portfolio.value`, JSON allocation, merge event, and vector note
-   appear as records inside the same database file.
-3. Embed: `inference embed miniLM "why did portfolio.value move?"` sends the question
-   through a local model and lights the vector path.
-4. Rank: `inference rank jina-reranker-v1-tiny ...` reorders database context by score.
-5. Generate: `inference generate openai:gpt-4o-mini ...` streams the seed-true answer:
-   "The portfolio value moved from 98400 to 111080 after the no-conflict merge..."
-   Provider rail shows local GGUF, OpenAI, Anthropic, and Google as routes through the
-   same layer. Reduced motion and SSR render the completed workbench.
+1. Read: KV `portfolio.value`, JSON allocation, merge event, and vector note appear
+   as records inside the same database file.
+2. Embed: the question lights the AI core.
+3. Rank: the useful records become the context set.
+4. Generate: the seed-true answer streams back: "The portfolio value moved from 98400
+   to 111080 after the branch merge..." Reduced motion and SSR render the completed
+   loop.
 
 ## 7. Section 6 — Strata Hub
 

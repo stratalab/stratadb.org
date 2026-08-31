@@ -1,14 +1,14 @@
 ---
-// Section 5 (04 §6 v3): "AI is built-in" The section now shows
-// native inference as database work: inspect a model, gather records, embed,
-// rank, and generate without adding a separate AI service layer. The copy and
-// demo share one centered scroll-owned chapter frame.
+// Section 5 (04 §6 v4): "AI is built-in" The section now shows
+// native inference as one direct loop: records stay in Strata, AI runs beside
+// them, and the answer returns grounded in database context. The copy and demo
+// share one centered scroll-owned chapter frame.
 import SectionRule from '../foundation/SectionRule.astro';
 import Heading from '../foundation/Heading.astro';
 import Eyebrow from '../foundation/Eyebrow.astro';
 import InferenceDemo from './inference/InferenceDemo.tsx';
 
-const capabilities = ['embed', 'rank', 'generate', 'tokenize', 'model checks'];
+const capabilities = ['embed', 'rank', 'generate'];
 ---
 
 <section id="inference" class="relative min-h-[100svh] scroll-mt-16 lg:h-[180svh]">
@@ -25,9 +25,8 @@ const capabilities = ['embed', 'rank', 'generate', 'tokenize', 'model checks'];
       </Eyebrow>
       <Heading size="title">AI is built-in</Heading>
       <p class="mt-6 text-body-lg text-ink-mid">
-        Run model work where the data already lives. Strata can embed text from records, rank
-        context, generate answers, tokenize text, and inspect model capability through one layer
-        that works with local models or hosted providers.
+        Run model work where the data already lives. Strata can read records, create embeddings,
+        rank context, and generate an answer without moving the app into a separate AI service.
       </p>
       <div class="mt-8 flex flex-wrap gap-2.5">
         {
