@@ -2,7 +2,7 @@
 title: "Deterministic Replay"
 section: "cookbook"
 description: "Record external inputs in the event log and reconstruct any past state exactly, using versioned reads and fork-at-version."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Goal: make an agent run reproducible by recording every nondeterministic input in

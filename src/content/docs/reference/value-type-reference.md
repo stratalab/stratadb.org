@@ -2,7 +2,7 @@
 title: "Value Type Reference"
 section: "reference"
 description: "How values are shaped across KV, JSON, events, vectors, graph, commits, and errors."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 This page gives the mental map. Generated command pages own exact parameters and

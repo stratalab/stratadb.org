@@ -2,7 +2,7 @@
 title: "When to use StrataDB"
 section: "why-strata"
 description: "The workloads StrataDB is built for, and the cases where another database is the better choice."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use StrataDB when the branch and history model matters. Use something else when
@@ -39,7 +39,7 @@ more than one data shape? If yes, StrataDB is worth considering.
 ## Boundaries In This Release
 
 - The supported surfaces are the CLI, Python SDK, generated machine docs, and MCP
-  server. A Node SDK is not part of `v1.1.0`.
+  server. A Node SDK is not part of `v1.1.1`.
 - Local model execution is a build feature. Cloud inference is available when a
   provider key is configured.
 - Broad search is not a separate product surface. Vector similarity search is

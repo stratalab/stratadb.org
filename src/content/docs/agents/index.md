@@ -2,7 +2,7 @@
 title: "For AI agents"
 section: "agents"
 description: "How agents should discover Strata: database targeting, generated catalogs, repo onboarding, and the built-in MCP server."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Agents should not infer Strata's command surface from examples. The binary can

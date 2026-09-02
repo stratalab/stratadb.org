@@ -2,7 +2,7 @@
 title: "Events"
 section: "data"
 description: "Append typed events, list them by sequence or type, and verify the hash-linked log."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use events when the order of what happened matters. The event log is append-only:
@@ -83,7 +83,7 @@ Read an earlier log snapshot with the commit timestamp from a write receipt:
 strata:default/default › event list --as-of <timestamp-from-receipt>
 ```
 
-In `v1.1.0`, branch merge compares event streams but does not merge them.
+In `v1.1.1`, branch merge compares event streams but does not merge them.
 
 ## Errors To Handle
 

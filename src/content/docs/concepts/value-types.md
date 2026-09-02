@@ -2,7 +2,7 @@
 title: "Value Types"
 section: "concepts"
 description: "What a value is depends on the primitive: KV stores opaque bytes, JSON stores the full JSON model, and vectors, events, and graphs carry their own shapes."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 StrataDB does not have one universal value type. What counts as a "value" depends on which [primitive](/docs/concepts/primitives) you are using. Knowing the value model of each one saves you from surprises - especially in KV, which is more literal than you might expect.

@@ -2,7 +2,7 @@
 title: "Error Reference"
 section: "reference"
 description: "How to read Strata error envelopes and use the generated error registry."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Strata errors are structured. Runtime failures carry a class, code, retry

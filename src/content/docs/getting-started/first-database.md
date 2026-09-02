@@ -2,7 +2,7 @@
 title: "Your First Database"
 section: "getting-started"
 description: "Create a durable database, fork a branch, merge it, and read an earlier version."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 This page uses a durable database at `./mydb`. StrataDB creates the directory on
@@ -154,7 +154,7 @@ The merge output is a structured receipt. The final read shows the result:
 {"bonds":15,"cash":5,"stocks":80,"strategy":"aggressive"}
 ```
 
-In `v1.1.0`, branch merge applies key-value, JSON, and vector changes. Events
+In `v1.1.1`, branch merge applies key-value, JSON, and vector changes. Events
 and graphs are compared but not merged.
 
 ## Read The Past

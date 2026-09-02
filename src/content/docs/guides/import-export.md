@@ -2,7 +2,7 @@
 title: "Import & export"
 section: "guides"
 description: "Move data in and out of a database as Parquet, CSV, or JSON lines using the arrow import and export commands."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 The `arrow` commands move data between a database and columnar files. Export snapshots a capability to Parquet, CSV, or JSON lines; import loads a file back into a primitive. Use them for backups, bulk loading, and handing data to analytics tools that read Arrow-compatible formats.

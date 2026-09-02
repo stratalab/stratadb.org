@@ -2,7 +2,7 @@
 title: "Providers & API keys"
 section: "inference"
 description: "Configure OpenAI, Anthropic, and Google provider keys for cloud inference."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Cloud inference uses a `provider:model` spec and a key you supply.

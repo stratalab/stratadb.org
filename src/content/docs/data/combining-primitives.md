@@ -2,7 +2,7 @@
 title: "Combining primitives"
 section: "data"
 description: "Use several StrataDB data shapes together while branches and historical reads stay consistent."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 The five primitives are useful alone, but StrataDB is built for the cases where
@@ -79,7 +79,7 @@ strata:default/default › branch diff default experiment
 strata:default/default › branch preview experiment default
 ```
 
-In `v1.1.0`, merge applies KV, JSON, and vector changes. Events and graph are
+In `v1.1.1`, merge applies KV, JSON, and vector changes. Events and graph are
 included in diff but are not merged.
 
 ## Read One Historical Snapshot

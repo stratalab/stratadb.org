@@ -2,7 +2,7 @@
 title: "Machine-readable docs"
 section: "agents"
 description: "How agents can consume the website: llms.txt, markdown mirrors, and the error registry."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 The docs have machine-friendly entry points. Use them when an agent needs

@@ -2,7 +2,7 @@
 title: "Quickstart: AI agents"
 section: "getting-started"
 description: "Give a coding agent the Strata playbook and the commands it should use first."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use this page when an agent is going to edit code that opens Strata or calls the

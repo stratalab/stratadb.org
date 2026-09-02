@@ -2,7 +2,7 @@
 title: "Python SDK"
 section: "python"
 description: "stratadb - the embedded Strata engine in your Python process, with typed namespaces over the same command surface as the CLI and MCP server."
-source: "strata-python@v1.1.0"
+source: "strata-python@v1.1.1"
 ---
 
 `stratadb` is the Python SDK for Strata: it links the engine **in your process**

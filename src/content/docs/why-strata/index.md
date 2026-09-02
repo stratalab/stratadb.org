@@ -2,7 +2,7 @@
 title: "What is StrataDB"
 section: "why-strata"
 description: "StrataDB is an embedded database you can fork: five data shapes, one versioned local store, no server."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 StrataDB is an embedded database you can fork.

@@ -2,7 +2,7 @@
 title: "The MCP server"
 section: "agents"
 description: "Run Strata as a stdio Model Context Protocol server and inspect the tools it exposes."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 `strata mcp serve` runs a Model Context Protocol server over stdio. It uses the

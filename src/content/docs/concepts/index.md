@@ -2,7 +2,7 @@
 title: "Concepts"
 section: "concepts"
 description: "The small set of ideas behind StrataDB: embedded databases, primitives, branches, commits, time travel, durability, spaces, and errors."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 You only need a few ideas to use StrataDB well.

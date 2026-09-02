@@ -2,7 +2,7 @@
 title: "Getting Started"
 section: "getting-started"
 description: "Install the CLI, create a database, fork a branch, and hand StrataDB to an agent."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Start here if you want to run StrataDB, not read around it.

@@ -2,7 +2,7 @@
 title: "Multi-Agent Coordination"
 section: "cookbook"
 description: "Give each agent an isolated branch, share an append-only event journal, and separate independent runs with spaces."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Goal: let several agents work in parallel without stepping on each other, then

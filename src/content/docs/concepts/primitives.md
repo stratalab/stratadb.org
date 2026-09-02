@@ -2,7 +2,7 @@
 title: "Primitives"
 section: "concepts"
 description: "Five data capabilities - KV, JSON, event log, vectors, and graphs - layered over one branch-aware, versioned KV storage substrate."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 StrataDB gives you **five data primitives**, each shaped for a different job rather than forcing everything into one generic model. They all live in the same database, in the same branch, and share the same storage substrate underneath.

@@ -2,7 +2,7 @@
 title: "Comparisons"
 section: "why-strata"
 description: "How StrataDB sits next to SQLite, DuckDB, Redis, Postgres, and dedicated vector databases."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 StrataDB overlaps with familiar systems, but it is not a drop-in replacement for

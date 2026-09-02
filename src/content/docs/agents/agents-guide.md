@@ -2,7 +2,7 @@
 title: "The agents guide"
 section: "agents"
 description: "The version-matched guide that agents can read from the CLI, Python package, or MCP server."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 The agents guide is a compact playbook shipped with Strata. It covers database

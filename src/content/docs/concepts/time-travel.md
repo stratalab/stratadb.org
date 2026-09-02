@@ -2,7 +2,7 @@
 title: "Time travel"
 section: "concepts"
 description: "Every write is a versioned commit, and any read can travel back to an earlier one. How historical reads work across every primitive."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Time travel is reading the database as it was at an earlier point, not restoring a

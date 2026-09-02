@@ -2,7 +2,7 @@
 title: "Reference"
 section: "reference"
 description: "Generated command facts, CLI rules, configuration, errors, and value types for the Strata binary."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 # Reference

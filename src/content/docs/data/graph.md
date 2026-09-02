@@ -2,7 +2,7 @@
 title: "Graph"
 section: "data"
 description: "Create graphs, add nodes and edges, traverse neighbors, run analytics, and use an ontology when types matter."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use graph when relationships are part of the data, not just fields on a record.
@@ -99,7 +99,7 @@ and traversals as of an earlier commit:
 strata:default/default › graph meta social --as-of <timestamp-from-receipt>
 ```
 
-In `v1.1.0`, branch diff includes graph changes, but branch merge does not merge
+In `v1.1.1`, branch diff includes graph changes, but branch merge does not merge
 graph data.
 
 ## Reference

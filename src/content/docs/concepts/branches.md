@@ -2,7 +2,7 @@
 title: "Branches"
 section: "concepts"
 description: "Branches isolate database state: fork a branch, change it, preview a merge, and promote the result."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 A branch is an isolated database view. Every key, document, event, vector, and
@@ -64,7 +64,7 @@ strata:default/default › branch merge experiment default
 - `preview` reports the conflicts a merge would hit.
 - `merge` applies the source into the target as one commit.
 
-In `v1.1.0`, merge applies key-value, JSON, and vector changes. Events and
+In `v1.1.1`, merge applies key-value, JSON, and vector changes. Events and
 graphs are compared but not merged.
 
 The default merge strategy is `strict`: if both sides changed the same entity

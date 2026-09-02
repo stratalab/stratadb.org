@@ -2,7 +2,7 @@
 title: "A/B Testing with Branches"
 section: "cookbook"
 description: "Fork one branch per variant, run each strategy in isolation, and compare the results without them touching each other."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Goal: run two agent strategies side by side and compare them, with each variant's

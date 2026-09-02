@@ -1,7 +1,7 @@
 ---
 title: "StrataDB Documentation"
 description: "Install StrataDB, create a database, fork a branch, and find the generated reference for the shipped CLI."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 StrataDB is an embedded database you can fork. It runs in your process against a
@@ -51,7 +51,7 @@ historical read sees all five at the same commit.
 ## Generated Truth
 
 Command pages under `/docs/reference/<family>` are generated from the
-`strata-core v1.1.0` release bundle. Error pages under `/e/<code>` are generated
+`strata-core v1.1.1` release bundle. Error pages under `/e/<code>` are generated
 from the shipped error registry. Narrative pages explain how to use the product;
 the generated reference owns exhaustive parameters, return shapes, and error
 lists.

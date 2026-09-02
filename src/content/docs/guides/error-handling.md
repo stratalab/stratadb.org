@@ -2,7 +2,7 @@
 title: "Error Handling"
 section: "guides"
 description: "Read Strata's coded errors, recover by class and retry policy, and parse the JSON error shape."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 

@@ -2,7 +2,7 @@
 title: "JSON documents"
 section: "data"
 description: "Store JSON documents, update fields by path, and index fields when lookup matters."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use JSON when the value has structure you want to address directly: user records,
@@ -93,7 +93,7 @@ strata:experiment/default › use default
 strata:default/default › json get user:1 '$.score'
 ```
 
-`branch merge` can promote JSON changes back to the target branch. In `v1.1.0`,
+`branch merge` can promote JSON changes back to the target branch. In `v1.1.1`,
 JSON merge is whole-document granularity.
 
 ## Errors To Handle

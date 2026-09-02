@@ -2,7 +2,7 @@
 title: "Branching workflows"
 section: "guides"
 description: "List, read, create, fork, diff, preview, promote, and delete branches, and understand the promotion model."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 

@@ -2,7 +2,7 @@
 title: "Vectors"
 section: "data"
 description: "Create vector collections, upsert embeddings with metadata, and query by similarity."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use vectors when you already have embeddings and need nearest-neighbor search.

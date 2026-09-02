@@ -2,7 +2,7 @@
 title: "Agent integration"
 section: "python"
 description: "The self-describing surface from Python: agents_guide(), command_index(), mcp_config(), and the raw command escape hatch."
-source: "strata-python@v1.1.0"
+source: "strata-python@v1.1.1"
 ---
 
 The SDK carries the same self-describing surface as the binary, so an agent

@@ -2,7 +2,7 @@
 title: "Configuration Reference"
 section: "reference"
 description: "Where Strata reads database targets, hub configuration, installer options, and model settings."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Strata has a small configuration surface. Most behavior is selected per command

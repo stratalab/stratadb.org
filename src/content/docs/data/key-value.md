@@ -2,7 +2,7 @@
 title: "Key-Value"
 section: "data"
 description: "Use the KV primitive for simple values addressed by key, with branch isolation and versioned reads."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use key-value when the application already knows the key and wants one opaque

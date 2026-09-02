@@ -2,7 +2,7 @@
 title: "Working with Data"
 section: "data"
 description: "Pick the right StrataDB data shape: key-value, JSON, events, vectors, graph, or a combination."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 StrataDB gives you five data shapes in one local database. Pick by the shape of

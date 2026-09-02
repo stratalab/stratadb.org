@@ -2,7 +2,7 @@
 title: "Inference"
 section: "inference"
 description: "Run generation, embedding, ranking, and tokenization through local models or cloud providers."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Inference runs models. It is not a stored data primitive.

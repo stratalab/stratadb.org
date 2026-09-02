@@ -2,7 +2,7 @@
 title: "Cookbook"
 section: "cookbook"
 description: "Task-oriented recipes for building agent systems on Strata."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Cookbook pages are small workflows built from ordinary Strata commands. They are

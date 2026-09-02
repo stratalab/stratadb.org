@@ -2,7 +2,7 @@
 title: "Local models"
 section: "inference"
 description: "Run local GGUF models when the installed binary was built with local inference support."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Local inference runs GGUF models in the Strata process. Use it when you want a

@@ -2,7 +2,7 @@
 title: "Command Reference"
 section: "reference"
 description: "How to use the generated command reference and the live command catalog."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Use this page as a map. The command facts live in two generated places:

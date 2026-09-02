@@ -1,7 +1,7 @@
 ---
 title: "Frequently Asked Questions"
 description: "What StrataDB is and isn't, how it stores data, and what changed in the V1 line."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 

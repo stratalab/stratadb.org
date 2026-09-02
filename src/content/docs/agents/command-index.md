@@ -2,7 +2,7 @@
 title: "The command index"
 section: "agents"
 description: "The structured command and error catalogs emitted by the Strata binary."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 The command index is the machine surface behind the docs. It tells an agent what

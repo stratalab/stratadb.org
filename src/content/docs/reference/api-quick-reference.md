@@ -2,7 +2,7 @@
 title: "API Quick Reference"
 section: "reference"
 description: "Fast links to the generated command families and the first task pages."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 This page is a routing table, not a second command reference. Use it to jump to

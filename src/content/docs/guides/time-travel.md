@@ -2,7 +2,7 @@
 title: "Time travel"
 section: "guides"
 description: "Read the past with --as-of, list a key's history, and reproduce or investigate state at a point in time."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Strata keeps history, so you can read the database as it was at an earlier commit

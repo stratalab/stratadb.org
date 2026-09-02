@@ -2,7 +2,7 @@
 title: "Cloning Datasets"
 section: "guides"
 description: "Clone a prepared dataset from a hub into a local database, and control which hub is used through flags, environment, and config."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 `strata clone` pulls a prepared dataset from a hub into a new local database. A cloned database is an ordinary database - it opens, branches, and queries like any other, and it remembers where it came from.

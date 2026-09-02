@@ -2,7 +2,7 @@
 title: "Installation"
 section: "getting-started"
 description: "Install the strata CLI and verify the binary with a cache-mode ping."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Install the `strata` CLI, then run one command to prove the binary works.
@@ -20,7 +20,7 @@ your shell path.
 Pin a version or change the install directory when you need repeatable setup:
 
 ```bash
-curl -fsSL https://stratadb.org/install.sh | STRATA_VERSION=1.1.0 sh
+curl -fsSL https://stratadb.org/install.sh | STRATA_VERSION=1.1.1 sh
 curl -fsSL https://stratadb.org/install.sh | STRATA_INSTALL_DIR=$HOME/bin sh
 ```
 
@@ -50,7 +50,7 @@ strata --cache ping
 ```
 
 ```text
-pong 1.1.0
+pong 1.1.1
 ```
 
 `--cache` opens an in-memory database for this one process, so the check leaves

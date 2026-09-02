@@ -2,7 +2,7 @@
 title: "Hub and clone"
 section: "concepts"
 description: "How prepared datasets are shared: a hub hosts them, clone pulls one into a local database, and the clone remembers its origin."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 A Strata database is a local directory, so the simplest way to share one is to

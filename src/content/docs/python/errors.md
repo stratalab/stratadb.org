@@ -2,7 +2,7 @@
 title: "Errors"
 section: "python"
 description: "Typed exceptions carrying stable codes - recover by code, never by message. Misses return None rather than raising."
-source: "strata-python@v1.1.0"
+source: "strata-python@v1.1.1"
 ---
 
 Every failure raises a typed subclass of `stratadb.errors.StrataError`, carrying

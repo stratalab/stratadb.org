@@ -2,7 +2,7 @@
 title: "RAG with Vectors"
 section: "cookbook"
 description: "Store embeddings in a vector collection and source text in KV, then query for the nearest rows and fetch their text."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Goal: build the retrieval half of a RAG pipeline - index document embeddings

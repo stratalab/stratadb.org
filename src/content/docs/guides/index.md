@@ -2,7 +2,7 @@
 title: "Guides"
 section: "guides"
 description: "Cross-cutting workflows: branching, time travel, spaces, configuration, import/export, deployment, and migration."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 Guides cover workflows that cut across data shapes. Start with the primitive

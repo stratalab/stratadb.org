@@ -2,7 +2,7 @@
 title: "CLI Reference"
 section: "reference"
 description: "How to invoke the Strata binary and where generated command facts live."
-source: "strata-core@v1.1.0"
+source: "strata-core@v1.1.1"
 ---
 
 `strata` is a single binary. It opens a durable database directory or an explicit
