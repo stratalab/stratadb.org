@@ -16,6 +16,9 @@ StrataDB is embedded. You point the binary at a local directory and the database
 opens in-process. Use `--cache` only for a throwaway single-process run; separate
 CLI invocations do not share an in-memory database.
 
+The first tutorial opens a REPL with `strata ./mydb`. From there, examples use
+the prompt form so you can focus on the operation instead of repeating the path.
+
 ## What You Will Do
 
 The first tutorial uses one durable database:

@@ -8,9 +8,10 @@ source: "strata-core@v1.1.0"
 Cookbook pages are small workflows built from ordinary Strata commands. They are
 useful when you already know the model and want a pattern to adapt.
 
-The recipes use durable database directories so each command can reopen the same
-state. `--cache` is single-process and in-memory, so it is not the right target
-for a multi-step shell recipe.
+The recipes use durable database directories and show the REPL for the main
+workflow: open the database once, then run commands against that session. Shell
+pipeline snippets still repeat the path because they are meant to be copied into
+a terminal as one-shot automation.
 
 - [A/B Testing with Branches](/docs/cookbook/ab-testing-with-branches)
 - [Agent State Management](/docs/cookbook/agent-state-management)

@@ -56,15 +56,11 @@ const cloneFacts = ['schema', 'examples', 'branches', 'history'];
       </Eyebrow>
       <Heading size="title">Clone the dataset your experiment needs.</Heading>
       <p class="mt-6 text-body-lg text-ink-mid">
-        Strata Hub is a catalog of prepared Strata databases for RAG, agents, benchmarks, events,
-        and reference data. Clone one with schema, examples, branches, and history, then start
-        locally.
+        Hub lists cloneable Strata databases for RAG, agents, benchmarks, events, and reference
+        data. Clone one, open it locally, and keep using the same Strata commands.
       </p>
-      <a
-        href="/hub"
-        class="mt-6 inline-flex items-center gap-2 text-small font-medium text-terracotta-400 transition-colors duration-200 hover:text-terracotta-300"
-      >
-        Browse the catalog <span aria-hidden="true">→</span>
+      <a href="/hub" class="hub-primary-link mt-8 inline-flex items-center gap-2">
+        Browse Strata Hub
       </a>
     </div>
 
@@ -125,7 +121,6 @@ const cloneFacts = ['schema', 'examples', 'branches', 'history'];
               <p class="hub-facts" aria-label="Included database assets">
                 {cloneFacts.map((fact) => <span>{fact}</span>)}
               </p>
-              <p class="mt-1 text-small text-ink-low">The hub is not in your read path.</p>
             </div>
           </div>
         </div>
@@ -176,6 +171,32 @@ const cloneFacts = ['schema', 'examples', 'branches', 'history'];
     box-shadow:
       var(--shadow-float),
       0 0 110px -34px rgb(var(--rgb-terracotta-500) / 0.42);
+  }
+  .hub-primary-link {
+    border: 1px solid rgb(var(--rgb-terracotta-500) / 0.5);
+    border-radius: var(--radius-control);
+    background: var(--color-terracotta-500);
+    box-shadow: 0 14px 34px -20px rgb(var(--rgb-terracotta-500) / 0.7);
+    padding: 0.78rem 1rem;
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--color-terracotta-950);
+    transition:
+      transform var(--dur-1) ease,
+      background var(--dur-1) ease,
+      border-color var(--dur-1) ease,
+      box-shadow var(--dur-1) ease;
+  }
+  .hub-primary-link:hover,
+  .hub-primary-link:focus-visible {
+    border-color: rgb(var(--rgb-terracotta-400) / 0.72);
+    background: var(--color-terracotta-400);
+    box-shadow: 0 18px 42px -22px rgb(var(--rgb-terracotta-500) / 0.85);
+    transform: translateY(-1px);
+  }
+  .hub-primary-link:focus-visible {
+    outline: 2px solid var(--color-terracotta-300);
+    outline-offset: 3px;
   }
   .hub-window-bar {
     display: flex;

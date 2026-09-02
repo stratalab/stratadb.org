@@ -7,19 +7,21 @@ source: "strata-core@v1.1.0"
 
 Every write in StrataDB is a **commit**. When you put a key, set a JSON path, append an event, upsert a vector, or add a graph node, that change is applied atomically and becomes durable on its own - there is no separate step to commit it. This keeps one canonical path for every write and removes a whole class of "did I remember to commit?" bugs.
 
+Examples below assume you opened a database with `strata ./db`.
+
 ## Writes auto-commit
 
 A write returns a receipt telling you what happened:
 
 ```text
-$ strata ./db kv put config prod
+strata:default/default › kv put config prod
 created config applied=true
 ```
 
 The `--json` envelope carries the full commit facts:
 
-```text
-$ strata --json ./db kv put config staging
+```bash
+strata --json ./db kv put config staging
 {"data":{"commit":{"delete_count":0,"durable":true,"put_count":1,"timestamp":4,"version":4},"effect":{"affected_count":1,"applied":true,"kind":"updated","matched":true},"key":"Y29uZmln"},"type":"write_result"}
 ```
 
@@ -33,7 +35,7 @@ Two objects matter here:
 There is no session to open and no transaction to manage. The old `begin`, `commit`, and `rollback` verbs are gone:
 
 ```text
-$ strata ./db begin
+strata:default/default › begin
 error: `begin` is recognized from the old CLI, but is not available in the V1 CLI surface yet
 ```
 
@@ -44,7 +46,7 @@ Each write is its own atomic unit. When you need several writes to land together
 Because every commit has a version, you can read the past. History lists a key's retained versions, newest first:
 
 ```text
-$ strata ./db kv history config
+strata:default/default › kv history config
 {"timestamp":4,"tombstone":false,"value":"staging","version":4}
 {"timestamp":3,"tombstone":false,"value":"prod","version":3}
 ```
@@ -52,9 +54,9 @@ $ strata ./db kv history config
 Pass a commit timestamp to `--as-of` to read the value as it stood then - the same flag works on `kv`, `json`, `event`, `vector`, and `graph` reads:
 
 ```text
-$ strata ./db kv get config --as-of 3
+strata:default/default › kv get config --as-of 3
 prod
-$ strata ./db kv get config --as-of 4
+strata:default/default › kv get config --as-of 4
 staging
 ```
 

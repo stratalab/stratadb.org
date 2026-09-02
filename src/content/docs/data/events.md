@@ -12,11 +12,13 @@ hash chain.
 Use [JSON](/docs/data/json) or [KV](/docs/data/key-value) for mutable current
 state. Use events for the record that should not be overwritten.
 
+Examples below assume you opened a database with `strata ./mydb`.
+
 ## Append
 
-```bash
-strata ./mydb event append order.created '{"id":"A1","total":42}'
-strata ./mydb event append order.paid '{"id":"A1"}'
+```text
+strata:default/default › event append order.created '{"id":"A1","total":42}'
+strata:default/default › event append order.paid '{"id":"A1"}'
 ```
 
 ```text
@@ -34,10 +36,10 @@ Sequences start at `0` inside the branch and space.
 
 ## Read
 
-```bash
-strata ./mydb event get 0
-strata ./mydb event count
-strata ./mydb event exists 99
+```text
+strata:default/default › event get 0
+strata:default/default › event count
+strata:default/default › event exists 99
 ```
 
 `event get` returns the event payload, type, sequence, hash, previous hash, and
@@ -45,26 +47,26 @@ commit version. A missing sequence returns a not-found value instead of throwing
 
 ## List And Filter
 
-```bash
-strata ./mydb event list --limit 20
-strata ./mydb event types
-strata ./mydb event by-type order.created --limit 5
+```text
+strata:default/default › event list --limit 20
+strata:default/default › event types
+strata:default/default › event by-type order.created --limit 5
 ```
 
 For paging, use `--after-sequence`. For a window, use sequence or event
 wall-clock time:
 
-```bash
-strata ./mydb event range 0 --limit 50
-strata ./mydb event range-time <start-event-timestamp> --end-ts <end-event-timestamp>
+```text
+strata:default/default › event range 0 --limit 50
+strata:default/default › event range-time <start-event-timestamp> --end-ts <end-event-timestamp>
 ```
 
 Event wall-clock timestamps are not the same as `--as-of` commit timestamps.
 
 ## Verify The Chain
 
-```bash
-strata ./mydb event verify-chain
+```text
+strata:default/default › event verify-chain
 ```
 
 The command checks dense sequence numbers and each event's link to the previous
@@ -77,8 +79,8 @@ events without touching the parent stream.
 
 Read an earlier log snapshot with the commit timestamp from a write receipt:
 
-```bash
-strata ./mydb event list --as-of <timestamp-from-receipt>
+```text
+strata:default/default › event list --as-of <timestamp-from-receipt>
 ```
 
 In `v1.1.0`, branch merge compares event streams but does not merge them.

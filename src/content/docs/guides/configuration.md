@@ -13,6 +13,9 @@ verbs - `get`, `get-key`, `set`, `unset`, `path`, and `show` - and explains how
 the hub URL is resolved. For every configurable key, see the
 [Configuration Reference](/docs/reference/configuration-reference).
 
+Examples stay in one-shot shell form because this page is about how targets,
+environment variables, and user config are resolved.
+
 ## Read a database's config
 
 `config get` prints the sanitized configuration of an open database. It needs a

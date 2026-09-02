@@ -1,16 +1,20 @@
 ---
-// Public nav for the current product lock: docs, architecture, changelog, and
-// the live browser playground. The primary action stays in-product.
+// Public nav for the current product lock: docs, Hub, and the live browser playground.
 import Button from '../foundation/Button.astro';
 
 const navItems: { label: string; href: string }[] = [
   { label: 'Docs', href: '/docs' },
-  { label: 'Hub', href: '/hub' },
-  { label: 'Architecture', href: '/architecture' },
-  { label: 'Changelog', href: '/changelog' },
   { label: 'Playground', href: '/playground' },
 ];
 const currentPath = Astro.url.pathname;
+const datasetsButtonClass = [
+  'max-sm:hidden',
+  '!border-terracotta-500/60 !bg-terracotta-500/10 !text-terracotta-300',
+  'hover:!border-terracotta-400 hover:!bg-terracotta-500/15 hover:!text-terracotta-200',
+  currentPath.startsWith('/hub') ? '!bg-terracotta-500/15 !text-ink-hi' : '',
+]
+  .filter(Boolean)
+  .join(' ');
 ---
 
 <header class="sticky top-0 z-50 border-b border-line bg-void/85 backdrop-blur-xl">
@@ -52,7 +56,8 @@ const currentPath = Astro.url.pathname;
     </div>
 
     <div class="flex items-center gap-3">
-      <Button href="/playground" class="max-sm:hidden">Try in browser</Button>
+      <Button href="/hub" variant="quiet" class={datasetsButtonClass}>Find datasets</Button>
+      <Button href="/#install" class="max-sm:hidden">Install Strata</Button>
       <button
         id="nav-toggle"
         class="rounded-(--radius-control) p-2 text-ink-mid hover:text-ink-hi md:hidden"
@@ -81,7 +86,15 @@ const currentPath = Astro.url.pathname;
         </a>
       ))
     }
-    <a href="/docs/getting-started" class="block py-3 text-small text-terracotta-500">Get Started</a
+    <a
+      href="/hub"
+      class:list={[
+        'block py-3 text-small hover:text-ink-hi',
+        currentPath.startsWith('/hub') ? 'text-ink-hi' : 'text-terracotta-400',
+      ]}>Find datasets</a
+    >
+    <a href="/#install" class="block py-3 text-small font-medium text-terracotta-500"
+      >Install Strata</a
     >
   </div>
 </header>

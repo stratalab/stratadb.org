@@ -1,10 +1,5 @@
-// The act surface, v3 (04 §8, 2026-06-12) - the mem0.ai steal, by Ani's
-// call: INTEGRATION MODES first (Library · CLI · Hub · For agents), language
-// pills inside the window chrome, and the code is a
-// COMPLETE numbered quickstart with step comments - a script you paste
-// and run, not a fragment. Copy-all in the corner; CLI keeps per-command
-// copy buttons. Selection persists in sessionStorage (05 §3). Every
-// command string is subject to build-time transcript verification.
+// Local setup surface: SDKs, CLI, VS Code, and agents. Each tab gives the
+// package, command, or editor path a user needs to start on their machine.
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { EMBER, INK } from '../../shared/term';
 
@@ -139,50 +134,48 @@ const JS: Script = [
 ];
 
 const CLI_LINES = [
-  { text: '$ cargo install strata-cli', cmd: true },
-  { text: '$ curl -fsSL stratadb.org/install.sh | sh', cmd: true, dim: true },
+  { text: '$ curl -fsSL https://stratadb.org/install.sh | sh', cmd: true },
+  { text: '# installs the strata CLI and adds it to your PATH' },
   { text: '' },
-  { text: '$ strata --cache', cmd: true },
+  { text: '$ strata ./quickstart.strata', cmd: true },
   { text: 'strata:default/default › kv put hello world' },
   { text: 'created hello applied=true', dim: true },
   { text: 'strata:default/default › kv get hello' },
   { text: 'world', dim: true },
 ];
 
-const HUB_COMMANDS = [
-  'strata clone iris ./iris',
-  'strata ./iris json history iris:35',
-  'strata ./iris remote',
+const VSCODE_COMMANDS = [
+  'curl -fsSL https://stratadb.org/install.sh | sh',
+  'code .',
+  'Open Extensions and search "StrataDB for VS Code"',
 ].join('\n');
 
-const HUB_LINES = [
-  { text: '$ strata clone iris ./iris', cmd: true },
-  { text: '# resolves the dataset and verifies every object' },
+const VSCODE_LINES = [
+  { text: '$ curl -fsSL https://stratadb.org/install.sh | sh', cmd: true },
+  { text: '# installs the local engine used by the extension' },
   { text: '' },
-  { text: '$ strata ./iris json history iris:35', cmd: true },
-  { text: '# history keeps the curation correction' },
+  { text: '$ code .', cmd: true },
+  { text: '# open your project in VS Code' },
   { text: '' },
-  { text: '$ strata ./iris remote', cmd: true },
-  { text: '# clone records Hub origin' },
+  { text: 'Extensions: search "StrataDB for VS Code"' },
 ];
 
-const HUB_DATASETS = [
+const SDK_PACKAGES = [
   {
-    name: 'agent-memory-with-experiments',
-    body: 'Agent state, event trace, and retention-policy branches in one clone.',
-    meta: 'agents · events · branches',
+    lang: 'py',
+    registry: 'PyPI',
+    name: 'stratadb',
+    install: 'pip install stratadb',
+    importLine: 'from stratadb import Strata',
   },
   {
-    name: 'movielens-100k',
-    body: 'A recommendation sandbox with JSON metadata and vector search ready.',
-    meta: 'vectors · json · retrieval',
+    lang: 'js',
+    registry: 'npm',
+    name: '@stratadb/core',
+    install: 'npm install @stratadb/core',
+    importLine: 'import { Strata } from "@stratadb/core";',
   },
-  {
-    name: 'ab-test-results',
-    body: 'Control and variant arms modeled as branches for direct comparison.',
-    meta: 'experiments · branches',
-  },
-];
+] as const;
 
 const MCP_JSON = [
   '{',
@@ -208,21 +201,20 @@ const TOK_CLS: Record<string, string> = {
 };
 
 const MODES = [
-  { id: 'library', label: 'Library' },
+  { id: 'library', label: 'SDKs' },
   { id: 'cli', label: 'CLI' },
-  { id: 'hub', label: 'Hub' },
-  { id: 'agents', label: 'For agents' },
+  { id: 'vscode', label: 'VS Code' },
+  { id: 'agents', label: 'Agents' },
 ] as const;
 type ModeId = (typeof MODES)[number]['id'];
 
 const MODE_ICONS: Record<ModeId, ReactNode> = {
   library: <path d="M8 6 4 12l4 6M16 6l4 6-4 6" />,
   cli: <path d="M4 17l6-5-6-5M13 19h7" />,
-  hub: (
+  vscode: (
     <>
-      <path d="M6.5 9.5 12 6.2l5.5 3.3v6.6L12 19.4l-5.5-3.3Z" />
-      <path d="M7 9.8 12 12.8l5-3M12 12.8v5.8" />
-      <path d="M4.5 6.6 12 2.5l7.5 4.1" />
+      <rect x="3.5" y="4" width="17" height="16" rx="2" />
+      <path d="M8 8.5 5.5 12 8 15.5M16 8.5l2.5 3.5-2.5 3.5M13.5 7.5l-3 9" />
     </>
   ),
   agents: <path d="M12 3v3m0 12v3M3 12h3m12 0h3M7 7l2 2m6 6 2 2m0-10-2 2m-6 6-2 2" />,
@@ -314,46 +306,71 @@ function NumberedScript({ script }: { script: Script }) {
   );
 }
 
-function HubPanel() {
+function PackageStrip({ activeLang }: { activeLang: 'py' | 'js' }) {
+  return (
+    <div className="mb-5 grid gap-3 md:grid-cols-2">
+      {SDK_PACKAGES.map((pkg) => {
+        const active = pkg.lang === activeLang;
+        return (
+          <div
+            key={pkg.name}
+            className={`rounded-(--radius-card) border p-4 ${
+              active ? 'border-terracotta-500/40 bg-terracotta-500/10' : 'border-line bg-panel/70'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-mono-sm text-ink-low">{pkg.registry}</span>
+              <CopyAllButton text={pkg.install} label="copy install" />
+            </div>
+            <code className="mt-2 block font-mono text-mono-body text-ink-hi">{pkg.name}</code>
+            <div className="mt-2 font-mono text-mono-sm text-ink-mid">{pkg.install}</div>
+            <div className="mt-1 font-mono text-mono-sm text-ink-low">{pkg.importLine}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function VscodePanel() {
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       <div className="rounded-(--radius-card) border border-line bg-panel/70 p-4">
         <div className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
-          <span className="font-mono text-mono-body text-ink-hi">Strata Hub</span>
-          <span className="font-mono text-mono-sm text-terracotta-400">prepared databases</span>
+          <span className="font-mono text-mono-body text-ink-hi">StrataDB for VS Code</span>
+          <span className="font-mono text-mono-sm text-terracotta-400">editor workflow</span>
         </div>
         <p className="mt-4 text-small text-ink-mid">
-          Start from useful data instead of an empty file. A clone becomes a normal local Strata
-          database: branch it, time-travel through it, run inference over it, and keep working
-          offline.
+          Install the Strata CLI, add the VS Code extension, then open a project with a Strata
+          database. The editor becomes the place to inspect records, branches, history, and local
+          commands.
         </p>
-        <div className="mt-4 space-y-2.5">
-          {HUB_DATASETS.map((dataset) => (
+        <div className="mt-4 grid gap-2.5">
+          {[
+            ['Extension', 'StrataDB for VS Code'],
+            ['Requires', 'Strata CLI'],
+          ].map(([label, value]) => (
             <div
-              key={dataset.name}
-              className="rounded-(--radius-control) border border-line bg-inset px-3 py-2.5"
+              key={label}
+              className="grid grid-cols-[6rem_1fr] gap-3 rounded-(--radius-control) border border-line bg-inset px-3 py-2.5 max-sm:grid-cols-1"
             >
-              <div className="font-mono text-mono-sm text-ink-hi">{dataset.name}</div>
-              <div className="mt-1 text-small text-ink-mid">{dataset.body}</div>
-              <div className="mt-1.5 font-mono text-mono-sm text-ink-low">{dataset.meta}</div>
+              <span className="text-small text-ink-low">{label}</span>
+              <code className="font-mono text-mono-sm text-ink-hi">{value}</code>
             </div>
           ))}
         </div>
-        <div className="mt-4 flex flex-wrap gap-3 border-t border-line pt-4 text-small">
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-4 text-small">
           <a
-            href="/docs/guides/cloning-datasets"
+            href="https://marketplace.visualstudio.com/search?term=StrataDB&target=VSCode&category=All%20categories&sortBy=Relevance"
             className="text-terracotta-500 hover:text-terracotta-400"
           >
-            Clone guide
-          </a>
-          <a href="/docs/concepts/hub-and-clone" className="text-ink-mid hover:text-ink-hi">
-            How Hub works
+            Open Marketplace
           </a>
         </div>
       </div>
 
       <pre className="overflow-x-auto rounded-(--radius-card) border border-line bg-inset p-4 font-mono text-mono-sm leading-7">
-        {HUB_LINES.map((line, i) =>
+        {VSCODE_LINES.map((line, i) =>
           'cmd' in line && line.cmd ? (
             <CmdLine key={i} text={line.text} />
           ) : (
@@ -407,13 +424,11 @@ export default function InstallTabs() {
   const script = lang === 'py' ? PY : JS;
   const windowTitle =
     mode === 'library'
-      ? lang === 'py'
-        ? 'quickstart.py'
-        : 'quickstart.mjs'
+      ? 'sdk packages'
       : mode === 'cli'
         ? 'terminal'
-        : mode === 'hub'
-          ? 'stratahub'
+        : mode === 'vscode'
+          ? 'StrataDB for VS Code'
           : 'mcp.json';
 
   return (
@@ -501,7 +516,7 @@ export default function InstallTabs() {
               </span>
             )}
             {mode === 'library' && <CopyAllButton text={scriptText(script)} label="copy script" />}
-            {mode === 'hub' && <CopyAllButton text={HUB_COMMANDS} label="copy commands" />}
+            {mode === 'vscode' && <CopyAllButton text={VSCODE_COMMANDS} label="copy setup" />}
             {mode === 'agents' && <CopyAllButton text={MCP_JSON.join('\n')} label="copy config" />}
           </span>
         </div>
@@ -514,7 +529,12 @@ export default function InstallTabs() {
             backgroundSize: '22px 22px, 100% 100%',
           }}
         >
-          {mode === 'library' && <NumberedScript script={script} />}
+          {mode === 'library' && (
+            <>
+              <PackageStrip activeLang={lang} />
+              <NumberedScript script={script} />
+            </>
+          )}
 
           {mode === 'cli' && (
             <pre className="overflow-x-auto font-mono text-mono-sm leading-7">
@@ -530,7 +550,7 @@ export default function InstallTabs() {
             </pre>
           )}
 
-          {mode === 'hub' && <HubPanel />}
+          {mode === 'vscode' && <VscodePanel />}
 
           {mode === 'agents' && (
             <div>

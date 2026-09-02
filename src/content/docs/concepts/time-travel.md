@@ -11,6 +11,8 @@ and timestamp, the past is still there - and any read can ask for it. This works
 the same across all five [primitives](/docs/concepts/primitives), because they
 share one versioned substrate.
 
+Examples below assume you opened a database with `strata ./mydb`.
+
 ## The commit clock
 
 Each successful write returns a **commit**: a monotonically increasing version and
@@ -19,9 +21,9 @@ write is a low integer, and it advances by one per commit - not a wall-clock tim
 You capture it from a write receipt (`data.commit.timestamp` under `--json`) and
 hand it back to a read to pin that read to that moment.
 
-```bash
-strata ./mydb json set user:1 '$.plan' '"pro"'      # receipt carries commit.timestamp, say 7
-strata ./mydb json set user:1 '$.plan' '"free"'     # a later commit, say 8
+```text
+strata:default/default › json set user:1 '$.plan' '"pro"' # receipt carries commit.timestamp, say 7
+strata:default/default › json set user:1 '$.plan' '"free"' # a later commit, say 8
 ```
 
 ## Reading the past with `--as-of`
@@ -29,9 +31,9 @@ strata ./mydb json set user:1 '$.plan' '"free"'     # a later commit, say 8
 Every read verb accepts `--as-of <timestamp>`. The read sees the state as of that
 commit, ignoring everything written after it:
 
-```bash
-strata ./mydb json get user:1 '$.plan'              # "free"  (latest)
-strata ./mydb --as-of 7 json get user:1 '$.plan'    # "pro"   (as of commit 7)
+```text
+strata:default/default › json get user:1 '$.plan' # "free" (latest)
+strata:default/default › json get user:1 '$.plan' --as-of 7 # "pro" (as of commit 7)
 ```
 
 The same `--as-of` applies to KV, JSON, vectors, events, and the graph - pass one
@@ -63,13 +65,13 @@ Time travel composes with [branches](/docs/concepts/branches). You can not only
 *read* a past commit - you can *fork* from one, creating a new branch anchored to
 that moment and then evolving it independently:
 
-```bash
-strata ./mydb branch fork main investigate --timestamp 7
+```text
+strata:default/default › branch fork default investigate --timestamp 7
 ```
 
 That gives you a live branch that starts from the state at commit 7, leaving
-`main` untouched - the basis for "reproduce the bug as of last Tuesday, then poke
-at it" workflows.
+`default` untouched - the basis for reproducing a bug from that commit, then
+investigating it independently.
 
 ## The retention boundary
 

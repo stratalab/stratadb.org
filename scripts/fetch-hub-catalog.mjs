@@ -28,6 +28,10 @@ function titleFromReadme(readme, fallback) {
   return heading || fallback;
 }
 
+function normalizeText(value) {
+  return typeof value === 'string' ? value.replace(/[\u2013\u2014]/g, '-') : value;
+}
+
 try {
   const list = await hub('/v1/datasets?limit=200');
   if (!Array.isArray(list.items) || list.items.length === 0) {
@@ -44,16 +48,16 @@ try {
       prior?.branches ?? [item.default_branch];
     datasets.push({
       slug: item.name,
-      title: prior?.title ?? titleFromReadme(card?.readme, item.name),
-      description: item.description,
-      tasks: item.tasks,
-      tags: item.tags,
-      license: item.license,
+      title: normalizeText(prior?.title ?? titleFromReadme(card?.readme, item.name)),
+      description: normalizeText(item.description),
+      tasks: item.tasks.map(normalizeText),
+      tags: item.tags.map(normalizeText),
+      license: normalizeText(item.license),
       size_category: prior?.size_category ?? 'small',
       size_bytes: item.size_bytes,
       downloads: item.downloads,
       last_updated: item.last_updated,
-      primitives: item.primitives.filter((p) => p !== 'branches'),
+      primitives: item.primitives.filter((p) => p !== 'branches').map(normalizeText),
       branches,
       includes: prior?.includes ?? [],
       quickstart: prior?.quickstart ?? [`strata clone ${item.name} ./${item.name}`],

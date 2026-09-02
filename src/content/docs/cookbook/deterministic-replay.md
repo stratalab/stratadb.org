@@ -8,9 +8,9 @@ source: "strata-core@v1.1.0"
 Goal: make an agent run reproducible by recording every nondeterministic input in
 the event log, then reconstruct the exact committed state at any past point.
 
-Prerequisites: the `strata` binary on your PATH, and `jq` for readable event
-output. Commands write to a durable directory (`./replay`) that each
-invocation reopens.
+Prerequisite: the `strata` binary on your PATH. Open a durable database with
+`strata ./replay` before step 1. Shell pipeline snippets use the same database
+path explicitly.
 
 ## 1. Record every external input
 
@@ -18,11 +18,11 @@ Before the agent acts on a clock reading, an API response, or a random draw, wri
 it to the event log. The log is append-only and hash-linked, so it is the source
 of truth for the run. Derived decisions go in KV.
 
-```bash
-strata ./replay event append input '{"source":"clock","epoch":1706900000}'
-strata ./replay event append input '{"source":"weather_api","temp_c":12}'
-strata ./replay event append input '{"source":"rng","value":2}'
-strata ./replay kv put decision "option 2"
+```text
+strata:default/default › event append input '{"source":"clock","epoch":1706900000}'
+strata:default/default › event append input '{"source":"weather_api","temp_c":12}'
+strata:default/default › event append input '{"source":"rng","value":2}'
+strata:default/default › kv put decision "option 2"
 ```
 
 ```text
@@ -52,8 +52,8 @@ strata ./replay event range 0 --json | jq -c '.data.items[] | {seq: .event.seque
 Every event links to the previous one by hash. `verify-chain` confirms the
 sequence is dense and the linkage is intact.
 
-```bash
-strata ./replay event verify-chain
+```text
+strata:default/default › event verify-chain
 ```
 
 ```text
@@ -71,16 +71,18 @@ Suppose the agent later overwrites its decision. You can still recover the earli
 committed state: fork a branch at the version where `option 2` was written. The
 `decision` write committed at version 6, so fork there.
 
-```bash
-strata ./replay kv put decision "option 9"
-strata ./replay branch fork default replay --version 6 --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
-strata ./replay --raw kv get decision --branch replay
-strata ./replay --raw kv get decision
+```text
+strata:default/default › kv put decision "option 9"
+strata:default/default › branch fork default replay --version 6
+strata:default/default › use replay
+strata:replay/default › --raw kv get decision
+strata:replay/default › use default
+strata:default/default › --raw kv get decision
 ```
 
 ```text
 updated decision applied=true
-{"name":"replay","forked_from":"default","at_version":6}
+{ "name": "replay", "parent": { "name": "default", "fork_version": 6 }, "status": "active" }
 option 2
 option 9
 ```

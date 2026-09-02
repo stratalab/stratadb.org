@@ -20,7 +20,7 @@ StrataDB gives you **five data primitives**, each shaped for a different job rat
 A database reports exactly these capabilities. `describe` lists them and their current counts:
 
 ```text
-$ strata ./db describe
+strata:default/default › describe
 {
   "capabilities": { "kv": true, "json": true, "event": true, "vector": true, "graph_core": true, ... },
   "primitives": { "kv_count": 1, "json_count": 0, "event_count": 0, "graphs": [], "vector_collections": [] },

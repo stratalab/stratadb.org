@@ -8,11 +8,19 @@ source: "strata-core@v1.1.0"
 This page uses a durable database at `./mydb`. StrataDB creates the directory on
 the first write. There is no server and no separate create step.
 
-## Write A Value
+Open the database once:
 
 ```bash
-strata ./mydb kv put portfolio.value 98400
-strata ./mydb kv get portfolio.value
+strata ./mydb
+```
+
+The rest of this page runs inside that REPL session.
+
+## Write A Value
+
+```text
+strata:default/default › kv put portfolio.value 98400
+strata:default/default › kv get portfolio.value
 ```
 
 ```text
@@ -26,9 +34,9 @@ That write created a local database directory and committed the first value.
 
 Use JSON when the value has fields you want to update directly.
 
-```bash
-strata ./mydb json set portfolio '$' '{"strategy":"balanced","stocks":60,"bonds":30,"cash":10}'
-strata ./mydb json get portfolio '$'
+```text
+strata:default/default › json set portfolio '$' '{"strategy":"balanced","stocks":60,"bonds":30,"cash":10}'
+strata:default/default › json get portfolio '$'
 ```
 
 ```text
@@ -42,8 +50,8 @@ created portfolio applied=true
 
 Fork `default` into a branch named `risky`:
 
-```bash
-strata ./mydb branch fork default risky
+```text
+strata:default/default › branch fork default risky
 ```
 
 The output includes the new branch and the parent commit it forked from:
@@ -66,11 +74,12 @@ branch starts from `default` without copying the whole database.
 
 Write the aggressive allocation on `risky`:
 
-```bash
-strata ./mydb --branch risky json set portfolio '$.strategy' '"aggressive"'
-strata ./mydb --branch risky json set portfolio '$.stocks' 80
-strata ./mydb --branch risky json set portfolio '$.bonds' 15
-strata ./mydb --branch risky json set portfolio '$.cash' 5
+```text
+strata:default/default › use risky
+strata:risky/default › json set portfolio '$.strategy' '"aggressive"'
+strata:risky/default › json set portfolio '$.stocks' 80
+strata:risky/default › json set portfolio '$.bonds' 15
+strata:risky/default › json set portfolio '$.cash' 5
 ```
 
 ```text
@@ -86,8 +95,9 @@ updated portfolio applied=true
 
 Diff is read-only:
 
-```bash
-strata ./mydb branch diff default risky
+```text
+strata:risky/default › use default
+strata:default/default › branch diff default risky
 ```
 
 Output is grouped by capability and space. This run reports one modified JSON
@@ -111,8 +121,8 @@ document:
 
 Preview the promotion before mutating either branch:
 
-```bash
-strata ./mydb branch preview risky default
+```text
+strata:default/default › branch preview risky default
 ```
 
 ```text
@@ -128,9 +138,9 @@ No conflicts means the merge can apply cleanly under the default strict strategy
 
 ## Merge Back
 
-```bash
-strata ./mydb branch merge risky default
-strata ./mydb json get portfolio '$'
+```text
+strata:default/default › branch merge risky default
+strata:default/default › json get portfolio '$'
 ```
 
 The merge output is a structured receipt. The final read shows the result:
@@ -161,10 +171,10 @@ strata --json ./mydb kv put note first
 
 Your timestamp may differ. Use the timestamp from your own receipt:
 
-```bash
-strata ./mydb kv put note second
-strata ./mydb kv get note
-strata ./mydb kv get note --as-of 16
+```text
+strata:default/default › kv put note second
+strata:default/default › kv get note
+strata:default/default › kv get note --as-of 16
 ```
 
 ```text
@@ -178,8 +188,8 @@ commit.
 
 ## Inspect The Database
 
-```bash
-strata ./mydb describe
+```text
+strata:default/default › describe
 ```
 
 `describe` returns the active branch, available capabilities, spaces, and

@@ -24,10 +24,12 @@ several data shapes share branches and history.
 
 That gives you a different default workflow:
 
-```bash
-strata ./db branch fork default experiment
-strata ./db --branch experiment json set config '$.enabled' true
-strata ./db branch preview experiment default
+```text
+strata:default/default › branch fork default experiment
+strata:default/default › use experiment
+strata:experiment/default › json set config '$.enabled' true
+strata:experiment/default › use default
+strata:default/default › branch preview experiment default
 ```
 
 The useful part is not that a branch exists. It is that the branch isolates the

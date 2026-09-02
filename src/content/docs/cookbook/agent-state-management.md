@@ -9,16 +9,16 @@ Goal: keep an agent's configuration, working memory, and action history in the
 primitives that fit each best, and use versioned reads to inspect what the agent
 believed at an earlier point.
 
-Prerequisites: the `strata` binary on your PATH. Commands write to a durable
-directory (`./agent`) that each invocation reopens.
+Prerequisite: the `strata` binary on your PATH. Open a durable database with
+`strata ./agent` before step 1.
 
 ## 1. Pin configuration in KV
 
 Flat, rarely-changing settings belong in the key-value store.
 
-```bash
-strata ./agent kv put config:model tinyllama
-strata ./agent kv put config:max_steps 8
+```text
+strata:default/default › kv put config:model tinyllama
+strata:default/default › kv put config:max_steps 8
 ```
 
 ```text
@@ -30,8 +30,8 @@ created config:max_steps applied=true
 
 Structured, evolving state belongs in a JSON document you can patch by path.
 
-```bash
-strata ./agent json set agent '$' '{"status":"planning","step":0,"scratchpad":[]}'
+```text
+strata:default/default › json set agent '$' '{"status":"planning","step":0,"scratchpad":[]}'
 ```
 
 ```text
@@ -43,14 +43,14 @@ created agent applied=true
 Each step patches memory and appends to the action log. The event log is your
 append-only audit trail.
 
-```bash
-strata ./agent event append tool_call '{"step":0,"tool":"web_search","query":"strata database"}'
-strata ./agent json set agent '$.status' '"acting"'
-strata ./agent event append tool_result '{"step":0,"status":"ok","hits":3}'
-strata ./agent json set agent '$.step' '1'
-strata ./agent event append tool_call '{"step":1,"tool":"summarize"}'
-strata ./agent json set agent '$.step' '2'
-strata ./agent json set agent '$.status' '"done"'
+```text
+strata:default/default › event append tool_call '{"step":0,"tool":"web_search","query":"strata database"}'
+strata:default/default › json set agent '$.status' '"acting"'
+strata:default/default › event append tool_result '{"step":0,"status":"ok","hits":3}'
+strata:default/default › json set agent '$.step' '1'
+strata:default/default › event append tool_call '{"step":1,"tool":"summarize"}'
+strata:default/default › json set agent '$.step' '2'
+strata:default/default › json set agent '$.status' '"done"'
 ```
 
 Each `json set` prints `updated agent applied=true`; each `event append` prints
@@ -58,10 +58,10 @@ Each `json set` prints `updated agent applied=true`; each `event append` prints
 
 ## 4. Read the current state
 
-```bash
-strata ./agent --raw kv get config:model
-strata ./agent --raw json get agent '$'
-strata ./agent event count
+```text
+strata:default/default › --raw kv get config:model
+strata:default/default › --raw json get agent '$'
+strata:default/default › event count
 ```
 
 ```text
@@ -76,10 +76,10 @@ Every write carries a commit timestamp. List the document's history, then read
 `--as-of` any of those timestamps to see the exact memory at that point - a
 rollback-style inspection with no rollback.
 
-```bash
-strata ./agent json history agent
-strata ./agent --raw json get agent '$' --as-of 5
-strata ./agent --raw json get agent '$' --as-of 9
+```text
+strata:default/default › json history agent
+strata:default/default › --raw json get agent '$' --as-of 5
+strata:default/default › --raw json get agent '$' --as-of 9
 ```
 
 ```text

@@ -8,7 +8,7 @@ source: "strata-core@v1.1.0"
 Strata keeps history, so you can read the database as it was at an earlier commit
 instead of restoring a backup. This guide is the hands-on patterns; for the model
 behind them see [the time-travel concept](/docs/concepts/time-travel). Examples
-use a durable database at `./mydb`.
+assume you opened a durable database with `strata ./mydb`.
 
 ## Capture a commit timestamp
 
@@ -35,9 +35,9 @@ strata --json ./mydb json set config '$.tier' '"pro"'   # commit.timestamp 4
 Pass `--as-of <timestamp>` to any read to see the state at that commit, ignoring
 later writes:
 
-```bash
-strata ./mydb json get config '$.tier'              # "pro"   (latest)
-strata ./mydb --as-of 3 json get config '$.tier'    # "free"  (as of commit 3)
+```text
+strata:default/default › json get config '$.tier' # "pro" (latest)
+strata:default/default › json get config '$.tier' --as-of 3 # "free" (as of commit 3)
 ```
 
 The same flag works on every primitive - KV, JSON, vectors, events, and the
@@ -48,8 +48,8 @@ graph - so one timestamp gives you a consistent snapshot of the whole database.
 Where `--as-of` reads *as of* a moment, the `history` verbs show *what changed*.
 Each primitive with mutable values exposes one, newest-first:
 
-```bash
-strata ./mydb json history config
+```text
+strata:default/default › json history config
 ```
 
 ```text
@@ -66,12 +66,13 @@ To *work with* a past state rather than just read it, fork a branch anchored to
 that commit. The fork starts from the old state and evolves independently, leaving
 the source branch untouched:
 
-```bash
-strata ./mydb branch fork main investigate --timestamp 3
-strata ./mydb --branch investigate json get config '$.tier'   # "free"
+```text
+strata:default/default › branch fork default investigate --timestamp 3
+strata:default/default › use investigate
+strata:investigate/default › json get config '$.tier' # "free"
 ```
 
-This is the "reproduce the bug as of last Tuesday, then poke at it" workflow - see
+This is the reproduce-and-investigate workflow. See
 [branching workflows](/docs/guides/branching-workflows) for the full fork surface.
 
 ## Audit what changed
@@ -80,9 +81,10 @@ Combine the two: `history` tells you the sequence of versions, and `--as-of`
 reads any of them back in full. To compare two points, read the same key at two
 timestamps:
 
-```bash
-strata ./mydb --as-of 3 json get config '$'
-strata ./mydb --as-of 4 json get config '$'
+```text
+strata:investigate/default › use default
+strata:default/default › json get config '$' --as-of 3
+strata:default/default › json get config '$' --as-of 4
 ```
 
 For an append-only audit trail rather than point-in-time diffs, the

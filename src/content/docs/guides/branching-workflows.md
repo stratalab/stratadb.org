@@ -13,16 +13,17 @@ you fork again. For the mental model, see
 verbs on the CLI: `list`, `get`, `create`, `fork`, `diff`, `preview`, `merge`,
 and `delete`.
 
-Examples use a durable database at `./mydb`. Every branch command also accepts
-`--branch`, `--space`, and `--json`.
+Examples assume you opened a durable database with `strata ./mydb`. The same
+commands also work as one-shot invocations with `--branch`, `--space`, and
+`--json` when you are scripting.
 
 ## List branches
 
 `branch list` prints one branch record per line. A fresh database has only
 `default`:
 
-```bash
-strata ./mydb branch list
+```text
+strata:default/default › branch list
 ```
 
 ```text
@@ -34,8 +35,8 @@ strata ./mydb branch list
 `branch get <name>` returns the full record. The human form is pretty-printed;
 add `--json` for a compact envelope:
 
-```bash
-strata ./mydb branch get default
+```text
+strata:default/default › branch get default
 ```
 
 ```text
@@ -54,11 +55,12 @@ strata ./mydb branch get default
 ## Create an empty branch
 
 `branch create <name>` makes a new root branch with no data and no parent. It
-does not switch you onto it - pass `--branch` on later commands to target it:
+does not switch you onto it automatically:
 
-```bash
-strata ./mydb branch create scratch
-strata ./mydb kv count --branch scratch
+```text
+strata:default/default › branch create scratch
+strata:default/default › use scratch
+strata:scratch/default › kv count
 ```
 
 ```text
@@ -75,9 +77,11 @@ receipt (`strata --json ./mydb kv put config v1` prints
 
 **From the tip** (no flags) forks the source's latest state:
 
-```bash
-strata ./mydb branch fork default review
-strata ./mydb kv get config --branch review
+```text
+strata:scratch/default › use default
+strata:default/default › branch fork default review
+strata:default/default › use review
+strata:review/default › kv get config
 ```
 
 ```text
@@ -86,9 +90,11 @@ v3
 
 **At a version** (`--version`) forks from a retained commit version:
 
-```bash
-strata ./mydb branch fork default rollback --version 3
-strata ./mydb kv get config --branch rollback
+```text
+strata:review/default › use default
+strata:default/default › branch fork default rollback --version 3
+strata:default/default › use rollback
+strata:rollback/default › kv get config
 ```
 
 ```text
@@ -97,9 +103,11 @@ v1
 
 **At a timestamp** (`--timestamp`) forks from a retained commit timestamp:
 
-```bash
-strata ./mydb branch fork default snapshot --timestamp 4
-strata ./mydb kv get config --branch snapshot
+```text
+strata:rollback/default › use default
+strata:default/default › branch fork default snapshot --timestamp 4
+strata:default/default › use snapshot
+strata:snapshot/default › kv get config
 ```
 
 ```text
@@ -114,18 +122,20 @@ The fork record records where it split from under `parent`, for example
 Writes are scoped to their branch. Writing `config` on `review` leaves `default`
 untouched:
 
-```bash
-strata ./mydb kv put config review-only --branch review
-strata ./mydb kv get config --branch review   # review-only
-strata ./mydb kv get config                    # v3
+```text
+strata:snapshot/default › use review
+strata:review/default › kv put config review-only
+strata:review/default › kv get config # review-only
+strata:review/default › use default
+strata:default/default › kv get config # v3
 ```
 
 ## Delete a branch
 
 `branch delete <name>` removes a branch and its history:
 
-```bash
-strata ./mydb branch delete scratch
+```text
+strata:default/default › branch delete scratch
 ```
 
 ```text
@@ -164,23 +174,23 @@ capability - KV, JSON, vectors, events, and graph nodes, edges, and ontology -
 grouped by space, as entries `added` on `b`, `removed` relative to `a`, and
 `modified` on both. It is read-only:
 
-```bash
-strata ./mydb branch diff default review
+```text
+strata:default/default › branch diff default review
 ```
 
 `branch preview <source> <target>` runs a three-way comparison from the fork
 point and reports the conflicts a promotion would hit, mutating neither branch.
 Each conflict reports what the chosen `--strategy` would do:
 
-```bash
-strata ./mydb branch preview review default
+```text
+strata:default/default › branch preview review default
 ```
 
 `branch merge <source> <target>` promotes the source's changes into the target as
 a single atomic commit, leaving the source unchanged:
 
-```bash
-strata ./mydb branch merge review default
+```text
+strata:default/default › branch merge review default
 ```
 
 Promotion applies to key-value, JSON, and vector data (with their collection

@@ -8,16 +8,15 @@ source: "strata-core@v1.1.0"
 Goal: run two agent strategies side by side and compare them, with each variant's
 writes fully isolated from the other and from your baseline.
 
-Prerequisites: the `strata` binary on your PATH, and `jq` for the compact fork
-output. Commands write to a durable directory (`./ab`) that each invocation
-reopens.
+Prerequisite: the `strata` binary on your PATH. Open a durable database with
+`strata ./ab` before step 1.
 
 ## 1. Seed a shared baseline
 
 Anything written before you fork is inherited by every variant.
 
-```bash
-strata ./ab kv put prompt:system "You are a helpful assistant."
+```text
+strata:default/default › kv put prompt:system "You are a helpful assistant."
 ```
 
 ```text
@@ -29,32 +28,34 @@ created prompt:system applied=true
 A fork is a cheap copy-on-write branch. Both start from the baseline at the same
 version.
 
-```bash
-strata ./ab branch fork default variant-a --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
-strata ./ab branch fork default variant-b --json | jq -c '{name: .data.name, forked_from: .data.parent.name, at_version: .data.parent.fork_version}'
+```text
+strata:default/default › branch fork default variant-a
+strata:default/default › branch fork default variant-b
 ```
 
 ```text
-{"name":"variant-a","forked_from":"default","at_version":3}
-{"name":"variant-b","forked_from":"default","at_version":3}
+{ "name": "variant-a", "parent": { "name": "default", "fork_version": 3 }, "status": "active" }
+{ "name": "variant-b", "parent": { "name": "default", "fork_version": 3 }, "status": "active" }
 ```
 
 ## 3. Run each variant on its own branch
 
-Pass `--branch` to target a variant. Here A runs cooler and produces two answers;
-B runs hotter and produces three.
+Switch branches as each variant runs. Here A runs cooler and produces two
+answers; B runs hotter and produces three.
 
-```bash
-strata ./ab kv put config:temperature 0.2 --branch variant-a
-strata ./ab event append answer '{"variant":"a","tokens":180}' --branch variant-a
-strata ./ab event append answer '{"variant":"a","tokens":210}' --branch variant-a
-strata ./ab kv put score 74 --branch variant-a
+```text
+strata:default/default › use variant-a
+strata:variant-a/default › kv put config:temperature 0.2
+strata:variant-a/default › event append answer '{"variant":"a","tokens":180}'
+strata:variant-a/default › event append answer '{"variant":"a","tokens":210}'
+strata:variant-a/default › kv put score 74
 
-strata ./ab kv put config:temperature 0.9 --branch variant-b
-strata ./ab event append answer '{"variant":"b","tokens":320}' --branch variant-b
-strata ./ab event append answer '{"variant":"b","tokens":295}' --branch variant-b
-strata ./ab event append answer '{"variant":"b","tokens":410}' --branch variant-b
-strata ./ab kv put score 88 --branch variant-b
+strata:variant-a/default › use variant-b
+strata:variant-b/default › kv put config:temperature 0.9
+strata:variant-b/default › event append answer '{"variant":"b","tokens":320}'
+strata:variant-b/default › event append answer '{"variant":"b","tokens":295}'
+strata:variant-b/default › event append answer '{"variant":"b","tokens":410}'
+strata:variant-b/default › kv put score 88
 ```
 
 ```text
@@ -73,11 +74,13 @@ created score applied=true
 
 Read each variant's score and answer count directly.
 
-```bash
-strata ./ab --raw kv get score --branch variant-a
-strata ./ab event count --branch variant-a
-strata ./ab --raw kv get score --branch variant-b
-strata ./ab event count --branch variant-b
+```text
+strata:variant-b/default › use variant-a
+strata:variant-a/default › --raw kv get score
+strata:variant-a/default › event count
+strata:variant-a/default › use variant-b
+strata:variant-b/default › --raw kv get score
+strata:variant-b/default › event count
 ```
 
 ```text
@@ -91,8 +94,9 @@ strata ./ab event count --branch variant-b
 
 The per-variant config never leaked back to `default`.
 
-```bash
-strata ./ab kv exists config:temperature
+```text
+strata:variant-b/default › use default
+strata:default/default › kv exists config:temperature
 ```
 
 ```text
@@ -105,17 +109,17 @@ Variant B scored higher (88 vs 74), so fold it into `default` with `branch merge
 Promotion carries the variant's KV, JSON, and vector writes onto the target as a
 single atomic commit; the source branch is left unchanged.
 
-```bash
-strata ./ab branch merge variant-b default
+```text
+strata:default/default › branch merge variant-b default
 ```
 
 The promotion reports the keys it applied - `config:temperature` and `score` -
 with no conflicts, because `default` never received any per-variant config
 (step 5) and so nothing diverged. Read them back on `default`:
 
-```bash
-strata ./ab --raw kv get config:temperature
-strata ./ab --raw kv get score
+```text
+strata:default/default › --raw kv get config:temperature
+strata:default/default › --raw kv get score
 ```
 
 ```text

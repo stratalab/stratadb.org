@@ -1,14 +1,4 @@
 ---
-// Strata Hub: the registry. Built for a catalog that grows to thousands of
-// datasets - search is the primary surface (sticky command bar, `/` to focus),
-// facets mirror the hub API's real query params (primitive / task / license),
-// and results render as a dense ledger of rows. A row opens the dataset's
-// manifest drawer: the full card plus its quickstart, so clone instructions
-// live at the moment of intent. "How cloning works" is one click away in the
-// header, not a section at the page bottom.
-//
-// Data: refreshed from the live hub API at build time (fetch-hub-catalog.mjs);
-// the committed JSON is the offline floor; client fetch overlays live stats.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Eyebrow from '../components/foundation/Eyebrow.astro';
 import Heading from '../components/foundation/Heading.astro';
@@ -31,19 +21,78 @@ interface HubDataset {
   includes: { primitive: string; detail: string }[];
   quickstart: string[];
 }
-const datasets = catalog.datasets as HubDataset[];
-const hubHost = catalog.hub.replace(/^https?:\/\//, '');
 
-// Facet counts, computed from the catalog itself so the rail never lies.
-const primitiveOrder = ['kv', 'json', 'events', 'vectors'];
-const primitiveFacets = primitiveOrder
-  .map((p) => ({ id: p, n: datasets.filter((d) => d.primitives.includes(p)).length }))
-  .filter((f) => f.n > 0);
-const countBy = (values: string[]) => {
-  const m = new Map<string, number>();
-  for (const v of values) m.set(v, (m.get(v) ?? 0) + 1);
-  return m;
+const datasets = catalog.datasets as HubDataset[];
+if (!datasets.length) throw new Error('Hub catalog is empty.');
+
+const hubHost = catalog.hub.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const featuredDataset = datasets.find((d) => d.slug === 'movielens-100k') ?? datasets[0];
+const primitiveOrder = ['kv', 'json', 'events', 'vectors', 'graph'];
+const primitiveLabels: Record<string, string> = {
+  kv: 'KV',
+  json: 'JSON',
+  events: 'Events',
+  vectors: 'Vectors',
+  graph: 'Graph',
 };
+const shortDescriptions: Record<string, string> = {
+  titanic: 'Passenger records with raw and cleaned branches for classification demos.',
+  'ab-test-results': 'A deterministic A/B test with each experiment arm on its own branch.',
+  'iana-http-reference': 'HTTP status codes, methods, and headers as local lookup data.',
+  'agent-memory-with-experiments': 'Synthetic agent memory with retention-policy branches.',
+  'github-events': 'Developer activity stored as append-only event streams.',
+  iris: 'Fisher iris measurements with curation history included.',
+  'iso-reference': 'Country, currency, and language codes for local lookups.',
+  'movielens-100k': 'Movie records, catalog stats, and genre vectors for recommendation tests.',
+  stackoverflow: 'Python Q&A threads as JSON documents with comments inline.',
+  'strata-bench-results': 'Benchmark runs stored as an event log.',
+  wikipedia: 'Article metadata with a title-to-slug index.',
+  'world-bank-indicators': 'Country-level population, GDP, and inflation records.',
+};
+
+const formatLabel = (value: string) => value.replaceAll('-', ' ');
+const formatInt = (n: number) => new Intl.NumberFormat('en-US').format(n);
+const formatDate = (value?: string) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+};
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+const quickstartHtml = (d: HubDataset) => `<code>${escapeHtml(d.quickstart.join('\n'))}</code>`;
+const cloneCommand = (d: HubDataset) => d.quickstart[0] ?? `strata clone ${d.slug} ./${d.slug}`;
+const commandDest = (command: string) => command.split(/\s+/)[3] ?? './database';
+const featuredClone = cloneCommand(featuredDataset);
+const featuredDest = commandDest(featuredClone);
+const shortDescription = (d: HubDataset) =>
+  shortDescriptions[d.slug] ?? d.description.split(/[.!?]\s/)[0] ?? d.description;
+const primaryUse = (d: HubDataset) => formatLabel(d.tasks[0] ?? 'dataset work');
+const formatBytes = (n?: number) => {
+  if (typeof n !== 'number') return null;
+  if (n >= 1e9) return `${(n / 1e9).toFixed(1)} GB`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(n / 1e3))} KB`;
+};
+
+const countBy = (values: string[]) => {
+  const counts = new Map<string, number>();
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+  return counts;
+};
+const primitiveFacets = primitiveOrder
+  .map((id) => ({ id, n: datasets.filter((d) => d.primitives.includes(id)).length }))
+  .filter((f) => f.n > 0);
 const taskFacets = [...countBy(datasets.flatMap((d) => d.tasks)).entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .slice(0, 8)
@@ -51,1695 +100,1504 @@ const taskFacets = [...countBy(datasets.flatMap((d) => d.tasks)).entries()]
 const licenseFacets = [...countBy(datasets.map((d) => d.license)).entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .map(([id, n]) => ({ id, n }));
+const allTasks = new Set(datasets.flatMap((d) => d.tasks));
 const multiBranchCount = datasets.filter((d) => d.branches.length > 1).length;
-
-const formatBytes = (n: number) =>
-  n >= 1e9
-    ? `${(n / 1e9).toFixed(1)} GB`
-    : n >= 1e6
-      ? `${(n / 1e6).toFixed(1)} MB`
-      : `${Math.max(1, Math.round(n / 1e3))} KB`;
-
-// The walkthrough terminal cycles datasets whose facts are real catalog facts.
-const demoData = ['movielens-100k', 'titanic', 'agent-memory-with-experiments'].map((slug) => {
-  const d = datasets.find((entry) => entry.slug === slug);
-  if (!d) throw new Error(`hub demo dataset missing from catalog: ${slug}`);
-  const clone = d.quickstart[0];
-  const dest = clone.split(' ')[3] ?? `./${d.slug}.strata`;
-  return { slug: d.slug, clone, dest, branches: d.branches.length };
-});
+const quickFilters = [
+  { label: 'RAG', query: 'retrieval' },
+  { label: 'Agent memory', query: 'agent-memory' },
+  { label: 'Events', query: 'event' },
+  { label: 'Benchmarks', query: 'benchmark' },
+];
+const heroStats = [
+  { value: formatInt(datasets.length), label: 'datasets today' },
+  { value: formatInt(allTasks.size), label: 'task areas' },
+  { value: formatInt(multiBranchCount), label: 'branch examples' },
+];
+const heroFacts = [
+  { label: 'JSON', body: 'movie records keyed as movie:<id>' },
+  { label: 'KV', body: 'catalog counts and source metadata under meta:' },
+  { label: 'Vectors', body: 'genre vectors for nearest-neighbor queries' },
+  { label: 'Branch', body: 'a sample branch for fast local runs' },
+];
 ---
 
 <BaseLayout
-  title="Strata Hub - clone-ready datasets"
-  description="The Strata Hub registry: prepared Strata databases for RAG, agents, benchmarks, events, and reference data. Search, filter, and clone one with schema, examples, branches, and history."
+  title="Strata Hub | datasets you can clone"
+  description="Strata Hub is a catalog of Strata databases you can clone locally for retrieval, agent memory, benchmarks, event streams, reference data, and small experiments."
 >
-  <div class="reg mx-auto w-full max-w-[80rem] px-6 pb-24 pt-12 max-[480px]:px-4">
-    <!-- ===== header ===== -->
-    <header class="reg-head">
-      <div class="min-w-0">
+  <div class="hub-page">
+    <section class="hub-hero mx-auto grid w-full max-w-[80rem] px-6 max-[480px]:px-4">
+      <div class="hub-hero-copy reveal">
         <Eyebrow class="mb-3 font-mono !font-normal !text-terracotta-400">Strata Hub</Eyebrow>
-        <Heading size="title">The dataset registry.</Heading>
-        <p class="mt-4 max-w-[40rem] text-body text-ink-mid">
-          Prepared Strata databases. Clone one and it opens, branches, and time-travels like any
-          local database.
+        <Heading level={1} size="title" class="hub-title max-w-[46rem]">
+          Start with a working database.
+        </Heading>
+        <p class="hub-intro mt-5 max-w-[43rem] text-body text-ink-mid">
+          Find the right dataset for your project, clone it, and start building.
         </p>
+
+        <div class="hub-clone-command">
+          <span>Try one</span>
+          <CopyChip value={featuredClone} label={featuredClone} class="hub-hero-copy-chip" />
+          <p>
+            Then open it with <code>strata {featuredDest}</code>.
+          </p>
+        </div>
+
+        <div class="hub-actions" aria-label="Hub page actions">
+          <a class="hub-primary-action" href="#catalog">Browse datasets</a>
+        </div>
       </div>
-      <div class="reg-head-actions">
-        <span class="reg-status" data-hub-status data-state="snapshot">
-          <i class="reg-status-dot" aria-hidden="true"></i>
-          <span data-hub-status-label>catalog snapshot</span>
-        </span>
-        <button type="button" class="reg-how-btn" data-open-how aria-haspopup="dialog">
+
+      <aside class="hub-hero-panel reveal" aria-label="Example Hub clone workflow">
+        <div class="hub-panel-top">
+          <span>{hubHost}</span>
+          <span>example clone</span>
+        </div>
+        <div class="hub-terminal">
+          <p><span>$</span> {featuredClone}</p>
+          <p class="hub-terminal-muted">resolved {hubHost}/{featuredDataset.slug}</p>
+          <p class="hub-terminal-muted">wrote {featuredDest}</p>
+          <p><span>$</span> strata {featuredDest}</p>
+          <p class="hub-terminal-output">opened local database</p>
+        </div>
+        <div class="hub-featured">
+          <div>
+            <span>Featured dataset</span>
+            <strong>{featuredDataset.title}</strong>
+          </div>
+        </div>
+        <ul class="hub-preview-list">
+          {
+            heroFacts.map((item) => (
+              <li>
+                <span>{item.label}</span>
+                <p>{item.body}</p>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="hub-hero-stats" aria-label="Hub catalog summary">
+          {
+            heroStats.map((stat) => (
+              <span>
+                <strong>{stat.value}</strong>
+                <small>{stat.label}</small>
+              </span>
+            ))
+          }
+        </div>
+      </aside>
+    </section>
+
+    <section id="catalog" class="hub-catalog mx-auto w-full max-w-[80rem] px-6 max-[480px]:px-4">
+      <header class="hub-catalog-head reveal">
+        <div>
+          <Heading level={2} size="heading" class="max-w-[38rem]">
+            Strata Hub Dataset Catalog
+          </Heading>
+        </div>
+        <div class="hub-source">
+          <span>Hub</span>
+          <strong>{hubHost}</strong>
+        </div>
+      </header>
+
+      <div class="hub-toolbar reveal" aria-label="Dataset search and filters">
+        <label class="hub-search-wrap" for="hub-search">
           <svg
-            width="14"
-            height="14"
+            width="15"
+            height="15"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             stroke-width="2"
             aria-hidden="true"
           >
-            <polyline points="4 17 10 11 4 5"></polyline>
-            <line x1="12" y1="19" x2="20" y2="19"></line>
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
           </svg>
-          How cloning works
-        </button>
+          <input
+            id="hub-search"
+            type="search"
+            placeholder="Search movies, events, agents, vectors..."
+            autocomplete="off"
+          />
+          <kbd aria-hidden="true">/</kbd>
+        </label>
+
+        <div class="hub-quick-filters" aria-label="Suggested searches">
+          {
+            quickFilters.map((filter) => (
+              <button type="button" data-query={filter.query}>
+                {filter.label}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="hub-toolbar-end">
+          <details class="hub-filter-menu">
+            <summary>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+              Filters
+            </summary>
+            <div class="hub-filter-panel">
+              <section>
+                <h3>Contains</h3>
+                <div class="hub-facet-list">
+                  {
+                    primitiveFacets.map((facet) => (
+                      <button
+                        type="button"
+                        data-facet-group="primitive"
+                        data-facet-value={facet.id}
+                        aria-pressed="false"
+                      >
+                        <span>{primitiveLabels[facet.id] ?? formatLabel(facet.id)}</span>
+                        <small>{facet.n}</small>
+                      </button>
+                    ))
+                  }
+                </div>
+              </section>
+
+              <section>
+                <h3>Good for</h3>
+                <div class="hub-facet-list">
+                  {
+                    taskFacets.map((facet) => (
+                      <button
+                        type="button"
+                        data-facet-group="task"
+                        data-facet-value={facet.id}
+                        aria-pressed="false"
+                      >
+                        <span>{formatLabel(facet.id)}</span>
+                        <small>{facet.n}</small>
+                      </button>
+                    ))
+                  }
+                </div>
+              </section>
+
+              <section>
+                <h3>License</h3>
+                <div class="hub-facet-list">
+                  {
+                    licenseFacets.map((facet) => (
+                      <button
+                        type="button"
+                        data-facet-group="license"
+                        data-facet-value={facet.id}
+                        aria-pressed="false"
+                      >
+                        <span>{facet.id}</span>
+                        <small>{facet.n}</small>
+                      </button>
+                    ))
+                  }
+                </div>
+              </section>
+
+              <section>
+                <h3>Branches</h3>
+                <div class="hub-facet-list">
+                  <button
+                    type="button"
+                    data-facet-group="branches"
+                    data-facet-value="multi"
+                    aria-pressed="false"
+                  >
+                    <span>Multiple branches</span>
+                    <small>{multiBranchCount}</small>
+                  </button>
+                </div>
+              </section>
+
+              <button type="button" class="hub-clear-filters" data-clear-filters>
+                Clear filters
+              </button>
+            </div>
+          </details>
+
+          <label class="hub-sort">
+            <span>Sort</span>
+            <select id="hub-sort">
+              <option value="featured">Featured</option>
+              <option value="name">Name</option>
+              <option value="branches">Branches</option>
+            </select>
+          </label>
+        </div>
       </div>
-    </header>
 
-    <!-- ===== command bar ===== -->
-    <div class="reg-bar">
-      <div class="reg-search-wrap">
-        <svg
-          class="reg-search-icon"
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
-        </svg>
-        <input
-          id="reg-search"
-          class="reg-search"
-          type="search"
-          placeholder="Search datasets"
-          aria-label="Search datasets by name, task, or tag"
-          autocomplete="off"
-        />
-        <kbd class="reg-kbd" aria-hidden="true">/</kbd>
+      <div class="hub-results-meta reveal" aria-live="polite">
+        <span data-result-count>{datasets.length}</span>
+        <span>datasets</span>
       </div>
-      <button
-        type="button"
-        class="reg-filter-btn"
-        data-toggle-rail
-        aria-expanded="false"
-        aria-controls="reg-rail"
-      >
-        filters
-      </button>
-      <label class="reg-sort">
-        <span>sort</span>
-        <select id="reg-sort" aria-label="Sort datasets">
-          <option value="featured" selected>featured</option>
-          <option value="name">name</option>
-          <option value="branches">branches</option>
-          <option value="downloads" disabled data-live-sort>downloads</option>
-        </select>
-      </label>
-      <p class="reg-count" data-count aria-live="polite">{datasets.length} datasets</p>
-    </div>
 
-    <!-- ===== rail + ledger ===== -->
-    <div class="reg-main">
-      <aside class="reg-rail" id="reg-rail" aria-label="Filter datasets">
-        <div class="reg-facet-group">
-          <p class="reg-facet-h">primitive</p>
-          {
-            primitiveFacets.map((f) => (
-              <button
-                type="button"
-                class="reg-facet"
-                data-facet="primitive"
-                data-value={f.id}
-                aria-pressed="false"
-              >
-                <i class:list={['reg-dot', `dot-${f.id}`]} aria-hidden="true" />
-                <span class="reg-facet-label">{f.id}</span>
-                <span class="reg-facet-n">{f.n}</span>
-              </button>
-            ))
-          }
+      <div class="hub-table reveal" role="table" aria-label="Strata Hub datasets">
+        <div class="hub-table-head" role="row">
+          <span role="columnheader">Dataset</span>
+          <span role="columnheader">Good for</span>
+          <span role="columnheader">Contains</span>
+          <span role="columnheader">Branches</span>
+          <span role="columnheader">Open</span>
         </div>
-        <div class="reg-facet-group">
-          <p class="reg-facet-h">branches</p>
-          <button
-            type="button"
-            class="reg-facet"
-            data-facet="branches"
-            data-value="multi"
-            aria-pressed="false"
-          >
-            <i class="reg-dot dot-branches" aria-hidden="true"></i>
-            <span class="reg-facet-label">multi-branch</span>
-            <span class="reg-facet-n">{multiBranchCount}</span>
-          </button>
-        </div>
-        <div class="reg-facet-group">
-          <p class="reg-facet-h">task</p>
-          {
-            taskFacets.map((f) => (
-              <button
-                type="button"
-                class="reg-facet"
-                data-facet="task"
-                data-value={f.id}
-                aria-pressed="false"
-              >
-                <span class="reg-facet-label">{f.id}</span>
-                <span class="reg-facet-n">{f.n}</span>
-              </button>
-            ))
-          }
-        </div>
-        <div class="reg-facet-group">
-          <p class="reg-facet-h">license</p>
-          {
-            licenseFacets.map((f) => (
-              <button
-                type="button"
-                class="reg-facet"
-                data-facet="license"
-                data-value={f.id}
-                aria-pressed="false"
-              >
-                <span class="reg-facet-label">{f.id}</span>
-                <span class="reg-facet-n">{f.n}</span>
-              </button>
-            ))
-          }
-        </div>
-        <button type="button" class="reg-clear" data-clear hidden>clear filters</button>
-      </aside>
 
-      <div class="reg-ledger" data-ledger>
         {
-          datasets.map((d, index) => (
-            <article
-              class="reg-rowwrap"
-              data-slug={d.slug}
-              data-index={index}
-              data-primitives={d.primitives.join(' ')}
-              data-tasks={d.tasks.join(' ')}
-              data-license={d.license}
-              data-branch-count={d.branches.length}
-              data-search={[d.slug, d.title, d.description, ...d.tasks, ...d.tags, ...d.primitives]
-                .join(' ')
-                .toLowerCase()}
-            >
-              <button type="button" class="reg-row" data-open-card={d.slug} aria-haspopup="dialog">
-                <span class="reg-row-main">
-                  <span class="reg-row-name">{d.slug}</span>
-                  <span class="reg-row-desc">{d.description}</span>
-                </span>
-                <span class="reg-row-side">
-                  <span class="reg-bar-mini" aria-hidden="true">
-                    {d.primitives.map((p) => (
-                      <i class:list={['reg-seg', `seg-${p}`]} />
+          datasets.map((d, index) => {
+            const clone = cloneCommand(d);
+            const size = formatBytes(d.size_bytes) ?? formatLabel(d.size_category);
+            const rowDescription = shortDescription(d);
+            const updated = formatDate(d.last_updated);
+            const downloads = typeof d.downloads === 'number' ? formatInt(d.downloads) : null;
+            const search = [
+              d.slug,
+              d.title,
+              rowDescription,
+              d.description,
+              d.license,
+              d.size_category,
+              ...d.tasks,
+              ...d.tags,
+              ...d.primitives,
+              ...d.branches,
+              ...d.includes.map((item) => item.detail),
+            ]
+              .join(' ')
+              .toLowerCase();
+
+            return (
+              <details
+                class="hub-dataset"
+                role="rowgroup"
+                data-index={index}
+                data-slug={d.slug}
+                data-search={search}
+                data-title={d.title.toLowerCase()}
+                data-primitives={d.primitives.join(' ')}
+                data-tasks={d.tasks.join(' ')}
+                data-license={d.license}
+                data-branch-count={d.branches.length}
+              >
+                <summary class="hub-row" role="row">
+                  <span class="hub-row-main" role="cell">
+                    <span class="hub-row-title">{d.title}</span>
+                    <span class="hub-row-slug">{d.slug}</span>
+                    <span class="hub-row-desc">{rowDescription}</span>
+                  </span>
+                  <span class="hub-row-use" role="cell">
+                    {primaryUse(d)}
+                  </span>
+                  <span class="hub-row-shape" role="cell">
+                    {d.primitives.map((primitive) => (
+                      <span data-primitive={primitive}>
+                        {primitiveLabels[primitive] ?? formatLabel(primitive)}
+                      </span>
                     ))}
                   </span>
-                  <span class="reg-row-meta">
-                    <span>{d.primitives.join(' · ')}</span>
-                    {d.branches.length > 1 && <span>{d.branches.length} branches</span>}
-                    <span class="reg-row-dl" data-row-dl hidden />
+                  <span class="hub-row-branches" role="cell">
+                    {d.branches.length}
+                    <small>{d.branches.length === 1 ? 'branch' : 'branches'}</small>
                   </span>
-                </span>
-                <span class="reg-row-chev" aria-hidden="true">
-                  ›
-                </span>
-              </button>
-              <button
-                type="button"
-                class="copy-chip reg-copy"
-                data-copy={d.quickstart[0]}
-                aria-label={`Copy: ${d.quickstart[0]}`}
-              >
-                <span class="copy-chip-icon" aria-hidden="true">
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                  >
-                    <rect x="9" y="9" width="11" height="11" rx="2" />
-                    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
-                  </svg>
-                </span>
-                <span class="copy-chip-done hidden" aria-hidden="true">
-                  ✓
-                </span>
-                clone
-              </button>
-            </article>
-          ))
+                  <span class="hub-row-detail" role="cell">
+                    <span>Open</span>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                </summary>
+
+                <div class="hub-detail">
+                  <div class="hub-detail-grid">
+                    <section class="hub-detail-story">
+                      <span class="hub-detail-kicker">Dataset notes</span>
+                      <p>{d.description}</p>
+                    </section>
+
+                    <aside class="hub-detail-actions">
+                      <div class="hub-clone-box">
+                        <span>Clone</span>
+                        <CopyChip value={clone} label={clone} class="hub-row-copy-chip" />
+                      </div>
+
+                      <div class="hub-quickstart">
+                        <span>Try first</span>
+                        <pre set:html={quickstartHtml(d)} />
+                      </div>
+                    </aside>
+                  </div>
+
+                  <div class="hub-detail-lower">
+                    <section class="hub-detail-block">
+                      <h3>Inside the database</h3>
+                      {d.includes.length ? (
+                        <ul>
+                          {d.includes.map((item) => (
+                            <li>
+                              <span>
+                                {primitiveLabels[item.primitive] ?? formatLabel(item.primitive)}
+                              </span>
+                              <p>{item.detail}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p class="hub-empty-note">
+                          A detailed manifest has not been published for this dataset yet.
+                        </p>
+                      )}
+                    </section>
+
+                    <dl class="hub-detail-meta">
+                      <div>
+                        <dt>License</dt>
+                        <dd>{d.license}</dd>
+                      </div>
+                      <div>
+                        <dt>Size</dt>
+                        <dd>{size}</dd>
+                      </div>
+                      <div>
+                        <dt>Branches</dt>
+                        <dd>{d.branches.join(', ')}</dd>
+                      </div>
+                      {updated && (
+                        <div>
+                          <dt>Updated</dt>
+                          <dd>{updated}</dd>
+                        </div>
+                      )}
+                      {downloads && (
+                        <div>
+                          <dt>Downloads</dt>
+                          <dd>{downloads}</dd>
+                        </div>
+                      )}
+                      <div>
+                        <dt>Origin</dt>
+                        <dd>
+                          {hubHost}/{d.slug}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+              </details>
+            );
+          })
         }
-        <div class="reg-empty" data-empty hidden>
-          <p class="reg-empty-t">No dataset matches.</p>
-          <p>Clear the search or filters - or tell us what's missing.</p>
-          <button type="button" class="reg-clear !mt-4 !inline-flex" data-clear>
-            clear filters
-          </button>
+
+        <div class="hub-empty" data-empty hidden>
+          <strong>No matching datasets.</strong>
+          <span>Clear the filters or search for a broader task.</span>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 
-  <!-- ===== manifest drawer ===== -->
-  <dialog class="reg-drawer" id="reg-drawer" aria-label="Dataset card">
-    <div class="reg-drawer-top">
-      <span class="font-mono text-mono-sm text-ink-low">{hubHost}</span>
-      <button type="button" class="reg-close" data-close-drawer aria-label="Close dataset card">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    {
-      datasets.map((d) => (
-        <article class="reg-card" data-card={d.slug} hidden>
-          <div class="reg-card-scroll">
-            <header class="reg-card-head">
-              <h2 class="reg-card-name">{d.slug}</h2>
-              <p class="reg-card-title">
-                {d.title}
-                <span class="reg-badge">official</span>
-              </p>
-            </header>
-
-            <div class="reg-bar-big" aria-hidden="true">
-              {d.primitives.map((p) => (
-                <i class:list={['reg-seg', `seg-${p}`]} />
-              ))}
-            </div>
-            <p class="reg-legend" aria-label="Primitives in this dataset">
-              {d.primitives.map((p) => (
-                <span>
-                  <i class:list={['reg-dot', `dot-${p}`]} aria-hidden="true" />
-                  {p}
-                </span>
-              ))}
-            </p>
-
-            <p class="reg-card-desc">{d.description}</p>
-
-            <dl class="reg-stats">
-              <div>
-                <dt>license</dt>
-                <dd>{d.license}</dd>
-              </div>
-              <div>
-                <dt>size</dt>
-                <dd data-stat-size>
-                  {typeof d.size_bytes === 'number' ? formatBytes(d.size_bytes) : d.size_category}
-                </dd>
-              </div>
-              <div>
-                <dt>branches</dt>
-                <dd>{d.branches.length}</dd>
-              </div>
-              <div>
-                <dt>clones</dt>
-                <dd data-stat-dl>{typeof d.downloads === 'number' ? d.downloads : '-'}</dd>
-              </div>
-            </dl>
-
-            {d.includes.length > 0 && (
-              <>
-                <p class="reg-card-h">in the clone</p>
-                <ul class="reg-includes">
-                  {d.includes.map((entry) => (
-                    <li>
-                      <i class:list={['reg-dot', `dot-${entry.primitive}`]} aria-hidden="true" />
-                      <span>{entry.detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            <p class="reg-card-h">branches</p>
-            <p class="reg-branches">
-              {d.branches.map((b) => (
-                <code>{b}</code>
-              ))}
-            </p>
-
-            <div class="reg-card-h reg-quick-h">
-              <span>quickstart</span>
-              <CopyChip
-                value={d.quickstart.join('\n')}
-                label="copy all"
-                class="!gap-2 !border-0 !bg-transparent !px-2 !py-1"
-              />
-            </div>
-            <pre class="reg-quick" set:text={d.quickstart.join('\n')} />
-
-            <p class="reg-provenance">
-              A clone remembers its origin - <code>strata remote</code> reports{' '}
-              <code>
-                {hubHost}/{d.slug}
-              </code>
-              .
-            </p>
-          </div>
-          <footer class="reg-card-foot">
-            <CopyChip
-              value={d.quickstart[0]}
-              class="w-full justify-between !border-terracotta-500/40 !bg-inset [&_.copy-chip-label]:!text-ink-hi"
-            />
-          </footer>
-        </article>
-      ))
-    }
-  </dialog>
-
-  <!-- ===== how cloning works ===== -->
-  <dialog class="reg-howdlg" id="reg-how" aria-labelledby="reg-how-title">
-    <div class="reg-howdlg-head">
-      <h2 id="reg-how-title" class="text-heading text-ink-hi">How cloning works</h2>
-      <button type="button" class="reg-close" data-close-how aria-label="Close">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-        </svg>
-      </button>
-    </div>
-    <div class="reg-howdlg-grid">
-      <div>
-        <ul class="reg-steps">
-          <li>
-            <p class="reg-step-t">Pick a dataset</p>
-            <p>Each card lists what the clone contains and the first commands to run.</p>
-          </li>
-          <li>
-            <p class="reg-step-t">Clone it</p>
-            <p>
-              <code>strata clone &lt;slug&gt; [dest]</code> resolves the hub, verifies the manifest, and
-              writes a new local database.
-            </p>
-          </li>
-          <li>
-            <p class="reg-step-t">Use it locally</p>
-            <p>
-              Open, query, fork branches, read past versions. <code>strata remote</code> remembers where
-              it came from. The hub is not in your read path.
-            </p>
-          </li>
-        </ul>
-        <p class="reg-how-note">
-          Cloning uses the built-in hub by default. Point it elsewhere with the{' '}
-          <code>--hub</code> flag, <code>STRATA_HUB_URL</code>, or{' '}
-          <code>config set hub.url</code>.
-        </p>
-        <p class="reg-how-links">
-          <a href="/docs/guides/cloning-datasets">Cloning datasets guide</a>
-          <a href="/docs/concepts/hub-and-clone">Hub &amp; clone concept</a>
-          <a href="/docs/reference/command-reference">Command reference</a>
-        </p>
-      </div>
-      <div class="reg-term" data-clone-demo>
-        <div class="reg-term-bar">
-          <div class="flex min-w-0 items-center gap-2.5">
-            <span class="h-2.5 w-2.5 rounded-full bg-terracotta-500/80"></span>
-            <span class="h-2.5 w-2.5 rounded-full bg-ink-low/35"></span>
-            <span class="h-2.5 w-2.5 rounded-full bg-ink-low/35"></span>
-            <span class="min-w-0 truncate font-mono text-mono-sm text-ink-mid">strata clone</span>
-          </div>
-          <span class="shrink-0 font-mono text-mono-sm text-ink-low">demo</span>
-        </div>
-        <div class="reg-term-body" data-clone-log aria-label="Clone walkthrough transcript">
-          <div class="ht-entry">
-            <p class="ht-cmd"><span class="ht-caret">$</span> strata clone movielens-100k ./ml</p>
-            <p class="ht-out ht-dim">resolving hub … {hubHost}</p>
-            <p class="ht-out ht-dim">manifest verified · 2 branches</p>
-            <p class="ht-out ht-dim">objects ▰▰▰▰▰▰▰▰▰▰▰▰ complete</p>
-            <p class="ht-out ht-ok">cloned into ./ml - an ordinary local database</p>
-          </div>
-          <div class="ht-entry">
-            <p class="ht-cmd"><span class="ht-caret">$</span> strata ./ml remote</p>
-            <p class="ht-out">origin: {hubHost}/movielens-100k</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </dialog>
-
-  <script
-    is:inline
-    type="application/json"
-    id="hub-demo-data"
-    set:html={JSON.stringify(demoData)}
-  /><script
-    is:inline
-    type="application/json"
-    id="hub-live-config"
-    set:html={JSON.stringify({ hub: catalog.hub })}
-  />
-
   <script>
-    // ---- state: search + facets + sort, mirrored into the URL --------------
-    const searchInput = document.getElementById('reg-search') as HTMLInputElement;
-    const sortSelect = document.getElementById('reg-sort') as HTMLSelectElement;
-    const countEl = document.querySelector<HTMLElement>('[data-count]');
-    const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
-    const facetButtons = [...document.querySelectorAll<HTMLButtonElement>('.reg-facet')];
-    const clearButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-clear]')];
-    const rows = [...document.querySelectorAll<HTMLElement>('.reg-rowwrap')];
+    const search = document.querySelector<HTMLInputElement>('#hub-search');
+    const sort = document.querySelector<HTMLSelectElement>('#hub-sort');
+    const rows = Array.from(document.querySelectorAll<HTMLDetailsElement>('.hub-dataset'));
+    const count = document.querySelector<HTMLElement>('[data-result-count]');
+    const empty = document.querySelector<HTMLElement>('[data-empty]');
+    const facetButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('[data-facet-group][data-facet-value]'),
+    );
+    const clearFilters = document.querySelector<HTMLButtonElement>('[data-clear-filters]');
+    const queryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-query]'));
+    const facets: Record<string, string> = {};
+    let initialLoad = true;
 
-    const facets: Record<string, string | null> = {
-      primitive: null,
-      branches: null,
-      task: null,
-      license: null,
+    const normalize = (value: string | null | undefined) => (value ?? '').trim().toLowerCase();
+
+    const setFacet = (group: string, value: string) => {
+      if (facets[group] === value) delete facets[group];
+      else facets[group] = value;
     };
 
-    function rowMatches(row: HTMLElement, query: string) {
-      if (query && !(row.dataset.search ?? '').includes(query)) return false;
-      if (facets.primitive && !(row.dataset.primitives ?? '').split(' ').includes(facets.primitive))
+    const syncFacetButtons = () => {
+      for (const button of facetButtons) {
+        const group = button.dataset.facetGroup ?? '';
+        const value = button.dataset.facetValue ?? '';
+        const active = facets[group] === value;
+        button.setAttribute('aria-pressed', String(active));
+      }
+    };
+
+    const rowMatches = (row: HTMLDetailsElement) => {
+      const q = normalize(search?.value);
+      if (q && !normalize(row.dataset.search).includes(q)) return false;
+
+      if (
+        facets.primitive &&
+        !normalize(row.dataset.primitives).split(/\s+/).includes(facets.primitive)
+      )
         return false;
-      if (facets.branches === 'multi' && Number(row.dataset.branchCount ?? '1') < 2) return false;
-      if (facets.task && !(row.dataset.tasks ?? '').split(' ').includes(facets.task)) return false;
+      if (facets.task && !normalize(row.dataset.tasks).split(/\s+/).includes(facets.task))
+        return false;
       if (facets.license && row.dataset.license !== facets.license) return false;
+      if (facets.branches === 'multi' && Number(row.dataset.branchCount ?? '1') < 2) return false;
+
       return true;
-    }
+    };
 
-    function sortKey(row: HTMLElement): number {
-      const mode = sortSelect.value;
-      if (mode === 'branches') return -Number(row.dataset.branchCount ?? '0');
-      if (mode === 'downloads') return -Number(row.dataset.downloads ?? '-1');
-      return Number(row.dataset.index ?? '0');
-    }
-
-    function apply() {
-      const query = searchInput.value.trim().toLowerCase();
-      const mode = sortSelect.value;
-      let order: HTMLElement[];
-      if (mode === 'name') {
-        order = [...rows].sort((a, b) =>
-          (a.dataset.slug ?? '').localeCompare(b.dataset.slug ?? ''),
-        );
-      } else {
-        order = [...rows].sort(
-          (a, b) => sortKey(a) - sortKey(b) || Number(a.dataset.index) - Number(b.dataset.index),
-        );
-      }
-      order.forEach((row, i) => {
-        row.style.order = String(i);
+    const sortRows = (visibleRows: HTMLDetailsElement[]) => {
+      const mode = sort?.value ?? 'featured';
+      const sorted = visibleRows.slice().sort((a, b) => {
+        if (mode === 'name') return (a.dataset.title ?? '').localeCompare(b.dataset.title ?? '');
+        if (mode === 'branches') {
+          return (
+            Number(b.dataset.branchCount ?? '0') - Number(a.dataset.branchCount ?? '0') ||
+            (a.dataset.title ?? '').localeCompare(b.dataset.title ?? '')
+          );
+        }
+        return Number(a.dataset.index ?? '0') - Number(b.dataset.index ?? '0');
       });
 
-      let shown = 0;
-      for (const row of rows) {
-        const visible = rowMatches(row, query);
-        row.hidden = !visible;
-        if (visible) shown++;
-      }
-      if (countEl)
-        countEl.textContent =
-          shown === rows.length ? `${rows.length} datasets` : `${shown} of ${rows.length}`;
-      if (emptyEl) emptyEl.hidden = shown > 0;
+      sorted.forEach((row, i) => {
+        row.style.order = String(i + 1);
+      });
+      if (empty) empty.style.order = String(sorted.length + 2);
+    };
 
-      const anyFacet = Object.values(facets).some(Boolean);
-      for (const btn of clearButtons) btn.hidden = !anyFacet && !query;
-
-      // Shareable state: /hub?q=…&primitive=…&sort=…
+    const writeUrlState = () => {
+      if (initialLoad) return;
       const params = new URLSearchParams();
-      if (query) params.set('q', query);
-      for (const [group, value] of Object.entries(facets)) if (value) params.set(group, value);
-      if (mode !== 'featured') params.set('sort', mode);
-      const qs = params.toString();
-      history.replaceState(null, '', qs ? `?${qs}` : location.pathname + location.hash);
-    }
+      const q = search?.value.trim();
+      if (q) params.set('q', q);
+      if (sort?.value && sort.value !== 'featured') params.set('sort', sort.value);
+      for (const [group, value] of Object.entries(facets)) params.set(group, value);
+      const query = params.toString();
+      history.replaceState(
+        null,
+        '',
+        `${location.pathname}${query ? `?${query}` : ''}${location.hash}`,
+      );
+    };
 
-    function syncFacetButtons() {
-      for (const btn of facetButtons) {
-        const active = facets[btn.dataset.facet ?? ''] === btn.dataset.value;
-        btn.classList.toggle('is-active', active);
-        btn.setAttribute('aria-pressed', String(active));
+    const apply = () => {
+      const visibleRows: HTMLDetailsElement[] = [];
+      for (const row of rows) {
+        const visible = rowMatches(row);
+        row.hidden = !visible;
+        if (!visible) row.open = false;
+        else visibleRows.push(row);
       }
-    }
+      sortRows(visibleRows);
+      if (count) count.textContent = String(visibleRows.length);
+      if (empty) empty.hidden = visibleRows.length > 0;
+      syncFacetButtons();
+      writeUrlState();
+    };
 
-    searchInput.addEventListener('input', apply);
-    sortSelect.addEventListener('change', apply);
-    for (const btn of facetButtons) {
-      btn.addEventListener('click', () => {
-        const group = btn.dataset.facet ?? '';
-        facets[group] = facets[group] === btn.dataset.value ? null : (btn.dataset.value ?? null);
-        syncFacetButtons();
+    const readUrlState = () => {
+      const params = new URLSearchParams(location.search);
+      if (search && params.has('q')) search.value = params.get('q') ?? '';
+      if (sort && params.has('sort')) sort.value = params.get('sort') ?? 'featured';
+      for (const group of ['primitive', 'task', 'license', 'branches']) {
+        const value = params.get(group);
+        if (value) facets[group] = value;
+      }
+    };
+
+    search?.addEventListener('input', apply);
+    sort?.addEventListener('change', apply);
+
+    for (const button of facetButtons) {
+      button.addEventListener('click', () => {
+        const group = button.dataset.facetGroup;
+        const value = button.dataset.facetValue;
+        if (!group || !value) return;
+        setFacet(group, value);
         apply();
       });
     }
-    for (const btn of clearButtons) {
-      btn.addEventListener('click', () => {
-        searchInput.value = '';
-        for (const group of Object.keys(facets)) facets[group] = null;
-        syncFacetButtons();
-        apply();
-      });
-    }
 
-    // Mobile filters disclosure.
-    const rail = document.getElementById('reg-rail');
-    const railToggle = document.querySelector<HTMLButtonElement>('[data-toggle-rail]');
-    railToggle?.addEventListener('click', () => {
-      const open = rail?.classList.toggle('is-open') ?? false;
-      railToggle.setAttribute('aria-expanded', String(open));
+    clearFilters?.addEventListener('click', () => {
+      for (const key of Object.keys(facets)) delete facets[key];
+      if (search) search.value = '';
+      apply();
     });
 
-    // `/` focuses search, registry style.
+    for (const button of queryButtons) {
+      button.addEventListener('click', () => {
+        if (!search) return;
+        search.value = button.dataset.query ?? '';
+        search.focus();
+        apply();
+      });
+    }
+
+    for (const row of rows) {
+      row.addEventListener('toggle', () => {
+        if (!row.open) return;
+        for (const other of rows) {
+          if (other !== row) other.open = false;
+        }
+        if (row.dataset.slug) {
+          history.replaceState(
+            null,
+            '',
+            `${location.pathname}${location.search}#${row.dataset.slug}`,
+          );
+        }
+      });
+    }
+
     document.addEventListener('keydown', (event) => {
       if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
       const target = event.target as HTMLElement;
-      if (target.closest('input, textarea, select, [contenteditable]')) return;
-      if (document.querySelector('dialog[open]')) return;
+      if (target.closest('input, textarea, select, [contenteditable="true"]')) return;
       event.preventDefault();
-      searchInput.focus();
+      search?.focus();
     });
 
-    // Restore state from the URL.
-    {
-      const params = new URLSearchParams(location.search);
-      searchInput.value = params.get('q') ?? '';
-      for (const group of Object.keys(facets)) {
-        const value = params.get(group);
-        if (
-          value &&
-          facetButtons.some((b) => b.dataset.facet === group && b.dataset.value === value)
-        )
-          facets[group] = value;
-      }
-      const sort = params.get('sort');
-      if (sort && [...sortSelect.options].some((o) => o.value === sort && !o.disabled))
-        sortSelect.value = sort;
-      syncFacetButtons();
-      apply();
-    }
+    readUrlState();
+    apply();
+    initialLoad = false;
 
-    // ---- manifest drawer --------------------------------------------------
-    const drawer = document.getElementById('reg-drawer') as HTMLDialogElement;
-    const cardEls = [...drawer.querySelectorAll<HTMLElement>('[data-card]')];
-    let drawerOpener: HTMLElement | null = null;
-
-    function openCard(slug: string, opener: HTMLElement | null) {
-      const card = cardEls.find((el) => el.dataset.card === slug);
-      if (!card) return;
-      for (const el of cardEls) el.hidden = el !== card;
-      drawerOpener = opener;
-      if (!drawer.open) drawer.showModal();
-      card.querySelector('.reg-card-scroll')?.scrollTo({ top: 0 });
-      history.replaceState(null, '', `${location.pathname}${location.search}#${slug}`);
-    }
-
-    drawer.addEventListener('close', () => {
-      history.replaceState(null, '', location.pathname + location.search);
-      drawerOpener?.focus();
-      drawerOpener = null;
-    });
-    // Click on the backdrop closes.
-    drawer.addEventListener('click', (event) => {
-      if (event.target === drawer) drawer.close();
-    });
-    document.querySelector('[data-close-drawer]')?.addEventListener('click', () => drawer.close());
-
-    for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-open-card]')) {
-      btn.addEventListener('click', () => openCard(btn.dataset.openCard ?? '', btn));
-    }
-
-    // Deep link: /hub#<slug> opens that dataset's card.
-    const initial = decodeURIComponent(location.hash.slice(1));
-    if (initial && cardEls.some((el) => el.dataset.card === initial)) openCard(initial, null);
-
-    // ---- live hydration ---------------------------------------------------
-    // The seed catalog owns the content; a reachable hub adds live numbers.
-    const liveConfig = JSON.parse(
-      document.getElementById('hub-live-config')?.textContent ?? '{}',
-    ) as { hub?: string };
-
-    function formatBytesJs(n: number) {
-      if (n >= 1e9) return `${(n / 1e9).toFixed(1)} GB`;
-      if (n >= 1e6) return `${(n / 1e6).toFixed(1)} MB`;
-      return `${Math.max(1, Math.round(n / 1e3))} KB`;
-    }
-    function formatCount(n: number) {
-      return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-    }
-
-    async function hydrateLive() {
-      if (!liveConfig.hub) return;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
-      try {
-        const res = await fetch(`${liveConfig.hub}/v1/datasets?limit=200`, {
-          signal: controller.signal,
-          headers: { Accept: 'application/json' },
-        });
-        if (!res.ok) return;
-        const body = (await res.json()) as {
-          items?: { name: string; size_bytes?: number; downloads?: number }[];
-        };
-        if (!Array.isArray(body.items)) return;
-        const byName = new Map(body.items.map((item) => [item.name, item]));
-        let anyDownloads = false;
-        for (const row of rows) {
-          const live = byName.get(row.dataset.slug ?? '');
-          if (!live) continue;
-          if (typeof live.downloads === 'number') {
-            anyDownloads = true;
-            row.dataset.downloads = String(live.downloads);
-            const dl = row.querySelector<HTMLElement>('[data-row-dl]');
-            if (dl) {
-              dl.textContent = `${formatCount(live.downloads)} clones`;
-              dl.hidden = false;
-            }
-          }
-          const card = cardEls.find((el) => el.dataset.card === row.dataset.slug);
-          if (card) {
-            const size = card.querySelector<HTMLElement>('[data-stat-size]');
-            if (size && typeof live.size_bytes === 'number')
-              size.textContent = formatBytesJs(live.size_bytes);
-            const dl = card.querySelector<HTMLElement>('[data-stat-dl]');
-            if (dl && typeof live.downloads === 'number')
-              dl.textContent = formatCount(live.downloads);
-          }
-        }
-        if (anyDownloads) {
-          const option = sortSelect.querySelector<HTMLOptionElement>('[data-live-sort]');
-          if (option) option.disabled = false;
-        }
-        const status = document.querySelector<HTMLElement>('[data-hub-status]');
-        const label = document.querySelector<HTMLElement>('[data-hub-status-label]');
-        if (status && label) {
-          status.dataset.state = 'live';
-          label.textContent = `live catalog · ${body.items.length} datasets`;
-        }
-      } catch {
-        /* hub unreachable - the snapshot stands on its own */
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-    hydrateLive();
-
-    // ---- how-cloning-works dialog + terminal loop -------------------------
-    const howDialog = document.getElementById('reg-how') as HTMLDialogElement;
-    document.querySelector('[data-open-how]')?.addEventListener('click', () => {
-      howDialog.showModal();
-      startDemo();
-    });
-    document.querySelector('[data-close-how]')?.addEventListener('click', () => howDialog.close());
-    howDialog.addEventListener('click', (event) => {
-      if (event.target === howDialog) howDialog.close();
-    });
-
-    // Terminal-typing tier of the motion system: jittered keystrokes, 300ms
-    // beats. The server-rendered transcript is the reduced-motion and no-JS
-    // rendering; the loop only runs while the dialog is open.
-    const demoLog = document.querySelector<HTMLElement>('[data-clone-log]');
-    const demoSets = JSON.parse(document.getElementById('hub-demo-data')?.textContent ?? '[]') as {
-      slug: string;
-      clone: string;
-      dest: string;
-      branches: number;
-    }[];
-    const reducedMotion = document.documentElement.dataset.motion === 'reduced';
-    let demoRunning = false;
-
-    function startDemo() {
-      if (demoRunning || reducedMotion || !demoLog || demoSets.length === 0) return;
-      demoRunning = true;
-      runDemo().finally(() => {
-        demoRunning = false;
-      });
-    }
-
-    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    const demoActive = () => howDialog.open && !document.hidden;
-
-    function demoLine(cls: string) {
-      const p = document.createElement('p');
-      p.className = cls;
-      demoLog!.appendChild(p);
-      return p;
-    }
-
-    async function typeCommand(text: string) {
-      const p = demoLine('ht-cmd');
-      const caret = document.createElement('span');
-      caret.className = 'ht-caret';
-      caret.textContent = '$';
-      const body = document.createElement('span');
-      const cursor = document.createElement('span');
-      cursor.className = 'ht-cursor';
-      p.append(caret, ' ', body, cursor);
-      for (const char of text) {
-        if (!demoActive()) break;
-        body.textContent += char;
-        await wait(24 + Math.random() * 16);
-      }
-      body.textContent = text;
-      await wait(300);
-      cursor.remove();
-    }
-
-    async function progressLine() {
-      const BAR = 12;
-      const p = demoLine('ht-out ht-dim');
-      for (let i = 0; i <= BAR; i++) {
-        if (!demoActive()) {
-          i = BAR;
-        }
-        p.textContent = `objects ${'▰'.repeat(i)}${'▱'.repeat(BAR - i)}${i === BAR ? ' complete' : ''}`;
-        await wait(70);
-      }
-    }
-
-    async function outLine(cls: string, text: string) {
-      if (demoActive()) await wait(300);
-      demoLine(cls).textContent = text;
-    }
-
-    async function runDemo() {
-      const host = new URL(liveConfig.hub ?? 'https://stratahub.io').host;
-      for (let i = 0; howDialog.open; i = (i + 1) % demoSets.length) {
-        const demo = demoSets[i];
-        demoLog!.textContent = '';
-        await typeCommand(demo.clone);
-        await outLine('ht-out ht-dim', `resolving hub … ${host}`);
-        await outLine(
-          'ht-out ht-dim',
-          `manifest verified · ${demo.branches} ${demo.branches === 1 ? 'branch' : 'branches'}`,
-        );
-        await progressLine();
-        await outLine('ht-out ht-ok', `cloned into ${demo.dest} - an ordinary local database`);
-        await wait(900);
-        await typeCommand(`strata ${demo.dest} remote`);
-        await outLine('ht-out', `origin: ${host}/${demo.slug}`);
-        for (let hold = 0; hold < 42 && howDialog.open; hold++) await wait(100);
+    const slug = decodeURIComponent(location.hash.slice(1));
+    if (slug) {
+      const row = rows.find((item) => item.dataset.slug === slug);
+      if (row) {
+        row.open = true;
+        requestAnimationFrame(() => row.scrollIntoView({ block: 'center' }));
       }
     }
   </script>
 
   <style>
-    /* ---- header ---- */
-    .reg-head {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
+    .hub-page {
+      overflow: clip;
+      background:
+        linear-gradient(rgba(var(--rgb-white) / 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(var(--rgb-white) / 0.024) 1px, transparent 1px),
+        var(--color-void);
+      background-size:
+        48px 48px,
+        48px 48px,
+        auto;
+    }
+
+    .hub-hero {
+      min-height: calc(100svh - 4.5rem);
+      grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.78fr);
+      gap: clamp(3rem, 7vw, 6rem);
+      align-items: center;
+      padding-top: clamp(4rem, 10vh, 7rem);
+      padding-bottom: clamp(3.5rem, 8vh, 6rem);
+    }
+
+    .hub-intro code,
+    .hub-intro-note code,
+    .hub-clone-command code,
+    .hub-catalog-head code {
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: var(--color-raised);
+      padding: 0.1rem 0.38rem;
+      color: var(--color-ink-hi);
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+
+    .hub-intro-note {
+      margin-top: 1rem;
+      color: var(--color-ink-low);
+      font-size: 0.96rem;
+      line-height: 1.65;
+    }
+
+    .hub-clone-command {
+      display: grid;
+      gap: 0.65rem;
+      max-width: 36rem;
+      margin-top: 1.65rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-panel) 78%, transparent);
+      padding: 0.85rem;
+    }
+
+    .hub-clone-command > span {
+      color: var(--color-ink-low);
+      font-size: 0.76rem;
+    }
+
+    .hub-clone-command p {
+      color: var(--color-ink-low);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .hub-clone-command :global(.hub-hero-copy-chip) {
       justify-content: space-between;
-      gap: 1.25rem;
+      background: var(--color-inset);
     }
-    .reg-head-actions {
+
+    .hub-actions {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      gap: 0.625rem;
-      padding-bottom: 0.25rem;
+      gap: 0.75rem;
+      margin-top: 1.75rem;
     }
-    .reg-status {
+
+    .hub-primary-action {
       display: inline-flex;
+      min-height: 2.8rem;
       align-items: center;
-      gap: 0.5rem;
-      border: 1px solid var(--color-line);
-      border-radius: 999px;
-      padding: 0.45rem 0.8rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: 1;
-      color: var(--color-ink-mid);
-    }
-    .reg-status-dot {
-      width: 0.45rem;
-      height: 0.45rem;
-      border-radius: 999px;
-      background: var(--color-ink-low);
-    }
-    .reg-status[data-state='live'] {
-      border-color: rgb(var(--rgb-terracotta-500) / 0.35);
-      color: var(--color-ink-hi);
-    }
-    .reg-status[data-state='live'] .reg-status-dot {
-      background: var(--color-ok);
-    }
-    .reg-how-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      border: 1px solid var(--color-line);
+      justify-content: center;
       border-radius: var(--radius-control);
-      background: var(--color-panel);
-      padding: 0.5rem 0.875rem;
-      font-size: var(--text-small);
-      font-weight: 500;
-      color: var(--color-ink-hi);
-      cursor: pointer;
+      padding: 0 1.05rem;
+      font-size: 0.93rem;
+      font-weight: 550;
+      text-decoration: none;
       transition:
-        border-color var(--dur-1) ease,
-        background var(--dur-1) ease;
-    }
-    .reg-how-btn:hover {
-      border-color: rgb(var(--rgb-terracotta-500) / 0.45);
-      background: var(--color-raised);
-    }
-    .reg-how-btn svg {
-      color: var(--color-terracotta-400);
+        border-color var(--dur-2) var(--ease-out),
+        background var(--dur-2) var(--ease-out),
+        color var(--dur-2) var(--ease-out),
+        transform var(--dur-2) var(--ease-out);
     }
 
-    /* ---- command bar (sticky) ---- */
-    .reg-bar {
-      position: sticky;
-      top: 4rem;
-      z-index: 30;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.625rem 1rem;
-      margin-top: 2.25rem;
-      padding: 0.75rem 0;
-      background: color-mix(in srgb, var(--color-void) 86%, transparent);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--color-line);
-    }
-    .reg-search-wrap {
-      position: relative;
-      display: flex;
-      flex: 1 1 16rem;
-      max-width: 30rem;
-      align-items: center;
-    }
-    .reg-search-icon {
-      position: absolute;
-      left: 0.8rem;
-      color: var(--color-ink-low);
-      pointer-events: none;
-    }
-    .reg-search {
-      width: 100%;
-      border: 1px solid var(--color-line);
-      border-radius: var(--radius-control);
-      background: var(--color-panel);
-      padding: 0.625rem 2.6rem 0.625rem 2.35rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-hi);
-      transition: border-color var(--dur-2) ease;
-    }
-    .reg-search::placeholder {
-      color: var(--color-ink-low);
-      font-family: var(--font-sans);
-      font-size: var(--text-small);
-    }
-    .reg-search:focus {
-      outline: none;
-      border-color: var(--color-terracotta-500);
-    }
-    .reg-kbd {
-      position: absolute;
-      right: 0.7rem;
-      border: 1px solid var(--color-line);
-      border-radius: 4px;
-      padding: 0.1rem 0.45rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-low);
-      pointer-events: none;
-    }
-    .reg-sort {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-low);
-    }
-    .reg-sort select {
-      appearance: none;
-      border: 1px solid var(--color-line);
-      border-radius: var(--radius-control);
-      background: var(--color-panel);
-      padding: 0.45rem 0.7rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-hi);
-      cursor: pointer;
-    }
-    .reg-sort select:focus-visible {
-      outline: 2px solid var(--color-terracotta-500);
-      outline-offset: 1px;
-    }
-    .reg-count {
-      margin-left: auto;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-low);
-    }
-
-    /* ---- rail + ledger layout ---- */
-    .reg-main {
-      display: grid;
-      gap: 2rem;
-      margin-top: 1.5rem;
-    }
-    @media (min-width: 1024px) {
-      .reg-main {
-        grid-template-columns: 12.5rem minmax(0, 1fr);
-        gap: 2.5rem;
-      }
-      .reg-rail {
-        position: sticky;
-        top: 8.5rem;
-        align-self: start;
-        max-height: calc(100vh - 10rem);
-        overflow-y: auto;
-      }
-    }
-    .reg-facet-group {
-      margin-bottom: 1.5rem;
-    }
-    .reg-facet-h {
-      margin-bottom: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-ink-low);
-    }
-    .reg-facet {
-      display: flex;
-      width: 100%;
-      align-items: center;
-      gap: 0.5rem;
-      border: 0;
-      border-radius: var(--radius-control);
-      background: transparent;
-      padding: 0.375rem 0.5rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-mid);
-      cursor: pointer;
-      text-align: left;
-      transition:
-        background var(--dur-1) ease,
-        color var(--dur-1) ease;
-    }
-    .reg-facet:hover {
-      background: rgb(var(--rgb-white) / 0.04);
-      color: var(--color-ink-hi);
-    }
-    .reg-facet.is-active {
-      background: rgb(var(--rgb-terracotta-500) / 0.09);
-      color: var(--color-terracotta-400);
-    }
-    .reg-facet-label {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .reg-facet-n {
-      margin-left: auto;
-      color: var(--color-ink-low);
-    }
-    .reg-facet.is-active .reg-facet-n {
-      color: var(--color-terracotta-400);
-    }
-    .reg-clear {
-      border: 1px solid var(--color-line);
-      border-radius: 999px;
-      background: transparent;
-      padding: 0.375rem 0.8rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-mid);
-      cursor: pointer;
-    }
-    .reg-clear:hover {
-      border-color: var(--color-line-hover);
-      color: var(--color-ink-hi);
-    }
-
-    .reg-filter-btn {
-      display: none;
-      border: 1px solid var(--color-line);
-      border-radius: var(--radius-control);
-      background: var(--color-panel);
-      padding: 0.55rem 0.875rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: 1;
-      color: var(--color-ink-mid);
-      cursor: pointer;
-    }
-    .reg-filter-btn:hover,
-    .reg-filter-btn[aria-expanded='true'] {
-      border-color: var(--color-line-hover);
-      color: var(--color-ink-hi);
-    }
-
-    /* mobile: rail collapses behind the filters button, opens as a chip strip */
-    @media (max-width: 1023px) {
-      .reg-filter-btn {
-        display: inline-flex;
-      }
-      .reg-rail {
-        display: none;
-        flex-wrap: wrap;
-        gap: 0.375rem 1.25rem;
-      }
-      .reg-rail.is-open {
-        display: flex;
-      }
-      .reg-facet-group {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.375rem;
-        margin-bottom: 0;
-      }
-      .reg-facet-h {
-        margin: 0 0.25rem 0 0;
-      }
-      .reg-facet {
-        width: auto;
-        border: 1px solid var(--color-line);
-        border-radius: 999px;
-        padding: 0.3rem 0.65rem;
-      }
-      .reg-facet.is-active {
-        border-color: rgb(var(--rgb-terracotta-500) / 0.55);
-      }
-      .reg-facet-n {
-        margin-left: 0.35rem;
-      }
-    }
-
-    /* ---- the ledger ---- */
-    .reg-ledger {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      border-top: 1px solid var(--color-line);
-    }
-    .reg-rowwrap {
-      position: relative;
-      border-bottom: 1px solid var(--color-line);
-    }
-    .reg-row {
-      display: grid;
-      width: 100%;
-      grid-template-columns: minmax(0, 1fr) auto 1rem;
-      align-items: center;
-      gap: 1.25rem;
-      border: 0;
-      background: transparent;
-      padding: 0.875rem 0.75rem 0.875rem 0.875rem;
-      text-align: left;
-      cursor: pointer;
-      transition: background var(--dur-1) ease;
-    }
-    .reg-rowwrap::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
+    .hub-primary-action {
+      border: 1px solid color-mix(in srgb, var(--color-terracotta-500) 64%, transparent);
       background: var(--color-terracotta-500);
-      opacity: 0;
-      transition: opacity var(--dur-1) ease;
-    }
-    .reg-rowwrap:hover::before,
-    .reg-rowwrap:focus-within::before {
-      opacity: 1;
-    }
-    .reg-rowwrap:hover .reg-row,
-    .reg-row:focus-visible {
-      background: rgb(var(--rgb-white) / 0.03);
-    }
-    .reg-row:focus-visible {
-      outline: 2px solid var(--color-terracotta-500);
-      outline-offset: -2px;
-    }
-    .reg-row-main {
-      display: grid;
-      gap: 0.25rem;
-      min-width: 0;
-    }
-    .reg-row-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-body);
-      color: var(--color-ink-hi);
-    }
-    .reg-row-desc {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: var(--text-small);
-      color: var(--color-ink-mid);
-    }
-    .reg-row-side {
-      display: grid;
-      justify-items: end;
-      gap: 0.4rem;
-    }
-    .reg-row-meta {
-      display: flex;
-      gap: 0.875rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: 1;
-      color: var(--color-ink-low);
-      white-space: nowrap;
-    }
-    .reg-row-dl {
-      color: var(--color-ink-mid);
-    }
-    .reg-row-chev {
-      color: var(--color-ink-low);
-      font-size: 1.1rem;
-      line-height: 1;
-      transition: color var(--dur-1) ease;
-    }
-    .reg-rowwrap:hover .reg-row-chev {
-      color: var(--color-terracotta-400);
+      color: var(--color-terracotta-950);
+      box-shadow: 0 14px 42px -28px rgba(var(--rgb-terracotta-500) / 0.9);
     }
 
-    /* hover-revealed quick clone */
-    .reg-copy {
-      position: absolute;
-      right: 2.4rem;
-      top: 50%;
-      translate: 0 -50%;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
+    .hub-primary-action:hover {
+      transform: translateY(-1px);
+    }
+
+    .hub-hero-panel {
       border: 1px solid var(--color-line);
-      border-radius: 999px;
-      background: var(--color-raised);
-      padding: 0.35rem 0.7rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: 1;
-      color: var(--color-ink-mid);
-      cursor: pointer;
-      opacity: 0;
-      transition:
-        opacity var(--dur-1) ease,
-        border-color var(--dur-1) ease,
-        color var(--dur-1) ease;
-    }
-    .reg-rowwrap:hover .reg-copy,
-    .reg-copy:focus-visible {
-      opacity: 1;
-    }
-    .reg-copy:hover {
-      border-color: rgb(var(--rgb-terracotta-500) / 0.5);
-      color: var(--color-ink-hi);
-    }
-    .reg-copy:focus-visible {
-      outline: 2px solid var(--color-terracotta-500);
-      outline-offset: 1px;
-    }
-    .reg-copy .copy-chip-done {
-      color: var(--color-ok);
-    }
-    @media (max-width: 720px) {
-      .reg-copy {
-        display: none;
-      }
-      .reg-row {
-        grid-template-columns: minmax(0, 1fr) 1rem;
-      }
-      .reg-row-side {
-        display: none;
-      }
-    }
-
-    /* ---- the composition bar (signature) ---- */
-    .reg-bar-mini,
-    .reg-bar-big {
-      display: flex;
-      gap: 2px;
-      width: 5.5rem;
-    }
-    .reg-bar-big {
-      width: 100%;
-      margin-top: 1.25rem;
-    }
-    .reg-seg {
-      flex: 1;
-      height: 3px;
-      border-radius: 999px;
-      background: var(--color-ink-low);
-    }
-    .reg-bar-big .reg-seg {
-      height: 5px;
-    }
-    .seg-kv {
-      background: var(--color-strata-kv);
-    }
-    .seg-json {
-      background: var(--color-strata-json);
-    }
-    .seg-events {
-      background: var(--color-strata-event);
-    }
-    .seg-vectors {
-      background: var(--color-strata-vector);
-    }
-    .reg-dot {
-      flex: none;
-      width: 0.4rem;
-      height: 0.4rem;
-      border-radius: 999px;
-      background: var(--color-ink-low);
-    }
-    .dot-kv {
-      background: var(--color-strata-kv);
-    }
-    .dot-json {
-      background: var(--color-strata-json);
-    }
-    .dot-events {
-      background: var(--color-strata-event);
-    }
-    .dot-vectors {
-      background: var(--color-strata-vector);
-    }
-    .dot-branches {
-      background: var(--color-terracotta-500);
-    }
-
-    .reg-empty {
-      order: 9999;
-      padding: 3rem 1rem;
-      text-align: center;
-      font-size: var(--text-small);
-      color: var(--color-ink-low);
-    }
-    .reg-empty-t {
-      margin-bottom: 0.25rem;
-      font-weight: 500;
-      color: var(--color-ink-mid);
-    }
-
-    /* ---- manifest drawer ---- */
-    .reg-drawer {
-      position: fixed;
-      inset: 0 0 0 auto;
-      display: none;
-      width: min(30rem, 100%);
-      max-width: none;
-      max-height: none;
-      height: 100dvh;
-      margin: 0;
-      padding: 0;
-      border: 0;
-      border-left: 1px solid rgb(var(--rgb-terracotta-500) / 0.22);
-      background: var(--color-panel);
-      color: var(--color-ink-mid);
+      border-radius: var(--radius-frame);
+      background:
+        linear-gradient(180deg, rgba(var(--rgb-white) / 0.055), transparent 36%), var(--color-panel);
       box-shadow: var(--shadow-float);
+      overflow: hidden;
     }
-    .reg-drawer[open] {
-      display: flex;
-      flex-direction: column;
-      animation: reg-slide var(--dur-3) var(--ease-out);
-    }
-    @keyframes reg-slide {
-      from {
-        transform: translateX(2rem);
-        opacity: 0;
-      }
-    }
-    html[data-motion='reduced'] .reg-drawer[open] {
-      animation: none;
-    }
-    .reg-drawer::backdrop {
-      background: rgb(var(--rgb-black) / 0.55);
-    }
-    .reg-drawer-top {
+
+    .hub-panel-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
       border-bottom: 1px solid var(--color-line);
-      padding: 0.875rem 1.25rem;
-    }
-    .reg-close {
-      display: inline-flex;
-      border: 0;
-      border-radius: var(--radius-control);
-      background: transparent;
-      padding: 0.4rem;
+      background: rgba(var(--rgb-white) / 0.035);
+      padding: 0.8rem 1rem;
       color: var(--color-ink-low);
-      cursor: pointer;
-      transition:
-        color var(--dur-1) ease,
-        background var(--dur-1) ease;
-    }
-    .reg-close:hover {
-      background: rgb(var(--rgb-white) / 0.06);
-      color: var(--color-ink-hi);
-    }
-    .reg-card {
-      display: flex;
-      min-height: 0;
-      flex: 1;
-      flex-direction: column;
-    }
-    .reg-card-scroll {
-      min-height: 0;
-      flex: 1;
-      overflow-y: auto;
-      padding: 1.5rem 1.5rem 1.75rem;
-    }
-    .reg-card-name {
       font-family: var(--font-mono);
-      font-size: 1.25rem;
-      line-height: 1.3;
-      color: var(--color-ink-hi);
+      font-size: 0.76rem;
+    }
+
+    .hub-panel-top span:first-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hub-terminal {
+      border-bottom: 1px solid var(--color-line);
+      background: var(--color-inset);
+      padding: 1.15rem;
+      font-family: var(--font-mono);
+      font-size: clamp(0.76rem, 1.5vw, 0.86rem);
+      line-height: 1.7;
+    }
+
+    .hub-terminal p {
       overflow-wrap: anywhere;
     }
-    .reg-card-title {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.375rem;
-      font-size: var(--text-small);
-      color: var(--color-ink-mid);
-    }
-    .reg-badge {
-      border: 1px solid rgb(var(--rgb-terracotta-500) / 0.35);
-      border-radius: 999px;
-      padding: 0.15rem 0.5rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: 1.4;
+
+    .hub-terminal span {
       color: var(--color-terracotta-400);
     }
-    .reg-legend {
+
+    .hub-terminal-muted {
+      color: var(--color-ink-low);
+    }
+
+    .hub-terminal-output {
+      color: var(--color-ok);
+    }
+
+    .hub-featured {
+      padding: 1.05rem 1.15rem;
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .hub-featured span,
+    .hub-clone-box span,
+    .hub-quickstart span {
+      display: block;
+      color: var(--color-ink-low);
+      font-size: 0.77rem;
+    }
+
+    .hub-featured strong {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--color-ink-hi);
+      font-size: 1rem;
+      font-weight: 560;
+    }
+
+    :global(.hub-hero-copy-chip),
+    :global(.hub-row-copy-chip) {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .hub-preview-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      margin: 0;
+      background: var(--color-line);
+      border-bottom: 1px solid var(--color-line);
+      padding: 0;
+      list-style: none;
+    }
+
+    .hub-preview-list li {
+      min-width: 0;
+      background: var(--color-panel);
+      padding: 0.95rem 1.15rem;
+    }
+
+    .hub-preview-list span {
+      display: block;
+      color: var(--color-terracotta-400);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .hub-preview-list p {
+      margin-top: 0.35rem;
+      color: var(--color-ink-mid);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .hub-hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 1.15rem;
+      background: var(--color-line);
+      border-top: 1px solid var(--color-line);
+    }
+
+    .hub-hero-stats span {
+      display: grid;
+      gap: 0.18rem;
+      background: var(--color-panel);
+      padding: 1rem;
+    }
+
+    .hub-hero-stats strong {
+      color: var(--color-ink-hi);
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+
+    .hub-hero-stats small {
+      color: var(--color-ink-low);
+      font-size: 0.76rem;
+    }
+
+    .hub-catalog {
+      scroll-margin-top: 5.5rem;
+      padding-top: clamp(4rem, 9vw, 7rem);
+      padding-bottom: 6.5rem;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .hub-catalog-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+
+    .hub-source {
+      flex: 0 0 auto;
+      min-width: 13rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: rgba(var(--rgb-white) / 0.035);
+      padding: 1rem;
+    }
+
+    .hub-source span {
+      display: block;
+      color: var(--color-ink-low);
+      font-size: 0.75rem;
+    }
+
+    .hub-source strong {
+      display: block;
+      margin-top: 0.28rem;
+      color: var(--color-ink-hi);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 400;
+    }
+
+    .hub-toolbar {
+      position: sticky;
+      top: 4rem;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(16rem, 1fr) auto minmax(15rem, auto);
+      gap: 0.85rem;
+      align-items: center;
+      margin-top: 2rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-frame);
+      background: color-mix(in srgb, var(--color-void) 82%, transparent);
+      padding: 0.75rem;
+      backdrop-filter: blur(18px);
+    }
+
+    .hub-search-wrap {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.7rem;
+      align-items: center;
+      min-width: 0;
+      min-height: 2.7rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: var(--color-inset);
+      padding: 0 0.8rem;
+      color: var(--color-ink-low);
+    }
+
+    .hub-search-wrap input {
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: var(--color-ink-hi);
+      font: inherit;
+      outline: 0;
+    }
+
+    .hub-search-wrap input::placeholder {
+      color: var(--color-ink-low);
+    }
+
+    .hub-search-wrap kbd {
+      border: 1px solid var(--color-line);
+      border-radius: 4px;
+      padding: 0.05rem 0.35rem;
+      color: var(--color-ink-low);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    .hub-quick-filters,
+    .hub-toolbar-end {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem 1rem;
-      margin-top: 0.6rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-ink-mid);
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-end;
     }
-    .reg-legend span {
+
+    .hub-quick-filters button,
+    .hub-filter-menu summary,
+    .hub-facet-list button,
+    .hub-clear-filters,
+    .hub-sort select {
+      min-height: 2.35rem;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-control);
+      background: rgba(var(--rgb-white) / 0.035);
+      color: var(--color-ink-mid);
+      font: inherit;
+      font-size: 0.84rem;
+      transition:
+        border-color var(--dur-2) var(--ease-out),
+        background var(--dur-2) var(--ease-out),
+        color var(--dur-2) var(--ease-out);
+    }
+
+    .hub-quick-filters button,
+    .hub-filter-menu summary,
+    .hub-clear-filters {
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
+      padding: 0 0.75rem;
+      cursor: pointer;
     }
-    .reg-card-desc {
-      margin-top: 1.25rem;
-      font-size: var(--text-small);
-      line-height: var(--text-small--line-height);
-      color: var(--color-ink-mid);
-    }
-    .reg-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.75rem;
-      margin-top: 1.25rem;
-      border-block: 1px solid var(--color-line);
-      padding: 0.875rem 0;
-    }
-    .reg-stats dt {
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-ink-low);
-    }
-    .reg-stats dd {
-      margin-top: 0.25rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
+
+    .hub-quick-filters button:hover,
+    .hub-filter-menu summary:hover,
+    .hub-facet-list button:hover,
+    .hub-clear-filters:hover,
+    .hub-sort select:hover {
+      border-color: var(--color-line-hover);
       color: var(--color-ink-hi);
+    }
+
+    .hub-filter-menu {
+      position: relative;
+    }
+
+    .hub-filter-menu summary {
+      list-style: none;
+    }
+
+    .hub-filter-menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .hub-filter-panel {
+      position: absolute;
+      top: calc(100% + 0.7rem);
+      right: 0;
+      width: min(38rem, calc(100vw - 2rem));
+      max-height: min(34rem, calc(100svh - 9rem));
+      overflow-y: auto;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-frame);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-float);
+      padding: 1rem;
+    }
+
+    .hub-filter-panel section + section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .hub-filter-panel h3 {
+      margin-bottom: 0.6rem;
+      color: var(--color-ink-low);
+      font-size: 0.77rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .hub-facet-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .hub-facet-list button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 0.7rem;
+      cursor: pointer;
+    }
+
+    .hub-facet-list button[aria-pressed='true'] {
+      border-color: color-mix(in srgb, var(--color-terracotta-500) 64%, transparent);
+      background: color-mix(in srgb, var(--color-terracotta-500) 16%, var(--color-panel));
+      color: var(--color-ink-hi);
+    }
+
+    .hub-facet-list small {
+      color: var(--color-ink-low);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    .hub-clear-filters {
+      margin-top: 1rem;
+    }
+
+    .hub-sort {
+      display: flex;
+      gap: 0.45rem;
+      align-items: center;
+      color: var(--color-ink-low);
+      font-size: 0.78rem;
+    }
+
+    .hub-sort select {
+      min-width: 8.5rem;
+      padding: 0 0.75rem;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .hub-results-meta {
+      display: flex;
+      gap: 0.35rem;
+      margin-top: 1rem;
+      color: var(--color-ink-low);
+      font-size: 0.82rem;
+    }
+
+    .hub-results-meta [data-result-count] {
+      color: var(--color-ink-hi);
+      font-family: var(--font-mono);
+    }
+
+    .hub-table {
+      display: grid;
+      gap: 0.65rem;
+      margin-top: 0.8rem;
+    }
+
+    .hub-table-head,
+    .hub-row {
+      display: grid;
+      grid-template-columns:
+        minmax(16rem, 1.45fr) minmax(8rem, 0.48fr) minmax(12rem, 0.72fr)
+        minmax(5rem, 0.28fr) minmax(5rem, 0.24fr);
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .hub-table-head {
+      position: sticky;
+      top: 8.7rem;
+      z-index: 8;
+      border-bottom: 1px solid var(--color-line);
+      background: color-mix(in srgb, var(--color-void) 86%, transparent);
+      padding: 0.7rem 1rem;
+      color: var(--color-ink-low);
+      font-size: 0.75rem;
+      backdrop-filter: blur(18px);
+    }
+
+    .hub-dataset {
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: color-mix(in srgb, var(--color-panel) 86%, transparent);
+      overflow: clip;
+      transition:
+        border-color var(--dur-2) var(--ease-out),
+        background var(--dur-2) var(--ease-out);
+    }
+
+    .hub-dataset:hover,
+    .hub-dataset[open] {
+      border-color: var(--color-line-hover);
+      background: var(--color-panel);
+    }
+
+    .hub-row {
+      min-height: 6.2rem;
+      padding: 1rem;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .hub-row::-webkit-details-marker {
+      display: none;
+    }
+
+    .hub-row::marker {
+      content: '';
+    }
+
+    .hub-row-main,
+    .hub-row-use,
+    .hub-row-shape,
+    .hub-row-branches,
+    .hub-row-detail {
+      min-width: 0;
+    }
+
+    .hub-row-title {
+      display: block;
+      color: var(--color-ink-hi);
+      font-size: 1rem;
+      font-weight: 560;
+    }
+
+    .hub-row-slug {
+      display: block;
+      margin-top: 0.24rem;
+      color: var(--color-terracotta-400);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+    }
+
+    .hub-row-desc {
+      display: -webkit-box;
       overflow: hidden;
+      margin-top: 0.48rem;
+      color: var(--color-ink-low);
+      font-size: 0.86rem;
+      line-height: 1.45;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .hub-row-use {
+      color: var(--color-ink-mid);
+      font-size: 0.88rem;
+      text-transform: capitalize;
+    }
+
+    .hub-row-shape {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.38rem;
+    }
+
+    .hub-row-shape span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.55rem;
+      border: 1px solid var(--color-line);
+      border-radius: 999px;
+      background: rgba(var(--rgb-white) / 0.035);
+      padding: 0 0.55rem;
+      color: var(--color-ink-mid);
+      font-size: 0.74rem;
+    }
+
+    .hub-row-shape span[data-primitive='kv'] {
+      color: var(--color-strata-kv);
+    }
+
+    .hub-row-shape span[data-primitive='json'] {
+      color: var(--color-strata-json);
+    }
+
+    .hub-row-shape span[data-primitive='events'] {
+      color: var(--color-strata-event);
+    }
+
+    .hub-row-shape span[data-primitive='vectors'] {
+      color: var(--color-strata-vector);
+    }
+
+    .hub-row-shape span[data-primitive='graph'] {
+      color: var(--color-strata-graph);
+    }
+
+    .hub-row-branches {
+      display: grid;
+      gap: 0.15rem;
+      color: var(--color-ink-hi);
+      font-family: var(--font-mono);
+      font-size: 1rem;
+    }
+
+    .hub-row-branches small {
+      color: var(--color-ink-low);
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+    }
+
+    .hub-row-detail {
+      display: inline-flex;
+      gap: 0.4rem;
+      align-items: center;
+      justify-content: flex-end;
+      color: var(--color-ink-low);
+      font-size: 0.82rem;
+    }
+
+    .hub-row-detail svg {
+      transition: transform var(--dur-2) var(--ease-out);
+    }
+
+    .hub-dataset[open] .hub-row-detail {
+      color: var(--color-terracotta-400);
+    }
+
+    .hub-dataset[open] .hub-row-detail svg {
+      transform: rotate(180deg);
+    }
+
+    .hub-detail {
+      border-top: 1px solid var(--color-line);
+      background: var(--color-inset);
+      padding: clamp(1.1rem, 3vw, 1.5rem);
+    }
+
+    .hub-detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.55fr);
+      gap: clamp(1.25rem, 4vw, 2.5rem);
+      align-items: start;
+    }
+
+    .hub-detail-story {
+      min-width: 0;
+    }
+
+    .hub-detail-kicker {
+      display: block;
+      color: var(--color-ink-low);
+      font-size: 0.78rem;
+    }
+
+    .hub-detail-story p {
+      max-width: 48rem;
+      margin-top: 0.55rem;
+      color: var(--color-ink-mid);
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+
+    .hub-detail-actions {
+      min-width: 0;
+    }
+
+    .hub-detail-lower {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.55fr);
+      gap: clamp(1.25rem, 4vw, 2.5rem);
+      margin-top: 1.45rem;
+      padding-top: 1.45rem;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .hub-detail-block {
+      min-width: 0;
+    }
+
+    .hub-detail-block h3 {
+      color: var(--color-ink-hi);
+      font-size: 0.88rem;
+      font-weight: 560;
+    }
+
+    .hub-detail-block ul {
+      display: grid;
+      gap: 0.85rem;
+      margin: 0.85rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hub-detail-block li {
+      display: grid;
+      grid-template-columns: minmax(5.5rem, auto) 1fr;
+      gap: 0.9rem;
+      align-items: start;
+    }
+
+    .hub-detail-block li > span {
+      color: var(--color-terracotta-400);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+
+    .hub-detail-block p {
+      color: var(--color-ink-mid);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .hub-empty-note {
+      max-width: 36rem;
+      margin-top: 0.85rem;
+    }
+
+    .hub-clone-box,
+    .hub-quickstart,
+    .hub-detail-meta {
+      min-width: 0;
+    }
+
+    .hub-clone-box {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .hub-quickstart {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 1.15rem;
+      padding-top: 1.15rem;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .hub-quickstart pre {
+      overflow-x: auto;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-card);
+      background: var(--color-inset);
+      padding: 0.9rem;
+      color: var(--color-ink-mid);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      line-height: 1.65;
+    }
+
+    .hub-detail-meta {
+      display: grid;
+      align-content: start;
+      gap: 0;
+      margin: 0;
+    }
+
+    .hub-detail-meta div {
+      display: grid;
+      grid-template-columns: minmax(6rem, 0.38fr) minmax(0, 1fr);
+      gap: 0.9rem;
+      min-width: 0;
+      padding: 0.72rem 0;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .hub-detail-meta div:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .hub-detail-meta dt {
+      color: var(--color-ink-low);
+      font-size: 0.72rem;
+    }
+
+    .hub-detail-meta dd {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--color-ink-mid);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .reg-card-h {
-      margin-top: 1.5rem;
-      margin-bottom: 0.625rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-ink-low);
-    }
-    .reg-quick-h {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-    .reg-includes {
-      display: grid;
-      gap: 0.5rem;
-    }
-    .reg-includes li {
-      display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
-      font-size: var(--text-small);
-      line-height: var(--text-small--line-height);
-      color: var(--color-ink-mid);
-    }
-    .reg-includes .reg-dot {
-      position: relative;
-      top: -0.125rem;
-    }
-    .reg-branches {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-    .reg-branches code {
-      border: 1px solid var(--color-line);
-      border-radius: 999px;
-      padding: 0.2rem 0.6rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: 1;
-      color: var(--color-ink-mid);
-    }
-    .reg-quick {
-      overflow-x: auto;
-      border: 1px solid var(--color-line);
-      border-radius: var(--radius-control);
-      background: var(--color-inset);
-      padding: 0.75rem 0.875rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: var(--text-mono-sm--line-height);
-      color: var(--color-ink-mid);
-    }
-    .reg-provenance {
-      margin-top: 1.25rem;
-      font-size: var(--text-small);
-      line-height: var(--text-small--line-height);
-      color: var(--color-ink-low);
-    }
-    .reg-provenance code {
-      font-family: var(--font-mono);
-      font-size: 0.92em;
-      color: var(--color-ink-mid);
-    }
-    .reg-card-foot {
-      border-top: 1px solid var(--color-line);
-      background: var(--color-panel);
-      padding: 1rem 1.5rem;
-    }
 
-    /* ---- how dialog ---- */
-    .reg-howdlg {
-      width: min(58rem, calc(100% - 2rem));
-      max-height: min(calc(100dvh - 4rem), 44rem);
-      margin: auto;
-      padding: 0;
-      border: 1px solid rgb(var(--rgb-terracotta-500) / 0.22);
-      border-radius: var(--radius-frame);
-      background: var(--color-panel);
-      color: var(--color-ink-mid);
-      box-shadow: var(--shadow-float);
-    }
-    .reg-howdlg::backdrop {
-      background: rgb(var(--rgb-black) / 0.55);
-    }
-    .reg-howdlg-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      border-bottom: 1px solid var(--color-line);
-      padding: 1.125rem 1.5rem;
-    }
-    .reg-howdlg-grid {
+    .hub-empty {
       display: grid;
-      gap: 1.75rem;
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-    @media (min-width: 860px) {
-      .reg-howdlg-grid {
-        grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1fr);
-        gap: 2.25rem;
-      }
-    }
-    .reg-steps {
-      display: grid;
-      gap: 1.125rem;
-      counter-reset: reg-step;
-    }
-    .reg-steps li {
-      position: relative;
-      counter-increment: reg-step;
-      padding-left: 2.25rem;
-    }
-    .reg-steps li::before {
-      content: counter(reg-step);
-      position: absolute;
-      left: 0;
-      top: 0.05rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 1px solid rgb(var(--rgb-terracotta-500) / 0.4);
-      border-radius: 999px;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      color: var(--color-terracotta-400);
-    }
-    .reg-step-t {
-      margin-bottom: 0.2rem;
-      font-weight: 500;
-      color: var(--color-ink-hi);
-    }
-    .reg-steps p:not(.reg-step-t),
-    .reg-how-note {
-      font-size: var(--text-small);
-      line-height: var(--text-small--line-height);
-      color: var(--color-ink-mid);
-    }
-    .reg-steps code,
-    .reg-how-note code {
-      font-family: var(--font-mono);
-      font-size: 0.92em;
-      color: var(--color-ink-hi);
-    }
-    .reg-how-note {
-      margin-top: 1.25rem;
-      border-left: 2px solid rgb(var(--rgb-terracotta-500) / 0.4);
-      padding-left: 0.875rem;
-    }
-    .reg-how-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem 1.125rem;
-      margin-top: 1.25rem;
-      font-size: var(--text-small);
-    }
-    .reg-how-links a {
-      color: var(--color-terracotta-400);
-      text-decoration: none;
-    }
-    .reg-how-links a:hover {
-      text-decoration: underline;
-    }
-
-    /* ---- walkthrough terminal ---- */
-    .reg-term {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border: 1px solid var(--color-line);
+      gap: 0.35rem;
+      justify-items: center;
+      border: 1px dashed var(--color-line-hover);
       border-radius: var(--radius-card);
-      background: var(--color-panel);
-    }
-    .reg-term-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      border-bottom: 1px solid var(--color-line);
-      background: rgb(var(--rgb-terracotta-500) / 0.04);
-      padding: 0.625rem 1rem;
-    }
-    .reg-term-body {
-      flex: 1;
-      min-height: 15rem;
-      background: var(--color-inset);
-      padding: 1rem 1.125rem;
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      line-height: var(--text-mono-sm--line-height);
-    }
-    .reg-term-body .ht-entry + .ht-entry {
-      margin-top: 0.875rem;
-    }
-    .ht-cmd {
-      color: var(--color-ink-hi);
-      overflow-wrap: anywhere;
-    }
-    .ht-caret {
-      color: var(--color-terracotta-400);
-      margin-right: 0.25rem;
-    }
-    .ht-out {
-      color: var(--color-ink-mid);
-      overflow-wrap: anywhere;
-    }
-    .ht-dim {
+      padding: 2.5rem 1rem;
       color: var(--color-ink-low);
-    }
-    .ht-ok {
-      color: var(--color-ok);
-    }
-    .ht-cursor {
-      display: inline-block;
-      width: 0.55em;
-      height: 1.05em;
-      margin-left: 0.15em;
-      vertical-align: text-bottom;
-      background: var(--color-terracotta-400);
-      animation: ht-blink 1.1s steps(1) infinite;
-    }
-    @keyframes ht-blink {
-      50% {
-        opacity: 0;
-      }
-    }
-    html[data-motion='reduced'] .ht-cursor {
-      animation: none;
+      text-align: center;
     }
 
-    @media (max-width: 900px) {
-      .reg-search-wrap {
-        max-width: none;
+    .hub-empty strong {
+      color: var(--color-ink-hi);
+      font-weight: 560;
+    }
+
+    .hub-empty[hidden],
+    .hub-dataset[hidden] {
+      display: none;
+    }
+
+    @media (max-width: 1080px) {
+      .hub-hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
       }
-      .reg-count {
+
+      .hub-hero-panel {
+        max-width: 44rem;
+      }
+
+      .hub-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-quick-filters,
+      .hub-toolbar-end {
+        justify-content: flex-start;
+      }
+
+      .hub-table-head {
         display: none;
+      }
+
+      .hub-row {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+
+      .hub-row-detail {
+        justify-content: flex-start;
+      }
+
+      .hub-detail-grid,
+      .hub-detail-lower {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hub-catalog-head,
+      .hub-featured {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-catalog-head {
+        display: grid;
+      }
+
+      .hub-toolbar {
+        position: relative;
+        top: auto;
+        z-index: 1;
+      }
+
+      .hub-source {
+        min-width: 0;
+      }
+
+      .hub-filter-panel {
+        position: fixed;
+        top: 5rem;
+        left: 0;
+        right: 0;
+        width: auto;
+        max-height: calc(100svh - 6rem);
+        margin-inline: 1rem;
+      }
+
+      .hub-hero-stats,
+      .hub-preview-list {
+        grid-template-columns: 1fr;
+      }
+
+      .hub-detail-block li,
+      .hub-detail-meta div {
+        grid-template-columns: 1fr;
       }
     }
   </style>

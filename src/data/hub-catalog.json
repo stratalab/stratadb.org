@@ -1,52 +1,210 @@
 {
   "hub": "https://stratahub.io",
-  "source": "stratalab/stratahub docs/curated-datasets",
+  "source": "https://stratahub.io/v1/datasets",
+  "fetched_at": "2026-09-02",
   "datasets": [
     {
-      "slug": "movielens-100k",
-      "title": "MovieLens 100K",
-      "description": "The GroupLens movie catalog across three primitives - movie JSON, KV aggregates, and similarity-ready genre vectors.",
-      "tasks": ["recommendation", "retrieval", "tabular"],
-      "tags": ["classic", "vectors", "embeddings", "branches"],
-      "license": "MovieLens-Research",
+      "slug": "titanic",
+      "title": "Titanic Passengers",
+      "description": "Passenger records from the 1912 voyage with raw and cleaned branches - the canonical beginner table, restructured for experiment isolation.",
+      "tasks": [
+        "classification",
+        "tabular"
+      ],
+      "tags": [
+        "classic",
+        "beginner",
+        "demo",
+        "branches",
+        "time-travel"
+      ],
+      "license": "CC0-1.0",
       "size_category": "small",
-      "primitives": ["json", "kv", "vectors"],
-      "branches": ["default", "sample"],
+      "size_bytes": 6887,
+      "downloads": 12,
+      "last_updated": "2026-09-01T01:19:32.333026064Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default",
+        "raw",
+        "cleaned"
+      ],
       "includes": [
         {
           "primitive": "json",
-          "detail": "One document per movie (movie:<id>) with title, year, genres, and rating summary stats."
-        },
-        {
-          "primitive": "vectors",
-          "detail": "Collection movie-genres - 19-dimension cosine vectors, so nearest-neighbor queries work right after clone."
+          "detail": "One document per passenger (passenger:<id>) with class, fare, embarkation, survival, and cabin fields."
         },
         {
           "primitive": "kv",
-          "detail": "Catalog aggregates under meta: - movie count, genre list, source id."
+          "detail": "Aggregates under meta: - survival rate, passenger counts."
         },
         {
           "primitive": "branches",
-          "detail": "The sample branch trims the catalog to the ten most-rated movies - the small/full split without duplicating storage."
+          "detail": "raw keeps the nulls; cleaned imputes them, with every curation step preserved as document history."
         }
       ],
       "quickstart": [
-        "strata clone movielens-100k ./ml",
-        "strata ./ml json get movie:1 '$'",
-        "strata ./ml vector query movie-genres '[0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]' --json",
-        "strata ./ml --branch sample json list"
+        "strata clone titanic ./titanic",
+        "strata ./titanic --branch raw json get passenger:6 '$'",
+        "strata ./titanic --branch cleaned json history passenger:6",
+        "strata ./titanic kv get meta:survival_rate"
+      ]
+    },
+    {
+      "slug": "ab-test-results",
+      "title": "A/B Test Results",
+      "description": "A seeded three-arm A/B test with one branch per arm and per-arm summary documents for cross-branch comparison in two reads.",
+      "tasks": [
+        "ab-testing",
+        "analytics",
+        "tabular"
+      ],
+      "tags": [
+        "synthetic",
+        "branches",
+        "demo",
+        "experimentation"
+      ],
+      "license": "CC0-1.0",
+      "size_category": "small",
+      "size_bytes": 1249,
+      "downloads": 6,
+      "last_updated": "2026-09-01T01:19:37.213385179Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default",
+        "control",
+        "variant-a",
+        "variant-b"
+      ],
+      "includes": [
+        {
+          "primitive": "json",
+          "detail": "One document per session (session:<n>), plus a per-arm summary:metrics document."
+        },
+        {
+          "primitive": "kv",
+          "detail": "The experiment definition under meta: - hypothesis, arm sizes."
+        },
+        {
+          "primitive": "branches",
+          "detail": "control, variant-a, and variant-b forked from the shared definition - the same query per branch is the whole analysis."
+        }
+      ],
+      "quickstart": [
+        "strata clone ab-test-results ./abtest",
+        "strata ./abtest kv get meta:hypothesis",
+        "strata ./abtest --branch variant-a json get summary:metrics '$'"
+      ]
+    },
+    {
+      "slug": "iana-http-reference",
+      "title": "IANA HTTP Reference",
+      "description": "The IANA HTTP registries - status codes, methods, header fields - as one-read KV lookups with RFC references in JSON.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "tooling"
+      ],
+      "tags": [
+        "http",
+        "iana",
+        "status-codes",
+        "methods",
+        "headers",
+        "reference",
+        "lookup"
+      ],
+      "license": "LicenseRef-Public-Domain",
+      "size_category": "small",
+      "size_bytes": 80154,
+      "downloads": 3,
+      "last_updated": "2026-09-01T01:19:44.911825726Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone iana-http-reference ./iana-http-reference"
+      ]
+    },
+    {
+      "slug": "world-bank-indicators",
+      "title": "World Bank Indicators",
+      "description": "Population, GDP, and inflation for 266 countries and regions, 2000-2025, one year-keyed series document per entity.",
+      "tasks": [
+        "reference-data",
+        "time-series",
+        "analysis"
+      ],
+      "tags": [
+        "world-bank",
+        "economics",
+        "population",
+        "gdp",
+        "inflation",
+        "countries",
+        "reference"
+      ],
+      "license": "CC-BY-4.0",
+      "size_category": "small",
+      "size_bytes": 533840,
+      "downloads": 2,
+      "last_updated": "2026-09-01T01:19:45.711510357Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone world-bank-indicators ./world-bank-indicators"
       ]
     },
     {
       "slug": "agent-memory-with-experiments",
       "title": "Agent Memory, With Experiments",
-      "description": "A synthetic agent's memory - episodes, event trace, working state - pre-forked into three retention-policy branches.",
-      "tasks": ["agent-memory", "retrieval", "tutorial"],
-      "tags": ["agents", "synthetic", "branches", "events", "state"],
+      "description": "A synthetic agent memory snapshot - episodic memories, event trace, working state - pre-forked into three retention-policy branches.",
+      "tasks": [
+        "agent-memory",
+        "retrieval",
+        "tutorial"
+      ],
+      "tags": [
+        "agents",
+        "synthetic",
+        "branches",
+        "events",
+        "state"
+      ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "primitives": ["json", "events", "kv"],
-      "branches": ["default", "retention-all", "retention-window-8", "retention-salience"],
+      "size_bytes": 12817,
+      "downloads": 1,
+      "last_updated": "2026-09-01T01:12:28.389402Z",
+      "primitives": [
+        "events",
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default",
+        "retention-all",
+        "retention-window-8",
+        "retention-salience"
+      ],
       "includes": [
         {
           "primitive": "json",
@@ -73,73 +231,33 @@
       ]
     },
     {
-      "slug": "titanic",
-      "title": "Titanic Passengers",
-      "description": "Passenger records from the 1912 voyage, with raw and cleaned branches so curation is a branch switch away.",
-      "tasks": ["classification", "tabular"],
-      "tags": ["classic", "beginner", "demo", "branches", "time-travel"],
-      "license": "CC0-1.0",
-      "size_category": "small",
-      "primitives": ["json", "kv"],
-      "branches": ["default", "raw", "cleaned"],
-      "includes": [
-        {
-          "primitive": "json",
-          "detail": "One document per passenger (passenger:<id>) with class, fare, embarkation, survival, and cabin fields."
-        },
-        {
-          "primitive": "kv",
-          "detail": "Aggregates under meta: - survival rate, passenger counts."
-        },
-        {
-          "primitive": "branches",
-          "detail": "raw keeps the nulls; cleaned imputes them, with every curation step preserved as document history."
-        }
-      ],
-      "quickstart": [
-        "strata clone titanic ./titanic",
-        "strata ./titanic --branch raw json get passenger:6 '$'",
-        "strata ./titanic --branch cleaned json history passenger:6",
-        "strata ./titanic kv get meta:survival_rate"
-      ]
-    },
-    {
-      "slug": "stackoverflow",
-      "title": "Stack Overflow Q&A",
-      "description": "1,500 Python-ecosystem posts as JSON documents with comment threads embedded - one get returns a full discussion.",
-      "tasks": ["qa-retrieval", "forum-analytics", "tutorial"],
-      "tags": ["stackoverflow", "forum", "real-world", "comments", "tags"],
-      "license": "CC-BY-SA-4.0",
-      "size_category": "small",
-      "primitives": ["json", "kv"],
-      "branches": ["default"],
-      "includes": [
-        {
-          "primitive": "json",
-          "detail": "Questions and answers keyed post:<id>, with their comment threads inline - no join against a comments table."
-        },
-        {
-          "primitive": "kv",
-          "detail": "Per-tag post counts under meta:tag:."
-        }
-      ],
-      "quickstart": [
-        "strata clone stackoverflow ./so",
-        "strata ./so json get post:74970000 '$'",
-        "strata ./so json get post:74970000 '$.comments'",
-        "strata ./so kv get meta:tag:pandas:count"
-      ]
-    },
-    {
       "slug": "github-events",
       "title": "GitHub Events",
-      "description": "2,000 developer-activity events across ten open-source repos, as append-only streams grouped by event type.",
-      "tasks": ["event-stream", "activity-log", "analytics"],
-      "tags": ["github", "events", "streams", "real-world", "devtools"],
+      "description": "GitHub-shaped developer activity - pushes, PRs, issues, stars - as an append-only event log grouped into per-type streams.",
+      "tasks": [
+        "event-stream",
+        "activity-log",
+        "analytics"
+      ],
+      "tags": [
+        "github",
+        "events",
+        "streams",
+        "real-world",
+        "devtools"
+      ],
       "license": "CC-BY-SA-4.0",
       "size_category": "small",
-      "primitives": ["events", "kv"],
-      "branches": ["default"],
+      "size_bytes": 528696,
+      "downloads": 1,
+      "last_updated": "2026-09-01T01:15:11.385558Z",
+      "primitives": [
+        "events",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
       "includes": [
         {
           "primitive": "events",
@@ -158,71 +276,295 @@
       ]
     },
     {
-      "slug": "wikipedia",
-      "title": "Wikipedia Articles",
-      "description": "200 article records over ten topics - one JSON document per article, with a KV title-to-slug index on top.",
-      "tasks": ["retrieval", "tutorial", "knowledge-base"],
-      "tags": ["wikipedia", "articles", "real-world", "catalog"],
-      "license": "CC-BY-SA-4.0",
-      "size_category": "small",
-      "primitives": ["json", "kv"],
-      "branches": ["default"],
-      "includes": [
-        {
-          "primitive": "json",
-          "detail": "One document per article (article:<slug>) with title, categories, internal links, and word counts."
-        },
-        {
-          "primitive": "kv",
-          "detail": "An exact-title index (title:<Title> → slug) plus catalog totals under meta:."
-        }
+      "slug": "semver-test-corpus",
+      "title": "SemVer Test Corpus",
+      "description": "Version validity and precedence cases from SemVer 2.0.0 - strict answers on default, a documented lenient dialect as a branch.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "eval",
+        "tooling",
+        "agent-development"
       ],
+      "tags": [
+        "semver",
+        "versioning",
+        "dependencies",
+        "parsing",
+        "precedence",
+        "edge-cases",
+        "reference"
+      ],
+      "license": "CC0-1.0",
+      "size_category": "small",
+      "size_bytes": 61371,
+      "downloads": 1,
+      "last_updated": "2026-09-01T01:19:47.512414152Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
       "quickstart": [
-        "strata clone wikipedia ./wiki",
-        "strata ./wiki kv get \"title:Quantum mechanics\"",
-        "strata ./wiki json get article:quantum-mechanics '$'"
+        "strata clone semver-test-corpus ./semver-test-corpus"
       ]
     },
     {
-      "slug": "ab-test-results",
-      "title": "A/B Test Results",
-      "description": "One experiment, three arms, each arm on its own branch - the cross-branch comparison workflow as a dataset.",
-      "tasks": ["ab-testing", "analytics", "tabular"],
-      "tags": ["synthetic", "branches", "demo", "experimentation"],
+      "slug": "spdx-license-reference",
+      "title": "SPDX License Reference",
+      "description": "The SPDX license list as one-read lookups: id to name, OSI/FSF flags, deprecation status, pinned to a list release.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "compliance",
+        "tooling"
+      ],
+      "tags": [
+        "spdx",
+        "license",
+        "licensing",
+        "sbom",
+        "compliance",
+        "reference",
+        "lookup"
+      ],
+      "license": "NOASSERTION",
+      "size_category": "small",
+      "size_bytes": 506544,
+      "downloads": 1,
+      "last_updated": "2026-09-01T01:19:46.685104418Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone spdx-license-reference ./spdx-license-reference"
+      ]
+    },
+    {
+      "slug": "iris",
+      "title": "Iris Flowers",
+      "description": "Fisher's 1936 iris measurements as a tutorial-grade bundle whose version history replays the dataset's real documented corrections.",
+      "tasks": [
+        "classification",
+        "tabular",
+        "tutorial"
+      ],
+      "tags": [
+        "classic",
+        "beginner",
+        "tiny",
+        "time-travel"
+      ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "primitives": ["json", "kv"],
-      "branches": ["default", "control", "variant-a", "variant-b"],
+      "size_bytes": 4945,
+      "downloads": 0,
+      "last_updated": "2026-09-01T01:19:33.090452523Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
       "includes": [
         {
           "primitive": "json",
-          "detail": "One document per session (session:<n>), plus a per-arm summary:metrics document."
+          "detail": "One document per flower (iris:<row>) with the four measurements and species - corrections visible via json history."
         },
         {
           "primitive": "kv",
-          "detail": "The experiment definition under meta: - hypothesis, arm sizes."
-        },
-        {
-          "primitive": "branches",
-          "detail": "control, variant-a, and variant-b forked from the shared definition - the same query per branch is the whole analysis."
+          "detail": "Per-species counts under meta:."
         }
       ],
       "quickstart": [
-        "strata clone ab-test-results ./abtest",
-        "strata ./abtest kv get meta:hypothesis",
-        "strata ./abtest --branch variant-a json get summary:metrics '$'"
+        "strata clone iris ./iris",
+        "strata ./iris json get iris:1 '$'",
+        "strata ./iris json history iris:35",
+        "strata ./iris kv get meta:species:setosa:count"
+      ]
+    },
+    {
+      "slug": "iso-reference",
+      "title": "ISO Reference Codes",
+      "description": "ISO country, currency, and language codes as one-read KV lookups with JSON detail documents for codes and numeric ids.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "tutorial"
+      ],
+      "tags": [
+        "iso",
+        "reference",
+        "countries",
+        "currencies",
+        "languages",
+        "lookup"
+      ],
+      "license": "CC0-1.0",
+      "size_category": "small",
+      "size_bytes": 73440,
+      "downloads": 0,
+      "last_updated": "2026-09-01T01:19:41.945202286Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
+      "includes": [
+        {
+          "primitive": "kv",
+          "detail": "Direct lookups - country:US, currency:JPY, language:fr - with catalog totals under meta:."
+        },
+        {
+          "primitive": "json",
+          "detail": "A detail document per entry across all three code tables (249 countries, 178 currencies, 184 languages)."
+        }
+      ],
+      "quickstart": [
+        "strata clone iso-reference ./iso",
+        "strata ./iso kv get country:US",
+        "strata ./iso json get currency:JPY '$'"
+      ]
+    },
+    {
+      "slug": "movielens-100k",
+      "title": "MovieLens 100K",
+      "description": "MovieLens 100K across three primitives - movie JSON documents, KV catalog aggregates, and similarity-searchable genre vectors.",
+      "tasks": [
+        "recommendation",
+        "retrieval",
+        "tabular"
+      ],
+      "tags": [
+        "classic",
+        "vectors",
+        "embeddings",
+        "branches"
+      ],
+      "license": "MovieLens-Research",
+      "size_category": "small",
+      "size_bytes": 6577,
+      "downloads": 0,
+      "last_updated": "2026-09-01T01:19:33.922805934Z",
+      "primitives": [
+        "json",
+        "kv",
+        "vectors"
+      ],
+      "branches": [
+        "default",
+        "sample"
+      ],
+      "includes": [
+        {
+          "primitive": "json",
+          "detail": "One document per movie (movie:<id>) with title, year, genres, and rating summary stats."
+        },
+        {
+          "primitive": "vectors",
+          "detail": "Collection movie-genres - 19-dimension cosine vectors, so nearest-neighbor queries work right after clone."
+        },
+        {
+          "primitive": "kv",
+          "detail": "Catalog aggregates under meta: - movie count, genre list, source id."
+        },
+        {
+          "primitive": "branches",
+          "detail": "The sample branch trims the catalog to the ten most-rated movies - the small/full split without duplicating storage."
+        }
+      ],
+      "quickstart": [
+        "strata clone movielens-100k ./ml",
+        "strata ./ml json get movie:1 '$'",
+        "strata ./ml vector query movie-genres '[0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]' --json",
+        "strata ./ml --branch sample json list"
+      ]
+    },
+    {
+      "slug": "stackoverflow",
+      "title": "Stack Overflow Q&A",
+      "description": "Stack Overflow questions and answers as JSON documents with comment threads embedded inline - a full discussion in one read.",
+      "tasks": [
+        "qa-retrieval",
+        "forum-analytics",
+        "tutorial"
+      ],
+      "tags": [
+        "stackoverflow",
+        "forum",
+        "real-world",
+        "comments",
+        "tags"
+      ],
+      "license": "CC-BY-SA-4.0",
+      "size_category": "small",
+      "size_bytes": 830470,
+      "downloads": 0,
+      "last_updated": "2026-09-01T01:19:40.263818193Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
+      "includes": [
+        {
+          "primitive": "json",
+          "detail": "Questions and answers keyed post:<id>, with their comment threads inline - no join against a comments table."
+        },
+        {
+          "primitive": "kv",
+          "detail": "Per-tag post counts under meta:tag:."
+        }
+      ],
+      "quickstart": [
+        "strata clone stackoverflow ./so",
+        "strata ./so json get post:74970000 '$'",
+        "strata ./so json get post:74970000 '$.comments'",
+        "strata ./so kv get meta:tag:pandas:count"
       ]
     },
     {
       "slug": "strata-bench-results",
       "title": "Strata Benchmark Results",
-      "description": "Thirty real runs from Strata's own performance suite, replayed as an event log instead of a flat CSV.",
-      "tasks": ["benchmarking", "observability", "tutorial"],
-      "tags": ["benchmarks", "performance", "events", "first-party", "real-world"],
+      "description": "Thirty real StrataDB benchmark runs replayed as an event log - the engine's own latency and scaling history over two months.",
+      "tasks": [
+        "benchmarking",
+        "observability",
+        "tutorial"
+      ],
+      "tags": [
+        "benchmarks",
+        "performance",
+        "events",
+        "first-party",
+        "real-world"
+      ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "primitives": ["events", "json", "kv"],
-      "branches": ["default"],
+      "size_bytes": 109385,
+      "downloads": 0,
+      "last_updated": "2026-09-01T01:16:51.29767Z",
+      "primitives": [
+        "events",
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
       "includes": [
         {
           "primitive": "events",
@@ -244,56 +586,46 @@
       ]
     },
     {
-      "slug": "iris",
-      "title": "Iris Flowers",
-      "description": "Fisher's 1936 measurements, with the dataset's real documented corrections preserved as document history.",
-      "tasks": ["classification", "tabular", "tutorial"],
-      "tags": ["classic", "beginner", "tiny", "time-travel"],
-      "license": "CC0-1.0",
+      "slug": "wikipedia",
+      "title": "Wikipedia Articles",
+      "description": "Wikipedia article metadata as one JSON document per article with a KV title index - the seed shape for a retrieval corpus.",
+      "tasks": [
+        "retrieval",
+        "tutorial",
+        "knowledge-base"
+      ],
+      "tags": [
+        "wikipedia",
+        "articles",
+        "real-world",
+        "catalog"
+      ],
+      "license": "CC-BY-SA-4.0",
       "size_category": "small",
-      "primitives": ["json", "kv"],
-      "branches": ["default"],
+      "size_bytes": 87945,
+      "downloads": 0,
+      "last_updated": "2026-09-01T01:19:41.061175336Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
       "includes": [
         {
           "primitive": "json",
-          "detail": "One document per flower (iris:<row>) with the four measurements and species - corrections visible via json history."
+          "detail": "One document per article (article:<slug>) with title, categories, internal links, and word counts."
         },
         {
           "primitive": "kv",
-          "detail": "Per-species counts under meta:."
+          "detail": "An exact-title index (title:<Title> → slug) plus catalog totals under meta:."
         }
       ],
       "quickstart": [
-        "strata clone iris ./iris",
-        "strata ./iris json get iris:1 '$'",
-        "strata ./iris json history iris:35",
-        "strata ./iris kv get meta:species:setosa:count"
-      ]
-    },
-    {
-      "slug": "iso-reference",
-      "title": "ISO Reference Codes",
-      "description": "Country, currency, and language codes from three ISO standards - the lookup table agents shouldn't bundle by hand.",
-      "tasks": ["reference-data", "lookup", "tutorial"],
-      "tags": ["iso", "reference", "countries", "currencies", "languages", "lookup"],
-      "license": "CC0-1.0",
-      "size_category": "small",
-      "primitives": ["kv", "json"],
-      "branches": ["default"],
-      "includes": [
-        {
-          "primitive": "kv",
-          "detail": "Direct lookups - country:US, currency:JPY, language:fr - with catalog totals under meta:."
-        },
-        {
-          "primitive": "json",
-          "detail": "A detail document per entry across all three code tables (249 countries, 178 currencies, 184 languages)."
-        }
-      ],
-      "quickstart": [
-        "strata clone iso-reference ./iso",
-        "strata ./iso kv get country:US",
-        "strata ./iso json get currency:JPY '$'"
+        "strata clone wikipedia ./wiki",
+        "strata ./wiki kv get \"title:Quantum mechanics\"",
+        "strata ./wiki json get article:quantum-mechanics '$'"
       ]
     }
   ]

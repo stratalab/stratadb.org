@@ -13,15 +13,17 @@ graph row belongs to a branch. A new database starts with `default`.
 `branch fork <source> <name>` creates a copy-on-write branch. It sees the
 source branch at the fork point, but later writes stay on the fork.
 
-```bash
-strata ./db kv put city london
-strata ./db branch fork default experiment
-strata ./db --branch experiment kv put city tokyo
+```text
+strata:default/default › kv put city london
+strata:default/default › branch fork default experiment
+strata:default/default › use experiment
+strata:experiment/default › kv put city tokyo
 ```
 
-```bash
-strata ./db --branch experiment kv get city
-strata ./db --branch default kv get city
+```text
+strata:experiment/default › kv get city
+strata:experiment/default › use default
+strata:default/default › kv get city
 ```
 
 ```text
@@ -35,9 +37,10 @@ Nothing is copied up front. The branch records its parent and fork version.
 
 `branch create <name>` makes a root branch with no parent data:
 
-```bash
-strata ./db branch create scratch
-strata ./db --branch scratch kv get city
+```text
+strata:default/default › branch create scratch
+strata:default/default › use scratch
+strata:scratch/default › kv get city
 ```
 
 ```text
@@ -50,10 +53,11 @@ Use `create` for a clean namespace. Use `fork` when you want existing state.
 
 Use three verbs when a branch is ready to come back:
 
-```bash
-strata ./db branch diff default experiment
-strata ./db branch preview experiment default
-strata ./db branch merge experiment default
+```text
+strata:scratch/default › use default
+strata:default/default › branch diff default experiment
+strata:default/default › branch preview experiment default
+strata:default/default › branch merge experiment default
 ```
 
 - `diff` is read-only. It reports changes by capability and space.
@@ -71,9 +75,9 @@ since the fork point, the merge refuses with `conflict.engine.promotion`.
 
 A fork can start from a retained point in history:
 
-```bash
-strata ./db branch fork default older --version 3
-strata ./db branch fork default yesterday --timestamp 12
+```text
+strata:default/default › branch fork default older --version 3
+strata:default/default › branch fork default yesterday --timestamp 12
 ```
 
 Use a version or commit timestamp from the source branch. The new branch starts
@@ -91,8 +95,8 @@ strata ./db --branch experiment kv get city
 In the REPL, switch the current context:
 
 ```text
-strata:default/default> use experiment
-strata:experiment/default>
+strata:default/default › use experiment
+strata:experiment/default › kv get city
 ```
 
 ## Safety Rules

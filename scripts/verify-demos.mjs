@@ -41,13 +41,13 @@ const REQUIRED = [
       'data-feature-eyebrow="strata-hub"',
       'Strata Hub',
       'Clone the dataset your experiment needs.',
-      'catalog of prepared Strata databases',
-      'Clone one with schema, examples, branches, and history',
+      'Hub lists cloneable Strata databases',
+      'Clone one, open it locally',
+      'Browse Strata Hub',
       'strata clone movielens-100k ./ml',
       'agent-memory-with-experiments',
       'stackoverflow',
       'github-events',
-      'The hub is not in your read path.',
     ],
   },
   {
@@ -146,7 +146,16 @@ const REQUIRED = [
   },
   {
     file: 'src/components/sections/install/InstallTabs.tsx',
-    strings: ['Library', 'CLI', 'Hub', 'For agents', 'strata clone iris ./iris'],
+    strings: [
+      'SDKs',
+      'CLI',
+      'VS Code',
+      'Agents',
+      'pip install stratadb',
+      'npm install @stratadb/core',
+      'curl -fsSL https://stratadb.org/install.sh | sh',
+      'StrataDB for VS Code',
+    ],
   },
 ];
 
@@ -226,7 +235,16 @@ const FORBIDDEN = [
   },
   {
     file: 'src/components/sections/install/InstallTabs.tsx',
-    strings: ['foundry', 'Desktop app', 'strata-foundry'],
+    strings: [
+      'foundry',
+      'Desktop app',
+      'strata-foundry',
+      'cargo install strata-cli',
+      'strata clone iris ./iris',
+      "id: 'hub'",
+      'HubPanel',
+      'For agents',
+    ],
   },
   {
     file: 'src/components/sections/primitives/PrimitiveTabs.tsx',

@@ -5,8 +5,14 @@ description: "How to invoke the Strata binary and where generated command facts 
 source: "strata-core@v1.1.0"
 ---
 
-`strata` is a single binary. It opens a durable database directory, or an
-explicit in-memory database, and runs one command.
+`strata` is a single binary. It opens a durable database directory or an explicit
+in-memory database. You can run one command from the shell, or open the REPL and
+run many commands against the same target.
+
+Most narrative docs use the REPL form so examples do not repeat the database
+path on every line. Generated reference pages, scripts, pipelines, clone flows,
+and MCP server startup keep the shell form because those commands are usually
+copied as one-shot invocations.
 
 ## Targeting
 
@@ -44,7 +50,20 @@ Passing a database target with no command opens the REPL on a terminal:
 strata ./mydb
 ```
 
-Inside the REPL, type the command without the leading `strata ./mydb`.
+Inside the REPL, type commands without the leading `strata ./mydb`:
+
+```text
+strata:default/default › kv put portfolio.value 98400
+strata:default/default › kv get portfolio.value
+```
+
+The prompt shows the current branch and space. Change context with `use`:
+
+```text
+strata:default/default › branch fork default experiment
+strata:default/default › use experiment
+strata:experiment/default › kv put portfolio.value 111080
+```
 
 ## Command facts
 

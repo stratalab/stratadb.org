@@ -14,11 +14,13 @@ The vector primitive does not write source text for you. Keep the source in
 under the same key. Use [Inference](/docs/inference) when you want StrataDB to
 run an embedding model.
 
+Examples below assume you opened a database with `strata ./mydb`.
+
 ## Create A Collection
 
-```bash
-strata ./mydb vector collection create docs 4 --metric cosine
-strata ./mydb vector collection list
+```text
+strata:default/default › vector collection create docs 4 --metric cosine
+strata:default/default › vector collection list
 ```
 
 ```text
@@ -31,10 +33,10 @@ Every vector inserted into `docs` must have four dimensions. Metrics are
 
 ## Upsert
 
-```bash
-strata ./mydb vector upsert docs a "[1,0,0,0]" --metadata '{"lang":"en","year":2024}'
-strata ./mydb vector upsert docs b "[0.9,0.1,0,0]" --metadata '{"lang":"en","year":2025}'
-strata ./mydb vector count docs
+```text
+strata:default/default › vector upsert docs a "[1,0,0,0]" --metadata '{"lang":"en","year":2024}'
+strata:default/default › vector upsert docs b "[0.9,0.1,0,0]" --metadata '{"lang":"en","year":2025}'
+strata:default/default › vector count docs
 ```
 
 ```text
@@ -47,8 +49,8 @@ Vectors can be inline JSON arrays, comma-separated floats, or `@path`.
 
 ## Query
 
-```bash
-strata ./mydb vector query docs "[1,0,0,0]" -k 2
+```text
+strata:default/default › vector query docs "[1,0,0,0]" -k 2
 ```
 
 ```text
@@ -63,8 +65,8 @@ For cosine, higher scores are closer.
 Attach metadata when you upsert, then restrict search with an AND-composed
 filter:
 
-```bash
-strata ./mydb vector query docs "[1,0,0,0]" -k 5 \
+```text
+strata:default/default › vector query docs "[1,0,0,0]" -k 5 \
   --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"en"}}]}'
 ```
 
@@ -73,10 +75,10 @@ authoritative record in JSON or KV.
 
 ## Update Metadata And Delete
 
-```bash
-strata ./mydb vector update-metadata docs a '{"reviewed":true}'
-strata ./mydb vector delete docs b
-strata ./mydb vector delete-by-filter docs \
+```text
+strata:default/default › vector update-metadata docs a '{"reviewed":true}'
+strata:default/default › vector delete docs b
+strata:default/default › vector delete-by-filter docs \
   --filter '{"conditions":[{"field":"reviewed","op":"eq","value":{"type":"bool","value":true}}]}'
 ```
 
@@ -84,9 +86,9 @@ strata ./mydb vector delete-by-filter docs \
 
 ## History And Branches
 
-```bash
-strata ./mydb vector history docs a
-strata ./mydb vector get docs a --as-of <timestamp-from-receipt>
+```text
+strata:default/default › vector history docs a
+strata:default/default › vector get docs a --as-of <timestamp-from-receipt>
 ```
 
 Vector collections and records are branch-scoped. Fork a branch to test a new

@@ -26,6 +26,15 @@ jobs:
           node-version: 22.19.0
           cache: npm
       - run: npm ci
+      - name: Fetch release metadata
+        run: node scripts/fetch-release.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Install strata CLI
+        run: |
+          VERSION=$(node -p "require('./src/data/release.json').version")
+          curl -fsSL https://stratadb.org/install.sh | STRATA_VERSION="$VERSION" sh
+          echo "$HOME/.strata/bin" >> "$GITHUB_PATH"
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

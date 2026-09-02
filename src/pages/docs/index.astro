@@ -12,9 +12,9 @@ const start = [
   },
   {
     title: 'First database',
-    desc: 'Write data, fork a branch, merge it, and read the past.',
+    desc: 'Open a database once, then write, branch, merge, and read the past.',
     href: '/docs/getting-started/first-database',
-    cta: 'strata ./mydb kv put portfolio.value 98400',
+    cta: 'strata ./mydb',
   },
   {
     title: 'Agent setup',
@@ -101,20 +101,39 @@ const sections = [
 
 const transcript = [
   {
-    cmd: 'strata ./demo kv put portfolio.value 98400',
+    prompt: '$ ',
+    cmd: 'strata ./demo',
+    out: ['# open the database once'],
+  },
+  {
+    prompt: 'strata:default/default › ',
+    cmd: 'kv put portfolio.value 98400',
     out: ['created portfolio.value applied=true'],
   },
   {
-    cmd: 'strata ./demo branch fork default risky',
+    prompt: 'strata:default/default › ',
+    cmd: 'branch fork default risky',
     out: ['{ "name": "risky", "parent": { "name": "default" }, "...": "receipt abridged" }'],
   },
   {
-    cmd: 'strata ./demo --branch risky kv put portfolio.value 111080',
+    prompt: 'strata:default/default › ',
+    cmd: 'use risky',
+    out: [],
+  },
+  {
+    prompt: 'strata:risky/default › ',
+    cmd: 'kv put portfolio.value 111080',
     out: ['updated portfolio.value applied=true'],
   },
-  { cmd: 'strata ./demo --branch default kv get portfolio.value', out: ['98400'] },
   {
-    cmd: 'strata ./demo branch preview risky default',
+    prompt: 'strata:risky/default › ',
+    cmd: 'use default',
+    out: [],
+  },
+  { prompt: 'strata:default/default › ', cmd: 'kv get portfolio.value', out: ['98400'] },
+  {
+    prompt: 'strata:default/default › ',
+    cmd: 'branch preview risky default',
     out: ['{ "conflicts": [], "strategy": "strict", "...": "receipt abridged" }'],
   },
 ];
@@ -129,8 +148,8 @@ const transcript = [
     <header class="mx-auto max-w-2xl text-center">
       <h1 class="text-title font-semibold text-ink-hi">Build with a database you can fork.</h1>
       <p class="mt-4 text-body-lg text-ink-mid">
-        Install the binary, write a value, fork the database, and keep the exact command reference
-        close by. Narrative pages explain the model; generated pages own exhaustive syntax.
+        Install the binary, open a database once, fork it, and keep the exact command reference
+        close by. Narrative pages teach the REPL workflow; generated pages own exhaustive syntax.
       </p>
       <button
         type="button"
@@ -183,7 +202,15 @@ const transcript = [
             transcript.map((step) => (
               <div class="mb-1.5">
                 <p class="text-ink-mid">
-                  <span class="select-none text-ink-low">$ </span>
+                  {step.prompt.includes('›') ? (
+                    <Fragment>
+                      <span class="select-none text-ink-low">{step.prompt.split('›')[0]}</span>
+                      <span class="select-none text-terracotta-500">›</span>
+                      <span class="select-none text-ink-low"> </span>
+                    </Fragment>
+                  ) : (
+                    <span class="select-none text-ink-low">{step.prompt}</span>
+                  )}
                   {step.cmd.includes('risky') ? (
                     <Fragment>
                       {step.cmd.split('risky').map((part, i, arr) => (

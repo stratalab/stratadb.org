@@ -12,14 +12,16 @@ single field may change without replacing the whole thing.
 Use [KV](/docs/data/key-value) for opaque values. Use [events](/docs/data/events)
 when changes should be append-only.
 
+Examples below assume you opened a database with `strata ./mydb`.
+
 ## Set And Get
 
 `$` is the document root. Paths like `$.score` address fields.
 
-```bash
-strata ./mydb json set user:1 '$' '{"name":"Ada","score":95}'
-strata ./mydb json get user:1 '$'
-strata ./mydb json get user:1 '$.score'
+```text
+strata:default/default › json set user:1 '$' '{"name":"Ada","score":95}'
+strata:default/default › json get user:1 '$'
+strata:default/default › json get user:1 '$.score'
 ```
 
 ```text
@@ -30,8 +32,8 @@ created user:1 applied=true
 
 Update one field:
 
-```bash
-strata ./mydb json set user:1 '$.score' 99
+```text
+strata:default/default › json set user:1 '$.score' 99
 ```
 
 ```text
@@ -43,8 +45,8 @@ field's path.
 
 ## Delete
 
-```bash
-strata ./mydb json delete user:1 '$.score'
+```text
+strata:default/default › json delete user:1 '$.score'
 ```
 
 Deleting `$` removes the document. Deleting a nested path removes that field.
@@ -56,18 +58,18 @@ invalid request.
 
 These commands operate on document keys:
 
-```bash
-strata ./mydb json list --prefix user:
-strata ./mydb json count
-strata ./mydb json exists user:1
-strata ./mydb json sample --count 5
+```text
+strata:default/default › json list --prefix user:
+strata:default/default › json count
+strata:default/default › json exists user:1
+strata:default/default › json sample --count 5
 ```
 
 Create a secondary index when a field becomes a common lookup dimension:
 
-```bash
-strata ./mydb json index create by_score '$.score' --index-type numeric
-strata ./mydb json index list
+```text
+strata:default/default › json index create by_score '$.score' --index-type numeric
+strata:default/default › json index list
 ```
 
 Index types are `tag`, `numeric`, and `text`.
@@ -76,17 +78,19 @@ Index types are `tag`, `numeric`, and `text`.
 
 JSON writes are versioned and branch-scoped.
 
-```bash
-strata ./mydb json history user:1
-strata ./mydb json get user:1 '$' --as-of <timestamp-from-receipt>
+```text
+strata:default/default › json history user:1
+strata:default/default › json get user:1 '$' --as-of <timestamp-from-receipt>
 ```
 
 Fork a branch to try document changes in isolation:
 
-```bash
-strata ./mydb branch fork default experiment
-strata ./mydb --branch experiment json set user:1 '$.score' 100
-strata ./mydb --branch default json get user:1 '$.score'
+```text
+strata:default/default › branch fork default experiment
+strata:default/default › use experiment
+strata:experiment/default › json set user:1 '$.score' 100
+strata:experiment/default › use default
+strata:default/default › json get user:1 '$.score'
 ```
 
 `branch merge` can promote JSON changes back to the target branch. In `v1.1.0`,

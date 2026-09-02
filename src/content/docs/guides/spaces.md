@@ -15,15 +15,16 @@ scope which slice of that data you see within a branch. Every branch has a
 per tenant, per agent session, or per dataset. This guide covers the four space
 verbs: `list`, `create`, `exists`, and `delete`.
 
-Examples use a durable database at `./mydb`. Pass `--space <name>` on any command
-to target a space; omit it to use `default`.
+Examples assume you opened a durable database with `strata ./mydb`. In the REPL,
+`use <branch> <space>` changes the current space; in one-shot commands, pass
+`--space <name>`.
 
 ## The default space
 
 A fresh database reports exactly one space:
 
-```bash
-strata ./mydb space list
+```text
+strata:default/default › space list
 ```
 
 ```text
@@ -44,8 +45,8 @@ strata --json ./mydb space list
 
 `space create <name>` registers a new space:
 
-```bash
-strata ./mydb space create analytics
+```text
+strata:default/default › space create analytics
 ```
 
 ```text
@@ -56,9 +57,9 @@ created analytics applied=true
 
 `space exists <name>` prints a bare boolean - handy in scripts:
 
-```bash
-strata ./mydb space exists analytics   # true
-strata ./mydb space exists ghost       # false
+```text
+strata:default/default › space exists analytics # true
+strata:default/default › space exists ghost # false
 ```
 
 ## How spaces scope data
@@ -67,10 +68,12 @@ Each space holds its own independent instance of every primitive. The same key
 in two spaces refers to two different values. Write `report` in `analytics`, and
 the `default` space does not see it:
 
-```bash
-strata ./mydb --space analytics kv put report q3
-strata ./mydb --space analytics kv get report   # q3
-strata ./mydb kv get report                      # (nil)
+```text
+strata:default/default › use default analytics
+strata:default/analytics › kv put report q3
+strata:default/analytics › kv get report # q3
+strata:default/analytics › use default
+strata:default/default › kv get report # (nil)
 ```
 
 Counts confirm the isolation - `kv count` returns `1` in `analytics` and `0` in
@@ -82,8 +85,8 @@ graphs are all space-scoped.
 `space delete <name>` drops a space. By default it refuses to delete a space
 that still holds visible data:
 
-```bash
-strata ./mydb space delete analytics
+```text
+strata:default/default › space delete analytics
 ```
 
 ```text
@@ -94,8 +97,8 @@ failed_precondition.engine.space_not_empty: product space `analytics` contains v
 
 Pass `--force` to delete the space and its visible data together:
 
-```bash
-strata ./mydb space delete analytics --force
+```text
+strata:default/default › space delete analytics --force
 ```
 
 ```text
@@ -105,8 +108,8 @@ deleted analytics applied=true
 Deleting an empty space needs no flag. Deleting a space that does not exist is a
 no-op - it reports `applied=false` and exits zero rather than failing:
 
-```bash
-strata ./mydb space delete ghost
+```text
+strata:default/default › space delete ghost
 ```
 
 ```text
@@ -115,8 +118,8 @@ not_found ghost applied=false
 
 The default space cannot be deleted:
 
-```bash
-strata ./mydb space delete default
+```text
+strata:default/default › space delete default
 ```
 
 ```text

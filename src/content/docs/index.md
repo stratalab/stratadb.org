@@ -7,6 +7,10 @@ source: "strata-core@v1.1.0"
 StrataDB is an embedded database you can fork. It runs in your process against a
 local directory; there is no server to start.
 
+Narrative docs show the REPL by default: open a database once with
+`strata ./mydb`, then run commands at the `strata:branch/space ›` prompt.
+Generated reference pages and shell pipelines keep the one-shot CLI form.
+
 Start with the shortest path:
 
 1. [Install the CLI](/docs/getting-started/installation).

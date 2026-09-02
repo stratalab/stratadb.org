@@ -10,7 +10,10 @@ Six read-only commands report on a database and the installation: `ping`,
 `info`, `health`, `metrics`, `describe`, and `doctor`. Each prints
 human-readable output by default and a compact envelope with `--json`, so the
 same command serves both a quick eyeball and a script. None of them writes
-anything. Examples use a durable database at `./mydb`.
+anything.
+
+These examples use one-shot shell commands because observability checks are
+usually probes, scripts, or CI preflights.
 
 ## ping - liveness
 

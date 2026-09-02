@@ -10,7 +10,7 @@ alongside their source text, then find the nearest documents to a query and pull
 back the text to feed a model.
 
 Prerequisites: the `strata` binary on your PATH, and `jq` to read match metadata.
-Commands write to a durable directory (`./rag`) that each invocation reopens.
+Open a durable database with `strata ./rag` before step 1.
 The vectors below are tiny and explicit so the recipe is self-contained; see the
 note at the end on generating real embeddings.
 
@@ -18,8 +18,8 @@ note at the end on generating real embeddings.
 
 Fix the embedding dimension and distance metric up front.
 
-```bash
-strata ./rag vector collection create notes 4 --metric cosine
+```text
+strata:default/default › vector collection create notes 4 --metric cosine
 ```
 
 ```text
@@ -31,13 +31,13 @@ strata ./rag vector collection create notes 4 --metric cosine
 Upsert one vector per document, tagging each with a `text_key` in metadata that
 points at the KV row holding its full text. Store that text in KV.
 
-```bash
-strata ./rag vector upsert notes note-1 '[1,0,0,0]' --metadata '{"text_key":"src:note-1"}'
-strata ./rag vector upsert notes note-2 '[0,1,0,0]' --metadata '{"text_key":"src:note-2"}'
-strata ./rag vector upsert notes note-3 '[0,0,1,0]' --metadata '{"text_key":"src:note-3"}'
-strata ./rag kv put src:note-1 "Branches fork cheaply and isolate writes."
-strata ./rag kv put src:note-2 "The event log is an append-only journal."
-strata ./rag kv put src:note-3 "Vectors support cosine, euclidean, and dot-product."
+```text
+strata:default/default › vector upsert notes note-1 '[1,0,0,0]' --metadata '{"text_key":"src:note-1"}'
+strata:default/default › vector upsert notes note-2 '[0,1,0,0]' --metadata '{"text_key":"src:note-2"}'
+strata:default/default › vector upsert notes note-3 '[0,0,1,0]' --metadata '{"text_key":"src:note-3"}'
+strata:default/default › kv put src:note-1 "Branches fork cheaply and isolate writes."
+strata:default/default › kv put src:note-2 "The event log is an append-only journal."
+strata:default/default › kv put src:note-3 "Vectors support cosine, euclidean, and dot-product."
 ```
 
 ```text
@@ -53,8 +53,8 @@ created src:note-3 applied=true
 
 Search returns the nearest keys with similarity scores, best first.
 
-```bash
-strata ./rag vector query notes '[0.9,0.2,0.1,0]' -k 2
+```text
+strata:default/default › vector query notes '[0.9,0.2,0.1,0]' -k 2
 ```
 
 ```text

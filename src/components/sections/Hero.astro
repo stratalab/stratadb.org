@@ -147,15 +147,12 @@ const dataModel = [
         >Strata is the embedded database for the AI era</Heading
       >
 
-      <!-- The acquisition control (2026-06-12): the hero IS the act surface.
-           No Get Started - get the product: CLI via curl, or the studio. -->
-      <!-- Two species, two paths (2026-06-12): the GUI gets a real button that
-           says what it IS (nobody knows "Foundry" yet); the CLI keeps the quiet
-           mono chip. "Get", not "Download", until R1 artifacts exist. -->
+      <!-- The acquisition control: install is the primary motion; the browser
+           playground stays in navigation as a secondary try-before-install path. -->
       <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <Button href="/playground" variant="primary">Try in your browser</Button>
+        <Button href="#install" variant="primary">Install Strata</Button>
         <CopyChip
-          value="curl -fsSL stratadb.org/install.sh | sh"
+          value="curl -fsSL https://stratadb.org/install.sh | sh"
           class="!bg-raised [&_.copy-chip-label]:!text-ink-hi"
         />
       </div>

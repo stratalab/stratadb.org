@@ -13,6 +13,7 @@ const routes = [
   { path: '/', h1: /embedded database/i },
   { path: '/docs/', h1: /database you can fork/i },
   { path: '/docs/reference/', h1: /reference/i },
+  { path: '/hub/', h1: /working database/i },
   { path: '/playground/', h1: /playground/i },
 ];
 
@@ -140,13 +141,14 @@ async function assertHomepageHubSection(page, viewport) {
 
   const sectionText = await page.locator('#hub').innerText();
   const sectionRequired = [
-    'Strata Hub is a catalog of prepared Strata databases for RAG',
-    'Clone one with schema, examples, branches, and history',
+    'Hub lists cloneable Strata databases',
+    'Clone one, open it locally',
+    'Browse Strata Hub',
     'agent-memory-with-experiments',
     'stackoverflow',
     'github-events',
     'strata clone movielens-100k',
-    'The hub is not in your read path.',
+    'resolved · verified · local file ready',
   ];
 
   for (const value of sectionRequired) {
