@@ -18,31 +18,31 @@ const PRIMS = [
     id: 'kv',
     label: 'Key–Value',
     role: 'Versioned key-value. History included.',
-    guide: '/docs/data/key-value',
+    guide: '/docs',
   },
   {
     id: 'event',
     label: 'Events',
     role: 'Append-only streams. Replay anything.',
-    guide: '/docs/data/events',
+    guide: '/docs',
   },
   {
     id: 'json',
     label: 'JSON',
     role: 'Documents with path-level writes.',
-    guide: '/docs/data/json',
+    guide: '/docs',
   },
   {
     id: 'vector',
     label: 'Vectors',
     role: 'Embeddings with HNSW search.',
-    guide: '/docs/data/vectors',
+    guide: '/docs',
   },
   {
     id: 'graph',
     label: 'Graph',
     role: 'Nodes, edges, typed links. Traverse anything.',
-    guide: '/docs/data/graph',
+    guide: '/docs',
   },
 ] as const;
 

@@ -13,8 +13,14 @@
 //   3. Committed floor  - whatever was last staged; a fetch failure keeps it.
 //
 // Output:
-//   src/content/docs/reference/<family>/<op>.md   (git-ignored; regenerated)
-//   src/data/command-index.json                   (git-ignored; sidebar + machine)
+//   src/content/docs/reference/<family>/<op>.md   (committed floor; restaged)
+//   src/data/command-index.json                   (committed floor; restaged)
+//
+// Docs rebuild: staging is opt-in. The markdown is written only when
+// src/content/docs/reference/ already exists, so the archived tree is not
+// resurrected into the zero-state docs directory. Create that directory to
+// bring the generated reference back. The command index is always refreshed;
+// it is data, not documentation.
 
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -137,15 +143,16 @@ async function main() {
   // Clean-rebuild the generated families. Every directory under reference/ is
   // staged (hand-written interim pages are top-level files), so removing all
   // directories also drops a family the bundle no longer ships.
-  await mkdir(REFERENCE_DIR, { recursive: true });
-  for (const entry of await readdir(REFERENCE_DIR, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      await rm(join(REFERENCE_DIR, entry.name), { recursive: true, force: true });
-    }
-  }
-
+  const stagingEnabled = existsSync(REFERENCE_DIR);
   let total = 0;
-  for (const family of families) total += await stageFamily(srcDocs, family, rewriteLinks);
+  if (stagingEnabled) {
+    for (const entry of await readdir(REFERENCE_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        await rm(join(REFERENCE_DIR, entry.name), { recursive: true, force: true });
+      }
+    }
+    for (const family of families) total += await stageFamily(srcDocs, family, rewriteLinks);
+  }
 
   const indexSrc = join(source.dir, 'command-index.json');
   if (existsSync(indexSrc)) {
@@ -154,7 +161,11 @@ async function main() {
     await writeFile(INDEX_OUT, `${normalizeCopy(JSON.stringify(index, null, 2))}\n`);
   }
 
-  console.log(`fetch-docs: staged ${total} reference pages from ${source.label}`);
+  console.log(
+    stagingEnabled
+      ? `fetch-docs: staged ${total} reference pages from ${source.label}`
+      : `fetch-docs: refreshed the command index from ${source.label}; reference staging is off until src/content/docs/reference/ exists`,
+  );
 }
 
 await main();

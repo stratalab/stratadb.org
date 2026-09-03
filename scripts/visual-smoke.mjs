@@ -11,8 +11,9 @@ const BASE_URL = EXTERNAL_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 const routes = [
   { path: '/', h1: /embedded database/i },
-  { path: '/docs/', h1: /database you can fork/i },
-  { path: '/docs/reference/', h1: /reference/i },
+  // Docs rebuild: /docs is the zero-state route. Restore the section rows
+  // (reference, guides, ...) as their pages come back.
+  { path: '/docs/', h1: /^documentation$/i },
   { path: '/hub/', h1: /working database/i },
   { path: '/playground/', h1: /playground/i },
 ];

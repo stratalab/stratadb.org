@@ -1,0 +1,27 @@
+---
+// Get Started: the entry point the documentation front page sends people to.
+// Placeholder. This becomes the common use cases chooser, where a reader picks
+// the thing they are building and leaves with the right first page.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Get started | StrataDB"
+  description="Start with StrataDB: pick the use case closest to what you are building and follow it end to end."
+>
+  <div class="mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
+    <header class="max-w-[44rem]">
+      <h1 class="text-title font-semibold text-ink-hi">Get started</h1>
+      <p class="mt-4 text-body-lg text-ink-mid">
+        Common use cases, and the shortest path through each one.
+      </p>
+    </header>
+    <p class="mt-10 text-body text-ink-low">
+      <a
+        href="/docs"
+        class="text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+        >Back to documentation</a
+      >
+    </p>
+  </div>
+</BaseLayout>

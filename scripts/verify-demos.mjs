@@ -16,7 +16,7 @@ const REQUIRED = [
       'id="hero"',
       'An embedded database you can fork',
       'Why does AI application state need a different database?',
-      'href="/docs/why-strata"',
+      'href="/docs"',
       '#primitive-kv',
       '#primitive-event',
       '#primitive-json',

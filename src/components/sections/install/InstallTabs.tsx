@@ -576,7 +576,7 @@ export default function InstallTabs() {
                   Agents can also read{' '}
                   <span className="font-mono text-mono-sm text-ink-mid">stratadb.org/llms.txt</span>{' '}
                   or the{' '}
-                  <a href="/docs/agents" className="text-terracotta-500 hover:text-terracotta-400">
+                  <a href="/docs" className="text-terracotta-500 hover:text-terracotta-400">
                     For AI agents
                   </a>{' '}
                   recipe directly.

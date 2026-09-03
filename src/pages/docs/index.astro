@@ -1,307 +1,284 @@
 ---
-// The docs front door: task paths first, generated reference close behind.
+// The documentation front door, built to the IA (doc 14 §10, brief §20).
+//
+// It is a path chooser, not a mirror of a sidebar: six blocks answering the six
+// things a reader arrives wanting.
+//
+// Each entry carries `ready`. A ready entry renders as a link; the rest render
+// muted, so this page can never point at a page that does not exist. Flip the
+// flag when the page lands and nothing else here has to change.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/foundation/Button.astro';
 import DocsSearch from '../../components/chrome/DocsSearch.astro';
+import HeroArtifact from '../../components/docs/HeroArtifact.astro';
+import TryItOut from '../../components/docs/TryItOut.astro';
+import InstallBand from '../../components/docs/InstallBand.astro';
 
-const start = [
+interface Item {
+  label: string;
+  href: string;
+  ready?: boolean;
+  external?: boolean;
+}
+
+// Interface is its own dimension, not a row repeated inside three other blocks.
+//
+// It holds hand-written per-surface material only. Two things deliberately stay
+// out of it, following what DuckDB, ClickHouse, Snowflake, Databricks, MongoDB
+// and Stripe all do: installation is shared and selector-driven rather than
+// duplicated per interface (the install band above is that selector), and the
+// generated command reference stays one tree, because no one successfully fans
+// a single generated definition out per interface.
+const interfaces: { name: string; href: string; blurb: string; items: Item[] }[] = [
   {
-    title: 'Install',
-    desc: 'Get the `strata` binary and check it with one command.',
-    href: '/docs/getting-started/installation',
-    cta: 'strata --cache ping',
+    name: 'Python',
+    href: '/docs/sdks/python',
+    blurb: 'Run the engine inside your process.',
+    items: [
+      { label: 'Quickstart', href: '/docs/get-started/python-quickstart' },
+      { label: 'Opening databases', href: '/docs/sdks/python/opening-databases' },
+      { label: 'Branches', href: '/docs/sdks/python/branches' },
+      { label: 'Error handling', href: '/docs/sdks/python/error-handling' },
+    ],
   },
   {
-    title: 'First database',
-    desc: 'Open a database once, then write, branch, merge, and read the past.',
-    href: '/docs/getting-started/first-database',
-    cta: 'strata ./mydb',
+    name: 'CLI',
+    href: '/docs/sdks/cli',
+    blurb: 'One binary, a shell, and a REPL.',
+    items: [
+      { label: 'Quickstart', href: '/docs/get-started/quickstart' },
+      { label: 'Targeting databases', href: '/docs/sdks/cli/targeting-databases' },
+      { label: 'Interactive shell', href: '/docs/sdks/cli/interactive-shell' },
+      { label: 'Scripting', href: '/docs/sdks/cli/scripting' },
+    ],
   },
   {
-    title: 'Agent setup',
-    desc: 'Use the self-describing binary or the built-in MCP server.',
-    href: '/docs/agents',
-    cta: 'strata ./mydb mcp serve',
+    name: 'AI agents',
+    href: '/docs/sdks/agents',
+    blurb: 'A binary that describes itself.',
+    items: [
+      { label: 'Setup', href: '/docs/get-started/agent-quickstart' },
+      { label: 'Agent skills', href: '/docs/sdks/agents/agent-skills' },
+      { label: 'Command discovery', href: '/docs/sdks/agents/command-discovery' },
+      { label: 'Machine-readable docs', href: '/docs/sdks/agents/machine-readable-docs' },
+    ],
+  },
+  {
+    name: 'MCP',
+    href: '/docs/sdks/mcp',
+    blurb: 'Model Context Protocol over stdio.',
+    items: [
+      { label: 'Setup', href: '/docs/sdks/mcp/setup' },
+      { label: 'Clients', href: '/docs/sdks/mcp/clients' },
+      { label: 'Tool model', href: '/docs/sdks/mcp/tool-model' },
+    ],
   },
 ];
 
-const primitives = [
+// What does not change with the interface.
+const blocks: { title: string; blurb: string; items: Item[] }[] = [
   {
-    title: 'Key-value',
-    desc: 'Opaque values by key, versioned.',
-    href: '/docs/data/key-value',
-    hue: 'var(--color-strata-kv)',
+    title: 'Learn the core model',
+    blurb: 'What Strata is doing underneath, and why it is shaped this way.',
+    items: [
+      { label: 'Branches', href: '/docs/learn/how-it-works/branches' },
+      { label: 'Working with data', href: '/docs/learn/data' },
+      { label: 'Time travel', href: '/docs/learn/how-it-works/time-travel' },
+      { label: 'Inference', href: '/docs/learn/inference' },
+    ],
   },
   {
-    title: 'JSON documents',
-    desc: 'Read and write inside documents by path.',
-    href: '/docs/data/json',
-    hue: 'var(--color-strata-json)',
+    title: 'Build something',
+    blurb: 'Guides that start from a goal and end in a working result.',
+    items: [
+      { label: 'Agent applications', href: '/docs/guides/agents' },
+      { label: 'Semantic search', href: '/docs/guides/ai-retrieval/build-semantic-search' },
+      { label: 'Retrieval augmented generation', href: '/docs/guides/ai-retrieval/build-rag' },
+      { label: 'Local models', href: '/docs/guides/ai-retrieval/use-local-models' },
+    ],
   },
   {
-    title: 'Events',
-    desc: 'Append-only, hash-chained history.',
-    href: '/docs/data/events',
-    hue: 'var(--color-strata-event)',
+    title: 'Look something up',
+    blurb: 'Exact syntax, parameters, return shapes, and failure behavior.',
+    items: [
+      { label: 'Commands', href: '/docs/reference' },
+      { label: 'Error codes', href: '/e/', ready: true },
+      { label: 'Configuration', href: '/docs/reference/configuration' },
+      { label: 'Data types', href: '/docs/reference/data-types' },
+    ],
   },
   {
-    title: 'Vectors',
-    desc: 'Similarity search with metadata filters.',
-    href: '/docs/data/vectors',
-    hue: 'var(--color-strata-vector)',
-  },
-  {
-    title: 'Graph',
-    desc: 'Nodes, edges, analytics, and an ontology.',
-    href: '/docs/data/graph',
-    hue: 'var(--color-strata-graph)',
-  },
-  {
-    title: 'Combining primitives',
-    desc: 'Use several shapes against one commit clock.',
-    href: '/docs/data/combining-primitives',
-    hue: 'var(--color-terracotta-500)',
-  },
-];
-
-const sections = [
-  { title: 'Why Strata', desc: 'Fit, boundaries, and comparisons.', href: '/docs/why-strata' },
-  {
-    title: 'Concepts',
-    desc: 'Branches, commits, time travel, durability.',
-    href: '/docs/concepts',
-  },
-  {
-    title: 'Working with Data',
-    desc: 'Choose KV, JSON, events, vectors, graph, or a combination.',
-    href: '/docs/data',
-  },
-  {
-    title: 'Inference',
-    desc: 'Generation, embedding, ranking, and tokenization.',
-    href: '/docs/inference',
-  },
-  { title: 'Guides', desc: 'Cross-cutting workflows and operating tasks.', href: '/docs/guides' },
-  { title: 'Python SDK', desc: 'Open StrataDB inside a Python process.', href: '/docs/python' },
-  {
-    title: 'Reference',
-    desc: 'Generated command facts, errors, values, and CLI rules.',
-    href: '/docs/reference',
-  },
-  {
-    title: 'Architecture',
-    desc: 'The internals: layers, storage, durability, and capabilities.',
-    href: '/architecture',
-  },
-  {
-    title: 'Troubleshooting',
-    desc: 'Failure modes and the codes they carry.',
-    href: '/docs/troubleshooting',
-  },
-];
-
-const transcript = [
-  {
-    prompt: '$ ',
-    cmd: 'strata ./demo',
-    out: ['# open the database once'],
-  },
-  {
-    prompt: 'strata:default/default › ',
-    cmd: 'kv put portfolio.value 98400',
-    out: ['created portfolio.value applied=true'],
-  },
-  {
-    prompt: 'strata:default/default › ',
-    cmd: 'branch fork default risky',
-    out: ['{ "name": "risky", "parent": { "name": "default" }, "...": "receipt abridged" }'],
-  },
-  {
-    prompt: 'strata:default/default › ',
-    cmd: 'use risky',
-    out: [],
-  },
-  {
-    prompt: 'strata:risky/default › ',
-    cmd: 'kv put portfolio.value 111080',
-    out: ['updated portfolio.value applied=true'],
-  },
-  {
-    prompt: 'strata:risky/default › ',
-    cmd: 'use default',
-    out: [],
-  },
-  { prompt: 'strata:default/default › ', cmd: 'kv get portfolio.value', out: ['98400'] },
-  {
-    prompt: 'strata:default/default › ',
-    cmd: 'branch preview risky default',
-    out: ['{ "conflicts": [], "strategy": "strict", "...": "receipt abridged" }'],
+    title: 'Go deeper',
+    blurb: 'How the storage engine, commit model, and recovery path actually work.',
+    items: [
+      { label: 'Internals', href: '/internals' },
+      {
+        label: 'Source on GitHub',
+        href: 'https://github.com/stratalab/strata-core',
+        ready: true,
+        external: true,
+      },
+    ],
   },
 ];
 ---
 
 <BaseLayout
   title="Documentation | StrataDB"
-  description="StrataDB documentation: install the embedded database, fork branches, use five data shapes, and look up generated command reference."
+  description="StrataDB documentation: get started, learn the branching model, follow task guides, pick your interface, and look up exact command behavior."
 >
-  <div class="mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
-    <!-- Hero: title, claim, search as the front door -->
-    <header class="mx-auto max-w-2xl text-center">
-      <h1 class="text-title font-semibold text-ink-hi">Build with a database you can fork.</h1>
-      <p class="mt-4 text-body-lg text-ink-mid">
-        Install the binary, open a database once, fork it, and keep the exact command reference
-        close by. Narrative pages teach the REPL workflow; generated pages own exhaustive syntax.
-      </p>
-      <button
-        type="button"
-        class="docs-search-trigger mt-8 flex w-full items-center gap-3 rounded-(--radius-card) border border-line bg-panel px-5 py-3.5 text-left text-body text-ink-low transition-colors duration-200 hover:border-line-hover hover:text-ink-mid"
-        aria-label="Search docs"
-      >
-        <svg
-          class="h-4 w-4 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="7"></circle>
-          <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
-        </svg>
-        <span>Search the docs…</span>
-        <kbd class="ml-auto rounded border border-line px-2 py-0.5 font-mono text-mono-sm">/</kbd>
-      </button>
-    </header>
-
-    <!-- Start here: the do row -->
-    <section class="mt-16" aria-label="Start here">
-      <div class="grid gap-4 md:grid-cols-3">
-        {
-          start.map((card) => (
-            <a
-              href={card.href}
-              class="group min-w-0 overflow-hidden rounded-(--radius-card) border border-line bg-panel p-6 transition-colors duration-200 hover:border-line-hover"
+  <div class="relative">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 top-0 h-[40rem]"
+      style="background: radial-gradient(58% 46% at 52% 0%, rgb(var(--rgb-terracotta-500) / 0.10), transparent 72%);"
+    >
+    </div>
+    <div class="relative mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
+      <!-- Hero: the name, the promise, the one action, then search. The artifact
+         rides alongside on wide screens and drops out when there is no room. -->
+      <header class="grid items-center gap-10 lg:grid-cols-[minmax(0,36rem)_minmax(0,1fr)]">
+        <div>
+          <h1 class="text-title font-semibold text-ink-hi">Documentation</h1>
+          <p class="mt-4 text-heading font-normal text-ink-hi">
+            Explore our guides and examples to build with Strata.
+          </p>
+          <Button href="/docs/get-started" class="mt-7">Get started with Strata</Button>
+          <button
+            type="button"
+            class="docs-search-trigger mt-6 flex w-full items-center gap-3 rounded-(--radius-card) border border-line-hover bg-elevated px-5 py-4 text-left text-body-lg text-ink-hi transition-colors duration-200 hover:border-terracotta-500 hover:text-ink-hi focus-visible:border-terracotta-500 focus-visible:outline-none"
+            aria-label="Search the documentation"
+          >
+            <svg
+              class="h-5 w-5 shrink-0 text-terracotta-500"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              <h2 class="text-body font-semibold text-ink-hi">{card.title}</h2>
-              <p class="mt-2 text-small text-ink-mid">{card.desc}</p>
-              <p class="mt-4 truncate font-mono text-mono-sm text-ink-low transition-colors duration-200 group-hover:text-terracotta-500">
-                {card.cta}
-              </p>
-            </a>
-          ))
-        }
-      </div>
-    </section>
+              <circle cx="11" cy="11" r="7"></circle>
+              <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
+            </svg>
+            <span>Search the docs</span>
+            <kbd
+              class="ml-auto rounded border border-line-hover px-2 py-0.5 font-mono text-mono-body text-ink-hi"
+              >/</kbd
+            >
+          </button>
+        </div>
+        <div class="hidden lg:block">
+          <HeroArtifact />
+        </div>
+      </header>
 
-    <!-- The proof strip: a concise fork path, aligned with the homepage gate. -->
-    <section class="mt-16" aria-label="Try it">
-      <div
-        class="grid overflow-hidden rounded-(--radius-frame) border border-line lg:grid-cols-[1fr_16rem]"
-      >
-        <div class="bg-inset p-6 font-mono text-mono-sm leading-relaxed">
+      <TryItOut />
+
+      <InstallBand />
+
+      <!-- Interfaces: pick how you drive Strata, and get only that surface -->
+      <section class="mt-16" aria-label="Interfaces">
+        <h2 class="text-small font-medium uppercase text-ink-mid">Pick your interface</h2>
+        <p class="mt-2 text-body-lg text-ink-hi">
+          Each one has its own first run and its own idioms. Installation and the command reference
+          are shared.
+        </p>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {
-            transcript.map((step) => (
-              <div class="mb-1.5">
-                <p class="text-ink-mid">
-                  {step.prompt.includes('›') ? (
-                    <Fragment>
-                      <span class="select-none text-ink-low">{step.prompt.split('›')[0]}</span>
-                      <span class="select-none text-terracotta-500">›</span>
-                      <span class="select-none text-ink-low"> </span>
-                    </Fragment>
-                  ) : (
-                    <span class="select-none text-ink-low">{step.prompt}</span>
-                  )}
-                  {step.cmd.includes('risky') ? (
-                    <Fragment>
-                      {step.cmd.split('risky').map((part, i, arr) => (
-                        <Fragment>
-                          {part}
-                          {i < arr.length - 1 && <span class="text-terracotta-500">risky</span>}
-                        </Fragment>
-                      ))}
-                    </Fragment>
-                  ) : (
-                    step.cmd
-                  )}
-                </p>
-                {step.out.map((line) => (
-                  <p class="text-ink-low">{line}</p>
-                ))}
+            interfaces.map((iface) => (
+              <div class="rounded-(--radius-card) border border-line bg-raised p-6 transition-colors duration-200 hover:border-line-hover hover:bg-elevated">
+                <h3 class="text-heading text-ink-hi">{iface.name}</h3>
+                <p class="mt-1.5 text-body text-ink-mid">{iface.blurb}</p>
+                <ul class="mt-4 space-y-2.5">
+                  {iface.items.map((item) => (
+                    <li>
+                      {item.ready ? (
+                        <a
+                          href={item.href}
+                          class="text-body text-ink-hi underline decoration-line underline-offset-4 transition-colors duration-200 hover:decoration-terracotta-500"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <span class="text-body text-ink-mid">{item.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))
           }
         </div>
-        <div
-          class="flex flex-col justify-center gap-3 border-t border-line bg-panel p-6 lg:border-l lg:border-t-0"
-        >
-          <h2 class="text-body font-semibold text-ink-hi">Forks are ordinary workflow</h2>
-          <p class="text-small text-ink-mid">
-            The homepage transcript gate replays this path against the shipped CLI. Long receipts
-            are abridged here; the browser playground lets you try the same model without installing
-            first.
-          </p>
-          <a
-            href="/playground"
-            class="mt-1 font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
-          >
-            Run it in your browser →
-          </a>
+      </section>
+
+      <!-- What does not change with the interface -->
+      <section class="mt-16" aria-label="Choose a path">
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            blocks.map((block) => (
+              <div class="rounded-(--radius-card) border border-line bg-raised p-7 transition-colors duration-200 hover:border-line-hover hover:bg-elevated">
+                <h2 class="text-heading text-ink-hi">{block.title}</h2>
+                <p class="mt-2 text-body text-ink-mid">{block.blurb}</p>
+                <ul class="mt-5 space-y-3">
+                  {block.items.map((item) => (
+                    <li>
+                      {item.ready ? (
+                        <a
+                          href={item.href}
+                          target={item.external ? '_blank' : undefined}
+                          rel={item.external ? 'noopener noreferrer' : undefined}
+                          class="text-body-lg text-ink-hi underline decoration-line underline-offset-4 transition-colors duration-200 hover:decoration-terracotta-500"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <span class="text-body-lg text-ink-mid">{item.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Working with data: the primitives, wearing their hues -->
-    <section class="mt-16" aria-label="Working with data">
-      <h2 class="text-eyebrow font-medium uppercase text-ink-low">Working with data</h2>
-      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          primitives.map((card) => (
-            <a
-              href={card.href}
-              class="group rounded-(--radius-card) border border-line bg-panel p-5 transition-colors duration-200 hover:border-line-hover"
-              style={`border-left: 2px solid ${card.hue}`}
-            >
-              <h3 class="text-body font-semibold text-ink-hi">{card.title}</h3>
-              <p class="mt-1.5 text-small text-ink-mid">{card.desc}</p>
-            </a>
-          ))
-        }
-      </div>
-    </section>
+      <!-- Live product surfaces, which the rebuild does not touch -->
+      <section class="mt-16" aria-label="Other surfaces">
+        <h2 class="text-small font-medium uppercase text-ink-mid">Elsewhere on the site</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-3">
+          {
+            [
+              {
+                label: 'Playground',
+                href: '/playground',
+                note: 'A database running in your browser.',
+              },
+              { label: 'Strata Hub', href: '/hub', note: 'Prepared datasets you can clone.' },
+              { label: 'Changelog', href: '/changelog', note: 'What shipped in each release.' },
+            ].map((item) => (
+              <a
+                href={item.href}
+                class="rounded-(--radius-card) border border-line bg-raised p-6 transition-colors duration-200 hover:border-line-hover hover:bg-elevated"
+              >
+                <h3 class="text-heading text-ink-hi">{item.label}</h3>
+                <p class="mt-2 text-body text-ink-mid">{item.note}</p>
+              </a>
+            ))
+          }
+        </div>
+      </section>
 
-    <!-- Everything else -->
-    <section class="mt-16" aria-label="All sections">
-      <h2 class="text-eyebrow font-medium uppercase text-ink-low">Browse the docs</h2>
-      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          sections.map((card) => (
-            <a
-              href={card.href}
-              class="group rounded-(--radius-card) border border-line p-5 transition-colors duration-200 hover:border-line-hover hover:bg-panel"
-            >
-              <h3 class="text-body font-semibold text-ink-hi">{card.title}</h3>
-              <p class="mt-1.5 text-small text-ink-mid">{card.desc}</p>
-            </a>
-          ))
-        }
-      </div>
-    </section>
-
-    <!-- The machine surface, quiet and mono -->
-    <section
-      class="mt-16 rounded-(--radius-card) border border-line bg-panel px-6 py-5"
-      aria-label="For machines"
-    >
-      <p class="font-mono text-mono-sm text-ink-low">
-        agents: <a href="/llms.txt" class="text-ink-mid hover:text-ink-hi">llms.txt</a>
-        · <a href="/llms-full.txt" class="text-ink-mid hover:text-ink-hi">llms-full.txt</a>
-        · append <span class="text-ink-mid">.md</span> to any docs URL for CommonMark · <a
-          href="/e/"
-          class="text-ink-mid hover:text-ink-hi">/e/ error registry</a
-        >
-        · <a href="/docs/agents" class="text-ink-mid hover:text-ink-hi">the full agent surface →</a>
-      </p>
-    </section>
+      <!-- The machine surface -->
+      <section class="mt-12 border-t border-line pt-6" aria-label="For machines">
+        <p class="font-mono text-mono-body text-ink-mid">
+          agents: <a href="/llms.txt" class="text-ink-hi hover:text-terracotta-400">llms.txt</a>
+          · <a href="/llms-full.txt" class="text-ink-hi hover:text-terracotta-400">llms-full.txt</a>
+          · <a href="/e/" class="text-ink-hi hover:text-terracotta-400">error registry</a>
+          · <span class="text-ink-mid">strata agents commands --json</span>
+        </p>
+      </section>
+    </div>
   </div>
   <DocsSearch />
 </BaseLayout>

@@ -1,7 +1,7 @@
 {
   "hub": "https://stratahub.io",
   "source": "https://stratahub.io/v1/datasets",
-  "fetched_at": "2026-09-02",
+  "fetched_at": "2026-09-03",
   "datasets": [
     {
       "slug": "titanic",
@@ -21,7 +21,7 @@
       "license": "CC0-1.0",
       "size_category": "small",
       "size_bytes": 6887,
-      "downloads": 14,
+      "downloads": 32,
       "last_updated": "2026-09-01T01:19:32.333026064Z",
       "primitives": [
         "json",

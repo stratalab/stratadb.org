@@ -12,6 +12,8 @@ export default tseslint.config(
       'node_modules/**',
       'public/playground/pkg/**',
       'src/content/docs/reference/**',
+      'src/content-archive/**',
+      'src/docs-ui-archive/**',
       'src/env.d.ts',
     ],
   },

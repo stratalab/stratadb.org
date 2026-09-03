@@ -18,7 +18,19 @@ export const GET: APIRoute = async () => {
     ),
   ];
 
-  return new Response(sections.join('\n\n---\n\n'), {
+  // Docs rebuild: the collections are empty until pages are restored. Emit a
+  // pointer rather than a zero-byte file so agents fetching this get an answer.
+  const body = sections.length
+    ? sections.join('\n\n---\n\n')
+    : [
+        '# StrataDB documentation corpus',
+        '',
+        'The documentation is being rebuilt and no pages are published yet.',
+        'Run `strata agents guide` for the complete version-matched guide, or see',
+        'https://stratadb.org/llms.txt for the current live surfaces.',
+      ].join('\n');
+
+  return new Response(body, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 };

@@ -63,6 +63,25 @@
 
   /* ---- the five primitives, on-dark anchors (02 §4.3; ember-luminous) ----
      branch is NOT a primitive - the branch model wears terracotta (brand). */
+  /* One step above --color-raised, for hover on already-raised surfaces. */
+  --color-elevated: #202226;
+
+  /* Classic macOS Terminal. A real terminal is not a black hole: it has window
+     chrome, traffic lights, and an ANSI palette. Values are Terminal.app's
+     bright ANSI set and the system window-control colors. Raw literals live
+     here because tokens.css is the only place they are allowed. */
+  --color-term-surface: #1e1f22;
+  --color-term-chrome: #2c2d31;
+  --color-term-fg: #e9ebeb;
+  --color-term-dim: #9aa0a6;
+  --color-term-green: #31e722;
+  --color-term-cyan: #14f0f0;
+  --color-term-yellow: #eaec23;
+  --color-term-red: #fc391f;
+  --color-mac-red: #ff5f57;
+  --color-mac-amber: #febc2e;
+  --color-mac-green: #28c840;
+
   --color-strata-kv: #7caaff;
   --color-strata-event: #4fe0a6;
   --color-strata-json: #ffc66e;

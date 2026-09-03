@@ -7,13 +7,10 @@ const DIST = join(ROOT, 'dist');
 const SITE = 'https://stratadb.org';
 const TEXT_EXTENSIONS = new Set(['.html', '.md', '.txt']);
 const FORBIDDEN_SITEMAP_PATHS = ['/404/', '/internals/', '/specimen/'];
-const REQUIRED_MACHINE_FILES = [
-  'llms.txt',
-  'llms-full.txt',
-  'docs/index.md',
-  'docs/reference.md',
-  'architecture/index.md',
-];
+// Docs rebuild: the per-page markdown mirrors come back when the docs routes
+// that emit them are restored. Re-add 'docs/index.md' and the section mirrors
+// as each lands.
+const REQUIRED_MACHINE_FILES = ['llms.txt', 'llms-full.txt'];
 
 async function exists(path) {
   try {

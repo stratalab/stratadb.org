@@ -1,0 +1,92 @@
+---
+// Docs hero artifact: StrataDB in one static picture.
+//
+// Two claims, no animation. One database holds five data models, and the whole
+// database forks, carrying every model with it. Colors come from the primitive
+// tokens, so the drawing follows the active theme; nothing here is a literal.
+const models = [
+  { label: 'kv', color: 'var(--color-strata-kv)' },
+  { label: 'json', color: 'var(--color-strata-json)' },
+  { label: 'events', color: 'var(--color-strata-event)' },
+  { label: 'vectors', color: 'var(--color-strata-vector)' },
+  { label: 'graph', color: 'var(--color-strata-graph)' },
+];
+
+// Row baselines inside each card, main then fork.
+const mainRows = [88, 116, 144, 172, 200];
+const forkRows = [124, 142, 160, 178, 196];
+---
+
+<svg
+  viewBox="0 0 388 244"
+  role="img"
+  aria-label="A StrataDB database holding key-value, JSON, event, vector and graph data, forked into a second branch that carries all five."
+  class="ml-auto block w-full max-w-[27rem]"
+>
+  <!-- main database -->
+  <text x="16" y="42" style="fill: var(--color-ink-low); font-size: 12px" class="font-mono"
+    >main</text
+  >
+  <rect
+    x="16"
+    y="58"
+    width="196"
+    height="166"
+    rx="10"
+    style="fill: var(--color-panel); stroke: var(--color-line)"
+    stroke-width="1"></rect>
+  {
+    models.map((model, i) => (
+      <>
+        <rect
+          x="36"
+          y={mainRows[i] - 9}
+          width="10"
+          height="10"
+          rx="3"
+          style={`fill: ${model.color}`}
+        />
+        <text
+          x="56"
+          y={mainRows[i]}
+          style="fill: var(--color-ink-mid); font-size: 13px"
+          class="font-mono"
+        >
+          {model.label}
+        </text>
+      </>
+    ))
+  }
+
+  <!-- the fork: the whole database, not one row -->
+  <path
+    d="M212 141 C 232 141, 232 162, 252 162"
+    fill="none"
+    style="stroke: var(--color-terracotta-500)"
+    stroke-width="1.5"></path>
+  <circle cx="212" cy="141" r="3.5" style="fill: var(--color-terracotta-500)"></circle>
+
+  <text x="252" y="94" style="fill: var(--color-terracotta-500); font-size: 12px" class="font-mono"
+    >experiment</text
+  >
+  <rect
+    x="252"
+    y="104"
+    width="120"
+    height="116"
+    rx="8"
+    style="fill: var(--color-panel); stroke: var(--color-terracotta-500); opacity: 0.5"
+    stroke-width="1"></rect>
+  {
+    models.map((model, i) => (
+      <rect
+        x="272"
+        y={forkRows[i]}
+        width="80"
+        height="8"
+        rx="3"
+        style={`fill: ${model.color}; opacity: 0.75`}
+      />
+    ))
+  }
+</svg>

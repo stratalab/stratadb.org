@@ -3,7 +3,10 @@
 import Button from '../foundation/Button.astro';
 import ResourcesMenu from './ResourcesMenu.astro';
 
-const navItems: { label: string; href: string }[] = [{ label: 'Playground', href: '/playground' }];
+const navItems: { label: string; href: string }[] = [
+  { label: 'Documentation', href: '/docs' },
+  { label: 'Playground', href: '/playground' },
+];
 const currentPath = Astro.url.pathname;
 const datasetsButtonClass = [
   'max-sm:hidden',

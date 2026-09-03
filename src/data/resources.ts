@@ -43,4 +43,9 @@ export const resourceNavItems = [
   },
 ] as const;
 
+// Documentation is promoted to the primary navigation, so it is left out of the
+// Resources dropdown. It stays a Resources page: the section sidebar and the
+// /resources index still list it, and /resources/documentation still resolves.
+export const resourceMenuItems = resourceNavItems.filter((item) => item.slug !== 'documentation');
+
 export type ResourceSlug = (typeof resourceNavItems)[number]['slug'];

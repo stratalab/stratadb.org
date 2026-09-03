@@ -1,4 +1,5 @@
 import { readFile, readdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { extname, join, relative, sep } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -11,6 +12,7 @@ function toPosix(path) {
 }
 
 async function walk(dir) {
+  if (!existsSync(dir)) return [];
   const out = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);

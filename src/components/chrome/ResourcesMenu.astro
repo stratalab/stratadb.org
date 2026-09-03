@@ -1,5 +1,5 @@
 ---
-import { resourceNavItems } from '../../data/resources';
+import { resourceMenuItems } from '../../data/resources';
 
 interface Props {
   variant?: 'desktop' | 'mobile';
@@ -8,16 +8,15 @@ interface Props {
 const { variant = 'desktop' } = Astro.props;
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 
+// /docs is its own primary nav item now and must not light up Resources.
 const isResourceActive =
   currentPath === '/resources' ||
   currentPath.startsWith('/resources/') ||
-  currentPath.startsWith('/docs') ||
   currentPath.startsWith('/architecture') ||
   currentPath === '/internals';
 
 const isItemActive = (slug: string, href: string) => {
   if (currentPath === href || currentPath.startsWith(`${href}/`)) return true;
-  if (slug === 'documentation' && currentPath.startsWith('/docs')) return true;
   if (
     slug === 'architecture' &&
     (currentPath.startsWith('/architecture') || currentPath === '/internals')
@@ -36,7 +35,7 @@ const isItemActive = (slug: string, href: string) => {
         <a href="/resources" class:list={[currentPath === '/resources' && 'is-active']}>
           All resources
         </a>
-        {resourceNavItems.map((item) => (
+        {resourceMenuItems.map((item) => (
           <a href={item.href} class:list={[isItemActive(item.slug, item.href) && 'is-active']}>
             {item.label}
           </a>
@@ -76,7 +75,7 @@ const isItemActive = (slug: string, href: string) => {
           <span>All resources</span>
         </a>
         <div class="resources-popover-grid">
-          {resourceNavItems.map((item) => (
+          {resourceMenuItems.map((item) => (
             <a
               href={item.href}
               class:list={[

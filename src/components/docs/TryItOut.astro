@@ -1,0 +1,276 @@
+---
+// "Try it out": a real Strata database running in the docs page.
+//
+// The same wasm engine as /playground, in a guided five-step shape. The engine
+// bundle is large, so nothing loads until the reader actually asks for it: the
+// first step click (or focusing the input) boots it.
+//
+// The script is `is:inline` on purpose. The wasm module is fetched at build
+// time into public/ and is not part of the Vite graph, so letting the bundler
+// touch this import would wrap it in a preload helper that fails at runtime.
+//
+// Every command below was run against the released engine before being listed.
+const steps = [
+  { title: 'Write a value', cmd: 'kv put portfolio.value 98400' },
+  { title: 'Fork the whole database', cmd: 'branch fork default experiment' },
+  { title: 'Change it on the fork', cmd: 'kv put portfolio.value 111080 --branch experiment' },
+  { title: 'Read the fork', cmd: 'kv get portfolio.value --branch experiment' },
+  { title: 'Main is untouched', cmd: 'kv get portfolio.value' },
+];
+---
+
+<section class="mt-16" aria-label="Try it out">
+  <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+    <div class="max-w-[46rem]">
+      <h2 class="text-small font-medium uppercase text-ink-mid">Try it out</h2>
+      <p class="mt-2 text-body-lg text-ink-hi">
+        A real Strata database, running in this page. Nothing is installed, and nothing leaves your
+        browser.
+      </p>
+    </div>
+    <a
+      href="/playground"
+      class="shrink-0 whitespace-nowrap font-mono text-mono-body text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+      >Open the full playground &rarr;</a
+    >
+  </div>
+
+  <div
+    class="mt-4 grid overflow-hidden rounded-(--radius-frame) border border-line lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]"
+  >
+    <!-- The guided steps -->
+    <div class="border-line bg-raised p-6 lg:border-r">
+      <p class="text-small font-medium uppercase text-ink-mid">Run these in order</p>
+      <ol class="mt-3 space-y-1.5" id="try-steps">
+        {
+          steps.map((step, i) => (
+            <li>
+              <button
+                type="button"
+                class="group w-full rounded-(--radius-control) border border-transparent px-3 py-2.5 text-left transition-colors duration-200 hover:border-line-hover hover:bg-raised"
+                data-cmd={step.cmd}
+              >
+                <span class="flex items-baseline gap-2.5">
+                  <span class="shrink-0 font-mono text-mono-body text-ink-mid">{i + 1}</span>
+                  <span class="text-body text-ink-hi">{step.title}</span>
+                </span>
+                <span class="mt-1 block break-words pl-7 font-mono text-mono-sm text-terracotta-500">
+                  {step.cmd}
+                </span>
+              </button>
+            </li>
+          ))
+        }
+      </ol>
+      <button
+        type="button"
+        id="try-reset"
+        class="mt-5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+        >reset the database</button
+      >
+    </div>
+
+    <!-- The live terminal: macOS window chrome, ANSI palette -->
+    <div class="flex min-w-0 flex-col bg-term-surface">
+      <div class="flex items-center gap-2 border-b border-black/40 bg-term-chrome px-4 py-2.5">
+        <span class="h-3 w-3 rounded-full bg-mac-red"></span>
+        <span class="h-3 w-3 rounded-full bg-mac-amber"></span>
+        <span class="h-3 w-3 rounded-full bg-mac-green"></span>
+        <span class="ml-2 font-mono text-mono-sm text-term-dim">strata &mdash; playground</span>
+      </div>
+      <div
+        id="try-log"
+        class="try-log min-h-[20rem] flex-1 overflow-y-auto p-5 font-mono text-mono-body"
+        aria-live="polite"
+      >
+        <p class="text-term-dim" id="try-boot">
+          Pick a step to start. The engine loads on your first click.
+        </p>
+      </div>
+      <form
+        class="flex items-center gap-2 border-t border-black/40 bg-term-surface px-5 py-3"
+        id="try-form"
+      >
+        <span class="shrink-0 font-mono text-mono-body text-term-green" id="try-caret"
+          >strata &rsaquo;</span
+        >
+        <input
+          id="try-input"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          placeholder="or type a command"
+          aria-label="Strata command"
+          class="min-w-0 flex-1 bg-transparent font-mono text-mono-body text-term-fg placeholder:text-term-dim focus:outline-none"
+        />
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .try-log {
+    max-height: 26rem;
+  }
+  .try-log pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<script type="module" is:inline>
+  const PKG = '/playground/pkg/strata_wasm.js';
+  const log = document.getElementById('try-log');
+  const caret = document.getElementById('try-caret');
+  const input = document.getElementById('try-input');
+  const form = document.getElementById('try-form');
+  const steps = document.getElementById('try-steps');
+
+  let StrataSession = null;
+  let session = null;
+  let booting = null;
+  let branch = 'default';
+  let space = 'default';
+
+  // The prompt carries the live branch and space, with the caret accented the
+  // way the real REPL prints it.
+  function writePrompt(target, trailingSpace) {
+    target.textContent = '';
+    target.appendChild(el('span', 'text-term-green', `strata:${branch}/${space} `));
+    target.appendChild(el('span', 'text-term-green', trailingSpace ? '\u203a ' : '\u203a'));
+    return target;
+  }
+
+  function syncScope() {
+    if (!session) return;
+    branch = session.branch;
+    space = session.space;
+    writePrompt(caret, false);
+  }
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function scroll() {
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function note(text) {
+    log.appendChild(el('p', 'text-term-dim', text));
+    scroll();
+  }
+
+  function echo(line) {
+    const row = el('div', 'mt-2 first:mt-0');
+    const head = writePrompt(el('p', ''), true);
+    head.appendChild(el('span', 'text-term-fg', line));
+    row.appendChild(head);
+    return row;
+  }
+
+  function output(row, text, isError) {
+    const trimmed = String(text).replace(/\s+$/, '');
+    if (trimmed) {
+      row.appendChild(
+        el('pre', isError ? 'mt-0.5 text-term-red' : 'mt-0.5 text-term-cyan', trimmed),
+      );
+    }
+    log.appendChild(row);
+    scroll();
+  }
+
+  // The engine bundle is several megabytes, so it is fetched on first use only.
+  async function ensureEngine() {
+    if (session) return true;
+    if (booting) return booting;
+    const boot = document.getElementById('try-boot');
+    if (boot) boot.textContent = 'Loading the Strata engine…';
+    booting = (async () => {
+      try {
+        const mod = await import(PKG);
+        await mod.default();
+        StrataSession = mod.StrataSession;
+        session = new StrataSession();
+        syncScope();
+        if (boot) boot.remove();
+        note(`Strata ${mod.engineVersion()}. This database lives in your browser only.`);
+        return true;
+      } catch (error) {
+        if (boot) boot.textContent = 'Could not load the engine: ' + (error?.message ?? error);
+        booting = null;
+        return false;
+      }
+    })();
+    return booting;
+  }
+
+  async function run(line) {
+    if (!(await ensureEngine())) return;
+    const row = echo(line);
+    const parts = line.split(/\s+/);
+
+    if (parts[0] === 'clear') {
+      log.textContent = '';
+      return;
+    }
+    // `use` is a REPL convenience, not an engine command, exactly as in the CLI.
+    if (parts[0] === 'use') {
+      try {
+        if (parts[1]) session.setBranch(parts[1]);
+        if (parts[2]) session.setSpace(parts[2]);
+        syncScope();
+        output(row, `now on ${branch}`, false);
+      } catch (error) {
+        output(row, String(error?.message ?? error), true);
+      }
+      return;
+    }
+
+    let result = '';
+    let failed = false;
+    try {
+      result = session.executeCli(line);
+    } catch (error) {
+      result = String(error?.message ?? error);
+      failed = true;
+    }
+    const looksError =
+      failed || /^error[: ]|is not available|needs a host|could not parse/i.test(result.trim());
+    output(row, result, looksError);
+    syncScope();
+  }
+
+  steps.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-cmd]');
+    if (button) void run(button.dataset.cmd);
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const line = input.value.trim();
+    if (!line) return;
+    input.value = '';
+    void run(line);
+  });
+
+  input.addEventListener('focus', () => void ensureEngine(), { once: true });
+
+  document.getElementById('try-reset').addEventListener('click', () => {
+    if (!session) return;
+    try {
+      session.close();
+    } catch {
+      /* already closed */
+    }
+    session = new StrataSession();
+    syncScope();
+    log.textContent = '';
+    note('Fresh database.');
+  });
+</script>

@@ -1,4 +1,5 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { extname, join, relative, sep } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -36,6 +37,8 @@ function toPosix(path) {
 
 async function walk(path) {
   const absolute = join(ROOT, path);
+  // Docs rebuild: targets return as pages are restored.
+  if (!existsSync(absolute)) return [];
   const info = await stat(absolute);
   if (info.isFile()) return EXTENSIONS.has(extname(absolute)) ? [absolute] : [];
 

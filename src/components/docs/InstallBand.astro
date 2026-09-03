@@ -1,0 +1,73 @@
+---
+// Install: the one action worth privileging on a documentation front page, and
+// the natural beat after "Try it out" has shown the product costing nothing.
+//
+// Deliberately slimmer than the homepage install section, which is a React
+// island carrying an editor pitch and agent prose that does not belong here.
+// Three ways in, one verification line, nothing else.
+//
+// Commands are taken from the installer itself and the published package; no
+// version is written down, so nothing here can go stale against a release.
+const methods = [
+  { label: 'script', cmd: 'curl -fsSL https://stratadb.org/install.sh | sh' },
+  { label: 'homebrew', cmd: 'brew install stratalab/tap/strata' },
+  { label: 'python', cmd: 'pip install stratadb' },
+];
+---
+
+<section class="mt-16" aria-label="Install">
+  <h2 class="text-small font-medium uppercase text-ink-mid">Install</h2>
+  <p class="mt-2 text-body-lg text-ink-hi">
+    One binary and a directory. No server to run, and nothing to configure first.
+  </p>
+
+  <div class="mt-4 overflow-hidden rounded-(--radius-frame) border border-line">
+    <ul>
+      {
+        methods.map((method) => (
+          <li class="group flex items-center gap-4 border-b border-line bg-raised px-5 py-5">
+            <span class="w-24 shrink-0 font-mono text-mono-body text-ink-mid">{method.label}</span>
+            <code class="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-mono-body text-ink-hi">
+              {method.cmd}
+            </code>
+            <button
+              type="button"
+              class="js-copy shrink-0 rounded-(--radius-control) border border-line px-2.5 py-1 font-mono text-mono-body text-ink-mid opacity-0 transition-opacity duration-200 hover:border-line-hover hover:text-ink-hi focus-visible:opacity-100 group-hover:opacity-100"
+              data-copy={method.cmd}
+              aria-label={`Copy the ${method.label} install command`}
+            >
+              copy
+            </button>
+          </li>
+        ))
+      }
+      <li class="flex flex-wrap items-center gap-x-4 gap-y-1 bg-panel px-5 py-5">
+        <span class="w-24 shrink-0 font-mono text-mono-body text-ink-mid">check</span>
+        <code class="font-mono text-mono-body text-ink-hi">strata --cache ping</code>
+        <span class="text-body text-ink-mid"
+          >prints <span class="font-mono text-mono-body text-ink-hi">pong</span> and the version you installed</span
+        >
+      </li>
+    </ul>
+  </div>
+</section>
+
+<script>
+  // Copy buttons for the install commands.
+  document.querySelectorAll<HTMLButtonElement>('.js-copy[data-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const text = button.dataset.copy;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        const previous = button.textContent;
+        button.textContent = 'copied';
+        setTimeout(() => {
+          button.textContent = previous;
+        }, 1500);
+      } catch {
+        /* clipboard unavailable (permissions or an insecure context) */
+      }
+    });
+  });
+</script>
