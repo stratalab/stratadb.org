@@ -1,0 +1,20 @@
+---
+// Second sample: a command that has a Python binding, so the selector carries
+// four interfaces rather than three.
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import CommandReference from '../../../../components/docs/CommandReference.astro';
+---
+
+<DocsLayout
+  title="Set JSON value"
+  description="Set a value at a path inside a JSON document."
+  section="Reference"
+>
+  <CommandReference
+    id="json.set"
+    guides={[
+      { label: 'Working with data', href: '/docs' },
+      { label: 'Combine data models', href: '/docs' },
+    ]}
+  />
+</DocsLayout>

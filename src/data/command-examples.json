@@ -106,7 +106,7 @@
   },
   "branch.preview": {
     "intro": "Preview promoting a fork into the branch it came from.",
-    "cli": "$ strata kv put config base\n$ strata branch fork default experiment\n$ strata kv put config tuned --branch experiment  # change on the fork\n$ strata branch preview experiment default --strategy strict  # a clean preview — no conflicting changes on default",
+    "cli": "$ strata kv put config base\n$ strata branch fork default experiment\n$ strata kv put config tuned --branch experiment  # change on the fork\n$ strata branch preview experiment default --strategy strict  # a clean preview - no conflicting changes on default",
     "wire": "{\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"YmFzZQ==\"}\n{\"branch\":\"experiment\",\"source\":\"default\",\"type\":\"branch_fork_current\"}\n{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}\n{\"source\":\"experiment\",\"strategy\":\"strict\",\"target\":\"default\",\"type\":\"branch_preview\"}"
   },
   "event.append": {
@@ -321,7 +321,7 @@
   },
   "inference.capability": {
     "intro": "Report a model's capabilities without a network call.",
-    "cli": "$ strata inference capability openai:gpt-4o-mini  # Pure metadata — no request is sent to the provider.",
+    "cli": "$ strata inference capability openai:gpt-4o-mini  # Pure metadata - no request is sent to the provider.",
     "wire": "{\"model\":\"openai:gpt-4o-mini\",\"type\":\"inference_model_capability\"}"
   },
   "inference.models.list": {

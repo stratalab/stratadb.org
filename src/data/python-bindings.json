@@ -1,0 +1,717 @@
+{
+  "arrow.export": {
+    "call": "db.arrow.export",
+    "signature": "(primitive: 'str', path: 'str', *, format: 'str' = 'parquet', collection: 'Optional[str]' = None, event_type: 'Optional[str]' = None, graph: 'Optional[str]' = None, limit: 'Optional[int]' = None, prefix: 'Optional[str]' = None) -> 'Any'",
+    "summary": "Exports a primitive's rows to ``path`` (Parquet by default).",
+    "example": [
+      "_ = db.kv.put(\"greeting\", \"hello\")",
+      "_ = db.arrow.export(\"kv\", tmp_dir + \"/kv.parquet\", format=\"parquet\")  # One file per primitive; Parquet by default.",
+      "_ = db.kv.delete(\"greeting\")",
+      "_ = db.arrow.import_(\"kv\", tmp_dir + \"/kv.parquet\")",
+      "db.kv.get(\"greeting\")"
+    ]
+  },
+  "arrow.import": {
+    "call": "db.arrow.import_",
+    "signature": "(target: 'str', path: 'str', *, format: 'Optional[str]' = None, collection: 'Optional[str]' = None, graph: 'Optional[str]' = None, key_column: 'Optional[str]' = None, value_column: 'Optional[str]' = None) -> 'Any'",
+    "summary": "Imports rows from ``path`` into ``target``.",
+    "example": [
+      "_ = db.kv.put(\"greeting\", \"hello\")",
+      "_ = db.arrow.export(\"kv\", tmp_dir + \"/kv.parquet\", format=\"parquet\")",
+      "_ = db.kv.delete(\"greeting\")",
+      "_ = db.arrow.import_(\"kv\", tmp_dir + \"/kv.parquet\")  # Rows are keyed by their source column; kv restores greeting=hello.",
+      "db.kv.get(\"greeting\")"
+    ]
+  },
+  "branch.create": {
+    "call": "db.branches.create",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Creates an empty branch rooted at an empty state.",
+    "example": [
+      "_ = db.branches.create(\"feature\")",
+      "sorted(b.name for b in db.branches.list())"
+    ]
+  },
+  "branch.delete": {
+    "call": "db.branches.delete",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Deletes a branch.",
+    "example": [
+      "_ = db.branches.create(\"temp\")",
+      "_ = db.branches.delete(\"temp\")",
+      "sorted(b.name for b in db.branches.list())"
+    ]
+  },
+  "branch.diff": {
+    "call": "db.branches.diff",
+    "signature": "(branch_a: 'str', branch_b: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Compares two branches and reports what differs, across every primitive.",
+    "example": [
+      "_ = db.vectors.create_collection(\"notes\", 2, metric=\"cosine\")",
+      "_ = db.kv.put(\"config\", \"base\")",
+      "_ = db.branches.fork(\"default\", \"experiment\")",
+      "_ = db.at(branch=\"experiment\").kv.put(\"config\", \"tuned\")  # diverge the key-value entry on the fork",
+      "_ = db.at(branch=\"experiment\").vectors.upsert(\"notes\", \"n1\", [0.1, 0.2])  # add a vector on the fork",
+      "_ = db.branches.diff(\"default\", \"experiment\")  # reports the key-value change and the new vector, grouped by capability"
+    ]
+  },
+  "branch.fork_at_version": {
+    "call": "db.branches.fork",
+    "signature": "(source: 'str', name: 'str', *, version: 'Optional[int]' = None, timestamp: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Forks ``name`` from ``source`` - at its current head, a version, or a timestamp.",
+    "example": [
+      "_ = db.branches.fork(\"default\", \"experiment\")",
+      "sorted(b.name for b in db.branches.list())"
+    ]
+  },
+  "branch.get": {
+    "call": "db.branches.get",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Returns a branch's info, or ``None`` if it does not exist.",
+    "example": [
+      "_ = db.branches.create(\"feature\")",
+      "db.branches.get(\"feature\").name"
+    ]
+  },
+  "branch.list": {
+    "call": "db.branches.list",
+    "signature": "() -> 'list'",
+    "summary": "Lists the branches.",
+    "example": [
+      "_ = db.branches.create(\"feature\")",
+      "sorted(b.name for b in db.branches.list())"
+    ]
+  },
+  "branch.merge": {
+    "call": "db.branches.merge",
+    "signature": "(source: 'str', target: 'str', *, strategy: 'Any' = 'strict') -> 'Any'",
+    "summary": "Promotes ``source``'s changes into ``target`` as one atomic commit.",
+    "example": [
+      "_ = db.kv.put(\"config\", \"base\")",
+      "_ = db.branches.fork(\"default\", \"experiment\")",
+      "_ = db.at(branch=\"experiment\").kv.put(\"config\", \"tuned\")  # change on the fork",
+      "_ = db.branches.merge(\"experiment\", \"default\", strategy=\"strict\")  # applies the fork's change onto default"
+    ]
+  },
+  "branch.preview": {
+    "call": "db.branches.preview",
+    "signature": "(source: 'str', target: 'str', *, strategy: 'Any' = 'strict') -> 'Any'",
+    "summary": "Previews promoting ``source`` into ``target`` without mutating either.",
+    "example": [
+      "_ = db.kv.put(\"config\", \"base\")",
+      "_ = db.branches.fork(\"default\", \"experiment\")",
+      "_ = db.at(branch=\"experiment\").kv.put(\"config\", \"tuned\")  # change on the fork",
+      "_ = db.branches.preview(\"experiment\", \"default\", strategy=\"strict\")  # a clean preview - no conflicting changes on default"
+    ]
+  },
+  "event.append": {
+    "call": "db.events.append",
+    "signature": "(event_type: 'str', payload: 'Any') -> 'Any'",
+    "summary": "Appends one event; returns its sequence + commit receipt.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "db.events.len()"
+    ]
+  },
+  "event.batch_append": {
+    "call": "db.events.append_many",
+    "signature": "(entries: 'Any') -> 'BatchResult'",
+    "summary": "Appends many events in one commit. Each entry is (event_type, payload) or a dict.",
+    "example": [
+      "_ = db.events.append_many([{\"event_type\": \"user.created\", \"payload\": {\"id\": 1}}, {\"event_type\": \"user.updated\", \"payload\": {\"id\": 2}}])",
+      "db.events.len()"
+    ]
+  },
+  "event.count": {
+    "call": "db.events.len",
+    "signature": "(*, as_of: 'Optional[int]' = None) -> 'int'",
+    "summary": "Number of events in the log.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "_ = db.events.append(\"user.updated\", {\"id\": 2})",
+      "db.events.len()"
+    ]
+  },
+  "event.exists": {
+    "call": "db.events.exists",
+    "signature": "(sequence: 'int') -> 'bool'",
+    "summary": "Whether an event exists at ``sequence``.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "db.events.exists(0)",
+      "db.events.exists(999)"
+    ]
+  },
+  "event.get": {
+    "call": "db.events.get",
+    "signature": "(sequence: 'int', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Returns the event at ``sequence``, or ``None`` if out of range.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "db.events.get(0).event.payload",
+      "db.events.get(999) is None"
+    ]
+  },
+  "event.list": {
+    "call": "db.events.list",
+    "signature": "(event_type: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, after_sequence: 'Optional[int]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "summary": "A page of events, optionally filtered by type / after a sequence.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "_ = db.events.append(\"user.updated\", {\"id\": 2})",
+      "[e.event.payload for e in db.events.list()]"
+    ]
+  },
+  "event.range": {
+    "call": "db.events.range",
+    "signature": "(start: 'int', *, end: 'Optional[int]' = None, limit: 'Optional[int]' = None, reverse: 'bool' = False, event_type: 'Optional[str]' = None) -> 'Page'",
+    "summary": "A page of events by sequence, from ``start`` (to ``end`` if given).",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "_ = db.events.append(\"user.updated\", {\"id\": 2})",
+      "[e.event.payload for e in db.events.range(0)]"
+    ]
+  },
+  "event.verify_chain": {
+    "call": "db.events.verify_chain",
+    "signature": "() -> 'Any'",
+    "summary": "Verifies the hash chain; returns its length, validity, and first invalid link.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "db.events.verify_chain().valid"
+    ]
+  },
+  "graph.apply_delete_policy": {
+    "call": "db.graphs.apply_delete_policy",
+    "signature": "(primitive: 'str', key: 'str', policy: 'str', *, space: 'Optional[str]' = None) -> 'Any'",
+    "summary": "Apply a delete policy to the graph facts bound to a product entity.",
+    "example": [
+      "_ = db.graphs.create(\"kb\")",
+      "_ = db.graphs.add_node(\"kb\", \"ada\", binding={\"target\": {\"primitive\": \"kv\", \"space\": \"default\", \"key\": \"user:1\"}})",
+      "_ = db.graphs.apply_delete_policy(\"kv\", \"user:1\", \"cascade\")  # cascade removes the bound node and its incident edges.",
+      "db.graphs.get_node(\"kb\", \"ada\") is None"
+    ]
+  },
+  "graph.batch_write": {
+    "call": "db.graphs.batch_write",
+    "signature": "(graph: 'str', operations: 'list') -> 'Any'",
+    "summary": "Applies a batch of node/edge operations atomically.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.batch_write(\"g\", [{\"type\": \"upsert_node\", \"node_id\": \"a\", \"data\": {\"object_type\": \"person\"}}, {\"type\": \"upsert_node\", \"node_id\": \"b\", \"data\": {\"object_type\": \"person\"}}, {\"type\": \"upsert_edge\", \"src\": \"a\", \"edge_type\": \"knows\", \"dst\": \"b\", \"data\": {}}])  # All operations land in one engine commit, or none do.",
+      "db.graphs.meta(\"g\").node_count"
+    ]
+  },
+  "graph.bulk_insert": {
+    "call": "db.graphs.bulk_insert",
+    "signature": "(graph: 'str', *, nodes: 'Optional[list]' = None, edges: 'Optional[list]' = None, chunk_size: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Insert many nodes and edges in one commit.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.bulk_insert(\"g\", nodes=[{\"node_id\": \"a\", \"object_type\": \"person\"}, {\"node_id\": \"b\", \"object_type\": \"person\"}], edges=[{\"src\": \"a\", \"edge_type\": \"knows\", \"dst\": \"b\"}])",
+      "db.graphs.meta(\"g\").node_count"
+    ]
+  },
+  "graph.create": {
+    "call": "db.graphs.create",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Creates an empty graph.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "db.graphs.list()"
+    ]
+  },
+  "graph.delete": {
+    "call": "db.graphs.delete",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Deletes a graph and all its nodes and edges.",
+    "example": [
+      "_ = db.graphs.create(\"temp\")",
+      "_ = db.graphs.delete(\"temp\")",
+      "db.graphs.list()"
+    ]
+  },
+  "graph.list": {
+    "call": "db.graphs.list",
+    "signature": "() -> 'list'",
+    "summary": "Lists the graphs (with node/edge counts).",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "db.graphs.list()"
+    ]
+  },
+  "graph.neighbors": {
+    "call": "db.graphs.neighbors",
+    "signature": "(graph: 'str', node_id: 'str', *, direction: 'str' = 'outgoing', edge_type: 'Optional[str]' = None, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "summary": "A page of a node's neighbors (``direction`` is outgoing/incoming/both).",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.add_node(\"social\", \"bob\")",
+      "_ = db.graphs.add_edge(\"social\", \"alice\", \"knows\", \"bob\")",
+      "[n.node_id for n in db.graphs.neighbors(\"social\", \"alice\", direction=\"outgoing\")]"
+    ]
+  },
+  "graph.nodes_by_type": {
+    "call": "db.graphs.nodes_by_type",
+    "signature": "(graph: 'str', object_type: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "summary": "A page of nodes of a given object type.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\", object_type=\"person\")",
+      "_ = db.graphs.add_node(\"g\", \"b\", object_type=\"person\")",
+      "[n.node_id for n in db.graphs.nodes_by_type(\"g\", \"person\")]"
+    ]
+  },
+  "graph.sample": {
+    "call": "db.graphs.sample",
+    "signature": "(graph: 'str', *, count: 'Optional[int]' = None) -> 'Sample'",
+    "summary": "A representative sample of nodes plus the total count.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "db.graphs.sample(\"g\").total_count"
+    ]
+  },
+  "hub.get_dataset": {
+    "call": "db.hub.get_dataset",
+    "signature": "(name: 'str', *, hub_url: 'Optional[str]' = None) -> 'Any'",
+    "summary": "One dataset's full card (``GET /v1/datasets/{name}``).",
+    "example": [
+      "card = db.hub.get_dataset(\"titanic\")        # doctest: +SKIP",
+      "card.primitives, card.license               # doctest: +SKIP"
+    ]
+  },
+  "hub.info": {
+    "call": "db.hub.info",
+    "signature": "(*, hub_url: 'Optional[str]' = None) -> 'Any'",
+    "summary": "The hub's V1 capability advertisement (``GET /v1/info``).",
+    "example": [
+      "db.hub.info().hash_algorithm                # doctest: +SKIP"
+    ]
+  },
+  "hub.list_datasets": {
+    "call": "db.hub.list_datasets",
+    "signature": "(*, tasks: 'Union[str, Iterable[str], None]' = None, tags: 'Union[str, Iterable[str], None]' = None, primitives: 'Union[str, Iterable[str], None]' = None, license: 'Optional[str]' = None, size_min_bytes: 'Optional[int]' = None, size_max_bytes: 'Optional[int]' = None, sort: 'Any' = None, limit: 'Optional[int]' = None, offset: 'Optional[int]' = None, hub_url: 'Optional[str]' = None) -> 'Any'",
+    "summary": "Lists the hub's datasets, filtered and sorted (``GET /v1/datasets``).",
+    "example": [
+      "page = db.hub.list_datasets(tasks=\"classification\", sort=\"downloads\", limit=5)  # doctest: +SKIP",
+      "[dataset.name for dataset in page.items]                                        # doctest: +SKIP"
+    ]
+  },
+  "hub.list_refs": {
+    "call": "db.hub.list_refs",
+    "signature": "(dataset: 'str', *, hub_url: 'Optional[str]' = None) -> 'Any'",
+    "summary": "A dataset's live, cloneable refs (``GET /v1/datasets/{name}/refs``).",
+    "example": [
+      "[ref.branch for ref in db.hub.list_refs(\"titanic\").refs]   # doctest: +SKIP"
+    ]
+  },
+  "hub.list_yanked": {
+    "call": "db.hub.list_yanked",
+    "signature": "(*, since: 'Union[str, datetime, None]' = None, hub_url: 'Optional[str]' = None) -> 'Any'",
+    "summary": "The hub's yank deny-list - refs taken down (``GET /v1/yanked``).",
+    "example": [
+      "db.hub.list_yanked(since=\"2026-09-01T00:00:00Z\").total   # doctest: +SKIP"
+    ]
+  },
+  "json.batch_delete": {
+    "call": "db.json.delete_many",
+    "signature": "(entries: 'Any') -> 'BatchResult'",
+    "summary": "Deletes many documents/paths.",
+    "example": [
+      "_ = db.json.set_many([{\"key\": \"a\", \"path\": \"$\", \"value\": {\"v\": 1}}])",
+      "_ = db.json.delete_many([{\"key\": \"a\", \"path\": \"$\"}])",
+      "db.json.exists(\"a\")"
+    ]
+  },
+  "json.batch_get": {
+    "call": "db.json.get_many",
+    "signature": "(entries: 'Any') -> 'list[Any]'",
+    "summary": "Reads many documents; returns the JSON value or ``None`` per entry, in order.",
+    "example": [
+      "_ = db.json.set_many([{\"key\": \"a\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"b\", \"path\": \"$\", \"value\": {\"v\": 2}}])",
+      "db.json.get_many([{\"key\": \"a\", \"path\": \"$\"}, {\"key\": \"b\", \"path\": \"$\"}])"
+    ]
+  },
+  "json.batch_set": {
+    "call": "db.json.set_many",
+    "signature": "(entries: 'Any') -> 'BatchResult'",
+    "summary": "Writes many documents. Accepts a dict, or list of (key, value)/(key, path, value).",
+    "example": [
+      "_ = db.json.set_many([{\"key\": \"a\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"b\", \"path\": \"$\", \"value\": {\"v\": 2}}])",
+      "db.json.get_many([{\"key\": \"a\", \"path\": \"$\"}, {\"key\": \"b\", \"path\": \"$\"}])"
+    ]
+  },
+  "json.count": {
+    "call": "db.json.count",
+    "signature": "(prefix: 'Optional[str]' = None, *, as_of: 'Optional[int]' = None) -> 'int'",
+    "summary": "Number of documents, optionally under an id prefix.",
+    "example": [
+      "_ = db.json.set(\"a\", \"$\", {\"v\": 1})",
+      "_ = db.json.set(\"b\", \"$\", {\"v\": 2})",
+      "db.json.count()"
+    ]
+  },
+  "json.delete": {
+    "call": "db.json.delete",
+    "signature": "(key: 'str', path: 'str' = '$') -> 'Any'",
+    "summary": "Deletes ``path`` in document ``key`` (whole document by default).",
+    "example": [
+      "_ = db.json.set(\"temp\", \"$\", {\"x\": 1})",
+      "_ = db.json.delete(\"temp\", \"$\")",
+      "db.json.exists(\"temp\")"
+    ]
+  },
+  "json.exists": {
+    "call": "db.json.exists",
+    "signature": "(key: 'str') -> 'bool'",
+    "summary": "Whether the document currently exists.",
+    "example": [
+      "_ = db.json.set(\"user\", \"$\", {\"name\": \"alice\"})",
+      "db.json.exists(\"user\")",
+      "db.json.exists(\"absent\")"
+    ]
+  },
+  "json.history": {
+    "call": "db.json.history",
+    "signature": "(key: 'str') -> 'Optional[list]'",
+    "summary": "Full version history (newest first), or ``None`` if the document never existed.",
+    "example": [
+      "db.json.history(\"absent\") is None"
+    ]
+  },
+  "json.list": {
+    "call": "db.json.iter_keys",
+    "signature": "(prefix: 'Optional[str]' = None, *, as_of: 'Optional[int]' = None) -> 'Iterator[str]'",
+    "summary": "Iterates every document id under ``prefix``, paginating internally.",
+    "example": []
+  },
+  "json.sample": {
+    "call": "db.json.sample",
+    "signature": "(prefix: 'Optional[str]' = None, *, count: 'Optional[int]' = None) -> 'Sample'",
+    "summary": "A deterministic representative sample plus the total count.",
+    "example": [
+      "_ = db.json.set_many([{\"key\": \"a\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"b\", \"path\": \"$\", \"value\": {\"v\": 2}}, {\"key\": \"c\", \"path\": \"$\", \"value\": {\"v\": 3}}])",
+      "db.json.sample().total_count"
+    ]
+  },
+  "json.scan": {
+    "call": "db.json.iter_rows",
+    "signature": "(start: 'Optional[str]' = None) -> 'Iterator[Any]'",
+    "summary": "Iterates every document row from ``start``, paginating internally.",
+    "example": []
+  },
+  "json.set": {
+    "call": "db.json.set",
+    "signature": "(key: 'str', path: 'str', value: 'Any') -> 'Any'",
+    "summary": "Sets ``value`` at ``path`` in document ``key``. Returns a write result.",
+    "example": [
+      "_ = db.json.set(\"user\", \"$\", {\"name\": \"alice\", \"age\": 30})",
+      "db.json.get(\"user\", \"$\")"
+    ]
+  },
+  "kv.batch_delete": {
+    "call": "db.kv.delete_many",
+    "signature": "(keys: 'Sequence[str | bytes]') -> 'BatchResult'",
+    "summary": "Deletes many keys in one commit.",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}])",
+      "_ = db.kv.delete_many([\"a\", \"b\"])",
+      "db.kv.exists_many([\"a\", \"b\"])"
+    ]
+  },
+  "kv.batch_exists": {
+    "call": "db.kv.exists_many",
+    "signature": "(keys: 'Sequence[str | bytes]') -> 'list[bool]'",
+    "summary": "Presence of many keys, in order.",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}])",
+      "db.kv.exists_many([\"a\", \"missing\"])"
+    ]
+  },
+  "kv.batch_get": {
+    "call": "db.kv.get_many",
+    "signature": "(keys: 'Sequence[str | bytes]') -> 'list[Optional[bytes]]'",
+    "summary": "Reads many keys; returns value bytes or ``None`` per key, in order.",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}])",
+      "db.kv.get_many([\"a\", \"b\", \"missing\"])"
+    ]
+  },
+  "kv.batch_put": {
+    "call": "db.kv.put_many",
+    "signature": "(entries: 'Any') -> 'BatchResult'",
+    "summary": "Writes many entries in one commit. Accepts a dict or a list of (key, value).",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}])",
+      "db.kv.get_many([\"a\", \"b\"])"
+    ]
+  },
+  "kv.count": {
+    "call": "db.kv.count",
+    "signature": "(prefix: 'Optional[str | bytes]' = None, *, as_of: 'Optional[int]' = None) -> 'int'",
+    "summary": "Number of visible keys, optionally under a prefix.",
+    "example": [
+      "_ = db.kv.put(\"a\", \"1\")",
+      "_ = db.kv.put(\"b\", \"2\")",
+      "db.kv.count()"
+    ]
+  },
+  "kv.delete": {
+    "call": "db.kv.delete",
+    "signature": "(key: 'str | bytes') -> 'Any'",
+    "summary": "Deletes a key. Returns a write result.",
+    "example": [
+      "_ = db.kv.put(\"temp\", \"scratch\")",
+      "_ = db.kv.delete(\"temp\")",
+      "db.kv.exists(\"temp\")"
+    ]
+  },
+  "kv.exists": {
+    "call": "db.kv.exists",
+    "signature": "(key: 'str | bytes') -> 'bool'",
+    "summary": "Whether the key currently has a visible value.",
+    "example": [
+      "_ = db.kv.put(\"k\", \"v\")",
+      "db.kv.exists(\"k\")",
+      "db.kv.exists(\"absent\")"
+    ]
+  },
+  "kv.get": {
+    "call": "db.kv.get",
+    "signature": "(key: 'str | bytes', *, as_of: 'Optional[int]' = None) -> 'Optional[bytes]'",
+    "summary": "Returns the value bytes, or ``None`` if absent.",
+    "example": [
+      "_ = db.kv.put(\"greeting\", \"hello\")",
+      "db.kv.get(\"greeting\")",
+      "db.kv.get(\"absent\") is None"
+    ]
+  },
+  "kv.history": {
+    "call": "db.kv.history",
+    "signature": "(key: 'str | bytes') -> 'Optional[list]'",
+    "summary": "Full version history (tombstones included), or ``None`` if the key never existed.",
+    "example": [
+      "db.kv.history(\"absent\") is None"
+    ]
+  },
+  "kv.list": {
+    "call": "db.kv.iter_keys",
+    "signature": "(prefix: 'Optional[str | bytes]' = None, *, as_of: 'Optional[int]' = None) -> 'Iterator[bytes]'",
+    "summary": "Iterates every key under ``prefix``, paginating internally.",
+    "example": []
+  },
+  "kv.put": {
+    "call": "db.kv.put",
+    "signature": "(key: 'str | bytes', value: 'str | bytes') -> 'Any'",
+    "summary": "Stores or replaces a value. Returns a write result (receipt + effect).",
+    "example": [
+      "_ = db.kv.put(\"setting\", \"v1\")",
+      "_ = db.kv.put(\"setting\", \"v2\")  # replaces the visible value",
+      "db.kv.get(\"setting\")"
+    ]
+  },
+  "kv.sample": {
+    "call": "db.kv.sample",
+    "signature": "(prefix: 'Optional[str | bytes]' = None, *, count: 'Optional[int]' = None) -> 'Sample'",
+    "summary": "A deterministic representative sample plus the total count.",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}, {\"key\": \"c\", \"value\": \"3\"}])",
+      "db.kv.sample().total_count"
+    ]
+  },
+  "kv.scan": {
+    "call": "db.kv.iter_rows",
+    "signature": "(start: 'Optional[str | bytes]' = None) -> 'Iterator[Any]'",
+    "summary": "Iterates every row from ``start``, paginating internally.",
+    "example": []
+  },
+  "space.create": {
+    "call": "db.spaces.create",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Creates a space.",
+    "example": [
+      "_ = db.spaces.create(\"app\")",
+      "sorted(db.spaces.list())"
+    ]
+  },
+  "space.delete": {
+    "call": "db.spaces.delete",
+    "signature": "(name: 'str', *, force: 'bool' = False) -> 'Any'",
+    "summary": "Deletes a space. Refuses a non-empty space unless ``force=True``.",
+    "example": [
+      "_ = db.spaces.create(\"temp\")",
+      "_ = db.spaces.delete(\"temp\")",
+      "db.spaces.exists(\"temp\")"
+    ]
+  },
+  "space.exists": {
+    "call": "db.spaces.exists",
+    "signature": "(name: 'str') -> 'bool'",
+    "summary": "Whether the space exists.",
+    "example": [
+      "_ = db.spaces.create(\"app\")",
+      "db.spaces.exists(\"app\")",
+      "db.spaces.exists(\"nope\")"
+    ]
+  },
+  "space.list": {
+    "call": "db.spaces.list",
+    "signature": "() -> 'list'",
+    "summary": "Lists the spaces.",
+    "example": [
+      "_ = db.spaces.create(\"app\")",
+      "sorted(db.spaces.list())"
+    ]
+  },
+  "vector.batch_delete": {
+    "call": "db.vectors.delete_many",
+    "signature": "(collection: 'str', keys: 'Sequence[str]') -> 'BatchResult'",
+    "summary": "Deletes many vectors.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert_many(\"docs\", [{\"key\": \"a\", \"vector\": [1.0, 0.0, 0.0]}, {\"key\": \"b\", \"vector\": [0.0, 1.0, 0.0]}])",
+      "_ = db.vectors.delete_many(\"docs\", [\"a\", \"b\"])",
+      "db.vectors.count(\"docs\")"
+    ]
+  },
+  "vector.batch_get": {
+    "call": "db.vectors.get_many",
+    "signature": "(collection: 'str', keys: 'Sequence[str]') -> 'BatchResult'",
+    "summary": "Reads many vectors positionally.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert_many(\"docs\", [{\"key\": \"a\", \"vector\": [1.0, 0.0, 0.0]}, {\"key\": \"b\", \"vector\": [0.0, 1.0, 0.0]}])",
+      "[i.result.value.key for i in db.vectors.get_many(\"docs\", [\"a\", \"b\"]).items]"
+    ]
+  },
+  "vector.batch_upsert": {
+    "call": "db.vectors.upsert_many",
+    "signature": "(collection: 'str', entries: 'Any') -> 'BatchResult'",
+    "summary": "Upserts many vectors. Each entry is (key, vector[, metadata]) or a dict.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert_many(\"docs\", [{\"key\": \"a\", \"vector\": [1.0, 0.0, 0.0]}, {\"key\": \"b\", \"vector\": [0.0, 1.0, 0.0]}])",
+      "db.vectors.count(\"docs\")"
+    ]
+  },
+  "vector.collection.stats": {
+    "call": "db.vectors.stats",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Returns a collection's info (dimension, metric, count), or ``None``.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "db.vectors.stats(\"docs\").dimension"
+    ]
+  },
+  "vector.count": {
+    "call": "db.vectors.count",
+    "signature": "(name: 'str', *, as_of: 'Optional[int]' = None) -> 'int'",
+    "summary": "Number of vectors in a collection.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0])",
+      "db.vectors.count(\"docs\")"
+    ]
+  },
+  "vector.delete": {
+    "call": "db.vectors.delete",
+    "signature": "(collection: 'str', key: 'str') -> 'Any'",
+    "summary": "Deletes one vector.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "_ = db.vectors.delete(\"docs\", \"a\")",
+      "db.vectors.exists(\"docs\", \"a\")"
+    ]
+  },
+  "vector.delete_all": {
+    "call": "db.vectors.delete_all",
+    "signature": "(collection: 'str') -> 'Any'",
+    "summary": "Deletes every vector in a collection.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "_ = db.vectors.delete_all(\"docs\")",
+      "db.vectors.count(\"docs\")"
+    ]
+  },
+  "vector.delete_by_filter": {
+    "call": "db.vectors.delete_by_filter",
+    "signature": "(collection: 'str', filter: 'Any') -> 'Any'",
+    "summary": "Deletes every vector whose metadata matches ``filter``.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0], metadata={\"tag\": \"keep\"})",
+      "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0], metadata={\"tag\": \"drop\"})",
+      "_ = db.vectors.delete_by_filter(\"docs\", stratadb.filters.eq(\"tag\", \"drop\"))",
+      "db.vectors.count(\"docs\")"
+    ]
+  },
+  "vector.exists": {
+    "call": "db.vectors.exists",
+    "signature": "(collection: 'str', key: 'str') -> 'bool'",
+    "summary": "Whether the key currently has a visible vector.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "db.vectors.exists(\"docs\", \"a\")",
+      "db.vectors.exists(\"docs\", \"absent\")"
+    ]
+  },
+  "vector.get": {
+    "call": "db.vectors.get",
+    "signature": "(collection: 'str', key: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Returns the stored vector + metadata, or ``None`` if absent.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "db.vectors.get(\"docs\", \"a\").key",
+      "db.vectors.get(\"docs\", \"absent\") is None"
+    ]
+  },
+  "vector.history": {
+    "call": "db.vectors.history",
+    "signature": "(collection: 'str', key: 'str') -> 'Optional[list]'",
+    "summary": "Full version history for a key, or ``None`` if it never existed.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "db.vectors.history(\"docs\", \"absent\") is None"
+    ]
+  },
+  "vector.index.query": {
+    "call": "db.vectors.index_query",
+    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None) -> 'Tuple[list, Any]'",
+    "summary": "Like ``query`` but also returns index diagnostics: ``(matches, diagnostics)``.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0])",
+      "[m.key for m in db.vectors.index_query(\"docs\", [1.0, 0.0, 0.0], k=2)[0]]"
+    ]
+  },
+  "vector.query": {
+    "call": "db.vectors.query",
+    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None) -> 'list'",
+    "summary": "Returns the ``k`` nearest matches, optionally metadata-filtered.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0])",
+      "[m.key for m in db.vectors.query(\"docs\", [1.0, 0.0, 0.0], k=2)]"
+    ]
+  },
+  "vector.upsert": {
+    "call": "db.vectors.upsert",
+    "signature": "(collection: 'str', key: 'str', vector: 'Sequence[float]', *, metadata: 'Optional[dict]' = None) -> 'Any'",
+    "summary": "Inserts or replaces a vector (with optional metadata).",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0], metadata={\"tag\": \"x\"})",
+      "db.vectors.exists(\"docs\", \"a\")"
+    ]
+  }
+}

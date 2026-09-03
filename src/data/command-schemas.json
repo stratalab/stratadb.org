@@ -935,7 +935,7 @@
             "type": "integer"
           },
           "usable_host_bytes": {
-            "description": "The usable host memory the derivation started from, in bytes — present\nonly when `source` is `derived_from_host`.",
+            "description": "The usable host memory the derivation started from, in bytes - present\nonly when `source` is `derived_from_host`.",
             "format": "uint64",
             "minimum": 0,
             "type": [
@@ -1031,7 +1031,7 @@
   "admin.ipc_status": {
     "$defs": {
       "AdminIpcClient": {
-        "description": "One connected IPC client, as reported by `ipc_status`. Display identity\nonly — the socket's same-user permission check is the security boundary.",
+        "description": "One connected IPC client, as reported by `ipc_status`. Display identity\nonly - the socket's same-user permission check is the security boundary.",
         "properties": {
           "access": {
             "$ref": "#/$defs/SessionAccess",
@@ -1131,7 +1131,7 @@
           },
           {
             "const": "read_write",
-            "description": "Full command access — the pre-hello default.",
+            "description": "Full command access - the pre-hello default.",
             "type": "string"
           }
         ]
@@ -5279,7 +5279,7 @@
         "type": "object"
       },
       "Maybe3": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record — struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -9409,7 +9409,7 @@
         "type": "object"
       },
       "Maybe5": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record — struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -10722,7 +10722,7 @@
         "type": "object"
       },
       "Maybe4": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record — struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -14971,7 +14971,7 @@
         "type": "object"
       },
       "ModelConfig": {
-        "description": "Per-model load/context configuration (llama.cpp local; ignored by cloud).\nSet once and cache-keyed — not repeated per call.",
+        "description": "Per-model load/context configuration (llama.cpp local; ignored by cloud).\nSet once and cache-keyed - not repeated per call.",
         "properties": {
           "chat_format": {
             "description": "Named chat template (e.g. `\"chatml\"`, `\"llama3\"`, `\"gemma\"`) overriding\nthe model's embedded `tokenizer.chat_template`.",
@@ -15060,7 +15060,7 @@
         ]
       },
       "Pooling": {
-        "description": "Embedding pooling strategy (a context-creation param — load-time).",
+        "description": "Embedding pooling strategy (a context-creation param - load-time).",
         "oneOf": [
           {
             "const": "mean",
@@ -15153,7 +15153,7 @@
           },
           {
             "const": "tool",
-            "description": "Tool result turn (function calling — phase 2).",
+            "description": "Tool result turn (function calling - phase 2).",
             "type": "string"
           }
         ]
@@ -18696,7 +18696,7 @@
         "type": "object"
       },
       "MaybeJsonValue": {
-        "description": "JSON point-read result that distinguishes absence from a stored JSON null.\n\nSerializes the same `{found, value}` wire shape as the shared\n[`Maybe`](super::Maybe) envelope, but carries a non-optional `value` so a\nstored JSON `null` (`found: true, value: null`) stays distinct from an\nabsent document (`found: false, value: null`). `Maybe<serde_json::Value>`\ncannot express that distinction because `Option<Value>` deserializes a JSON\n`null` back to absence — hence this dedicated type.",
+        "description": "JSON point-read result that distinguishes absence from a stored JSON null.\n\nSerializes the same `{found, value}` wire shape as the shared\n[`Maybe`](super::Maybe) envelope, but carries a non-optional `value` so a\nstored JSON `null` (`found: true, value: null`) stays distinct from an\nabsent document (`found: false, value: null`). `Maybe<serde_json::Value>`\ncannot express that distinction because `Option<Value>` deserializes a JSON\n`null` back to absence - hence this dedicated type.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -22469,7 +22469,7 @@
         "type": "string"
       },
       "Maybe": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record — struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -22950,7 +22950,7 @@
     "command": "kv.put",
     "request": {
       "additionalProperties": false,
-      "description": "Writes one KV entry.\n\n# Guaranteed semantics\n\n- **Atomic per key.** The write is a single engine commit: it either\n  applies fully (value plus a new commit version) or not at all. No\n  reader ever observes a partial or torn value.\n- **Read-after-write visibility.** Once the command returns success,\n  every subsequent read through any handle of the same database\n  observes this write (or a newer one) — including immediately, from\n  the handle that issued it. Acknowledged writes are never\n  transiently invisible.",
+      "description": "Writes one KV entry.\n\n# Guaranteed semantics\n\n- **Atomic per key.** The write is a single engine commit: it either\n  applies fully (value plus a new commit version) or not at all. No\n  reader ever observes a partial or torn value.\n- **Read-after-write visibility.** Once the command returns success,\n  every subsequent read through any handle of the same database\n  observes this write (or a newer one) - including immediately, from\n  the handle that issued it. Acknowledged writes are never\n  transiently invisible.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -23419,7 +23419,7 @@
     "command": "space.create",
     "request": {
       "additionalProperties": false,
-      "description": "Creates a product space for a branch.\n\n# Guaranteed semantics\n\n- **Idempotent success.** Creating a space that already exists is not\n  an error: the command succeeds with `created: false` and no mutation\n  effect. `created: true` is reported only by the call that first\n  materialized the space.\n- **Immediate visibility.** Once the command returns success, the\n  space is visible to every subsequent command on any handle of the\n  same database — `SpaceExists` reports `true` and data commands\n  targeting the space are accepted.",
+      "description": "Creates a product space for a branch.\n\n# Guaranteed semantics\n\n- **Idempotent success.** Creating a space that already exists is not\n  an error: the command succeeds with `created: false` and no mutation\n  effect. `created: true` is reported only by the call that first\n  materialized the space.\n- **Immediate visibility.** Once the command returns success, the\n  space is visible to every subsequent command on any handle of the\n  same database - `SpaceExists` reports `true` and data commands\n  targeting the space are accepted.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -27461,7 +27461,7 @@
   "vector.get": {
     "$defs": {
       "Maybe2": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record — struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"

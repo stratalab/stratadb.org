@@ -48,7 +48,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.config.md"
-      }
+      },
+      "wire": "config_get"
     },
     {
       "id": "admin.config_key",
@@ -99,7 +100,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.config_key.md"
-      }
+      },
+      "wire": "configure_get_key"
     },
     {
       "id": "admin.describe",
@@ -153,7 +155,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.describe.md"
-      }
+      },
+      "wire": "describe"
     },
     {
       "id": "admin.health",
@@ -207,7 +210,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.health.md"
-      }
+      },
+      "wire": "health"
     },
     {
       "id": "admin.hub_clone",
@@ -282,7 +286,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.hub_clone.md"
-      }
+      },
+      "wire": "hub_clone"
     },
     {
       "id": "admin.info",
@@ -336,7 +341,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.info.md"
-      }
+      },
+      "wire": "info"
     },
     {
       "id": "admin.ipc_status",
@@ -383,7 +389,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.ipc_status.md"
-      }
+      },
+      "wire": "ipc_status"
     },
     {
       "id": "admin.ipc_stop",
@@ -430,7 +437,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.ipc_stop.md"
-      }
+      },
+      "wire": "ipc_stop"
     },
     {
       "id": "admin.metrics",
@@ -484,7 +492,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.metrics.md"
-      }
+      },
+      "wire": "metrics"
     },
     {
       "id": "admin.ping",
@@ -530,7 +539,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.ping.md"
-      }
+      },
+      "wire": "ping"
     },
     {
       "id": "admin.remote",
@@ -576,7 +586,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.remote.md"
-      }
+      },
+      "wire": "remote_get"
     },
     {
       "id": "arrow.export",
@@ -672,7 +683,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/arrow.yaml",
         "prose": "commands/arrow.export.md"
-      }
+      },
+      "wire": "arrow_export"
     },
     {
       "id": "arrow.import",
@@ -776,7 +788,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/arrow.yaml",
         "prose": "commands/arrow.import.md"
-      }
+      },
+      "wire": "arrow_import"
     },
     {
       "id": "branch.create",
@@ -844,7 +857,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.create.md"
-      }
+      },
+      "wire": "branch_create"
     },
     {
       "id": "branch.delete",
@@ -910,7 +924,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.delete.md"
-      }
+      },
+      "wire": "branch_delete"
     },
     {
       "id": "branch.diff",
@@ -973,7 +988,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.diff.md"
-      }
+      },
+      "wire": "branch_diff"
     },
     {
       "id": "branch.fork",
@@ -1039,7 +1055,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.fork.md"
-      }
+      },
+      "wire": "branch_fork_current"
     },
     {
       "id": "branch.fork_at_timestamp",
@@ -1109,7 +1126,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.fork_at_timestamp.md"
-      }
+      },
+      "wire": "branch_fork_at_timestamp"
     },
     {
       "id": "branch.fork_at_version",
@@ -1179,7 +1197,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.fork_at_version.md"
-      }
+      },
+      "wire": "branch_fork_at_version"
     },
     {
       "id": "branch.get",
@@ -1241,7 +1260,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.get.md"
-      }
+      },
+      "wire": "branch_get"
     },
     {
       "id": "branch.list",
@@ -1291,7 +1311,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.list.md"
-      }
+      },
+      "wire": "branch_list"
     },
     {
       "id": "branch.merge",
@@ -1382,7 +1403,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.merge.md"
-      }
+      },
+      "wire": "branch_merge"
     },
     {
       "id": "branch.preview",
@@ -1460,7 +1482,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.preview.md"
-      }
+      },
+      "wire": "branch_preview"
     },
     {
       "id": "event.append",
@@ -1533,7 +1556,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.append.md"
-      }
+      },
+      "wire": "event_append"
     },
     {
       "id": "event.batch_append",
@@ -1604,7 +1628,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.batch_append.md"
-      }
+      },
+      "wire": "event_batch_append"
     },
     {
       "id": "event.count",
@@ -1663,7 +1688,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.count.md"
-      }
+      },
+      "wire": "event_count"
     },
     {
       "id": "event.exists",
@@ -1721,7 +1747,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.exists.md"
-      }
+      },
+      "wire": "event_exists"
     },
     {
       "id": "event.get",
@@ -1780,7 +1807,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.get.md"
-      }
+      },
+      "wire": "event_get"
     },
     {
       "id": "event.list",
@@ -1848,7 +1876,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.list.md"
-      }
+      },
+      "wire": "event_list"
     },
     {
       "id": "event.range",
@@ -1916,7 +1945,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.range.md"
-      }
+      },
+      "wire": "event_range"
     },
     {
       "id": "event.range_time",
@@ -1984,7 +2014,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.range_time.md"
-      }
+      },
+      "wire": "event_range_by_time"
     },
     {
       "id": "event.types",
@@ -2043,7 +2074,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.types.md"
-      }
+      },
+      "wire": "event_list_types"
     },
     {
       "id": "event.verify_chain",
@@ -2102,7 +2134,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.verify_chain.md"
-      }
+      },
+      "wire": "event_verify_chain"
     },
     {
       "id": "graph.analytics.bfs",
@@ -2193,7 +2226,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.bfs.md"
-      }
+      },
+      "wire": "graph_bfs"
     },
     {
       "id": "graph.analytics.cdlp",
@@ -2274,7 +2308,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.cdlp.md"
-      }
+      },
+      "wire": "graph_cdlp"
     },
     {
       "id": "graph.analytics.lcc",
@@ -2354,7 +2389,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.lcc.md"
-      }
+      },
+      "wire": "graph_lcc"
     },
     {
       "id": "graph.analytics.pagerank",
@@ -2443,7 +2479,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.pagerank.md"
-      }
+      },
+      "wire": "graph_pagerank"
     },
     {
       "id": "graph.analytics.sssp",
@@ -2530,7 +2567,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.sssp.md"
-      }
+      },
+      "wire": "graph_sssp"
     },
     {
       "id": "graph.analytics.wcc",
@@ -2611,7 +2649,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.wcc.md"
-      }
+      },
+      "wire": "graph_wcc"
     },
     {
       "id": "graph.apply_delete_policy",
@@ -2674,7 +2713,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.apply_delete_policy.md"
-      }
+      },
+      "wire": "graph_apply_delete_policy"
     },
     {
       "id": "graph.batch_write",
@@ -2764,7 +2804,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.batch_write.md"
-      }
+      },
+      "wire": "graph_batch_write"
     },
     {
       "id": "graph.bindings",
@@ -2827,7 +2868,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.bindings.md"
-      }
+      },
+      "wire": "graph_bindings_for_entity"
     },
     {
       "id": "graph.bulk_insert",
@@ -2929,7 +2971,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.bulk_insert.md"
-      }
+      },
+      "wire": "graph_bulk_insert"
     },
     {
       "id": "graph.create",
@@ -3009,7 +3052,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.create.md"
-      }
+      },
+      "wire": "graph_create"
     },
     {
       "id": "graph.delete",
@@ -3075,7 +3119,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.delete.md"
-      }
+      },
+      "wire": "graph_delete"
     },
     {
       "id": "graph.edge.add",
@@ -3183,7 +3228,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.edge.add.md"
-      }
+      },
+      "wire": "graph_add_edge"
     },
     {
       "id": "graph.edge.get",
@@ -3260,7 +3306,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.edge.get.md"
-      }
+      },
+      "wire": "graph_get_edge"
     },
     {
       "id": "graph.edge.remove",
@@ -3337,7 +3384,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.edge.remove.md"
-      }
+      },
+      "wire": "graph_remove_edge"
     },
     {
       "id": "graph.list",
@@ -3399,7 +3447,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.list.md"
-      }
+      },
+      "wire": "graph_list"
     },
     {
       "id": "graph.meta",
@@ -3468,7 +3517,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.meta.md"
-      }
+      },
+      "wire": "graph_get_meta"
     },
     {
       "id": "graph.neighbors",
@@ -3547,7 +3597,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.neighbors.md"
-      }
+      },
+      "wire": "graph_neighbors"
     },
     {
       "id": "graph.node.add",
@@ -3645,7 +3696,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.add.md"
-      }
+      },
+      "wire": "graph_add_node"
     },
     {
       "id": "graph.node.get",
@@ -3716,7 +3768,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.get.md"
-      }
+      },
+      "wire": "graph_get_node"
     },
     {
       "id": "graph.node.list",
@@ -3789,7 +3842,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.list.md"
-      }
+      },
+      "wire": "graph_list_nodes"
     },
     {
       "id": "graph.node.remove",
@@ -3860,7 +3914,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.remove.md"
-      }
+      },
+      "wire": "graph_remove_node"
     },
     {
       "id": "graph.nodes_by_type",
@@ -3937,7 +3992,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.nodes_by_type.md"
-      }
+      },
+      "wire": "graph_nodes_by_type"
     },
     {
       "id": "graph.ontology.define_link_type",
@@ -4021,7 +4077,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.define_link_type.md"
-      }
+      },
+      "wire": "graph_define_link_type"
     },
     {
       "id": "graph.ontology.define_object_type",
@@ -4104,7 +4161,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.define_object_type.md"
-      }
+      },
+      "wire": "graph_define_object_type"
     },
     {
       "id": "graph.ontology.delete_link_type",
@@ -4181,7 +4239,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.delete_link_type.md"
-      }
+      },
+      "wire": "graph_delete_link_type"
     },
     {
       "id": "graph.ontology.delete_object_type",
@@ -4257,7 +4316,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.delete_object_type.md"
-      }
+      },
+      "wire": "graph_delete_object_type"
     },
     {
       "id": "graph.ontology.freeze",
@@ -4334,7 +4394,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.freeze.md"
-      }
+      },
+      "wire": "graph_freeze_ontology"
     },
     {
       "id": "graph.ontology.get",
@@ -4404,7 +4465,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.get.md"
-      }
+      },
+      "wire": "graph_get_ontology"
     },
     {
       "id": "graph.ontology.summary",
@@ -4475,7 +4537,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.summary.md"
-      }
+      },
+      "wire": "graph_ontology_summary"
     },
     {
       "id": "graph.sample",
@@ -4544,7 +4607,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.sample.md"
-      }
+      },
+      "wire": "graph_sample"
     },
     {
       "id": "hub.get_dataset",
@@ -4616,7 +4680,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.get_dataset.md"
-      }
+      },
+      "wire": "hub_get_dataset"
     },
     {
       "id": "hub.info",
@@ -4680,7 +4745,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.info.md"
-      }
+      },
+      "wire": "hub_info"
     },
     {
       "id": "hub.list_datasets",
@@ -4754,7 +4820,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.list_datasets.md"
-      }
+      },
+      "wire": "hub_list_datasets"
     },
     {
       "id": "hub.list_refs",
@@ -4826,7 +4893,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.list_refs.md"
-      }
+      },
+      "wire": "hub_list_refs"
     },
     {
       "id": "hub.list_yanked",
@@ -4904,7 +4972,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.list_yanked.md"
-      }
+      },
+      "wire": "hub_list_yanked"
     },
     {
       "id": "inference.cache_status",
@@ -4955,7 +5024,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.cache_status.md"
-      }
+      },
+      "wire": "inference_cache_status"
     },
     {
       "id": "inference.capability",
@@ -5010,7 +5080,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.capability.md"
-      }
+      },
+      "wire": "inference_model_capability"
     },
     {
       "id": "inference.detokenize",
@@ -5081,7 +5152,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.detokenize.md"
-      }
+      },
+      "wire": "inference_detokenize"
     },
     {
       "id": "inference.embed",
@@ -5172,7 +5244,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.embed.md"
-      }
+      },
+      "wire": "inference_embed"
     },
     {
       "id": "inference.generate",
@@ -5279,7 +5352,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.generate.md"
-      }
+      },
+      "wire": "inference_generate"
     },
     {
       "id": "inference.models.list",
@@ -5331,7 +5405,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.models.list.md"
-      }
+      },
+      "wire": "inference_models_list"
     },
     {
       "id": "inference.models.local",
@@ -5383,7 +5458,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.models.local.md"
-      }
+      },
+      "wire": "inference_models_local"
     },
     {
       "id": "inference.models.pull",
@@ -5459,7 +5535,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.models.pull.md"
-      }
+      },
+      "wire": "inference_models_pull"
     },
     {
       "id": "inference.rank",
@@ -5530,7 +5607,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.rank.md"
-      }
+      },
+      "wire": "inference_rank"
     },
     {
       "id": "inference.tokenize",
@@ -5601,7 +5679,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.tokenize.md"
-      }
+      },
+      "wire": "inference_tokenize"
     },
     {
       "id": "inference.unload",
@@ -5652,7 +5731,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.unload.md"
-      }
+      },
+      "wire": "inference_unload"
     },
     {
       "id": "json.batch_delete",
@@ -5730,7 +5810,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_delete.md"
-      }
+      },
+      "wire": "json_batch_delete"
     },
     {
       "id": "json.batch_exists",
@@ -5792,7 +5873,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_exists.md"
-      }
+      },
+      "wire": "json_batch_exists"
     },
     {
       "id": "json.batch_get",
@@ -5862,7 +5944,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_get.md"
-      }
+      },
+      "wire": "json_batch_get"
     },
     {
       "id": "json.batch_set",
@@ -5957,7 +6040,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_set.md"
-      }
+      },
+      "wire": "json_batch_set"
     },
     {
       "id": "json.count",
@@ -6019,7 +6103,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.count.md"
-      }
+      },
+      "wire": "json_count"
     },
     {
       "id": "json.delete",
@@ -6090,7 +6175,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.delete.md"
-      }
+      },
+      "wire": "json_delete"
     },
     {
       "id": "json.exists",
@@ -6152,7 +6238,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.exists.md"
-      }
+      },
+      "wire": "json_exists"
     },
     {
       "id": "json.get",
@@ -6235,7 +6322,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.get.md"
-      }
+      },
+      "wire": "json_get"
     },
     {
       "id": "json.history",
@@ -6298,7 +6386,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.history.md"
-      }
+      },
+      "wire": "json_history"
     },
     {
       "id": "json.index.create",
@@ -6374,7 +6463,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.index.create.md"
-      }
+      },
+      "wire": "json_create_index"
     },
     {
       "id": "json.index.drop",
@@ -6441,7 +6531,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.index.drop.md"
-      }
+      },
+      "wire": "json_drop_index"
     },
     {
       "id": "json.index.list",
@@ -6500,7 +6591,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.index.list.md"
-      }
+      },
+      "wire": "json_list_indexes"
     },
     {
       "id": "json.list",
@@ -6562,7 +6654,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.list.md"
-      }
+      },
+      "wire": "json_list"
     },
     {
       "id": "json.sample",
@@ -6624,7 +6717,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.sample.md"
-      }
+      },
+      "wire": "json_sample"
     },
     {
       "id": "json.scan",
@@ -6686,7 +6780,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.scan.md"
-      }
+      },
+      "wire": "json_scan"
     },
     {
       "id": "json.set",
@@ -6783,7 +6878,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.set.md"
-      }
+      },
+      "wire": "json_set"
     },
     {
       "id": "kv.batch_delete",
@@ -6857,7 +6953,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_delete.md"
-      }
+      },
+      "wire": "kv_batch_delete"
     },
     {
       "id": "kv.batch_exists",
@@ -6923,7 +7020,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_exists.md"
-      }
+      },
+      "wire": "kv_batch_exists"
     },
     {
       "id": "kv.batch_get",
@@ -6989,7 +7087,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_get.md"
-      }
+      },
+      "wire": "kv_batch_get"
     },
     {
       "id": "kv.batch_put",
@@ -7066,7 +7165,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_put.md"
-      }
+      },
+      "wire": "kv_batch_put"
     },
     {
       "id": "kv.count",
@@ -7128,7 +7228,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.count.md"
-      }
+      },
+      "wire": "kv_count"
     },
     {
       "id": "kv.delete",
@@ -7187,7 +7288,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.delete.md"
-      }
+      },
+      "wire": "kv_delete"
     },
     {
       "id": "kv.exists",
@@ -7249,7 +7351,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.exists.md"
-      }
+      },
+      "wire": "kv_exists"
     },
     {
       "id": "kv.get",
@@ -7322,7 +7425,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.get.md"
-      }
+      },
+      "wire": "kv_get"
     },
     {
       "id": "kv.history",
@@ -7385,7 +7489,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.history.md"
-      }
+      },
+      "wire": "kv_history"
     },
     {
       "id": "kv.list",
@@ -7449,7 +7554,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.list.md"
-      }
+      },
+      "wire": "kv_list"
     },
     {
       "id": "kv.put",
@@ -7514,7 +7620,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.put.md"
-      }
+      },
+      "wire": "kv_put"
     },
     {
       "id": "kv.sample",
@@ -7576,7 +7683,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.sample.md"
-      }
+      },
+      "wire": "kv_sample"
     },
     {
       "id": "kv.scan",
@@ -7640,7 +7748,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.scan.md"
-      }
+      },
+      "wire": "kv_scan"
     },
     {
       "id": "space.create",
@@ -7699,7 +7808,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.create.md"
-      }
+      },
+      "wire": "space_create"
     },
     {
       "id": "space.delete",
@@ -7779,7 +7889,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.delete.md"
-      }
+      },
+      "wire": "space_delete"
     },
     {
       "id": "space.exists",
@@ -7841,7 +7952,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.exists.md"
-      }
+      },
+      "wire": "space_exists"
     },
     {
       "id": "space.list",
@@ -7895,7 +8007,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.list.md"
-      }
+      },
+      "wire": "space_list"
     },
     {
       "id": "vector.batch_delete",
@@ -7975,7 +8088,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_delete.md"
-      }
+      },
+      "wire": "vector_batch_delete"
     },
     {
       "id": "vector.batch_exists",
@@ -8047,7 +8161,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_exists.md"
-      }
+      },
+      "wire": "vector_batch_exists"
     },
     {
       "id": "vector.batch_get",
@@ -8123,7 +8238,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_get.md"
-      }
+      },
+      "wire": "vector_batch_get"
     },
     {
       "id": "vector.batch_upsert",
@@ -8213,7 +8329,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_upsert.md"
-      }
+      },
+      "wire": "vector_batch_upsert"
     },
     {
       "id": "vector.collection.create",
@@ -8295,7 +8412,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.create.md"
-      }
+      },
+      "wire": "vector_create_collection"
     },
     {
       "id": "vector.collection.delete",
@@ -8366,7 +8484,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.delete.md"
-      }
+      },
+      "wire": "vector_delete_collection"
     },
     {
       "id": "vector.collection.list",
@@ -8437,7 +8556,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.list.md"
-      }
+      },
+      "wire": "vector_list_collections"
     },
     {
       "id": "vector.collection.stats",
@@ -8508,7 +8628,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.stats.md"
-      }
+      },
+      "wire": "vector_collection_stats"
     },
     {
       "id": "vector.count",
@@ -8578,7 +8699,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.count.md"
-      }
+      },
+      "wire": "vector_count"
     },
     {
       "id": "vector.delete",
@@ -8650,7 +8772,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.delete.md"
-      }
+      },
+      "wire": "vector_delete"
     },
     {
       "id": "vector.delete_all",
@@ -8722,7 +8845,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.delete_all.md"
-      }
+      },
+      "wire": "vector_delete_all"
     },
     {
       "id": "vector.delete_by_filter",
@@ -8798,7 +8922,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.delete_by_filter.md"
-      }
+      },
+      "wire": "vector_delete_by_filter"
     },
     {
       "id": "vector.exists",
@@ -8870,7 +8995,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.exists.md"
-      }
+      },
+      "wire": "vector_exists"
     },
     {
       "id": "vector.get",
@@ -8948,7 +9074,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.get.md"
-      }
+      },
+      "wire": "vector_get"
     },
     {
       "id": "vector.history",
@@ -9020,7 +9147,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.history.md"
-      }
+      },
+      "wire": "vector_history"
     },
     {
       "id": "vector.index.query",
@@ -9101,7 +9229,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.index.query.md"
-      }
+      },
+      "wire": "vector_index_query"
     },
     {
       "id": "vector.keys",
@@ -9173,7 +9302,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.keys.md"
-      }
+      },
+      "wire": "vector_list_keys"
     },
     {
       "id": "vector.metadata.update",
@@ -9249,7 +9379,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.metadata.update.md"
-      }
+      },
+      "wire": "vector_update_metadata"
     },
     {
       "id": "vector.query",
@@ -9329,7 +9460,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.query.md"
-      }
+      },
+      "wire": "vector_query"
     },
     {
       "id": "vector.sample",
@@ -9401,7 +9533,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.sample.md"
-      }
+      },
+      "wire": "vector_sample"
     },
     {
       "id": "vector.scan",
@@ -9473,7 +9606,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.scan.md"
-      }
+      },
+      "wire": "vector_scan"
     },
     {
       "id": "vector.upsert",
@@ -9559,7 +9693,8 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.upsert.md"
-      }
+      },
+      "wire": "vector_upsert"
     }
   ]
 }

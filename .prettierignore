@@ -11,6 +11,7 @@ src/content/docs/reference/**/*.md
 src/data/command-index.json
 src/data/command-examples.json
 src/data/command-schemas.json
+src/data/python-bindings.json
 src/data/error-registry.json
 src/data/hub-catalog.json
 src/data/release.json

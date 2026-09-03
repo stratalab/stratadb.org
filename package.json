@@ -33,7 +33,7 @@
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs"
+    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

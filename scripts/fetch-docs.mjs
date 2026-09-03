@@ -148,7 +148,11 @@ async function collectExamples(srcDocs, commands) {
     const intro = block.split('### ')[0].trim();
     const cli = block.match(/### CLI\n+```console\n([\s\S]*?)```/)?.[1]?.trim();
     const wire = block.match(/### Wire\n+```json\n([\s\S]*?)```/)?.[1]?.trim();
-    examples[command.id] = { intro: normalizeCopy(intro), cli, wire };
+    examples[command.id] = {
+      intro: normalizeCopy(intro),
+      cli: cli ? normalizeCopy(cli) : cli,
+      wire: wire ? normalizeCopy(wire) : wire,
+    };
   }
   return examples;
 }
@@ -198,6 +202,20 @@ async function main() {
     await mkdir(join(INDEX_OUT, '..'), { recursive: true });
     const index = normalizeCommandIndexDocs(JSON.parse(await readFile(indexSrc, 'utf8')), families);
     commands = index.commands ?? [];
+
+    // The docs index omits the wire name; the CLI index has it. Joining them
+    // here is what lets other generators key off a command without guessing,
+    // since the wire name is not derivable from the id (admin.config is
+    // config_get on the wire).
+    const cliIndexSrc = join(source.dir, 'cli-command-index.json');
+    if (existsSync(cliIndexSrc)) {
+      const cli = JSON.parse(await readFile(cliIndexSrc, 'utf8'));
+      const wireById = new Map((cli.commands ?? []).map((c) => [c.id, c.wire]));
+      for (const command of commands) {
+        const wire = wireById.get(command.id);
+        if (wire) command.wire = wire;
+      }
+    }
     await writeFile(INDEX_OUT, `${normalizeCopy(JSON.stringify(index, null, 2))}\n`);
   }
 
@@ -207,7 +225,7 @@ async function main() {
   await writeFile(EXAMPLES_OUT, `${JSON.stringify(examples, null, 2)}\n`);
 
   const schemas = await collectSchemas(source.dir);
-  if (schemas) await writeFile(SCHEMAS_OUT, `${JSON.stringify(schemas, null, 2)}\n`);
+  if (schemas) await writeFile(SCHEMAS_OUT, `${normalizeCopy(JSON.stringify(schemas, null, 2))}\n`);
 
   console.log(
     `fetch-docs: ${Object.keys(examples).length} example set(s) and ${schemas ? Object.keys(schemas).length : 0} schema(s) written`,

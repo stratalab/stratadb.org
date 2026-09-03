@@ -15,6 +15,7 @@ import index from '../../data/command-index.json';
 import schemas from '../../data/command-schemas.json';
 import examples from '../../data/command-examples.json';
 import registry from '../../data/error-registry.json';
+import bindings from '../../data/python-bindings.json';
 
 interface Props {
   /** Command id, e.g. "branch.merge". */
@@ -53,6 +54,12 @@ interface CommandExample {
   cli?: string;
   wire?: string;
 }
+interface PythonBinding {
+  call: string;
+  signature: string;
+  summary: string;
+  example: string[];
+}
 
 const command = (index.commands as Command[]).find((c) => c.id === id);
 if (!command) throw new Error(`CommandReference: unknown command id "${id}"`);
@@ -60,6 +67,19 @@ if (!command) throw new Error(`CommandReference: unknown command id "${id}"`);
 const schema = (schemas as Record<string, CommandSchema>)[id];
 const example = (examples as Record<string, CommandExample>)[id];
 const codes = new Map(registry.errors.map((e) => [e.code, e]));
+
+// Introspected from the released wheel. Absent for commands the SDK does not
+// wrap, in which case the Python tab is simply not offered.
+const python = (bindings as Record<string, PythonBinding>)[id];
+
+// Only offer interfaces this command actually has.
+const ifaces = ['cli', 'wire', 'mcp', ...(python ? ['python'] : [])] as const;
+const IFACE_LABEL: Record<string, string> = {
+  cli: 'CLI',
+  wire: 'Wire',
+  mcp: 'MCP',
+  python: 'Python',
+};
 
 // Parameters come from the request schema, not the markdown table: the schema
 // carries required lists, defaults and shared enum definitions.
@@ -152,7 +172,7 @@ const RETRY_TONE: Record<string, string> = {
   <div class="mt-8 overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
     <div class="flex gap-1 border-b border-line px-3 py-2" role="tablist" aria-label="Interface">
       {
-        ['cli', 'wire', 'mcp'].map((iface, i) => (
+        ifaces.map((iface, i) => (
           <button
             type="button"
             role="tab"
@@ -161,7 +181,7 @@ const RETRY_TONE: Record<string, string> = {
             data-iface-tab={iface}
             class="rounded-(--radius-control) px-3 py-1.5 font-mono text-mono-body text-ink-mid transition-colors duration-200 hover:text-ink-hi aria-selected:bg-elevated aria-selected:text-ink-hi"
           >
-            {iface === 'mcp' ? 'MCP' : iface === 'cli' ? 'CLI' : 'Wire'}
+            {IFACE_LABEL[iface]}
           </button>
         ))
       }
@@ -175,6 +195,17 @@ const RETRY_TONE: Record<string, string> = {
         >{`{"type": "${command.cli?.path ? command.id.replace(/\./g, '_') : command.id}"}`}</code
       >
     </div>
+    {
+      python && (
+        <div class="px-5 py-4" data-iface-panel="python" hidden>
+          <code class="font-mono text-mono-body text-ink-hi">
+            {python.call}
+            {python.signature}
+          </code>
+          <p class="mt-2 text-small text-ink-mid">{python.summary}</p>
+        </div>
+      )
+    }
     <div class="px-5 py-4" data-iface-panel="mcp" hidden>
       <code class="font-mono text-mono-body text-ink-hi">{command.mcp?.name}</code>
       <p class="mt-2 text-small text-ink-mid">
@@ -194,12 +225,18 @@ const RETRY_TONE: Record<string, string> = {
         <h2 class="text-heading text-ink-hi">Example</h2>
         {example.intro && <p class="mt-2 text-body text-ink-mid">{example.intro}</p>}
         <div class="mt-3 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
-          {(['cli', 'wire', 'mcp'] as const).map((iface) => (
+          {ifaces.map((iface) => (
             <pre
               class="overflow-x-auto p-5 font-mono text-mono-sm text-term-fg"
               data-iface-panel={iface}
               hidden={iface !== 'cli'}
-              set:html={escapeHtml((iface === 'cli' ? example.cli : example.wire) ?? '')}
+              set:html={escapeHtml(
+                iface === 'cli'
+                  ? (example.cli ?? '')
+                  : iface === 'python'
+                    ? (python?.example.map((line) => `>>> ${line}`).join('\n') ?? '')
+                    : (example.wire ?? ''),
+              )}
             />
           ))}
         </div>
