@@ -1,27 +1,44 @@
 ---
-// Get Started: the entry point the documentation front page sends people to.
-// Placeholder. This becomes the common use cases chooser, where a reader picks
-// the thing they are building and leaves with the right first page.
-import BaseLayout from '../../layouts/BaseLayout.astro';
+// Get Started, rendered in the documentation shell.
+//
+// The first page to use the restored layout, so the reading experience can be
+// judged before the archived pages come back. The sidebar beside it is a
+// skeleton: it depicts the intended tree with nothing linked, because none of
+// those pages exist yet.
+import DocsLayout from '../../layouts/DocsLayout.astro';
 ---
 
-<BaseLayout
-  title="Get started | StrataDB"
+<DocsLayout
+  title="Get started"
   description="Start with StrataDB: pick the use case closest to what you are building and follow it end to end."
+  section="Get Started"
 >
-  <div class="mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
-    <header class="max-w-[44rem]">
-      <h1 class="text-title font-semibold text-ink-hi">Get started</h1>
-      <p class="mt-4 text-body-lg text-ink-mid">
-        Common use cases, and the shortest path through each one.
-      </p>
-    </header>
-    <p class="mt-10 text-body text-ink-low">
-      <a
-        href="/docs"
-        class="text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
-        >Back to documentation</a
-      >
-    </p>
-  </div>
-</BaseLayout>
+  <h1>Get started</h1>
+  <p>
+    This page will hold the common use cases, and the shortest path through each one. It is here now
+    so the documentation shell can be reviewed: the sidebar, the measure, and the reading column.
+  </p>
+
+  <h2>What belongs here</h2>
+  <p>
+    A reader arriving without a chosen interface should leave with one. The page names the thing you
+    are building, points at the guide that finishes it, and gets out of the way.
+  </p>
+
+  <h2>The sidebar beside this page</h2>
+  <p>
+    The tree is the intended structure, not what exists. Nothing in it links anywhere yet, and
+    sections stay collapsed until opened, so a reader drills toward an operation rather than meeting
+    every one of them at once.
+  </p>
+
+  <h2>Meanwhile</h2>
+  <p>
+    The binary describes itself offline, and its answers always match the version you installed. Run <code
+      >strata agents guide</code
+    > for the complete guide, or
+    <code>strata agents commands --json</code> for the machine-readable catalog.
+  </p>
+
+  <p><a href="/docs">Back to documentation</a></p>
+</DocsLayout>

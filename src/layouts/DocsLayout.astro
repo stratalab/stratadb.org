@@ -1,0 +1,76 @@
+---
+// The reading shell for a documentation page: sidebar, article, and the
+// on-this-page rail. Restored ahead of the content so the page shape can be
+// judged before any page is ported back.
+import BaseLayout from './BaseLayout.astro';
+import DocsSidebar from '../components/chrome/DocsSidebar.astro';
+import DocsSearch from '../components/chrome/DocsSearch.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Sidebar section to open for this page. */
+  section?: string;
+  headings?: Heading[];
+}
+const { title, description, section, headings = [] } = Astro.props;
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = toc.length >= 2;
+---
+
+<BaseLayout title={`${title} | StrataDB Docs`} description={description}>
+  <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4 xl:max-w-[86rem]">
+    <div class="flex gap-12">
+      <DocsSidebar open={section} />
+
+      <div class="min-w-0 flex-1">
+        <button
+          type="button"
+          class="docs-search-trigger mb-8 flex w-full items-center gap-2 rounded-(--radius-control) border border-line-hover bg-raised px-3 py-2.5 text-small text-ink-mid lg:hidden"
+          aria-label="Search the documentation"
+        >
+          <span>Search docs</span>
+        </button>
+
+        <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+          <div class="prose-docs max-w-[46rem]">
+            <slot />
+          </div>
+        </article>
+      </div>
+
+      {
+        showToc && (
+          <nav class="hidden w-52 shrink-0 xl:block" aria-label="On this page">
+            <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+              <h2 class="mb-2.5 text-small font-medium uppercase text-ink-mid">On this page</h2>
+              <ul class="space-y-px border-l border-line">
+                {toc.map((h) => (
+                  <li>
+                    <a
+                      href={`#${h.slug}`}
+                      class:list={[
+                        '-ml-px block border-l-2 border-transparent py-1 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi',
+                        h.depth === 3 ? 'pl-7' : 'pl-4',
+                      ]}
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+        )
+      }
+    </div>
+  </div>
+  <DocsSearch />
+</BaseLayout>

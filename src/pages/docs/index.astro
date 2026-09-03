@@ -20,6 +20,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DocsSearch from '../../components/chrome/DocsSearch.astro';
 import TryItOut from '../../components/docs/TryItOut.astro';
+import InstallBand from '../../components/docs/InstallBand.astro';
 import HeroArtifact from '../../components/docs/HeroArtifact.astro';
 
 interface Item {
@@ -164,6 +165,8 @@ const sections: { title: string; desc: string; items: Item[] }[] = [
           }
         </div>
       </section>
+
+      <InstallBand />
 
       <!-- Show it working before asking the reader to browse -->
       <TryItOut />

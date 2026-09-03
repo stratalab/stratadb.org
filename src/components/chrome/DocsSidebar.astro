@@ -1,0 +1,109 @@
+---
+// The documentation sidebar, in skeleton.
+//
+// It renders the intended tree from src/lib/docsTree.ts rather than the content
+// collection, so the shape can be reviewed before the pages exist. Items with
+// no href render as plain text: the sidebar will never invent a link.
+//
+// Progressive disclosure is the point here, per doc 14 §8. Sections and groups
+// are collapsed by default; a reader drills Reference, then Commands, then a
+// family, instead of meeting every operation at once.
+import { countItems, docsTree } from '../../lib/docsTree';
+
+interface Props {
+  /** Section to open on load. Everything else stays collapsed. */
+  open?: string;
+}
+const { open } = Astro.props;
+---
+
+<nav class="hidden w-64 shrink-0 lg:block" aria-label="Documentation">
+  <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4">
+    <button
+      type="button"
+      class="docs-search-trigger mb-5 flex w-full items-center gap-2 rounded-(--radius-control) border border-line-hover bg-raised px-3 py-2 text-small text-ink-mid transition-colors duration-200 hover:border-terracotta-500 hover:text-ink-hi"
+      aria-label="Search the documentation"
+    >
+      <svg
+        class="h-3.5 w-3.5 shrink-0 text-terracotta-500"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7"></circle>
+        <path stroke-linecap="round" d="M21 21l-4.3-4.3"></path>
+      </svg>
+      <span>Search docs</span>
+      <kbd class="ml-auto rounded border border-line px-1.5 font-mono text-mono-sm">/</kbd>
+    </button>
+
+    {
+      docsTree.map((section) => (
+        <details open={section.label === open} class="group/sec mb-1">
+          <summary class="flex cursor-pointer list-none items-center gap-2 rounded-(--radius-control) px-2 py-1.5 text-small font-medium uppercase text-ink-mid transition-colors duration-200 hover:bg-raised hover:text-ink-hi">
+            <span class="text-ink-low transition-transform duration-200 group-open/sec:rotate-90">
+              ›
+            </span>
+            <span class="min-w-0 flex-1 truncate">{section.label}</span>
+            <span class="font-mono text-mono-sm text-ink-low">{countItems(section)}</span>
+          </summary>
+
+          <div class="pb-4 pt-1">
+            {section.items && (
+              <ul class="space-y-px border-l border-line">
+                {section.items.map((item) => (
+                  <li>
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-small text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <span class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-small text-ink-low">
+                        {item.label}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {section.groups?.map((group) => (
+              <details class="group/grp mt-1.5">
+                <summary class="flex cursor-pointer list-none items-center gap-1.5 py-1 pl-2 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi">
+                  <span class="text-ink-low transition-transform duration-200 group-open/grp:rotate-90">
+                    ›
+                  </span>
+                  <span class="min-w-0 flex-1 truncate">{group.label}</span>
+                  <span class="font-mono text-mono-sm text-ink-low">{group.items.length}</span>
+                </summary>
+                <ul class="ml-3 space-y-px border-l border-line">
+                  {group.items.map((item) => (
+                    <li>
+                      {item.href ? (
+                        <a
+                          href={item.href}
+                          class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <span class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-low">
+                          {item.label}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
+        </details>
+      ))
+    }
+  </div>
+</nav>
