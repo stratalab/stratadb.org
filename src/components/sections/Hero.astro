@@ -144,7 +144,7 @@ const dataModel = [
     <div class="mb-14 text-center">
       <Badge href="/changelog" class="mb-8">Research preview · v{release.version}</Badge>
       <Heading level={1} size="display-xl" class="mx-auto max-w-[66rem]"
-        >Strata is the embedded database for the AI era</Heading
+        >An embedded database you can fork</Heading
       >
 
       <!-- The acquisition control: install is the primary motion; the browser
@@ -227,6 +227,19 @@ const dataModel = [
 
     <div class="mx-auto max-w-[56rem]">
       <ForkingTerminal client:visible />
+    </div>
+
+    <div class="mx-auto mt-14 max-w-[48rem] border-t border-line pt-8 text-center">
+      <a
+        href="/docs/why-strata"
+        class="group inline-flex items-center justify-center gap-3 text-body-lg font-medium text-ink-hi transition-colors duration-200 hover:text-terracotta-300"
+      >
+        <span>Why does AI application state need a different database?</span>
+        <span
+          class="translate-y-px text-terracotta-500 transition-transform duration-200 group-hover:translate-x-1"
+          aria-hidden="true">&rarr;</span
+        >
+      </a>
     </div>
   </div>
 </section>

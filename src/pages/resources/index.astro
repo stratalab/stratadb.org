@@ -1,0 +1,66 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+import { resourceNavItems } from '../../data/resources';
+
+const liveNow = [
+  {
+    type: 'Try',
+    title: 'Browser playground',
+    copy: 'Run the branch workflow without installing Strata.',
+    href: '/playground',
+  },
+  {
+    type: 'Data',
+    title: 'Strata Hub',
+    copy: 'Browse cloneable databases for prototypes, retrieval tests, agents, and benchmarks.',
+    href: '/hub',
+  },
+  {
+    type: 'Proof',
+    title: 'Engine internals',
+    copy: 'Inspect the storage engine, commit model, recovery path, vector indexing, and tests.',
+    href: '/internals',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Resources"
+  description="A practical index for learning StrataDB, evaluating the architecture, watching demos, and finding deeper technical material."
+  activeSlug="index"
+  eyebrow="Index"
+>
+  <section class="resource-section" aria-labelledby="resource-sections">
+    <h2 id="resource-sections">Sections</h2>
+    <div class="resource-grid">
+      {
+        resourceNavItems.map((item) => (
+          <a href={item.href} class="resource-card">
+            <span>{item.label}</span>
+            <h3>{item.label}</h3>
+            <p>{item.summary}</p>
+            <strong>Open &rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="live-now">
+    <h2 id="live-now">Live now</h2>
+    <div class="resource-list">
+      {
+        liveNow.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

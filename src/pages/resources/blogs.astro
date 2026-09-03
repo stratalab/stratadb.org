@@ -1,0 +1,78 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const reading = [
+  {
+    type: 'Positioning',
+    title: 'What is StrataDB',
+    copy: 'The shortest explanation of the product, its model, and the trade it makes.',
+    href: '/docs/why-strata',
+  },
+  {
+    type: 'Fit',
+    title: 'When to use StrataDB',
+    copy: 'Good fits, poor fits, and boundaries for the current release.',
+    href: '/docs/why-strata/when-to-use',
+  },
+  {
+    type: 'Comparison',
+    title: 'Comparisons',
+    copy: 'How StrataDB sits next to SQLite, DuckDB, Redis, Postgres, and vector databases.',
+    href: '/docs/why-strata/comparisons',
+  },
+];
+
+const queue = [
+  {
+    title: 'Why StrataDB exists',
+    copy: 'The argument for branchable local state as its own database shape.',
+  },
+  {
+    title: 'Branching changes agent state',
+    copy: 'How speculative execution looks when the database can fork with the run.',
+  },
+  {
+    title: 'Designing datasets for Strata Hub',
+    copy: 'What makes a cloned database useful on the first query.',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Blogs"
+  description="Product essays and technical notes from the StrataDB project. The dedicated blog archive is being prepared; the best long reads live here for now."
+  activeSlug="blogs"
+>
+  <section class="resource-section" aria-labelledby="blog-reading">
+    <h2 id="blog-reading">Long reads now</h2>
+    <div class="resource-list">
+      {
+        reading.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="blog-queue">
+    <h2 id="blog-queue">Editorial queue</h2>
+    <div class="resource-grid">
+      {
+        queue.map((item) => (
+          <article class="resource-note">
+            <span>Draft</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

@@ -1,0 +1,79 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const live = [
+  {
+    type: 'Interactive',
+    title: 'Browser playground',
+    copy: 'Use StrataDB in the browser and run the branch workflow immediately.',
+    href: '/playground',
+  },
+  {
+    type: 'Datasets',
+    title: 'Strata Hub',
+    copy: 'Browse prepared databases and clone datasets for experiments.',
+    href: '/hub',
+  },
+  {
+    type: 'Install',
+    title: 'Local setup',
+    copy: 'Install Strata and run the same workflows against a local directory.',
+    href: '/#install',
+  },
+];
+
+const videos = [
+  {
+    title: 'Branching a database',
+    copy: 'Fork, write, diff, preview, and merge without copying the database directory.',
+  },
+  {
+    title: 'Cloning from Hub',
+    copy: 'Pick a prepared dataset, run strata clone, and start querying the local database.',
+  },
+  {
+    title: 'Agent setup',
+    copy: 'Expose StrataDB through MCP and inspect the generated command catalog.',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Demos"
+  description="Interactive demos are live today. Video walkthroughs will be linked here when they are published on YouTube."
+  activeSlug="demos"
+>
+  <section class="resource-section" aria-labelledby="demos-live">
+    <h2 id="demos-live">Live demos</h2>
+    <div class="resource-list">
+      {
+        live.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="video-library">
+    <h2 id="video-library">Video library</h2>
+    <p>No public videos are linked yet. YouTube embeds will live here once they ship.</p>
+    <div class="resource-grid">
+      {
+        videos.map((item) => (
+          <article class="resource-note">
+            <span>Planned</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

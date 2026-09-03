@@ -21,7 +21,7 @@
       "license": "CC0-1.0",
       "size_category": "small",
       "size_bytes": 6887,
-      "downloads": 12,
+      "downloads": 14,
       "last_updated": "2026-09-01T01:19:32.333026064Z",
       "primitives": [
         "json",
@@ -71,7 +71,7 @@
       "license": "CC0-1.0",
       "size_category": "small",
       "size_bytes": 1249,
-      "downloads": 6,
+      "downloads": 7,
       "last_updated": "2026-09-01T01:19:37.213385179Z",
       "primitives": [
         "json",
@@ -136,6 +136,51 @@
       "includes": [],
       "quickstart": [
         "strata clone iana-http-reference ./iana-http-reference"
+      ]
+    },
+    {
+      "slug": "github-events",
+      "title": "GitHub Events",
+      "description": "GitHub-shaped developer activity - pushes, PRs, issues, stars - as an append-only event log grouped into per-type streams.",
+      "tasks": [
+        "event-stream",
+        "activity-log",
+        "analytics"
+      ],
+      "tags": [
+        "github",
+        "events",
+        "streams",
+        "real-world",
+        "devtools"
+      ],
+      "license": "CC-BY-SA-4.0",
+      "size_category": "small",
+      "size_bytes": 528696,
+      "downloads": 2,
+      "last_updated": "2026-09-01T01:15:11.385558Z",
+      "primitives": [
+        "events",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
+      "includes": [
+        {
+          "primitive": "events",
+          "detail": "PushEvent, PullRequestEvent, IssuesEvent and more, in arrival order - the natural shape for what-happened-when questions."
+        },
+        {
+          "primitive": "kv",
+          "detail": "Per-type event counts under meta:count:."
+        }
+      ],
+      "quickstart": [
+        "strata clone github-events ./gh-events",
+        "strata ./gh-events event types",
+        "strata ./gh-events event by-type PushEvent --limit 5",
+        "strata ./gh-events event verify-chain"
       ]
     },
     {
@@ -228,51 +273,6 @@
         "strata ./agent-mem json get state:working_memory '$'",
         "strata ./agent-mem event by-type tool_call",
         "strata ./agent-mem --branch retention-salience json list"
-      ]
-    },
-    {
-      "slug": "github-events",
-      "title": "GitHub Events",
-      "description": "GitHub-shaped developer activity - pushes, PRs, issues, stars - as an append-only event log grouped into per-type streams.",
-      "tasks": [
-        "event-stream",
-        "activity-log",
-        "analytics"
-      ],
-      "tags": [
-        "github",
-        "events",
-        "streams",
-        "real-world",
-        "devtools"
-      ],
-      "license": "CC-BY-SA-4.0",
-      "size_category": "small",
-      "size_bytes": 528696,
-      "downloads": 1,
-      "last_updated": "2026-09-01T01:15:11.385558Z",
-      "primitives": [
-        "events",
-        "kv"
-      ],
-      "branches": [
-        "default"
-      ],
-      "includes": [
-        {
-          "primitive": "events",
-          "detail": "PushEvent, PullRequestEvent, IssuesEvent and more, in arrival order - the natural shape for what-happened-when questions."
-        },
-        {
-          "primitive": "kv",
-          "detail": "Per-type event counts under meta:count:."
-        }
-      ],
-      "quickstart": [
-        "strata clone github-events ./gh-events",
-        "strata ./gh-events event types",
-        "strata ./gh-events event by-type PushEvent --limit 5",
-        "strata ./gh-events event verify-chain"
       ]
     },
     {

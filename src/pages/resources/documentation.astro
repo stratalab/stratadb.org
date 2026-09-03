@@ -1,0 +1,91 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const start = [
+  {
+    type: 'Start',
+    title: 'Documentation home',
+    copy: 'The main route into concepts, guides, generated reference, and search.',
+    href: '/docs',
+  },
+  {
+    type: 'Install',
+    title: 'Installation',
+    copy: 'Install the CLI and verify the binary before opening a database.',
+    href: '/docs/getting-started/installation',
+  },
+  {
+    type: 'Build',
+    title: 'Your first database',
+    copy: 'Open a database once, write data, fork a branch, preview, merge, and read history.',
+    href: '/docs/getting-started/first-database',
+  },
+];
+
+const reference = [
+  {
+    type: 'Data',
+    title: 'Working with data',
+    copy: 'KV, JSON, events, vectors, graph, and combined data shapes.',
+    href: '/docs/data',
+  },
+  {
+    type: 'Agents',
+    title: 'For AI agents',
+    copy: 'MCP, machine docs, generated command catalogs, and error catalogs.',
+    href: '/docs/agents',
+  },
+  {
+    type: 'Reference',
+    title: 'Command reference',
+    copy: 'Generated command families, parameters, result shapes, and error behavior.',
+    href: '/docs/reference',
+  },
+  {
+    type: 'SDK',
+    title: 'Python SDK',
+    copy: 'Use StrataDB from Python with typed namespaces and agent helpers.',
+    href: '/docs/python',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Documentation"
+  description="Learning paths and generated references for the shipped CLI, Python SDK, data primitives, and agent surfaces."
+  activeSlug="documentation"
+>
+  <section class="resource-section" aria-labelledby="docs-start">
+    <h2 id="docs-start">Start here</h2>
+    <div class="resource-list">
+      {
+        start.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="docs-reference">
+    <h2 id="docs-reference">Reference paths</h2>
+    <div class="resource-grid">
+      {
+        reference.map((item) => (
+          <a href={item.href} class="resource-card">
+            <span>{item.type}</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+            <strong>Open &rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

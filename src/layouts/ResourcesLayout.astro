@@ -1,0 +1,300 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { resourceNavItems, type ResourceSlug } from '../data/resources';
+
+interface Props {
+  title: string;
+  description: string;
+  activeSlug?: ResourceSlug | 'index';
+  eyebrow?: string;
+}
+
+const { title, description, activeSlug = 'index', eyebrow = 'Resources' } = Astro.props;
+---
+
+<BaseLayout title={`${title} | StrataDB Resources`} description={description}>
+  <div class="resource-shell">
+    <div class="resource-wrap">
+      <aside class="resource-sidebar" aria-label="Resource sections">
+        <a
+          href="/resources"
+          class:list={['resource-sidebar-title', activeSlug === 'index' && 'is-active']}
+        >
+          Resources
+        </a>
+        <nav>
+          {
+            resourceNavItems.map((item) => (
+              <a href={item.href} class:list={[activeSlug === item.slug && 'is-active']}>
+                <span>{item.label}</span>
+              </a>
+            ))
+          }
+        </nav>
+      </aside>
+
+      <article class="resource-article" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+        <a href="/resources" class="resource-back">All resources</a>
+        <p class="resource-eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p class="resource-dek">{description}</p>
+        <slot />
+      </article>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .resource-shell {
+    border-top: 1px solid var(--color-line);
+    background:
+      radial-gradient(circle at 82% 0%, rgba(var(--rgb-terracotta-500), 0.1), transparent 24rem),
+      var(--color-void);
+  }
+
+  .resource-wrap {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    width: min(100%, 70rem);
+    margin: 0 auto;
+    padding: clamp(3rem, 7vw, 5.5rem) 1.5rem clamp(5rem, 9vw, 7rem);
+  }
+
+  .resource-sidebar {
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+  }
+
+  .resource-sidebar-title {
+    display: block;
+    margin-bottom: 1rem;
+    color: var(--color-ink-hi);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .resource-sidebar nav {
+    display: grid;
+    gap: 0.25rem;
+    border-left: 1px solid var(--color-line);
+    padding-left: 0.9rem;
+  }
+
+  .resource-sidebar a:not(.resource-sidebar-title) {
+    display: block;
+    border-radius: var(--radius-control);
+    padding: 0.55rem 0.65rem;
+    color: var(--color-ink-mid);
+    text-decoration: none;
+    transition:
+      color var(--dur-2) var(--ease-out),
+      background var(--dur-2) var(--ease-out);
+  }
+
+  .resource-sidebar a:not(.resource-sidebar-title):hover,
+  .resource-sidebar a.is-active {
+    color: var(--color-ink-hi);
+    background: var(--color-panel);
+  }
+
+  .resource-sidebar span {
+    display: block;
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+
+  .resource-article {
+    max-width: 52rem;
+    min-width: 0;
+  }
+
+  .resource-back {
+    display: none;
+  }
+
+  .resource-eyebrow {
+    margin: 0;
+    color: var(--color-terracotta-400);
+    font-family: var(--font-mono);
+    font-size: var(--text-eyebrow);
+    line-height: var(--text-eyebrow--line-height);
+    letter-spacing: var(--text-eyebrow--letter-spacing);
+    font-weight: var(--text-eyebrow--font-weight);
+    text-transform: uppercase;
+  }
+
+  .resource-article h1 {
+    margin: 0.85rem 0 0;
+    color: var(--color-ink-hi);
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    letter-spacing: var(--text-title--letter-spacing);
+    font-weight: 600;
+  }
+
+  .resource-dek {
+    margin: 1rem 0 0;
+    max-width: 42rem;
+    color: var(--color-ink-mid);
+    font-size: var(--text-body-lg);
+    line-height: var(--text-body-lg--line-height);
+  }
+
+  .resource-article :global(.resource-section) {
+    margin-top: 3rem;
+  }
+
+  .resource-article :global(.resource-section h2) {
+    margin: 0 0 1rem;
+    color: var(--color-ink-hi);
+    font-size: var(--text-heading);
+    line-height: var(--text-heading--line-height);
+    font-weight: 600;
+  }
+
+  .resource-article :global(.resource-section > p) {
+    margin: 0 0 1rem;
+    color: var(--color-ink-mid);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  .resource-article :global(.resource-grid) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  .resource-article :global(.resource-list) {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .resource-article :global(.resource-card),
+  .resource-article :global(.resource-note) {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-panel);
+    padding: 1rem;
+  }
+
+  .resource-article :global(a.resource-card) {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color var(--dur-2) var(--ease-out),
+      background var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+
+  .resource-article :global(a.resource-card:hover) {
+    transform: translateY(-2px);
+    border-color: var(--color-line-hover);
+    background: var(--color-raised);
+  }
+
+  .resource-article :global(.resource-row) {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    border-bottom: 1px solid var(--color-line);
+    color: inherit;
+    padding: 1rem 0;
+    text-decoration: none;
+  }
+
+  .resource-article :global(.resource-row:hover h3) {
+    color: var(--color-terracotta-300);
+  }
+
+  .resource-article :global(.resource-type),
+  .resource-article :global(.resource-card > span),
+  .resource-article :global(.resource-note > span) {
+    color: var(--color-terracotta-400);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    line-height: var(--text-mono-sm--line-height);
+    text-transform: uppercase;
+  }
+
+  .resource-article :global(.resource-card h3),
+  .resource-article :global(.resource-note h3),
+  .resource-article :global(.resource-row h3) {
+    margin: 0.55rem 0 0;
+    color: var(--color-ink-hi);
+    font-size: var(--text-body-lg);
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .resource-article :global(.resource-row h3) {
+    margin-top: 0;
+  }
+
+  .resource-article :global(.resource-card p),
+  .resource-article :global(.resource-note p),
+  .resource-article :global(.resource-row p) {
+    margin: 0.45rem 0 0;
+    color: var(--color-ink-mid);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+
+  .resource-article :global(.resource-row strong),
+  .resource-article :global(.resource-card strong) {
+    color: var(--color-terracotta-300);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    font-weight: 600;
+  }
+
+  .resource-article :global(.resource-note) {
+    background: var(--color-inset);
+  }
+
+  .resource-article :global(.resource-note + .resource-note) {
+    margin-top: 0.75rem;
+  }
+
+  @media (max-width: 900px) {
+    .resource-wrap {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .resource-sidebar {
+      display: none;
+    }
+
+    .resource-back {
+      display: inline-flex;
+      margin-bottom: 1rem;
+      color: var(--color-ink-low);
+      font-size: var(--text-small);
+      line-height: var(--text-small--line-height);
+      text-decoration: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .resource-wrap {
+      padding-right: 1rem;
+      padding-left: 1rem;
+    }
+
+    .resource-sidebar nav,
+    .resource-article :global(.resource-grid),
+    .resource-article :global(.resource-row) {
+      grid-template-columns: 1fr;
+    }
+
+    .resource-article :global(.resource-row strong) {
+      display: none;
+    }
+  }
+</style>

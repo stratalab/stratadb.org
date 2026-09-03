@@ -1,0 +1,78 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const current = [
+  {
+    type: 'Internals',
+    title: 'Engine internals',
+    copy: 'The closest current substitute for a whitepaper: storage, recovery, vectors, testing, and benchmarks.',
+    href: '/internals',
+  },
+  {
+    type: 'Architecture',
+    title: 'Storage substrate',
+    copy: 'The storage layer and how higher-level data capabilities are built above it.',
+    href: '/architecture/storage-substrate',
+  },
+  {
+    type: 'Architecture',
+    title: 'Commits and versioning',
+    copy: 'How StrataDB records versions and exposes historical reads.',
+    href: '/architecture/commits-and-versioning',
+  },
+];
+
+const standards = [
+  {
+    title: 'Clear scope',
+    copy: 'Each paper should state what it proves, what it does not prove, and which release it covers.',
+  },
+  {
+    title: 'Reproducible evidence',
+    copy: 'Claims need commands, source references, environment details, and raw outputs where possible.',
+  },
+  {
+    title: 'Readable PDF',
+    copy: 'The PDF should stand on its own for technical readers who are not browsing the website.',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Whitepapers"
+  description="Long-form technical papers will collect the deeper design arguments behind StrataDB."
+  activeSlug="whitepapers"
+>
+  <section class="resource-section" aria-labelledby="whitepapers-current">
+    <h2 id="whitepapers-current">Current long-form material</h2>
+    <div class="resource-list">
+      {
+        current.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="whitepaper-standard">
+    <h2 id="whitepaper-standard">Publication standard</h2>
+    <div class="resource-grid">
+      {
+        standards.map((item) => (
+          <article class="resource-note">
+            <span>Standard</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

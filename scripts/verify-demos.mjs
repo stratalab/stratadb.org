@@ -14,7 +14,9 @@ const REQUIRED = [
     file: 'src/components/sections/Hero.astro',
     strings: [
       'id="hero"',
-      'Strata is the embedded database for the AI era',
+      'An embedded database you can fork',
+      'Why does AI application state need a different database?',
+      'href="/docs/why-strata"',
       '#primitive-kv',
       '#primitive-event',
       '#primitive-json',

@@ -1,0 +1,78 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const current = [
+  {
+    type: 'Method',
+    title: 'Testing methodology',
+    copy: 'How the engine is tested, including fault paths and deterministic checks.',
+    href: '/internals#testing',
+  },
+  {
+    type: 'Benchmarks',
+    title: 'Internals benchmark section',
+    copy: 'The technical page section reserved for benchmark discussion.',
+    href: '/internals#benchmarks',
+  },
+  {
+    type: 'Runtime',
+    title: 'Durability and recovery',
+    copy: 'The recovery path and failure model that benchmark reports should account for.',
+    href: '/architecture/durability-and-recovery',
+  },
+];
+
+const reportShape = [
+  {
+    title: 'Harness',
+    copy: 'Commands, dataset shape, workload mix, version, and commit hash.',
+  },
+  {
+    title: 'Environment',
+    copy: 'Hardware, OS, filesystem, runtime mode, cache settings, and model/provider settings.',
+  },
+  {
+    title: 'Results',
+    copy: 'Raw output, summary charts, interpretation, and known limits.',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Benchmarks"
+  description="Evaluation reports will live here once the harness output is ready to publish with enough context to reproduce it."
+  activeSlug="benchmarks"
+>
+  <section class="resource-section" aria-labelledby="benchmarks-current">
+    <h2 id="benchmarks-current">Current technical material</h2>
+    <div class="resource-list">
+      {
+        current.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="benchmark-report-shape">
+    <h2 id="benchmark-report-shape">What a report will include</h2>
+    <div class="resource-grid">
+      {
+        reportShape.map((item) => (
+          <article class="resource-note">
+            <span>Required</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

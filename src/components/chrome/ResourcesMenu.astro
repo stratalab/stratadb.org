@@ -1,0 +1,219 @@
+---
+import { resourceNavItems } from '../../data/resources';
+
+interface Props {
+  variant?: 'desktop' | 'mobile';
+}
+
+const { variant = 'desktop' } = Astro.props;
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const isResourceActive =
+  currentPath === '/resources' ||
+  currentPath.startsWith('/resources/') ||
+  currentPath.startsWith('/docs') ||
+  currentPath.startsWith('/architecture') ||
+  currentPath === '/internals';
+
+const isItemActive = (slug: string, href: string) => {
+  if (currentPath === href || currentPath.startsWith(`${href}/`)) return true;
+  if (slug === 'documentation' && currentPath.startsWith('/docs')) return true;
+  if (
+    slug === 'architecture' &&
+    (currentPath.startsWith('/architecture') || currentPath === '/internals')
+  )
+    return true;
+  if (slug === 'demos' && currentPath.startsWith('/playground')) return true;
+  return false;
+};
+---
+
+{
+  variant === 'mobile' ? (
+    <details class="resources-mobile" open={isResourceActive}>
+      <summary>Resources</summary>
+      <div class="resources-mobile-list">
+        <a href="/resources" class:list={[currentPath === '/resources' && 'is-active']}>
+          All resources
+        </a>
+        {resourceNavItems.map((item) => (
+          <a href={item.href} class:list={[isItemActive(item.slug, item.href) && 'is-active']}>
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </details>
+  ) : (
+    <details class="resources-menu">
+      <summary
+        class:list={[
+          'resources-summary',
+          isResourceActive
+            ? 'text-ink-hi underline decoration-terracotta-500 decoration-2 underline-offset-8'
+            : 'text-ink-mid hover:text-ink-hi',
+        ]}
+      >
+        <span>Resources</span>
+        <svg
+          class="resources-chevron"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
+
+      <div class="resources-popover">
+        <a
+          href="/resources"
+          class:list={['resources-popover-item', currentPath === '/resources' && 'is-active']}
+        >
+          <span>All resources</span>
+        </a>
+        <div class="resources-popover-grid">
+          {resourceNavItems.map((item) => (
+            <a
+              href={item.href}
+              class:list={[
+                'resources-popover-item',
+                isItemActive(item.slug, item.href) && 'is-active',
+              ]}
+            >
+              <span>{item.label}</span>
+              <small>{item.summary}</small>
+            </a>
+          ))}
+        </div>
+      </div>
+    </details>
+  )
+}
+
+<style>
+  .resources-menu {
+    position: relative;
+  }
+
+  .resources-summary {
+    display: inline-flex;
+    cursor: pointer;
+    list-style: none;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: var(--radius-control);
+    padding: 0.5rem 0.875rem;
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    transition: color var(--dur-2) var(--ease-out);
+  }
+
+  .resources-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .resources-chevron {
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  .resources-menu[open] .resources-chevron {
+    transform: rotate(180deg);
+  }
+
+  .resources-popover {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 4rem;
+    z-index: 60;
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-panel);
+    box-shadow: var(--shadow-float);
+    padding: 0.55rem 0;
+  }
+
+  .resources-popover-item {
+    display: block;
+    flex: 0 0 auto;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    color: inherit;
+    padding: 0.5rem 0.7rem;
+    text-decoration: none;
+    transition:
+      border-color var(--dur-2) var(--ease-out),
+      background var(--dur-2) var(--ease-out);
+  }
+
+  .resources-popover-grid {
+    display: contents;
+  }
+
+  .resources-popover-item:hover,
+  .resources-popover-item.is-active {
+    border-color: var(--color-line-hover);
+    background: var(--color-raised);
+  }
+
+  .resources-popover-item span {
+    display: block;
+    color: var(--color-ink-hi);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    font-weight: 600;
+  }
+
+  .resources-popover-item small {
+    display: none;
+  }
+
+  .resources-popover {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .resources-mobile {
+    border-bottom: 1px solid var(--color-line);
+    padding: 0.75rem 0;
+  }
+
+  .resources-mobile summary {
+    cursor: pointer;
+    list-style: none;
+    color: var(--color-ink-hi);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+
+  .resources-mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .resources-mobile-list {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.65rem 0 0.2rem 0.85rem;
+  }
+
+  .resources-mobile-list a {
+    color: var(--color-ink-mid);
+    padding: 0.38rem 0;
+    text-decoration: none;
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+  }
+
+  .resources-mobile-list a:hover,
+  .resources-mobile-list a.is-active {
+    color: var(--color-terracotta-300);
+  }
+</style>

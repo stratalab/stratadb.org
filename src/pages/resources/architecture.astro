@@ -1,0 +1,91 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const primary = [
+  {
+    type: 'Index',
+    title: 'Architecture',
+    copy: 'The public architecture front door for layers, runtime modes, durability, and data capabilities.',
+    href: '/architecture',
+  },
+  {
+    type: 'Internals',
+    title: 'Engine internals',
+    copy: 'A deeper technical surface covering MVCC, storage layout, recovery, vector indexing, and tests.',
+    href: '/internals',
+  },
+  {
+    type: 'Concept',
+    title: 'Embedded architecture',
+    copy: 'How StrataDB runs as a local embedded database rather than a separate service.',
+    href: '/docs/concepts/embedded-architecture',
+  },
+];
+
+const topics = [
+  {
+    type: 'Branches',
+    title: 'Branches',
+    copy: 'Branch isolation, fork, diff, preview, merge, and deletion.',
+    href: '/docs/concepts/branches',
+  },
+  {
+    type: 'Commits',
+    title: 'Commits',
+    copy: 'The write clock, commit history, and how changes become visible.',
+    href: '/docs/concepts/commits',
+  },
+  {
+    type: 'Durability',
+    title: 'Durability',
+    copy: 'What the durable runtime promises and how failures are surfaced.',
+    href: '/docs/concepts/durability',
+  },
+  {
+    type: 'Data',
+    title: 'Data capabilities',
+    copy: 'How KV, JSON, events, vectors, and graph share the same state model.',
+    href: '/architecture/data-capabilities',
+  },
+];
+---
+
+<ResourcesLayout
+  title="Architecture"
+  description="Technical entry points for the StrataDB engine, embedded runtime, branch model, durability path, and data capabilities."
+  activeSlug="architecture"
+>
+  <section class="resource-section" aria-labelledby="architecture-primary">
+    <h2 id="architecture-primary">Core reads</h2>
+    <div class="resource-list">
+      {
+        primary.map((item) => (
+          <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="architecture-topics">
+    <h2 id="architecture-topics">Topics</h2>
+    <div class="resource-grid">
+      {
+        topics.map((item) => (
+          <a href={item.href} class="resource-card">
+            <span>{item.type}</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+            <strong>Open &rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>

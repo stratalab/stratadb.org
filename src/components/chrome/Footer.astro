@@ -7,6 +7,15 @@ const columns: Record<string, { label: string; href: string; external?: boolean 
     { label: 'Strata Hub', href: '/hub' },
     { label: 'Changelog', href: '/changelog' },
   ],
+  Resources: [
+    { label: 'All resources', href: '/resources' },
+    { label: 'Documentation', href: '/resources/documentation' },
+    { label: 'Blogs', href: '/resources/blogs' },
+    { label: 'About', href: '/resources/about' },
+    { label: 'Demos', href: '/resources/demos' },
+    { label: 'Whitepapers', href: '/resources/whitepapers' },
+    { label: 'Benchmarks', href: '/resources/benchmarks' },
+  ],
   Documentation: [
     { label: 'Getting Started', href: '/docs/getting-started' },
     { label: 'Guides', href: '/docs/guides' },
@@ -28,7 +37,7 @@ const year = new Date().getFullYear();
 
 <footer class="border-t border-line">
   <div class="mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
-    <div class="grid grid-cols-2 gap-10 md:grid-cols-4">
+    <div class="grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-5">
       {
         Object.entries(columns).map(([title, links]) => (
           <div>

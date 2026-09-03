@@ -1,11 +1,9 @@
 ---
-// Public nav for the current product lock: docs, Hub, and the live browser playground.
+// Public nav for the current product lock: resources, Hub, and the live browser playground.
 import Button from '../foundation/Button.astro';
+import ResourcesMenu from './ResourcesMenu.astro';
 
-const navItems: { label: string; href: string }[] = [
-  { label: 'Docs', href: '/docs' },
-  { label: 'Playground', href: '/playground' },
-];
+const navItems: { label: string; href: string }[] = [{ label: 'Playground', href: '/playground' }];
 const currentPath = Astro.url.pathname;
 const datasetsButtonClass = [
   'max-sm:hidden',
@@ -38,6 +36,7 @@ const datasetsButtonClass = [
     </a>
 
     <div class="hidden items-center gap-1 md:flex">
+      <ResourcesMenu />
       {
         navItems.map((item) => (
           <a
@@ -79,6 +78,7 @@ const datasetsButtonClass = [
   </nav>
 
   <div id="nav-sheet" class="hidden border-t border-line px-6 pb-4 md:hidden">
+    <ResourcesMenu variant="mobile" />
     {
       navItems.map((item) => (
         <a href={item.href} class="block py-3 text-small text-ink-mid hover:text-ink-hi">

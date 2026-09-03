@@ -1,0 +1,86 @@
+---
+import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+
+const facts = [
+  {
+    type: 'Product',
+    title: 'Embedded database',
+    copy: 'StrataDB opens a local directory in-process. There is no database server to deploy for the core workflow.',
+  },
+  {
+    type: 'Model',
+    title: 'Branchable state',
+    copy: 'KV, JSON, events, vectors, and graph share branches, commits, snapshots, history, and durability.',
+  },
+  {
+    type: 'Status',
+    title: 'Research preview',
+    copy: 'The public site and docs describe the shipped preview surfaces and the boundaries of the current release.',
+  },
+];
+
+const links = [
+  {
+    type: 'Source',
+    title: 'strata-core',
+    copy: 'The Apache-2.0 core repository.',
+    href: 'https://github.com/stratalab/strata-core',
+  },
+  {
+    type: 'Docs',
+    title: 'What is StrataDB',
+    copy: 'The concise product framing and fit summary.',
+    href: '/docs/why-strata',
+  },
+  {
+    type: 'Hub',
+    title: 'Strata Hub',
+    copy: 'The dataset catalog for cloneable Strata databases.',
+    href: '/hub',
+  },
+];
+---
+
+<ResourcesLayout
+  title="About"
+  description="StrataDB is an embedded database for branchable, versioned application state."
+  activeSlug="about"
+>
+  <section class="resource-section" aria-labelledby="about-facts">
+    <h2 id="about-facts">What matters</h2>
+    <div class="resource-grid">
+      {
+        facts.map((item) => (
+          <article class="resource-note">
+            <span>{item.type}</span>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="about-links">
+    <h2 id="about-links">Project links</h2>
+    <div class="resource-list">
+      {
+        links.map((item) => (
+          <a
+            href={item.href}
+            class="resource-row"
+            target={item.href.startsWith('http') ? '_blank' : undefined}
+            rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</ResourcesLayout>
