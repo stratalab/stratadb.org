@@ -1,0 +1,21 @@
+---
+// Sample: one generated command rendered from data, to judge the template
+// before the other 134 follow. The guide links are the site-side sidecar, which
+// exists because the generated artifact must not be hand-edited.
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import CommandReference from '../../../../components/docs/CommandReference.astro';
+---
+
+<DocsLayout
+  title="Promote branch"
+  description="Promote one branch's changes into another as a single atomic commit."
+  section="Reference"
+>
+  <CommandReference
+    id="branch.merge"
+    guides={[
+      { label: 'Merge changes', href: '/docs' },
+      { label: 'Resolve merge conflicts', href: '/docs' },
+    ]}
+  />
+</DocsLayout>

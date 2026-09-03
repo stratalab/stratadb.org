@@ -1,0 +1,377 @@
+---
+// A generated command reference page, composed from data.
+//
+// The site owns presentation and the release ships data (sourcing policy §4.2).
+// Nothing here is hand-written per command: everything comes from
+// command-index.json, command-schemas.json, command-examples.json and the error
+// registry, all staged from the released strata-core bundle. That is what lets
+// the page carry facts the generated markdown cannot, and lets a section be
+// added without cutting a release.
+//
+// One page per command with all three spellings on it, following Stripe: CLI,
+// wire and MCP share one parameter table, one return shape and one error list,
+// so only the invocation and the example swap.
+import index from '../../data/command-index.json';
+import schemas from '../../data/command-schemas.json';
+import examples from '../../data/command-examples.json';
+import registry from '../../data/error-registry.json';
+
+interface Props {
+  /** Command id, e.g. "branch.merge". */
+  id: string;
+  /** Guide pages that use this command. Site-side, because the artifact is not editable. */
+  guides?: { label: string; href: string }[];
+}
+const { id, guides = [] } = Astro.props;
+
+type Command = (typeof index.commands)[number];
+
+// The staged JSON is untyped; describe only the parts this template reads.
+interface SchemaProp {
+  // JSON Schema allows a union here, e.g. ["object", "null"].
+  type?: string | string[];
+  $ref?: string;
+  description?: string;
+}
+
+const typeName = (spec: SchemaProp): string => {
+  if (typeof spec.$ref === 'string') return spec.$ref.split('/').pop() ?? 'any';
+  if (Array.isArray(spec.type)) return spec.type.join(' or ');
+  return spec.type ?? 'any';
+};
+interface SchemaDef {
+  description?: string;
+  oneOf?: { const?: string }[];
+}
+interface CommandSchema {
+  $defs?: Record<string, SchemaDef>;
+  request?: { required?: string[]; properties?: Record<string, SchemaProp> };
+  response?: { properties?: Record<string, SchemaProp> };
+}
+interface CommandExample {
+  intro?: string;
+  cli?: string;
+  wire?: string;
+}
+
+const command = (index.commands as Command[]).find((c) => c.id === id);
+if (!command) throw new Error(`CommandReference: unknown command id "${id}"`);
+
+const schema = (schemas as Record<string, CommandSchema>)[id];
+const example = (examples as Record<string, CommandExample>)[id];
+const codes = new Map(registry.errors.map((e) => [e.code, e]));
+
+// Parameters come from the request schema, not the markdown table: the schema
+// carries required lists, defaults and shared enum definitions.
+const request = schema?.request ?? {};
+const required = new Set<string>(request.required ?? []);
+const params = Object.entries(request.properties ?? {})
+  // `type` is the wire discriminator, not something a caller passes.
+  .filter(([name]) => name !== 'type')
+  .map(([name, spec]) => {
+    const ref = typeof spec.$ref === 'string' ? spec.$ref.split('/').pop() : null;
+    const def = ref ? schema?.$defs?.[ref] : undefined;
+    const options = def?.oneOf?.map((o) => o.const).filter(Boolean) ?? null;
+    return {
+      name,
+      type: typeName(spec),
+      required: required.has(name),
+      description: spec.description ?? def?.description ?? '',
+      options,
+    };
+  })
+  .sort((a, b) => Number(b.required) - Number(a.required) || a.name.localeCompare(b.name));
+
+const returns = Object.entries(schema?.response?.properties ?? {}).map(([name, spec]) => ({
+  name,
+  type: typeName(spec),
+  description: spec.description ?? '',
+}));
+
+// Facts a hand-written page could not keep true across releases.
+const COMMIT_LABEL: Record<string, string> = {
+  none: 'no commit',
+  commits_on_success: 'commits on success',
+  itemwise_shared_commit: 'itemwise, one shared commit',
+  chunked_commits: 'chunked commits',
+};
+const facts = [
+  command.access === 'write' ? 'write' : 'read',
+  COMMIT_LABEL[command.commit] ?? command.commit,
+  command.wire_status === 'stable' ? 'stable' : command.wire_status,
+  command.pagination && command.pagination !== 'none' ? `paginated (${command.pagination})` : null,
+  command.batch && command.batch !== 'none' ? `batch (${command.batch})` : null,
+].filter(Boolean) as string[];
+
+const errors = (command.errors ?? []).map((e) => {
+  const detail = codes.get(e.code);
+  return {
+    code: e.code,
+    href: `/e/${e.code}`,
+    retry: detail?.retry_policy ?? 'unknown',
+    outcome: detail?.commit_outcome ?? 'unknown',
+  };
+});
+
+const siblings = (index.commands as Command[])
+  .filter((c) => c.family === command.family && c.id !== command.id)
+  .slice(0, 6);
+
+const cliInvocation = `strata ${command.cli?.path?.join(' ') ?? ''}`;
+
+// A <pre> keeps every character, including the whitespace a formatter adds
+// around an expression. Setting the text directly is the only reliable way to
+// render an example exactly as generated.
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const RETRY_TONE: Record<string, string> = {
+  never: 'text-err',
+  safe: 'text-ok',
+  after_backoff: 'text-warn',
+};
+---
+
+<article class="cmd" data-cmd>
+  <header>
+    <p class="font-mono text-mono-sm text-ink-low">{command.family} · {command.op}</p>
+    <h1 class="mt-2 text-title font-semibold text-ink-hi">{command.title}</h1>
+    <p class="mt-3 text-body-lg text-ink-mid">{command.summary}</p>
+
+    <ul class="mt-4 flex list-none flex-wrap gap-2 p-0" aria-label="Behavior">
+      {
+        facts.map((fact) => (
+          <li class="rounded-full border border-line px-2.5 py-0.5 font-mono text-mono-sm text-ink-mid">
+            {fact}
+          </li>
+        ))
+      }
+    </ul>
+  </header>
+
+  <!-- Interface selector: only the invocation and the example change. -->
+  <div class="mt-8 overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
+    <div class="flex gap-1 border-b border-line px-3 py-2" role="tablist" aria-label="Interface">
+      {
+        ['cli', 'wire', 'mcp'].map((iface, i) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+            data-iface-tab={iface}
+            class="rounded-(--radius-control) px-3 py-1.5 font-mono text-mono-body text-ink-mid transition-colors duration-200 hover:text-ink-hi aria-selected:bg-elevated aria-selected:text-ink-hi"
+          >
+            {iface === 'mcp' ? 'MCP' : iface === 'cli' ? 'CLI' : 'Wire'}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="px-5 py-4" data-iface-panel="cli">
+      <code class="font-mono text-mono-body text-ink-hi">{cliInvocation}</code>
+    </div>
+    <div class="px-5 py-4" data-iface-panel="wire" hidden>
+      <code class="font-mono text-mono-body text-ink-hi"
+        >{`{"type": "${command.cli?.path ? command.id.replace(/\./g, '_') : command.id}"}`}</code
+      >
+    </div>
+    <div class="px-5 py-4" data-iface-panel="mcp" hidden>
+      <code class="font-mono text-mono-body text-ink-hi">{command.mcp?.name}</code>
+      <p class="mt-2 text-small text-ink-mid">
+        Values are spelled for the wire, not the CLI: byte fields are base64 and enums use
+        underscores. The tool's own <code class="font-mono">inputSchema</code> is the authority.
+      </p>
+    </div>
+  </div>
+
+  <div class="prose-docs mt-8">
+    <p>{command.description.split('\n\n')[0]}</p>
+  </div>
+
+  {
+    example && (
+      <section class="mt-8">
+        <h2 class="text-heading text-ink-hi">Example</h2>
+        {example.intro && <p class="mt-2 text-body text-ink-mid">{example.intro}</p>}
+        <div class="mt-3 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
+          {(['cli', 'wire', 'mcp'] as const).map((iface) => (
+            <pre
+              class="overflow-x-auto p-5 font-mono text-mono-sm text-term-fg"
+              data-iface-panel={iface}
+              hidden={iface !== 'cli'}
+              set:html={escapeHtml((iface === 'cli' ? example.cli : example.wire) ?? '')}
+            />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    params.length > 0 && (
+      <section class="mt-10">
+        <h2 class="text-heading text-ink-hi">Parameters</h2>
+        <div class="mt-3 overflow-x-auto">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr class="border-b border-line">
+                {['Name', 'Type', 'Required', 'Description'].map((h) => (
+                  <th class="py-2 pr-4 text-small font-medium text-ink-mid">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {params.map((p) => (
+                <tr class="border-b border-line align-top">
+                  <td class="py-2.5 pr-4 font-mono text-mono-sm text-ink-hi">{p.name}</td>
+                  <td class="py-2.5 pr-4 font-mono text-mono-sm text-ink-mid">{p.type}</td>
+                  <td class="py-2.5 pr-4 font-mono text-mono-sm">
+                    <span class={p.required ? 'text-ink-hi' : 'text-ink-low'}>
+                      {p.required ? 'yes' : 'no'}
+                    </span>
+                  </td>
+                  <td class="py-2.5 text-small text-ink-mid">
+                    {p.description}
+                    {p.options && (
+                      <span class="mt-1 block font-mono text-mono-sm text-ink-low">
+                        one of: {p.options.join(', ')}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="mt-10">
+    <h2 class="text-heading text-ink-hi">Returns</h2>
+    <p class="mt-2 font-mono text-mono-sm text-ink-mid">{command.response_model}</p>
+    {
+      returns.length > 0 && (
+        <ul class="mt-3 list-none space-y-2 border-l border-line pl-4">
+          {returns.map((r) => (
+            <li>
+              <span class="font-mono text-mono-sm text-ink-hi">{r.name}</span>
+              <span class="ml-2 font-mono text-mono-sm text-ink-low">{r.type}</span>
+              {r.description && <p class="mt-0.5 text-small text-ink-mid">{r.description}</p>}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  {
+    errors.length > 0 && (
+      <section class="mt-10">
+        <h2 class="text-heading text-ink-hi">Errors</h2>
+        <p class="mt-2 text-small text-ink-mid">
+          Recover by code. Retry policy and commit outcome come from the shipped error registry.
+        </p>
+        <div class="mt-3 overflow-x-auto">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr class="border-b border-line">
+                {['Code', 'Retry', 'Commit outcome'].map((h) => (
+                  <th class="py-2 pr-4 text-small font-medium text-ink-mid">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {errors.map((e) => (
+                <tr class="border-b border-line">
+                  <td class="py-2.5 pr-4 font-mono text-mono-sm">
+                    <a
+                      href={e.href}
+                      class="text-ink-hi underline decoration-line underline-offset-4 hover:decoration-terracotta-500"
+                    >
+                      {e.code}
+                    </a>
+                  </td>
+                  <td
+                    class={`py-2.5 pr-4 font-mono text-mono-sm ${RETRY_TONE[e.retry] ?? 'text-ink-mid'}`}
+                  >
+                    {e.retry}
+                  </td>
+                  <td class="py-2.5 font-mono text-mono-sm text-ink-mid">{e.outcome}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="mt-10 border-t border-line pt-6">
+    <h2 class="text-small font-medium uppercase text-ink-mid">Related</h2>
+    {
+      guides.length > 0 && (
+        <p class="mt-3 text-body text-ink-mid">
+          Guides:{' '}
+          {guides.map((g, i) => (
+            <>
+              {i > 0 && ' · '}
+              <a href={g.href} class="text-ink-hi underline decoration-line underline-offset-4">
+                {g.label}
+              </a>
+            </>
+          ))}
+        </p>
+      )
+    }
+    <p class="mt-2 text-body text-ink-mid">
+      In this family: <span class="text-ink-low">{siblings.map((s) => s.title).join(' · ')}</span>
+    </p>
+  </section>
+</article>
+
+<script>
+  // One persisted choice across every reference page, as Stripe does.
+  const KEY = 'strata.docs.interface';
+  const root = document.querySelector<HTMLElement>('[data-cmd]');
+
+  if (root) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-iface-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-iface-panel]')];
+
+    function select(iface: string) {
+      tabs.forEach((tab) => {
+        const on = tab.dataset.ifaceTab === iface;
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.ifacePanel !== iface;
+      });
+      try {
+        localStorage.setItem(KEY, iface);
+      } catch {
+        /* private browsing */
+      }
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab.dataset.ifaceTab ?? 'cli'));
+      tab.addEventListener('keydown', (event) => {
+        const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        const next = tabs[(i + step + tabs.length) % tabs.length];
+        next.focus();
+        select(next.dataset.ifaceTab ?? 'cli');
+      });
+    });
+
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved && tabs.some((t) => t.dataset.ifaceTab === saved)) select(saved);
+    } catch {
+      /* private browsing */
+    }
+  }
+</script>

@@ -34,6 +34,8 @@ const exec = promisify(execFile);
 const ROOT = new URL('..', import.meta.url).pathname;
 const REFERENCE_DIR = join(ROOT, 'src/content/docs/reference');
 const INDEX_OUT = join(ROOT, 'src/data/command-index.json');
+const SCHEMAS_OUT = join(ROOT, 'src/data/command-schemas.json');
+const EXAMPLES_OUT = join(ROOT, 'src/data/command-examples.json');
 const RELEASE_JSON = join(ROOT, 'src/data/release.json');
 const ASSET = 'strata-idl-docs.tar.gz';
 const REPO = 'https://github.com/stratalab/strata-core';
@@ -128,6 +130,42 @@ async function stageFamily(srcDocs, family, rewriteLinks) {
   return count;
 }
 
+// The command index carries every fact about a command except its examples,
+// which live only in the generated markdown. Lift them out as data so the site
+// can compose reference pages without rendering the markdown at all (sourcing
+// policy §4.2: the repo ships data, the site owns presentation).
+async function collectExamples(srcDocs, commands) {
+  const examples = {};
+  for (const command of commands) {
+    const route = typeof command.docs === 'string' ? command.docs : '';
+    const rel = route.replace(/^\/docs\/reference\//, '');
+    if (!rel) continue;
+    const file = join(srcDocs, `${rel}.md`);
+    if (!existsSync(file)) continue;
+    const md = await readFile(file, 'utf8');
+    const block = md.split('## Examples')[1]?.split('\n## ')[0];
+    if (!block) continue;
+    const intro = block.split('### ')[0].trim();
+    const cli = block.match(/### CLI\n+```console\n([\s\S]*?)```/)?.[1]?.trim();
+    const wire = block.match(/### Wire\n+```json\n([\s\S]*?)```/)?.[1]?.trim();
+    examples[command.id] = { intro: normalizeCopy(intro), cli, wire };
+  }
+  return examples;
+}
+
+// Request and response shapes, with shared $defs. The markdown reduces a return
+// type to its name; the schema has the actual shape.
+async function collectSchemas(dir) {
+  const schemaDir = join(dir, 'schemas');
+  if (!existsSync(schemaDir)) return null;
+  const out = {};
+  for (const name of await readdir(schemaDir)) {
+    if (!name.endsWith('.json')) continue;
+    out[name.replace(/\.json$/, '')] = JSON.parse(await readFile(join(schemaDir, name), 'utf8'));
+  }
+  return out;
+}
+
 async function main() {
   const source = await resolveSource();
   if (!source || source.error) {
@@ -155,12 +193,25 @@ async function main() {
   }
 
   const indexSrc = join(source.dir, 'command-index.json');
+  let commands = [];
   if (existsSync(indexSrc)) {
     await mkdir(join(INDEX_OUT, '..'), { recursive: true });
     const index = normalizeCommandIndexDocs(JSON.parse(await readFile(indexSrc, 'utf8')), families);
+    commands = index.commands ?? [];
     await writeFile(INDEX_OUT, `${normalizeCopy(JSON.stringify(index, null, 2))}\n`);
   }
 
+  // Data the site composes reference pages from. Written whether or not the
+  // markdown is staged, because the pages are rendered from these, not from it.
+  const examples = await collectExamples(srcDocs, commands);
+  await writeFile(EXAMPLES_OUT, `${JSON.stringify(examples, null, 2)}\n`);
+
+  const schemas = await collectSchemas(source.dir);
+  if (schemas) await writeFile(SCHEMAS_OUT, `${JSON.stringify(schemas, null, 2)}\n`);
+
+  console.log(
+    `fetch-docs: ${Object.keys(examples).length} example set(s) and ${schemas ? Object.keys(schemas).length : 0} schema(s) written`,
+  );
   console.log(
     stagingEnabled
       ? `fetch-docs: staged ${total} reference pages from ${source.label}`
