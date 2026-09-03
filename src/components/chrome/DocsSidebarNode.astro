@@ -1,0 +1,57 @@
+---
+// One node of the documentation tree, rendered recursively.
+//
+// A node with children is a collapsible group; a leaf is a link once its page
+// exists and plain text until then, so the sidebar can never invent a link.
+import type { TreeNode } from '../../lib/docsTree';
+import Self from './DocsSidebarNode.astro';
+
+interface Props {
+  node: TreeNode;
+  depth: number;
+  open?: boolean;
+}
+const { node, depth, open = false } = Astro.props;
+const hasChildren = Boolean(node.children?.length);
+---
+
+{
+  hasChildren ? (
+    <details open={open} class="tree-node">
+      <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-(--radius-control) py-1 pl-1 pr-2 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi">
+        <span class="tree-chev shrink-0 text-ink-low">›</span>
+        <span class="min-w-0 flex-1 truncate">{node.label}</span>
+      </summary>
+      <ul class="ml-2 space-y-px border-l border-line pl-1">
+        {node.children!.map((child) => (
+          <li>
+            <Self node={child} depth={depth + 1} />
+          </li>
+        ))}
+      </ul>
+    </details>
+  ) : node.href ? (
+    <a
+      href={node.href}
+      class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
+    >
+      {node.label}
+    </a>
+  ) : (
+    <span class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-low">
+      {node.label}
+    </span>
+  )
+}
+
+<style>
+  /* Direct-child only: a nested node must not inherit its ancestor's state. */
+  .tree-chev {
+    display: inline-block;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  details.tree-node[open] > summary > .tree-chev {
+    transform: rotate(90deg);
+  }
+</style>

@@ -1,33 +1,29 @@
 // The documentation tree, as an intention rather than a rendering of what
-// exists. It is written down here so the shape can be reviewed before any of
-// the pages are restored, and so the sidebar has something to depict while the
-// content collection is still empty.
+// exists. Written down here so the shape can be reviewed before the pages are
+// restored, and so the sidebar has something to depict while the content
+// collection is empty.
 //
 // Source: docs/product/14-docs-ia-redesign.md §5. Keep the two in step.
 //
-// Nothing here links anywhere. Items gain an `href` as their page lands, and
-// the sidebar starts linking them at that point.
+// It is deliberately a manifest rather than a walk of the filesystem. Reference
+// is generated, so it is the part that grows without anyone deciding to grow
+// it; if it ever outruns a single tree, switching to a per-section switcher
+// becomes a rendering change here rather than an IA change.
+//
+// Nothing links anywhere yet. A node gains an `href` as its page lands.
 
-export interface TreeItem {
+export interface TreeNode {
   label: string;
   href?: string;
+  children?: TreeNode[];
+  /** Emitted from the IDL in strata-core. Never authored or edited here. */
+  generated?: boolean;
 }
 
-export interface TreeGroup {
-  label: string;
-  items: TreeItem[];
-}
-
-export interface TreeSection {
-  label: string;
-  items?: TreeItem[];
-  groups?: TreeGroup[];
-}
-
-export const docsTree: TreeSection[] = [
+export const docsTree: TreeNode[] = [
   {
     label: 'Get Started',
-    items: [
+    children: [
       { label: 'Overview' },
       { label: 'Installation' },
       { label: 'Quickstart' },
@@ -37,10 +33,10 @@ export const docsTree: TreeSection[] = [
   },
   {
     label: 'Learn',
-    groups: [
+    children: [
       {
         label: 'How Strata works',
-        items: [
+        children: [
           { label: 'Embedded databases' },
           { label: 'Databases and storage' },
           { label: 'Branches' },
@@ -53,7 +49,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Working with data',
-        items: [
+        children: [
           { label: 'Overview' },
           { label: 'Key-value' },
           { label: 'JSON' },
@@ -64,7 +60,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Inference',
-        items: [
+        children: [
           { label: 'Overview' },
           { label: 'Models' },
           { label: 'Generation' },
@@ -74,16 +70,16 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Distribution',
-        items: [{ label: 'Strata Hub' }, { label: 'Cloning databases' }],
+        children: [{ label: 'Strata Hub' }, { label: 'Cloning databases' }],
       },
     ],
   },
   {
     label: 'Guides',
-    groups: [
+    children: [
       {
         label: 'Branching and history',
-        items: [
+        children: [
           { label: 'Isolate an experiment' },
           { label: 'Compare two branches' },
           { label: 'Preview a merge' },
@@ -95,7 +91,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'AI and retrieval',
-        items: [
+        children: [
           { label: 'Build semantic search' },
           { label: 'Build RAG' },
           { label: 'Embed and store documents' },
@@ -106,7 +102,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Agent applications',
-        items: [
+        children: [
           { label: 'Give each run a branch' },
           { label: 'Persist agent memory' },
           { label: 'Record tool activity' },
@@ -115,7 +111,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Data',
-        items: [
+        children: [
           { label: 'Import data' },
           { label: 'Export data' },
           { label: 'Migrate from SQLite' },
@@ -126,7 +122,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Operations',
-        items: [
+        children: [
           { label: 'Configure Strata' },
           { label: 'Inspect database health' },
           { label: 'Back up a database' },
@@ -136,7 +132,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'Deployment',
-        items: [
+        children: [
           { label: 'Embed in an application' },
           { label: 'Package with an application' },
           { label: 'Run in the browser' },
@@ -146,10 +142,10 @@ export const docsTree: TreeSection[] = [
   },
   {
     label: 'Develop',
-    groups: [
+    children: [
       {
         label: 'Python',
-        items: [
+        children: [
           { label: 'Overview' },
           { label: 'Installation' },
           { label: 'Opening databases' },
@@ -166,7 +162,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'CLI',
-        items: [
+        children: [
           { label: 'Overview' },
           { label: 'Targeting databases' },
           { label: 'Interactive shell' },
@@ -176,7 +172,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'AI agents',
-        items: [
+        children: [
           { label: 'Overview' },
           { label: 'Agent skills' },
           { label: 'Machine-readable docs' },
@@ -186,7 +182,7 @@ export const docsTree: TreeSection[] = [
       },
       {
         label: 'MCP',
-        items: [
+        children: [
           { label: 'Overview' },
           { label: 'Setup' },
           { label: 'Clients' },
@@ -197,54 +193,75 @@ export const docsTree: TreeSection[] = [
   },
   {
     label: 'Reference',
-    items: [
-      { label: 'MCP tools' },
-      { label: 'Configuration' },
-      { label: 'Error codes' },
-      { label: 'Data types' },
-      { label: 'Compatibility and versioning' },
-    ],
-    groups: [
+    children: [
       {
         label: 'CLI',
-        items: [
+        children: [
           { label: 'Global options' },
           { label: 'init' },
           { label: 'doctor' },
           { label: 'agents' },
           { label: 'mcp' },
-          { label: 'start / stop' },
+          { label: 'start and stop' },
           { label: 'ipc' },
           { label: 'remote' },
           { label: 'command' },
         ],
       },
       {
-        // Generated, one page per command. Families only here: the operations
-        // stay collapsed until a family is opened, per the progressive
-        // disclosure rule.
+        // One page per command, generated. Middle levels keep their own group
+        // and index rather than being flattened, so a reader drills toward an
+        // operation. Only `branch` is spelled out below: the rest render from
+        // the command index when the pages are restored.
         label: 'Commands',
-        items: [
-          { label: 'Key-value' },
-          { label: 'JSON' },
-          { label: 'Vectors' },
-          { label: 'Events' },
-          { label: 'Graph' },
-          { label: 'Branches' },
-          { label: 'Spaces' },
-          { label: 'Inference' },
-          { label: 'Admin' },
-          { label: 'Arrow' },
-          { label: 'Hub' },
+        generated: true,
+        children: [
+          {
+            label: 'Branches',
+            generated: true,
+            children: [
+              { label: 'Create empty branch' },
+              { label: 'Fork branch from current head' },
+              { label: 'Fork branch at version' },
+              { label: 'Fork branch at timestamp' },
+              { label: 'Compare branches' },
+              { label: 'Preview branch promotion' },
+              { label: 'Promote branch' },
+              { label: 'Read one branch' },
+              { label: 'List branches' },
+              { label: 'Delete branch' },
+            ],
+          },
+          { label: 'Key-value', generated: true },
+          { label: 'JSON', generated: true, children: [{ label: 'Indexes' }] },
+          {
+            label: 'Vectors',
+            generated: true,
+            children: [{ label: 'Collections' }, { label: 'Indexes' }, { label: 'Metadata' }],
+          },
+          { label: 'Events', generated: true },
+          {
+            label: 'Graph',
+            generated: true,
+            children: [
+              { label: 'Nodes' },
+              { label: 'Edges' },
+              { label: 'Ontology' },
+              { label: 'Analytics' },
+            ],
+          },
+          { label: 'Spaces', generated: true },
+          { label: 'Inference', generated: true, children: [{ label: 'Models' }] },
+          { label: 'Admin', generated: true },
+          { label: 'Arrow', generated: true },
+          { label: 'Hub', generated: true },
         ],
       },
+      { label: 'MCP tools', generated: true },
+      { label: 'Configuration' },
+      { label: 'Error codes' },
+      { label: 'Data types' },
+      { label: 'Compatibility and versioning' },
     ],
   },
 ];
-
-export function countItems(section: TreeSection): number {
-  return (
-    (section.items?.length ?? 0) +
-    (section.groups ?? []).reduce((total, group) => total + group.items.length, 0)
-  );
-}

@@ -1,14 +1,17 @@
 ---
-// The documentation sidebar, in skeleton.
+// The documentation sidebar.
 //
-// It renders the intended tree from src/lib/docsTree.ts rather than the content
-// collection, so the shape can be reviewed before the pages exist. Items with
-// no href render as plain text: the sidebar will never invent a link.
+// One tree, every top-level section always visible, only the active branch
+// expanded. That is what all six reference sites do, and at this size a single
+// tree is well inside what they carry: Kubernetes renders 871 links in one and
+// DuckDB 428. Scoping behind a section switcher, as Snowflake and ClickHouse
+// do, only starts paying at their scale; Snowflake's Reference alone is 3022
+// nodes. The tree comes from a manifest, so if our generated Reference ever
+// outruns this, scoping becomes a rendering change rather than an IA change.
 //
-// Progressive disclosure is the point here, per doc 14 §8. Sections and groups
-// are collapsed by default; a reader drills Reference, then Commands, then a
-// family, instead of meeting every operation at once.
-import { countItems, docsTree } from '../../lib/docsTree';
+// No counts and no badges: none of the six carry them.
+import { docsTree } from '../../lib/docsTree';
+import DocsSidebarNode from './DocsSidebarNode.astro';
 
 interface Props {
   /** Section to open on load. Everything else stays collapsed. */
@@ -41,69 +44,31 @@ const { open } = Astro.props;
 
     {
       docsTree.map((section) => (
-        <details open={section.label === open} class="group/sec mb-1">
+        <details open={section.label === open} class="tree-section mb-1">
           <summary class="flex cursor-pointer list-none items-center gap-2 rounded-(--radius-control) px-2 py-1.5 text-small font-medium uppercase text-ink-mid transition-colors duration-200 hover:bg-raised hover:text-ink-hi">
-            <span class="text-ink-low transition-transform duration-200 group-open/sec:rotate-90">
-              ›
-            </span>
+            <span class="tree-chev shrink-0 text-ink-low">›</span>
             <span class="min-w-0 flex-1 truncate">{section.label}</span>
-            <span class="font-mono text-mono-sm text-ink-low">{countItems(section)}</span>
           </summary>
-
-          <div class="pb-4 pt-1">
-            {section.items && (
-              <ul class="space-y-px border-l border-line">
-                {section.items.map((item) => (
-                  <li>
-                    {item.href ? (
-                      <a
-                        href={item.href}
-                        class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-small text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
-                      >
-                        {item.label}
-                      </a>
-                    ) : (
-                      <span class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-small text-ink-low">
-                        {item.label}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {section.groups?.map((group) => (
-              <details class="group/grp mt-1.5">
-                <summary class="flex cursor-pointer list-none items-center gap-1.5 py-1 pl-2 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi">
-                  <span class="text-ink-low transition-transform duration-200 group-open/grp:rotate-90">
-                    ›
-                  </span>
-                  <span class="min-w-0 flex-1 truncate">{group.label}</span>
-                  <span class="font-mono text-mono-sm text-ink-low">{group.items.length}</span>
-                </summary>
-                <ul class="ml-3 space-y-px border-l border-line">
-                  {group.items.map((item) => (
-                    <li>
-                      {item.href ? (
-                        <a
-                          href={item.href}
-                          class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
-                        >
-                          {item.label}
-                        </a>
-                      ) : (
-                        <span class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-low">
-                          {item.label}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </details>
+          <ul class="mt-0.5 space-y-px border-l border-line pl-1 pb-3">
+            {section.children?.map((child) => (
+              <li>
+                <DocsSidebarNode node={child} depth={1} />
+              </li>
             ))}
-          </div>
+          </ul>
         </details>
       ))
     }
   </div>
 </nav>
+
+<style>
+  .tree-chev {
+    display: inline-block;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  details.tree-section[open] > summary > .tree-chev {
+    transform: rotate(90deg);
+  }
+</style>
