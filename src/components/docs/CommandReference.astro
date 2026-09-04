@@ -72,14 +72,13 @@ const codes = new Map(registry.errors.map((e) => [e.code, e]));
 // wrap, in which case the Python tab is simply not offered.
 const python = (bindings as Record<string, PythonBinding>)[id];
 
-// Only offer interfaces this command actually has.
-const ifaces = ['cli', 'wire', 'mcp', ...(python ? ['python'] : [])] as const;
-const IFACE_LABEL: Record<string, string> = {
-  cli: 'CLI',
-  wire: 'Wire',
-  mcp: 'MCP',
-  python: 'Python',
-};
+// The selector answers "what am I writing this in", so it carries languages
+// only. Node joins it when the SDK ships. The wire type and the MCP tool name
+// are single facts rather than languages, so they sit on one line below instead
+// of taking a tab each; the markdown twin still carries both, since an agent
+// configuring MCP or driving `strata command run` is exactly who wants them.
+const ifaces = ['cli', ...(python ? ['python'] : [])] as const;
+const IFACE_LABEL: Record<string, string> = { cli: 'CLI', python: 'Python' };
 
 // Parameters come from the request schema, not the markdown table: the schema
 // carries required lists, defaults and shared enum definitions.
@@ -193,7 +192,11 @@ const RETRY_TONE: Record<string, string> = {
 
   <!-- Interface selector: only the invocation and the example change. -->
   <div class="mt-8 overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
-    <div class="flex gap-1 border-b border-line px-3 py-2" role="tablist" aria-label="Interface">
+    <div
+      class:list={['gap-1 border-b border-line px-3 py-2', ifaces.length > 1 ? 'flex' : 'hidden']}
+      role="tablist"
+      aria-label="Interface"
+    >
       {
         ifaces.map((iface, i) => (
           <button
@@ -213,11 +216,6 @@ const RETRY_TONE: Record<string, string> = {
     <div class="px-5 py-4" data-iface-panel="cli">
       <code class="font-mono text-mono-body text-ink-hi">{cliInvocation}</code>
     </div>
-    <div class="px-5 py-4" data-iface-panel="wire" hidden>
-      <code class="font-mono text-mono-body text-ink-hi"
-        >{`{"type": "${command.cli?.path ? command.id.replace(/\./g, '_') : command.id}"}`}</code
-      >
-    </div>
     {
       python && (
         <div class="px-5 py-4" data-iface-panel="python" hidden>
@@ -229,14 +227,18 @@ const RETRY_TONE: Record<string, string> = {
         </div>
       )
     }
-    <div class="px-5 py-4" data-iface-panel="mcp" hidden>
-      <code class="font-mono text-mono-body text-ink-hi">{command.mcp?.name}</code>
-      <p class="mt-2 text-small text-ink-mid">
-        Values are spelled for the wire, not the CLI: byte fields are base64 and enums use
-        underscores. The tool's own <code class="font-mono">inputSchema</code> is the authority.
-      </p>
-    </div>
   </div>
+
+  <p class="mt-3 font-mono text-mono-sm text-ink-low">
+    wire <span class="text-ink-mid">{command.wire ?? command.id.replace(/\./g, '_')}</span>
+    {
+      command.mcp?.name && (
+        <>
+          {' · '}MCP tool <span class="text-ink-mid">{command.mcp.name}</span>
+        </>
+      )
+    }
+  </p>
 
   <div class="prose-docs mt-8">
     <p>{command.description.split('\n\n')[0]}</p>
@@ -256,9 +258,7 @@ const RETRY_TONE: Record<string, string> = {
               set:html={escapeHtml(
                 iface === 'cli'
                   ? (example.cli ?? '')
-                  : iface === 'python'
-                    ? (python?.example.map((line) => `>>> ${line}`).join('\n') ?? '')
-                    : (example.wire ?? ''),
+                  : (python?.example.map((line) => `>>> ${line}`).join('\n') ?? ''),
               )}
             />
           ))}
