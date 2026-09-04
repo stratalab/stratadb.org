@@ -15,6 +15,8 @@
 // all three differ per interface. Unlike dbutils, our interfaces do not share
 // a signature: the CLI spells it `strata kv batch-delete` and Python spells it
 // `db.kv.delete_many`.
+import { cliExampleText, pythonExampleText } from '../../lib/exampleText';
+
 interface Props {
   /** Anchor id, also the rail target. */
   id: string;
@@ -48,8 +50,8 @@ const helpFor: Record<string, string> = {
   python: python ? `help(${python.call})` : '',
 };
 const sample: Record<string, string> = {
-  cli: cliExample ?? '',
-  python: python?.example?.map((line) => `>>> ${line}`).join('\n') ?? '',
+  cli: cliExampleText(cliExample),
+  python: pythonExampleText(python?.example),
 };
 
 // A <pre> keeps every character, including whitespace a formatter adds around

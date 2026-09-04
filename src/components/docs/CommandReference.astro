@@ -16,6 +16,7 @@ import schemas from '../../data/command-schemas.json';
 import examples from '../../data/command-examples.json';
 import registry from '../../data/error-registry.json';
 import bindings from '../../data/python-bindings.json';
+import { cliExampleText, pythonExampleText } from '../../lib/exampleText';
 
 interface Props {
   /** Command id, e.g. "branch.merge". */
@@ -239,9 +240,7 @@ const RETRY_TONE: Record<string, string> = {
               data-iface-panel={iface}
               hidden={iface !== 'cli'}
               set:html={escapeHtml(
-                iface === 'cli'
-                  ? (example.cli ?? '')
-                  : (python?.example.map((line) => `>>> ${line}`).join('\n') ?? ''),
+                iface === 'cli' ? cliExampleText(example.cli) : pythonExampleText(python?.example),
               )}
             />
           ))}
