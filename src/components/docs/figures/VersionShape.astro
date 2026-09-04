@@ -1,0 +1,90 @@
+---
+// One counter, shared by every record.
+//
+// The page's claim is that a version belongs to the database rather than to the
+// record you wrote, and the thing that makes it land is watching writes to
+// different records take successive numbers from the same line. So the lane is
+// the database, the ticks are versions, and the labels above show which record
+// took which number: a at 3, b at 4, a again at 5.
+//
+// It animates because the sequence is the argument. A still image of the same
+// thing reads as three unrelated dots.
+const writes = [
+  { v: 3, rec: 'a', x: 150 },
+  { v: 4, rec: 'b', x: 260 },
+  { v: 5, rec: 'a', x: 370 },
+];
+---
+
+<div class="p-6 sm:p-8">
+  <svg viewBox="0 0 520 130" class="version-svg w-full" role="img" aria-hidden="true">
+    <line x1="30" y1="86" x2="490" y2="86" class="axis"></line>
+
+    {
+      writes.map((w, i) => (
+        <g class="tick" style={`--d:${i * 0.6}s`}>
+          <line x1={w.x} y1="76" x2={w.x} y2="96" class="tick-mark" />
+          <circle cx={w.x} cy="86" r="5" class="tick-dot" />
+          <text x={w.x} y="62" class="tick-rec" text-anchor="middle">
+            {`kv put ${w.rec}`}
+          </text>
+          <text x={w.x} y="116" class="tick-ver" text-anchor="middle">
+            {w.v}
+          </text>
+        </g>
+      ))
+    }
+
+    <text x="30" y="116" class="tick-ver">version</text>
+  </svg>
+</div>
+
+<style>
+  .version-svg {
+    max-height: 170px;
+  }
+  .axis {
+    stroke: var(--color-line-hover);
+    stroke-width: 1.5;
+  }
+  .tick {
+    opacity: 0;
+    animation: arrive 4.5s var(--ease-out) infinite;
+    animation-delay: var(--d);
+  }
+  .tick-mark {
+    stroke: var(--color-line-hover);
+    stroke-width: 1;
+  }
+  .tick-dot {
+    fill: var(--color-terracotta-500);
+  }
+  .tick-rec {
+    fill: var(--color-ink-mid);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .tick-ver {
+    fill: var(--color-ink-low);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  @keyframes arrive {
+    0% {
+      opacity: 0;
+    }
+    8%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  html[data-motion='reduced'] .tick {
+    animation: none;
+    opacity: 1;
+  }
+</style>

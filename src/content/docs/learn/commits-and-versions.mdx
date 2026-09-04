@@ -1,0 +1,116 @@
+---
+title: 'Commits and versions'
+description: 'Every write is a commit, every commit advances one database-wide version, and history keeps what each version held.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+import Figure from '../../../components/docs/Figure.astro';
+
+Every write in Strata is a commit. There is no `begin`, no `commit`, and no
+`rollback` to call, because there is no way to leave a write half-applied: a
+command either lands completely or it does not land at all.
+
+That is the whole transaction model. It is smaller than the one you are used to,
+and the rest of this page is what it buys.
+
+## One counter for the whole database
+
+A commit advances a single version number that belongs to the database, not to
+the record you wrote. Write three keys and you have moved through three
+versions, and a fourth write to the first key does not resume that key's
+private numbering; it takes the next number the database had.
+
+You can see this by writing to two keys in turn and asking each what it
+remembers:
+
+```console
+strata kv put a 1
+strata kv put b 1
+strata kv put a 2
+```
+
+`a` reports versions 3 and 5. `b` reports version 4, sitting between them. There
+is one sequence and every record takes its place in it.
+
+<Figure
+  kind="versions"
+  caption="Writes to different records take successive numbers from one sequence: a at version 3, b at 4, a again at 5. The version belongs to the database, not to the record."
+/>
+
+This is why a version means something on its own. Version 5 is not "the fifth
+time this key changed", it is a state the entire database was in, across every
+data model at once. When a write touches JSON documents and vectors together,
+one version covers both, and there is no moment where a reader sees one applied
+and not the other.
+
+## History is what each version held
+
+Reading a record's history gives you every retained version of it, newest
+first:
+
+```console
+strata kv history meta:survival_rate
+```
+
+Each entry carries the value, the version, a timestamp, and whether the entry is
+a deletion. That last one matters: a deleted record is a tombstone in history,
+not a null value, so "someone removed this" and "someone stored nothing here"
+stay different questions.
+
+History is retained, not infinite. When a value has aged out, Strata says so
+rather than pretending the record began later than it did.
+
+## Timestamps are positions, not clock time
+
+Each history entry reports a **version** and a **timestamp**, and they are not
+the same number. Reads into the past take the timestamp.
+
+```console
+strata kv get meta:survival_rate --as-of 85
+```
+
+Two things about that flag are worth knowing before you use it.
+
+The timestamp is a position on the database's commit timeline. It is not
+wall-clock time, despite the flag's help text calling it microseconds in 1.1.1.
+Passing a real clock reading fails with
+`history_unavailable.engine.persistence_history`, because the position is beyond
+anything the timeline holds.
+
+And passing a **version** where a timestamp belongs does not fail. In a fresh
+database the two numbers happen to be equal, so the mistake works. In a database
+that came from somewhere else, a clone for instance, they differ by a fixed
+offset, and the same mistake quietly returns an empty result instead of the
+value you asked for. Take the number from the `timestamp` field, not the
+`version` field.
+
+This is filed upstream as strata-core issue 3066.
+
+## What a write gives back
+
+A successful write returns an acknowledgement rather than nothing: what was
+affected, what the write did to it, and the commit facts for the version it
+created. You do not have to read the record back to find out whether it applied,
+or which version it applied at.
+
+Failures are typed rather than described. Every error carries a code, and the
+[error registry](/e/) records for each one whether a retry is safe and what
+happened to the commit: whether it never started, was not applicable, or landed.
+That is what makes automated recovery possible without guessing. A caller that
+reads the code knows whether repeating the write is safe or whether it already
+took effect.
+
+## What this model does not give you
+
+There is no multi-command transaction. You cannot open a session, issue five
+commands, and commit them as one unit. Each command is its own commit, and the
+batch commands are how you make several changes land together: they take many
+records and produce one commit covering all of them.
+
+If you need two unrelated commands to be atomic with each other, the answer in
+Strata is a branch. Do the work on a fork where nobody is reading, and merge it
+when it is complete.
+
+Branches, the branch point, and how a merge produces its version are covered in
+[Branches](/docs/learn/branches).

@@ -49,7 +49,7 @@ export const docsTree: TreeNode[] = [
           { label: 'Embedded databases' },
           { label: 'Databases and storage' },
           { label: 'Branches', href: '/docs/learn/branches' },
-          { label: 'Commits and versions' },
+          { label: 'Commits and versions', href: '/docs/learn/commits-and-versions' },
           { label: 'Time travel' },
           { label: 'Spaces' },
           { label: 'Durability' },
