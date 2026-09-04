@@ -123,6 +123,22 @@ const siblings = (index.commands as Command[])
 
 const cliInvocation = `strata ${command.cli?.path?.join(' ') ?? ''}`;
 
+// Signature and help pointer, per interface. Both are derived from data the
+// bundle ships, so neither is written per command.
+//
+// The help pointer is the one borrowed idea here: Databricks ends every command
+// with the call that prints its complete help, which hands the reader the
+// authoritative source rather than asking them to trust the page. Ours is the
+// same move in each interface.
+const signature: Record<string, string> = {
+  cli: cliInvocation,
+  python: python ? `${python.call}${python.signature}` : '',
+};
+const helpFor: Record<string, string> = {
+  cli: `${cliInvocation} --help`,
+  python: python ? `help(${python.call})` : '',
+};
+
 // A <pre> keeps every character, including the whitespace a formatter adds
 // around an expression. Setting the text directly is the only reliable way to
 // render an example exactly as generated.
@@ -146,8 +162,8 @@ const RETRY_TONE: Record<string, string> = {
   */
   }
   <header>
-    <p class="font-mono text-mono-sm text-ink-low">{command.family} · {command.op}</p>
-    <h1 class="mt-2 text-title font-semibold text-ink-hi">{command.title}</h1>
+    <p class="font-mono text-mono-sm text-ink-low">{command.family}</p>
+    <h1 class="mt-2 font-mono text-title font-semibold text-ink-hi">{command.op}</h1>
     <p class="mt-3 text-body-lg text-ink-mid">{command.summary}</p>
   </header>
 
@@ -174,18 +190,12 @@ const RETRY_TONE: Record<string, string> = {
       }
     </div>
 
-    <div class="px-5 py-4" data-iface-panel="cli">
-      <code class="font-mono text-mono-body text-ink-hi">{cliInvocation}</code>
-    </div>
     {
-      python && (
-        <div class="px-5 py-4" data-iface-panel="python" hidden>
-          <code class="font-mono text-mono-body text-ink-hi">
-            {python.call}
-            {python.signature}
-          </code>
+      ifaces.map((iface) => (
+        <div class="px-5 py-4" data-iface-panel={iface} hidden={iface !== 'cli'}>
+          <code class="font-mono text-mono-body text-ink-hi">{signature[iface]}</code>
         </div>
-      )
+      ))
     }
   </div>
 
@@ -203,6 +213,22 @@ const RETRY_TONE: Record<string, string> = {
   <div class="prose-docs mt-8">
     <p>{command.description.split('\n\n')[0]}</p>
   </div>
+
+  <section class="mt-8">
+    <p class="text-body text-ink-mid">To see the complete help for this command, run:</p>
+    <div class="mt-2 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
+      {
+        ifaces.map((iface) => (
+          <pre
+            class="overflow-x-auto px-5 py-4 font-mono text-mono-sm text-term-fg"
+            data-iface-panel={iface}
+            hidden={iface !== 'cli'}
+            set:html={escapeHtml(helpFor[iface])}
+          />
+        ))
+      }
+    </div>
+  </section>
 
   {
     example && (
