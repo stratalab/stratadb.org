@@ -238,9 +238,16 @@ function commandsNode(): TreeNode {
     const direct: TreeNode[] = [];
     const groups = new Map<string, TreeNode[]>();
     for (const command of commands) {
+      // The operation name, not the prose title. A sidebar is a scanning
+      // surface: someone after `kv put` looks for `put`, and thirteen titles
+      // that all start with "Batch ..." bury the distinguishing word at the
+      // end. The engine operation is also the one name stable across CLI,
+      // wire, MCP and Python, and it matches the URL. Prose lives one level
+      // up, on the family landing, which lists every command with its summary.
       const node: TreeNode = {
-        label: command.title,
+        label: command.segments[command.segments.length - 1],
         href: live ? command.docs : undefined,
+        generated: true,
       };
       if (command.segments.length > 1) {
         const key = command.segments[0];

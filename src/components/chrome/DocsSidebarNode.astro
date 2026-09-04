@@ -33,12 +33,20 @@ const hasChildren = Boolean(node.children?.length);
   ) : node.href ? (
     <a
       href={node.href}
-      class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
+      class:list={[
+        '-ml-px block border-l-2 border-transparent py-1 pl-4 transition-colors duration-200 hover:border-line-hover hover:text-ink-hi',
+        node.generated ? 'font-mono text-mono-sm text-ink-mid' : 'text-small text-ink-mid',
+      ]}
     >
       {node.label}
     </a>
   ) : (
-    <span class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-small text-ink-low">
+    <span
+      class:list={[
+        '-ml-px block border-l-2 border-transparent py-1 pl-4',
+        node.generated ? 'font-mono text-mono-sm text-ink-low' : 'text-small text-ink-low',
+      ]}
+    >
       {node.label}
     </span>
   )

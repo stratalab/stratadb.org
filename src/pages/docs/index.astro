@@ -17,8 +17,7 @@
 // Dropped on purpose, so the comparison is honest: the hero artifact, the
 // standalone install band, the standalone interfaces band. Not shown because we
 // lack the feature: the AI ask box five of the six now put beside search.
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import DocsSearch from '../../components/chrome/DocsSearch.astro';
+import DocsLayout from '../../layouts/DocsLayout.astro';
 import TryItOut from '../../components/docs/TryItOut.astro';
 import InstallBand from '../../components/docs/InstallBand.astro';
 import HeroArtifact from '../../components/docs/HeroArtifact.astro';
@@ -93,19 +92,20 @@ const sections: { title: string; desc: string; items: Item[] }[] = [
 ];
 ---
 
-<BaseLayout
-  title="Documentation | StrataDB"
+<DocsLayout
+  title="Documentation"
   description="StrataDB documentation: get started, learn the branching model, follow task guides, pick your interface, and look up exact command behavior."
+  bare
 >
   <div class="relative">
     <div
       aria-hidden="true"
-      class="pointer-events-none absolute inset-x-0 top-0 h-[34rem]"
-      style="background: radial-gradient(52% 44% at 50% 0%, rgb(var(--rgb-terracotta-500) / 0.10), transparent 72%);"
+      class="pointer-events-none absolute inset-x-0 -top-12 h-[30rem]"
+      style="background: radial-gradient(58% 46% at 50% 0%, rgb(var(--rgb-terracotta-500) / 0.10), transparent 72%);"
     >
     </div>
 
-    <div class="relative mx-auto w-full max-w-[70rem] px-6 py-16 max-[480px]:px-4">
+    <div class="relative">
       <!-- Search-dominant hero. Nothing competes with the field. -->
       <header class="mx-auto max-w-[44rem] text-center">
         <h1 class="text-title font-semibold text-ink-hi">Documentation</h1>
@@ -214,5 +214,4 @@ const sections: { title: string; desc: string; items: Item[] }[] = [
       </section>
     </div>
   </div>
-  <DocsSearch />
-</BaseLayout>
+</DocsLayout>
