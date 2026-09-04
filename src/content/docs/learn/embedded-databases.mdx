@@ -1,0 +1,98 @@
+---
+title: 'Embedded databases'
+description: 'What a Strata database is on disk, who is allowed to open it, and what that buys you.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+Strata runs inside your process. There is no server to start and no port to
+open, and a database is a directory you point at.
+
+[Introduction to StrataDB](/docs/learn/introduction) covers why that shape
+matters. This page is what it means in practice: what the directory holds, who
+may open it, and the three ways to open one.
+
+## A database is a directory
+
+Give Strata a path and it makes one:
+
+```console
+strata --db ./mydb kv put k v
+```
+
+Inside are the parts you would expect of a storage engine that keeps history: a
+write-ahead log, snapshots, a manifest naming the current state and the branch
+catalog, and a lock file recording who is using it.
+
+You do not need to know any of that to use Strata, and you should not read those
+files yourself. Rows are spread across the log, the snapshots and the tables
+under MVCC, with branches and tombstones layered on top, so a file read gives
+you something between incomplete and wrong. Every database says so in its own
+`README.md`, written into the directory at creation, because a directory full of
+opaque files is exactly the thing somebody eventually opens in an editor.
+
+What you can do is treat the directory as a unit. Copy it, move it, archive it,
+ship it. It is the database.
+
+## One process owns it at a time
+
+A durable database has a single writer. The process that opens it takes a lock,
+and while it holds that lock another process opening the same directory is
+refused.
+
+For a lot of embedded use this never comes up: your application is the one
+process, and it holds the database for as long as it runs. When you do need more
+than one, `strata start` hosts a database and keeps it alive so other processes
+can reach it, and `strata stop` releases it. The `--ipc` flag selects how a
+process behaves toward that arrangement.
+
+Be aware that contention today reports itself poorly. A second process opening a
+held database fails with `unavailable.engine.persistence` wrapping a raw
+operating-system error, and the message names neither the process holding the
+lock nor what to do about it. That is filed upstream as strata-core issue 3005.
+If a command fails that way, something else has the database open.
+
+## Three ways to open one
+
+**Durable**, the normal case. A directory that persists:
+
+```console
+strata --db ./mydb kv get k
+```
+
+**Read-only**, when you want to be sure you cannot change anything:
+
+```console
+strata --db ./mydb --read-only kv put k v2
+```
+
+```
+access_denied.executor.read_only_session: `kv_put` is a write command and
+this session is read-only
+```
+
+Every write-classified command is rejected rather than attempted, so a read-only
+session is a guarantee rather than an intention. Useful for handing a database to
+something you have not audited, an analysis job or an agent.
+
+**Cache**, when you want a database that never touches disk:
+
+```console
+strata --cache kv put k v
+```
+
+That database lives in the process and disappears with it. Nothing is written to
+your working directory, and a second process sees nothing, because there is
+nothing to see. It is the right mode for tests and for trying something out.
+
+## What this costs you
+
+The single-writer rule is the real constraint, and it is a deliberate one. Strata
+is not a database many machines write to at once, and no amount of configuration
+turns it into one. If that is what you need, you need a different kind of
+database.
+
+What you get in exchange is everything else on this page. No server to operate.
+No connection pool, no network partition, no separate thing to deploy and
+monitor. A database that is a directory, which is why it can be cloned from a
+registry, forked in constant time, and thrown away when you are done with it.
