@@ -34,11 +34,6 @@ const clients = [
 ];
 
 const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-
-const toc = [
-  { depth: 2, slug: 'install', text: 'Installation' },
-  { depth: 2, slug: 'verify', text: 'Check it worked' },
-];
 ---
 
 <DocsLayout
@@ -46,7 +41,6 @@ const toc = [
   description={`Install StrataDB ${release.version}: the strata binary or the Python package.`}
   section="Get Started"
   wide
-  toc={toc}
 >
   <h1>Installation</h1>
 
@@ -180,15 +174,6 @@ const toc = [
       </ul>
     </div>
   </details>
-
-  <h2 id="verify" class="mt-12">Check it worked</h2>
-  <p>Ask the binary what it is. It answers without a database, a server or a config file.</p>
-  <pre class="not-prose"><code>strata --cache ping</code></pre>
-  <p>
-    That prints <code>pong</code> and the version you installed. If the command is not found, the install
-    directory is not on your <code>PATH</code>; the installer prints the directory it used on its
-    last line.
-  </p>
 </DocsLayout>
 
 <style>
