@@ -127,6 +127,15 @@ const familyTitle = FAMILY_TITLES[command.family] ?? command.family;
 // space. That cost a rebuild once already ("All 16JSON commands").
 const familyLabel = `All ${familyCount} ${familyTitle} commands`;
 
+// The bundle does not ship an example for every command in every interface, and
+// the Python example comes from the wheel rather than from the examples file,
+// so neither one alone decides whether there is anything to show.
+const sample: Record<string, string> = {
+  cli: cliExampleText(example?.cli),
+  python: pythonExampleText(python?.example),
+};
+const hasExample = ifaces.some((iface) => sample[iface]);
+
 const cliInvocation = `strata ${command.cli?.path?.join(' ') ?? ''}`;
 
 // Signature and help pointer, per interface. Both are derived from data the
@@ -229,21 +238,29 @@ const RETRY_TONE: Record<string, string> = {
   </section>
 
   {
-    example && (
+    hasExample && (
       <section class="mt-8">
         <h2 class="text-heading text-ink-hi">Example</h2>
-        {example.intro && <p class="mt-2 text-body text-ink-mid">{example.intro}</p>}
+        {example?.intro && <p class="mt-2 text-body text-ink-mid">{example.intro}</p>}
         <div class="mt-3 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
-          {ifaces.map((iface) => (
-            <pre
-              class="p-5 font-mono text-mono-sm text-term-fg"
-              data-iface-panel={iface}
-              hidden={iface !== 'cli'}
-              set:html={exampleHtml(
-                iface === 'cli' ? cliExampleText(example.cli) : pythonExampleText(python?.example),
-              )}
-            />
-          ))}
+          {ifaces.map((iface) =>
+            sample[iface] ? (
+              <pre
+                class="p-5 font-mono text-mono-sm text-term-fg"
+                data-iface-panel={iface}
+                hidden={iface !== 'cli'}
+                set:html={exampleHtml(sample[iface])}
+              />
+            ) : (
+              <p
+                class="p-5 text-body text-ink-low"
+                data-iface-panel={iface}
+                hidden={iface !== 'cli'}
+              >
+                No {IFACE_LABEL[iface]} example in this release.
+              </p>
+            ),
+          )}
         </div>
       </section>
     )

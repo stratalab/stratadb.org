@@ -53,6 +53,10 @@ const sample: Record<string, string> = {
   cli: cliExampleText(cliExample),
   python: pythonExampleText(python?.example),
 };
+// The bundle does not ship an example for every command in every interface.
+// Where none exists at all the section is dropped; where one interface has it
+// and another does not, the empty side says so rather than framing a hole.
+const hasExample = ifaces.some((iface) => sample[iface]);
 ---
 
 <section id={id} data-command-entry class="not-prose mt-12 scroll-mt-24 border-b border-line pb-12">
@@ -109,19 +113,33 @@ const sample: Record<string, string> = {
     }
   </p>
 
-  <SubHeading class="mt-6 text-body-lg font-medium text-ink-hi">Example</SubHeading>
-  <div class="mt-2 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
-    {
-      ifaces.map((iface) => (
-        <pre
-          class="px-5 py-4 font-mono text-mono-sm text-term-fg"
-          data-iface-panel={iface}
-          hidden={iface !== 'cli'}
-          set:html={exampleHtml(sample[iface])}
-        />
-      ))
-    }
-  </div>
+  {
+    hasExample && (
+      <Fragment>
+        <SubHeading class="mt-6 text-body-lg font-medium text-ink-hi">Example</SubHeading>
+        <div class="mt-2 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
+          {ifaces.map((iface) =>
+            sample[iface] ? (
+              <pre
+                class="px-5 py-4 font-mono text-mono-sm text-term-fg"
+                data-iface-panel={iface}
+                hidden={iface !== 'cli'}
+                set:html={exampleHtml(sample[iface])}
+              />
+            ) : (
+              <p
+                class="px-5 py-4 text-body text-ink-low"
+                data-iface-panel={iface}
+                hidden={iface !== 'cli'}
+              >
+                No {IFACE_LABEL[iface]} example in this release.
+              </p>
+            ),
+          )}
+        </div>
+      </Fragment>
+    )
+  }
 
   <a
     href={href}

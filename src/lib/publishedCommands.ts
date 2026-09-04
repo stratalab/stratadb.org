@@ -18,6 +18,9 @@ export const PUBLISHED_FAMILIES = [
   'branch',
   'space',
   'arrow',
+  'admin',
+  'inference',
+  'hub',
 ] as const;
 
 export interface CommandEntry {
