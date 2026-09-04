@@ -22,6 +22,7 @@
 // platform without a binary behind it, and will name a new one the day it
 // ships.
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import ClientIcon from '../../../components/docs/ClientIcon.astro';
 import { operatingSystems, platforms } from '../../../lib/platforms';
 import release from '../../../data/release.json';
 
@@ -63,8 +64,9 @@ const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
               data-client={c.key}
               data-long={c.long}
               aria-pressed={i === 0 ? 'true' : 'false'}
-              class="rounded-(--radius-control) border border-line px-4 py-2 text-body text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi aria-pressed:border-terracotta-500 aria-pressed:bg-elevated aria-pressed:text-ink-hi"
+              class="flex items-center gap-2.5 rounded-(--radius-control) border border-line px-4 py-2 text-body text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi aria-pressed:border-terracotta-500 aria-pressed:bg-elevated aria-pressed:text-ink-hi"
             >
+              <ClientIcon client={c.key} class="h-4 w-4 shrink-0" />
               {c.label}
             </button>
           ))
