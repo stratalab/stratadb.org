@@ -22,10 +22,20 @@ interface Props {
   /** Skip the prose wrapper and reading measure, for pages that lay themselves out. */
   bare?: boolean;
   headings?: Heading[];
+  /** Explicit rail entries, for pages that build their own headings. */
+  toc?: Heading[];
 }
-const { title, description, section, mdHref, bare = false, headings = [] } = Astro.props;
+const {
+  title,
+  description,
+  section,
+  mdHref,
+  bare = false,
+  headings = [],
+  toc: explicitToc,
+} = Astro.props;
 
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const toc = explicitToc ?? headings.filter((h) => h.depth === 2 || h.depth === 3);
 const showToc = toc.length >= 2;
 ---
 

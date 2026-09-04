@@ -1,7 +1,15 @@
 ---
-// A family landing: every command in one place, which is the comparison a
-// per-command page cannot give you. Generated from the index, so it can never
-// disagree with the pages it lists.
+// A family as one page: every command stacked, with a rail to jump between
+// them. Modelled on the Databricks utilities reference, which fits 40-odd
+// commands on one page by keeping each entry light: a signature, a sentence and
+// an example.
+//
+// Weight is the whole trick. Our per-command pages carry a parameters table, a
+// return shape and up to a dozen error codes; stacking those would run 20
+// screens for key-value and 45 for graph. So each entry here is the light form
+// and links to its own page for the exhaustive detail. You get one page to scan
+// and search across, without losing the deep pages an agent or a search result
+// lands on.
 import DocsLayout from '../../../../layouts/DocsLayout.astro';
 import {
   FAMILY_TITLES,
@@ -9,65 +17,128 @@ import {
   commandsInFamily,
   groupTitle,
 } from '../../../../lib/publishedCommands';
+import index from '../../../../data/command-index.json';
+import examples from '../../../../data/command-examples.json';
+import bindings from '../../../../data/python-bindings.json';
 
 export function getStaticPaths() {
   return PUBLISHED_FAMILIES.map((family) => ({ params: { family }, props: { family } }));
 }
 
 const { family } = Astro.props;
-const commands = commandsInFamily(family);
 const title = FAMILY_TITLES[family] ?? family;
+const commands = commandsInFamily(family);
 
-// Same middle-level grouping the sidebar uses.
+const detail = new Map(index.commands.map((c) => [c.id, c]));
+const example = examples as Record<string, { cli?: string }>;
+const python = bindings as Record<string, { call: string; signature: string }>;
+
+// Group the same way the sidebar does, so the middle levels survive.
 const direct = commands.filter((c) => c.segments.length === 1);
 const grouped = new Map<string, typeof commands>();
 for (const command of commands.filter((c) => c.segments.length > 1)) {
-  const key = command.segments[0];
-  grouped.set(key, [...(grouped.get(key) ?? []), command]);
+  grouped.set(command.segments[0], [...(grouped.get(command.segments[0]) ?? []), command]);
 }
+
+const anchor = (id: string) => id.replace(/\./g, '-');
+
+// A <pre> keeps every character, including whitespace a formatter adds around
+// an expression, so set the text directly.
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// The rail: groups at depth 2, commands at depth 3, exactly like the page.
+const toc = [
+  ...direct.map((c) => ({ depth: 2, slug: anchor(c.id), text: c.op })),
+  ...[...grouped.entries()].flatMap(([key, items]) => [
+    { depth: 2, slug: `group-${key}`, text: groupTitle(key) },
+    ...items.map((c) => ({ depth: 3, slug: anchor(c.id), text: c.segments.join(' ') })),
+  ]),
+];
 ---
 
 <DocsLayout
   title={`${title} commands`}
-  description={`Every ${title} command in StrataDB, with its parameters, returns and error behavior.`}
+  description={`Every ${title} command in StrataDB, with its invocation and an example.`}
   section="Reference"
+  toc={toc}
 >
   <h1>{title} commands</h1>
   <p>
-    {commands.length} commands. Each page carries the CLI, wire, MCP and Python spellings, the parameters
-    and return shape from the schema, and the error codes with their retry policy.
+    {commands.length} commands. Each entry below gives the invocation and an example; follow a command
+    for its parameters, return shape and error codes.
   </p>
 
-  <div class="not-prose mt-8 overflow-hidden rounded-(--radius-frame) border border-line">
-    {
-      direct.map((command) => (
+  {
+    direct.map((command) => (
+      <section id={anchor(command.id)} class="not-prose mt-10 scroll-mt-24">
+        <h2 class="font-mono text-heading text-ink-hi">{command.op}</h2>
+        <p class="mt-1.5 text-body text-ink-mid">{command.summary}</p>
+
+        <div class="mt-3 space-y-1 font-mono text-mono-sm">
+          <p class="text-ink-hi">strata {detail.get(command.id)?.cli?.path?.join(' ')}</p>
+          {python[command.id] && (
+            <p class="text-ink-mid">
+              {python[command.id].call}
+              {python[command.id].signature}
+            </p>
+          )}
+        </div>
+
+        {example[command.id]?.cli && (
+          <pre
+            class="mt-3 overflow-x-auto rounded-(--radius-card) border border-line bg-inset p-4 font-mono text-mono-sm text-term-fg"
+            set:html={escapeHtml(example[command.id].cli ?? '')}
+          />
+        )}
+
         <a
           href={command.docs}
-          class="flex flex-col gap-1 border-b border-line bg-raised px-5 py-4 transition-colors duration-200 last:border-b-0 hover:bg-elevated"
+          class="mt-3 inline-block font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
         >
-          <span class="font-mono text-mono-body text-ink-hi">{command.id}</span>
-          <span class="text-small text-ink-mid">{command.summary}</span>
+          parameters, returns and errors &rarr;
         </a>
-      ))
-    }
-  </div>
+      </section>
+    ))
+  }
 
   {
     [...grouped.entries()].map(([key, items]) => (
-      <section class="not-prose mt-8">
-        <h2 class="text-heading text-ink-hi">{groupTitle(key)}</h2>
-        <div class="mt-3 overflow-hidden rounded-(--radius-frame) border border-line">
-          {items.map((command) => (
+      <div>
+        <h2 id={`group-${key}`} class="not-prose mt-14 scroll-mt-24 text-heading text-ink-hi">
+          {groupTitle(key)}
+        </h2>
+        {items.map((command) => (
+          <section id={anchor(command.id)} class="not-prose mt-8 scroll-mt-24">
+            <h3 class="font-mono text-body-lg text-ink-hi">{command.segments.join(' ')}</h3>
+            <p class="mt-1.5 text-body text-ink-mid">{command.summary}</p>
+
+            <div class="mt-3 space-y-1 font-mono text-mono-sm">
+              <p class="text-ink-hi">strata {detail.get(command.id)?.cli?.path?.join(' ')}</p>
+              {python[command.id] && (
+                <p class="text-ink-mid">
+                  {python[command.id].call}
+                  {python[command.id].signature}
+                </p>
+              )}
+            </div>
+
+            {example[command.id]?.cli && (
+              <pre
+                class="mt-3 overflow-x-auto rounded-(--radius-card) border border-line bg-inset p-4 font-mono text-mono-sm text-term-fg"
+                set:html={escapeHtml(example[command.id].cli ?? '')}
+              />
+            )}
+
             <a
               href={command.docs}
-              class="flex flex-col gap-1 border-b border-line bg-raised px-5 py-4 transition-colors duration-200 last:border-b-0 hover:bg-elevated"
+              class="mt-3 inline-block font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
             >
-              <span class="font-mono text-mono-body text-ink-hi">{command.id}</span>
-              <span class="text-small text-ink-mid">{command.summary}</span>
+              parameters, returns and errors &rarr;
             </a>
-          ))}
-        </div>
-      </section>
+          </section>
+        ))}
+      </div>
     ))
   }
 </DocsLayout>
