@@ -10,6 +10,9 @@ import Inference from '../components/sections/Inference.astro';
 import Hub from '../components/sections/Hub.astro';
 import InstallClose from '../components/sections/InstallClose.astro';
 import release from '../data/release.json';
+// Platforms come from the release assets, never from a literal: this line read
+// 'macOS, Linux, Windows' while the release shipped no Windows binary.
+import { operatingSystems } from '../lib/platforms';
 ---
 
 <BaseLayout
@@ -33,7 +36,9 @@ import release from '../data/release.json';
       description:
         'The embedded database for the AI era: five data primitives, branch diff, merge preview, time-travel reads, built-in inference, and prepared dataset clones through Strata Hub.',
       applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'macOS, Linux, Windows',
+      operatingSystem: operatingSystems()
+        .map((os) => os.label)
+        .join(', '),
       license: 'https://www.apache.org/licenses/LICENSE-2.0',
       softwareVersion: release.version,
       url: 'https://stratadb.org',

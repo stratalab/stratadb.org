@@ -1,5 +1,25 @@
 {
   "version": "1.1.1",
   "source": "GitHub release v1.1.1",
-  "fetched_at": "2026-09-04"
+  "fetched_at": "2026-09-04",
+  "targets": [
+    {
+      "target": "aarch64-apple-darwin",
+      "asset": "strata-v1.1.1-aarch64-apple-darwin.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.1.1/strata-v1.1.1-aarch64-apple-darwin.tar.gz",
+      "size": 11055644
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "asset": "strata-v1.1.1-aarch64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.1.1/strata-v1.1.1-aarch64-unknown-linux-gnu.tar.gz",
+      "size": 11583303
+    },
+    {
+      "target": "x86_64-unknown-linux-gnu",
+      "asset": "strata-v1.1.1-x86_64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.1.1/strata-v1.1.1-x86_64-unknown-linux-gnu.tar.gz",
+      "size": 12508755
+    }
+  ]
 }
