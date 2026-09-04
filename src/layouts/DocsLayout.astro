@@ -39,7 +39,18 @@ const {
 } = Astro.props;
 
 const toc = explicitToc ?? headings.filter((h) => h.depth === 2 || h.depth === 3);
+// The centred group is exactly as wide as what it holds: the reading column,
+// the rail when there is one, and the 2rem gutters either side.
 const showToc = toc.length >= 2;
+const groupWidth = bare
+  ? 'max-w-[76rem]'
+  : wide
+    ? showToc
+      ? 'max-w-[88rem]'
+      : 'max-w-[72rem]'
+    : showToc
+      ? 'max-w-[66rem]'
+      : 'max-w-[50rem]';
 ---
 
 <BaseLayout title={`${title} | StrataDB Docs`} description={description}>
@@ -56,81 +67,86 @@ const showToc = toc.length >= 2;
   }
   {
     /*
-    Left aligned, not centred. A centred shell pushed the sidebar 23% in from
-    the left on a 2560px monitor, which is not where a reader looks for
-    navigation, so the sidebar pins to the left edge instead.
+    Two different alignments, which is what the reference sites do. Measured on
+    docs.databricks.com at 2560px: the sidebar sits flush at x=0 against the
+    left edge, and the article plus its rail are centred in the space left over
+    beside it, with empty margin on both sides of that group.
 
-    The row still stops growing at 110rem. Without a cap the rail flew out to
-    the far right on a wide monitor and left a void in the middle of the page;
-    with it, the leftover space collects at the right edge, where it reads as
-    margin. The reading column keeps its own measure inside that, so prose never
-    stretches with the viewport.
+    So the sidebar pins left and carries its own inset, and the group centres
+    inside the remaining column. Its width is the reading measure plus the rail,
+    never the viewport, so the empty space grows and the content does not.
   */
   }
-  <div class="w-full px-8 py-12 max-[480px]:px-4">
-    <div class="flex max-w-[110rem] gap-12">
+  <div class="w-full py-12">
+    <div class="flex">
       <DocsSidebar open={section} />
 
       <div class="min-w-0 flex-1">
-        <button
-          type="button"
-          class="docs-search-trigger mb-8 flex w-full items-center gap-2 rounded-(--radius-control) border border-line-hover bg-raised px-3 py-2.5 text-small text-ink-mid lg:hidden"
-          aria-label="Search the documentation"
-        >
-          <span>Search docs</span>
-        </button>
+        <div class:list={['mx-auto flex w-full gap-12 px-8 max-[480px]:px-4', groupWidth]}>
+          <div class="min-w-0 flex-1">
+            <button
+              type="button"
+              class="docs-search-trigger mb-8 flex w-full items-center gap-2 rounded-(--radius-control) border border-line-hover bg-raised px-3 py-2.5 text-small text-ink-mid lg:hidden"
+              aria-label="Search the documentation"
+            >
+              <span>Search docs</span>
+            </button>
 
-        <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+            <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+              {
+                bare ? (
+                  <slot />
+                ) : (
+                  <div
+                    class:list={['prose-docs', wide ? 'prose-wide max-w-[68rem]' : 'max-w-[46rem]']}
+                  >
+                    <slot />
+                  </div>
+                )
+              }
+            </article>
+
+            {
+              mdHref && (
+                <p class="mt-12 max-w-[46rem] border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
+                  agents: this page as markdown &rarr;{' '}
+                  <a
+                    href={mdHref}
+                    class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+                  >
+                    {mdHref}
+                  </a>
+                </p>
+              )
+            }
+          </div>
+
           {
-            bare ? (
-              <slot />
-            ) : (
-              <div class:list={['prose-docs', wide ? 'prose-wide max-w-[68rem]' : 'max-w-[46rem]']}>
-                <slot />
-              </div>
+            showToc && (
+              <nav class="hidden w-52 shrink-0 xl:block" aria-label="On this page">
+                <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                  <h2 class="mb-2.5 text-small font-medium uppercase text-ink-mid">On this page</h2>
+                  <ul class="space-y-px border-l border-line">
+                    {toc.map((h) => (
+                      <li>
+                        <a
+                          href={`#${h.slug}`}
+                          class:list={[
+                            '-ml-px block border-l-2 border-transparent py-1 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi',
+                            h.depth === 3 ? 'pl-7' : 'pl-4',
+                          ]}
+                        >
+                          {h.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </nav>
             )
           }
-        </article>
-
-        {
-          mdHref && (
-            <p class="mt-12 max-w-[46rem] border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
-              agents: this page as markdown &rarr;{' '}
-              <a
-                href={mdHref}
-                class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
-              >
-                {mdHref}
-              </a>
-            </p>
-          )
-        }
+        </div>
       </div>
-
-      {
-        showToc && (
-          <nav class="hidden w-52 shrink-0 xl:block" aria-label="On this page">
-            <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
-              <h2 class="mb-2.5 text-small font-medium uppercase text-ink-mid">On this page</h2>
-              <ul class="space-y-px border-l border-line">
-                {toc.map((h) => (
-                  <li>
-                    <a
-                      href={`#${h.slug}`}
-                      class:list={[
-                        '-ml-px block border-l-2 border-transparent py-1 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi',
-                        h.depth === 3 ? 'pl-7' : 'pl-4',
-                      ]}
-                    >
-                      {h.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </nav>
-        )
-      }
     </div>
   </div>
   <DocsSearch />
