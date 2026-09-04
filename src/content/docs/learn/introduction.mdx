@@ -1,0 +1,115 @@
+---
+title: 'Introduction to StrataDB'
+description: 'What StrataDB is, the shape of it, and the problem it was built for.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+import Figure from '../../../components/docs/Figure.astro';
+
+StrataDB is a database you embed in your program, holding five kinds of data at
+once, that you can fork the way you fork a git repository.
+
+Those three things are one idea rather than three features, and the idea is
+this: a database should be cheap enough to make a copy of that you stop treating
+its contents as precious. Most databases are the opposite. Changing one is a
+thing you schedule. You take a backup first, you write the rollback, and you do
+it when nobody is using it, because there is one copy of the truth and you are
+about to edit it in place.
+
+Strata is built on the assumption that you will want to try something, look at
+what it did, and then keep it or throw it away. Not once a quarter. Constantly,
+and often not by hand.
+
+## It runs inside your program
+
+Strata has no server. There is no port to open, no process to supervise, no
+connection string. You point it at a directory and it is a database.
+
+<Figure
+  kind="embedded"
+  caption="An embedded database lives in your process: a read is a function call rather than a network round trip to a server you have to run."
+/>
+
+This is the same shape as SQLite, and for the same reasons. The database is a
+library and a directory of files. It starts when your program starts. It has no
+opinion about your deployment because it is not a thing you deploy.
+
+What it buys you here is not only latency. It is that a database which is a
+directory is a database you can copy, move, commit, ship, and throw away. Most
+of what follows depends on that.
+
+## It holds five kinds of data
+
+Key-value pairs, JSON documents, an append-only event log, vectors, and a
+property graph. Not five databases behind one API. One engine, one file format,
+one transaction.
+
+<Figure
+  kind="models"
+  caption="A write that touches several data models lands as a single commit with one version, so the whole database moves from one consistent state to the next together."
+/>
+
+This matters more than a feature list suggests. An application that stores
+documents, embeds them for search, logs what happened, and tracks how things
+relate is an ordinary application, and it usually ends up with four systems that
+each have their own idea of what time it is. When a write spans them, you find
+out later that three of them applied it.
+
+In Strata that write is one commit. Everything in it moves together or none of
+it does, and afterwards there is a single version number describing the whole
+database, not five that need reconciling.
+
+## You can fork the whole thing
+
+A fork gives you an isolated copy of every model at once. Writes on the fork are
+invisible to its parent, and the fork does not copy the data to get there, so
+forking a large database is not a large operation.
+
+That is the part that changes how you work. You can give a risky migration its
+own branch and compare the result against the original. You can give every
+experiment a branch and keep them side by side rather than in sequence. You can
+give an agent a branch to work in and inspect what it did before any of it
+reaches anything real.
+
+And because every write is a commit, the history is not something you configured
+separately. You can read the database as it was, at a version or a point in
+time, without having restored anything.
+
+**How Strata works**, the next section, covers the mechanics: what a branch is
+made of, what a commit contains, how a merge resolves, and how reads address the
+past. This page is the shape; that one is the machinery.
+
+## It expects to be driven by something that is not a person
+
+The MCP server is inside the binary rather than a separate package. The command
+catalog and the error registry are printable, as JSON, matched to the version
+installed. The documentation answers offline. Every page on this site has a
+markdown twin, and the whole corpus is one file.
+
+None of that is a bolt-on for agents, and none of it is a chatbot. It is the
+observation that the thing writing the code increasingly is not the person
+reading the docs, and that a database which can be forked per attempt is
+unusually well suited to something that will attempt a lot of things.
+
+[Agents](/docs/get-started/agents) covers how to wire it up.
+
+## What it is not
+
+It is not a distributed database. There is no cluster, no consensus protocol, no
+replication between nodes. One writer owns a database directory at a time.
+
+It is not a drop-in for a relational database. There is no SQL, no schema
+migration story, and no query planner joining across models.
+
+It is not a cache. Data is durable and versioned by default, and the history is
+the point rather than an overhead to trim.
+
+If you need many machines writing to one logical database, Strata is the wrong
+tool and will stay the wrong tool. If you need one program to own its data,
+carry it around, and be able to change its mind, that is what it was built for.
+
+## Where to go next
+
+- [Installation](/docs/get-started/installation) puts the binary on your machine.
+- [Reference](/docs/reference) is every command, generated from the interface definition.

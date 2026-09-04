@@ -22,7 +22,9 @@ const SITE = 'https://stratadb.org';
 
 export const GET: APIRoute = async () => {
   const docs = await getCollection('docs');
-  const architecture = await getCollection('architecture');
+  // Still empty during the rebuild, and getCollection warns on every build when
+  // it is. The corpus does not depend on it existing.
+  const architecture = await getCollection('architecture').catch(() => []);
   const commands = publishedCommands();
   const published = commands.map((c) => c.id);
 

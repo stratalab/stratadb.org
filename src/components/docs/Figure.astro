@@ -1,0 +1,27 @@
+---
+// A figure in a prose page: an animation with a caption that carries the same
+// information in words.
+//
+// The caption is not decoration and not a label. It is the figure's fallback:
+// the markdown twin substitutes it for the animation, so an agent reading
+// /docs/<page>.md gets the point the animation makes rather than a hole where
+// it was. Write it as a sentence that stands alone.
+//
+// The animation is the only component allowed in this collection, which is what
+// lets the twin generator be a substitution rather than a parser.
+import EmbeddedShape from './figures/EmbeddedShape.astro';
+import ModelsShape from './figures/ModelsShape.astro';
+
+interface Props {
+  kind: 'embedded' | 'models';
+  caption: string;
+}
+const { kind, caption } = Astro.props;
+---
+
+<figure class="not-prose my-10">
+  <div class="overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
+    {kind === 'embedded' ? <EmbeddedShape /> : <ModelsShape />}
+  </div>
+  <figcaption class="mt-3 text-body text-ink-mid">{caption}</figcaption>
+</figure>

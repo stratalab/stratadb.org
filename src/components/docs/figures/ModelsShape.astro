@@ -1,0 +1,81 @@
+---
+// Five data models, one commit.
+//
+// The claim this makes is not "Strata has five data models", which a list would
+// say more cheaply. It is that a write touching several of them lands once: the
+// rows light in sequence and the commit beneath them resolves after the last
+// one, so the reader sees the join rather than being told about it.
+//
+// Colour is carried by one accent at different strengths, not five hues. Five
+// colours would read as five separate things, which is the opposite of the
+// point.
+const models = [
+  { name: 'kv', hint: 'keys and values' },
+  { name: 'json', hint: 'documents' },
+  { name: 'event', hint: 'append-only log' },
+  { name: 'vector', hint: 'embeddings' },
+  { name: 'graph', hint: 'nodes and edges' },
+];
+---
+
+<div class="p-6 sm:p-8">
+  <ul class="grid gap-2">
+    {
+      models.map((m, i) => (
+        <li class="model-row flex items-center gap-3" style={`--i:${i}`}>
+          <span class="model-dot" aria-hidden="true" />
+          <span class="font-mono text-mono-body text-ink-hi">{m.name}</span>
+          <span class="text-body text-ink-low">{m.hint}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="mt-5 flex items-center gap-3 border-t border-line pt-5">
+    <span class="commit-mark" aria-hidden="true"></span>
+    <span class="font-mono text-mono-sm text-ink-mid">one commit, one version, one history</span>
+  </div>
+</div>
+
+<style>
+  .model-dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background-color: var(--color-terracotta-500);
+    opacity: 0.25;
+    animation: light 5s var(--ease-out) infinite;
+    animation-delay: calc(var(--i) * 0.35s);
+  }
+  .commit-mark {
+    height: 0.5rem;
+    width: 0.5rem;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background-color: var(--color-terracotta-500);
+    opacity: 0.25;
+    animation: light 5s var(--ease-out) infinite;
+    animation-delay: 1.75s;
+  }
+
+  @keyframes light {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    8%,
+    38% {
+      opacity: 1;
+    }
+    60% {
+      opacity: 0.25;
+    }
+  }
+
+  html[data-motion='reduced'] .model-dot,
+  html[data-motion='reduced'] .commit-mark {
+    animation: none;
+    opacity: 1;
+  }
+</style>

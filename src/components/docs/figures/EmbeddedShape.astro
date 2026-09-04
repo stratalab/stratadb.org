@@ -1,0 +1,116 @@
+---
+// What "embedded" means, as a shape: the database is inside the process, so a
+// read is a function call rather than a round trip.
+//
+// The comparison animates because the difference is a difference in time. The
+// server side sends a packet across a gap and waits; the embedded side does
+// not. Running them side by side on the same loop is the argument.
+//
+// Motion is the point here, so it is not decorative, but it still stops for
+// anyone who asked it to: html[data-motion='reduced'] freezes both rows in
+// their resting state.
+---
+
+<div class="grid gap-px bg-line sm:grid-cols-2">
+  <div class="bg-raised p-6">
+    <p class="text-small font-medium uppercase tracking-wide text-ink-low">Client and server</p>
+    <div class="embed-row mt-5 flex items-center gap-3">
+      <span class="shape-box">app</span>
+      <span class="wire"><span class="packet" aria-hidden="true"></span></span>
+      <span class="shape-box">database</span>
+    </div>
+    <p class="mt-4 text-body text-ink-mid">
+      A read leaves the process, crosses a socket, and comes back.
+    </p>
+  </div>
+
+  <div class="bg-raised p-6">
+    <p class="text-small font-medium uppercase tracking-wide text-ink-low">Embedded</p>
+    <div class="embed-row mt-5 flex items-center gap-3">
+      <span class="shape-box shape-outer">
+        app
+        <span class="shape-inner">strata</span>
+      </span>
+    </div>
+    <p class="mt-4 text-body text-ink-mid">
+      A read is a function call. One directory on disk, no port, nothing to start.
+    </p>
+  </div>
+</div>
+
+<style>
+  .shape-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-line-hover);
+    border-radius: var(--radius-control);
+    padding: 0.625rem 0.875rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-sm);
+    color: var(--color-ink-mid);
+    white-space: nowrap;
+  }
+  .shape-outer {
+    padding: 0.625rem 0.75rem 0.625rem 0.875rem;
+    color: var(--color-ink-hi);
+  }
+  .shape-inner {
+    border: 1px solid var(--color-terracotta-700);
+    border-radius: var(--radius-control);
+    background-color: var(--color-inset);
+    padding: 0.25rem 0.5rem;
+    color: var(--color-terracotta-500);
+  }
+
+  /* The gap the packet has to cross, and the packet crossing it. */
+  .wire {
+    position: relative;
+    display: block;
+    height: 1px;
+    flex: 1;
+    min-width: 2rem;
+    background-color: var(--color-line-hover);
+  }
+  .packet {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    height: 5px;
+    width: 5px;
+    border-radius: 9999px;
+    background-color: var(--color-terracotta-500);
+    animation: packet 2.4s var(--ease-out) infinite;
+  }
+
+  @keyframes packet {
+    0% {
+      left: 0;
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    45% {
+      left: calc(100% - 5px);
+      opacity: 1;
+    }
+    55% {
+      left: calc(100% - 5px);
+      opacity: 1;
+    }
+    90% {
+      left: 0;
+      opacity: 1;
+    }
+    100% {
+      left: 0;
+      opacity: 0;
+    }
+  }
+
+  html[data-motion='reduced'] .packet {
+    animation: none;
+    left: calc(50% - 2.5px);
+  }
+</style>
