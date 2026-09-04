@@ -1,14 +1,20 @@
 ---
-// One command as it appears on a family page: the light form.
+// One command on a family page, carrying the same anatomy as its own page.
 //
-// Shaped after the Databricks utilities reference, where each command is a
-// band with a heading, a sentence, a switched example and a pointer to the
-// full page. The switcher covers the invocation and the example together,
-// since unlike dbutils our interfaces do not share a signature: the CLI spells
-// it `strata kv batch-delete` and Python spells it `db.kv.delete_many`.
+// This is the shape the Databricks utilities reference uses, and it uses it in
+// exactly this position: on the consolidated page, every command gets the full
+// treatment rather than a stub. Heading, signature, description, the call that
+// prints complete help, then a labelled example behind a language switcher.
 //
-// The band carries its own rule and its own breathing room, so a reader
-// scanning thirteen commands has an edge to move their eye along.
+// So a reader who lands here never has to leave to understand a command. The
+// per-command page is not a fuller version of this block, it is the same block
+// plus the exhaustive parts: the parameter table, the return shape and the
+// error codes. That is what "View details" goes and gets.
+//
+// The switcher covers the signature, the help pointer and the example, since
+// all three differ per interface. Unlike dbutils, our interfaces do not share
+// a signature: the CLI spells it `strata kv batch-delete` and Python spells it
+// `db.kv.delete_many`.
 interface Props {
   /** Anchor id, also the rail target. */
   id: string;
@@ -17,6 +23,8 @@ interface Props {
   /** Heading level, since grouped commands sit under a group heading. */
   level?: 2 | 3;
   summary: string;
+  /** First paragraph of the generated description. */
+  description?: string;
   /** Full command page. */
   href: string;
   cli: string;
@@ -24,15 +32,20 @@ interface Props {
   python?: { call: string; signature: string; example?: string[] };
 }
 
-const { id, name, level = 2, summary, href, cli, cliExample, python } = Astro.props;
+const { id, name, level = 2, summary, description, href, cli, cliExample, python } = Astro.props;
 
 const Heading = level === 2 ? 'h2' : 'h3';
+const SubHeading = level === 2 ? 'h3' : 'h4';
 const ifaces = ['cli', ...(python ? ['python'] : [])];
 const IFACE_LABEL: Record<string, string> = { cli: 'CLI', python: 'Python' };
 
-const invocation: Record<string, string> = {
-  cli: cli,
+const signature: Record<string, string> = {
+  cli,
   python: python ? `${python.call}${python.signature}` : '',
+};
+const helpFor: Record<string, string> = {
+  cli: `${cli} --help`,
+  python: python ? `help(${python.call})` : '',
 };
 const sample: Record<string, string> = {
   cli: cliExample ?? '',
@@ -45,7 +58,7 @@ const escapeHtml = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 ---
 
-<section id={id} data-command-entry class="not-prose mt-10 scroll-mt-24 border-b border-line pb-10">
+<section id={id} data-command-entry class="not-prose mt-12 scroll-mt-24 border-b border-line pb-12">
   <Heading class:list={['font-mono text-ink-hi', level === 2 ? 'text-heading' : 'text-body-lg']}
     >{name}</Heading
   >
@@ -75,22 +88,47 @@ const escapeHtml = (value: string) =>
 
     {
       ifaces.map((iface) => (
-        <div data-iface-panel={iface} hidden={iface !== 'cli'}>
-          <p class="px-5 py-3.5 font-mono text-mono-body text-ink-hi">{invocation[iface]}</p>
-          {sample[iface] && (
-            <pre
-              class="overflow-x-auto border-t border-line bg-inset px-5 py-4 font-mono text-mono-sm text-term-fg"
-              set:html={escapeHtml(sample[iface])}
-            />
-          )}
-        </div>
+        <p
+          class="px-5 py-3.5 font-mono text-mono-body text-ink-hi"
+          data-iface-panel={iface}
+          hidden={iface !== 'cli'}
+        >
+          {signature[iface]}
+        </p>
+      ))
+    }
+  </div>
+
+  {description && <p class="mt-5 text-body text-ink-mid">{description}</p>}
+
+  <p class="mt-5 text-body text-ink-mid">To see the complete help for this command, run:</p>
+  <p class="mt-1.5 font-mono text-mono-sm">
+    {
+      ifaces.map((iface) => (
+        <code class="text-ink-hi" data-iface-panel={iface} hidden={iface !== 'cli'}>
+          {helpFor[iface]}
+        </code>
+      ))
+    }
+  </p>
+
+  <SubHeading class="mt-6 text-body-lg font-medium text-ink-hi">Example</SubHeading>
+  <div class="mt-2 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
+    {
+      ifaces.map((iface) => (
+        <pre
+          class="overflow-x-auto px-5 py-4 font-mono text-mono-sm text-term-fg"
+          data-iface-panel={iface}
+          hidden={iface !== 'cli'}
+          set:html={escapeHtml(sample[iface])}
+        />
       ))
     }
   </div>
 
   <a
     href={href}
-    class="mt-4 inline-block font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+    class="mt-5 inline-block font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
   >
     View details &rarr;
   </a>
