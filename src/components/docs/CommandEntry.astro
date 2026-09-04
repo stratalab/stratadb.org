@@ -29,24 +29,39 @@ interface Props {
   description?: string;
   /** Full command page. */
   href: string;
-  cli: string;
+  /** CLI invocation, absent when the catalog ships no path for this command. */
+  cli?: string;
+  /** Wire type, the one spelling every command has. */
+  wire?: string;
   cliExample?: string;
   python?: { call: string; signature: string; example?: string[] };
 }
 
-const { id, name, level = 2, summary, description, href, cli, cliExample, python } = Astro.props;
+const {
+  id,
+  name,
+  level = 2,
+  summary,
+  description,
+  href,
+  cli,
+  wire,
+  cliExample,
+  python,
+} = Astro.props;
 
 const Heading = level === 2 ? 'h2' : 'h3';
 const SubHeading = level === 2 ? 'h3' : 'h4';
-const ifaces = ['cli', ...(python ? ['python'] : [])];
+// Only the interfaces the catalog actually spells this command in.
+const ifaces = [...(cli ? ['cli'] : []), ...(python ? ['python'] : [])];
 const IFACE_LABEL: Record<string, string> = { cli: 'CLI', python: 'Python' };
 
 const signature: Record<string, string> = {
-  cli,
+  cli: cli ?? '',
   python: python ? `${python.call}${python.signature}` : '',
 };
 const helpFor: Record<string, string> = {
-  cli: `${cli} --help`,
+  cli: cli ? `${cli} --help` : '',
   python: python ? `help(${python.call})` : '',
 };
 const sample: Record<string, string> = {
@@ -65,7 +80,21 @@ const hasExample = ifaces.some((iface) => sample[iface]);
   >
   <p class="mt-2 text-body text-ink-mid">{summary}</p>
 
-  <div class="mt-5 overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
+  {
+    ifaces.length === 0 && wire && (
+      <p class="mt-5 font-mono text-mono-sm text-ink-low">
+        No CLI or Python spelling in this release. Wire type{' '}
+        <span class="text-ink-mid">{wire}</span>.
+      </p>
+    )
+  }
+
+  <div
+    class:list={[
+      'mt-5 overflow-hidden rounded-(--radius-frame) border border-line bg-raised',
+      ifaces.length === 0 && 'hidden',
+    ]}
+  >
     <div
       class:list={['gap-1 border-b border-line px-3 py-2', ifaces.length > 1 ? 'flex' : 'hidden']}
       role="tablist"
@@ -92,7 +121,7 @@ const hasExample = ifaces.some((iface) => sample[iface]);
         <p
           class="px-5 py-3.5 font-mono text-mono-body text-ink-hi"
           data-iface-panel={iface}
-          hidden={iface !== 'cli'}
+          hidden={iface !== ifaces[0]}
         >
           {signature[iface]}
         </p>
@@ -102,11 +131,13 @@ const hasExample = ifaces.some((iface) => sample[iface]);
 
   {description && <p class="mt-5 text-body text-ink-mid">{description}</p>}
 
-  <p class="mt-5 text-body text-ink-mid">To see the complete help for this command, run:</p>
-  <p class="mt-1.5 font-mono text-mono-sm">
+  <p class:list={['mt-5 text-body text-ink-mid', ifaces.length === 0 && 'hidden']}>
+    To see the complete help for this command, run:
+  </p>
+  <p class:list={['mt-1.5 font-mono text-mono-sm', ifaces.length === 0 && 'hidden']}>
     {
       ifaces.map((iface) => (
-        <code class="text-ink-hi" data-iface-panel={iface} hidden={iface !== 'cli'}>
+        <code class="text-ink-hi" data-iface-panel={iface} hidden={iface !== ifaces[0]}>
           {helpFor[iface]}
         </code>
       ))
@@ -123,14 +154,14 @@ const hasExample = ifaces.some((iface) => sample[iface]);
               <pre
                 class="px-5 py-4 font-mono text-mono-sm text-term-fg"
                 data-iface-panel={iface}
-                hidden={iface !== 'cli'}
+                hidden={iface !== ifaces[0]}
                 set:html={exampleHtml(sample[iface])}
               />
             ) : (
               <p
                 class="px-5 py-4 text-body text-ink-low"
                 data-iface-panel={iface}
-                hidden={iface !== 'cli'}
+                hidden={iface !== ifaces[0]}
               >
                 No {IFACE_LABEL[iface]} example in this release.
               </p>

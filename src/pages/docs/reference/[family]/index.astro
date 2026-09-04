@@ -46,6 +46,13 @@ for (const command of commands.filter((c) => c.segments.length > 1)) {
 // are unique within a family, which is the only scope an anchor needs.
 const anchor = (segments: string[]) => segments.join('-');
 
+// Absent for a command the catalog ships no CLI path for; the band then offers
+// Python only, or names the wire type if it has neither.
+const cliPath = (id: string) => {
+  const path = detail.get(id)?.cli?.path;
+  return path?.length ? `strata ${path.join(' ')}` : undefined;
+};
+
 // The rail: groups at depth 2, commands at depth 3, exactly like the page.
 const toc = [
   ...direct.map((c) => ({ depth: 2, slug: anchor(c.segments), text: c.op })),
@@ -77,7 +84,8 @@ const toc = [
         summary={command.summary}
         description={detail.get(command.id)?.description?.split('\n\n')[0]}
         href={command.docs}
-        cli={`strata ${detail.get(command.id)?.cli?.path?.join(' ')}`}
+        cli={cliPath(command.id)}
+        wire={detail.get(command.id)?.wire}
         cliExample={example[command.id]?.cli}
         python={python[command.id]}
       />
@@ -98,7 +106,8 @@ const toc = [
             summary={command.summary}
             description={detail.get(command.id)?.description?.split('\n\n')[0]}
             href={command.docs}
-            cli={`strata ${detail.get(command.id)?.cli?.path?.join(' ')}`}
+            cli={cliPath(command.id)}
+            wire={detail.get(command.id)?.wire}
             cliExample={example[command.id]?.cli}
             python={python[command.id]}
           />
@@ -122,7 +131,10 @@ const toc = [
     for (const entry of entries) {
       const tabs = [...entry.querySelectorAll<HTMLButtonElement>('[data-iface-tab]')];
       const panels = [...entry.querySelectorAll<HTMLElement>('[data-iface-panel]')];
-      const shown = panels.some((p) => p.dataset.ifacePanel === iface) ? iface : 'cli';
+      // Fall back to whatever this band does have, not to the CLI: a command
+      // the catalog ships no CLI path for offers Python only.
+      const fallback = panels[0]?.dataset.ifacePanel;
+      const shown = panels.some((p) => p.dataset.ifacePanel === iface) ? iface : fallback;
       for (const tab of tabs) {
         const on = tab.dataset.ifaceTab === shown;
         tab.setAttribute('aria-selected', String(on));

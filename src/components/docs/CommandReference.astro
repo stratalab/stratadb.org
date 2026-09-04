@@ -77,7 +77,11 @@ const python = (bindings as Record<string, PythonBinding>)[id];
 // are single facts rather than languages, so they sit on one line below instead
 // of taking a tab each; the markdown twin still carries both, since an agent
 // configuring MCP or driving `strata command run` is exactly who wants them.
-const ifaces = ['cli', ...(python ? ['python'] : [])] as const;
+// An interface is offered only where the catalog actually has a spelling for
+// it. A command with no cli.path is programmatic only, and rendering "strata "
+// with an empty path would invent a command that does not exist.
+const hasCli = Boolean(command.cli?.path?.length);
+const ifaces = [...(hasCli ? ['cli'] : []), ...(python ? ['python'] : [])];
 const IFACE_LABEL: Record<string, string> = { cli: 'CLI', python: 'Python' };
 
 // Parameters come from the request schema, not the markdown table: the schema
@@ -136,7 +140,7 @@ const sample: Record<string, string> = {
 };
 const hasExample = ifaces.some((iface) => sample[iface]);
 
-const cliInvocation = `strata ${command.cli?.path?.join(' ') ?? ''}`;
+const cliInvocation = hasCli ? `strata ${command.cli!.path!.join(' ')}` : '';
 
 // Signature and help pointer, per interface. Both are derived from data the
 // bundle ships, so neither is written per command.
@@ -178,7 +182,12 @@ const RETRY_TONE: Record<string, string> = {
   </header>
 
   <!-- Interface selector: only the invocation and the example change. -->
-  <div class="mt-8 overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
+  <div
+    class:list={[
+      'mt-8 overflow-hidden rounded-(--radius-frame) border border-line bg-raised',
+      ifaces.length === 0 && 'hidden',
+    ]}
+  >
     <div
       class:list={['gap-1 border-b border-line px-3 py-2', ifaces.length > 1 ? 'flex' : 'hidden']}
       role="tablist"
@@ -202,7 +211,7 @@ const RETRY_TONE: Record<string, string> = {
 
     {
       ifaces.map((iface) => (
-        <div class="px-5 py-4" data-iface-panel={iface} hidden={iface !== 'cli'}>
+        <div class="px-5 py-4" data-iface-panel={iface} hidden={iface !== ifaces[0]}>
           <code class="font-mono text-mono-body text-ink-hi">{signature[iface]}</code>
         </div>
       ))
@@ -224,12 +233,12 @@ const RETRY_TONE: Record<string, string> = {
     <p>{command.description.split('\n\n')[0]}</p>
   </div>
 
-  <section class="mt-8">
+  <section class:list={['mt-8', ifaces.length === 0 && 'hidden']}>
     <p class="text-body text-ink-mid">To see the complete help for this command, run:</p>
     <p class="mt-1.5 font-mono text-mono-sm">
       {
         ifaces.map((iface) => (
-          <code class="text-ink-hi" data-iface-panel={iface} hidden={iface !== 'cli'}>
+          <code class="text-ink-hi" data-iface-panel={iface} hidden={iface !== ifaces[0]}>
             {helpFor[iface]}
           </code>
         ))
@@ -248,14 +257,14 @@ const RETRY_TONE: Record<string, string> = {
               <pre
                 class="p-5 font-mono text-mono-sm text-term-fg"
                 data-iface-panel={iface}
-                hidden={iface !== 'cli'}
+                hidden={iface !== ifaces[0]}
                 set:html={exampleHtml(sample[iface])}
               />
             ) : (
               <p
                 class="p-5 text-body text-ink-low"
                 data-iface-panel={iface}
-                hidden={iface !== 'cli'}
+                hidden={iface !== ifaces[0]}
               >
                 No {IFACE_LABEL[iface]} example in this release.
               </p>
