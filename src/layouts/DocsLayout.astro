@@ -21,6 +21,8 @@ interface Props {
   mdHref?: string;
   /** Skip the prose wrapper and reading measure, for pages that lay themselves out. */
   bare?: boolean;
+  /** A wider measure, for pages that are mostly tables and code rather than prose. */
+  wide?: boolean;
   headings?: Heading[];
   /** Explicit rail entries, for pages that build their own headings. */
   toc?: Heading[];
@@ -31,6 +33,7 @@ const {
   section,
   mdHref,
   bare = false,
+  wide = false,
   headings = [],
   toc: explicitToc,
 } = Astro.props;
@@ -51,8 +54,21 @@ const showToc = toc.length >= 2;
       />
     )
   }
-  <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4 xl:max-w-[86rem]">
-    <div class="flex gap-12">
+  {
+    /*
+    Left aligned, not centred. A centred shell pushed the sidebar 23% in from
+    the left on a 2560px monitor, which is not where a reader looks for
+    navigation, so the sidebar pins to the left edge instead.
+
+    The row still stops growing at 110rem. Without a cap the rail flew out to
+    the far right on a wide monitor and left a void in the middle of the page;
+    with it, the leftover space collects at the right edge, where it reads as
+    margin. The reading column keeps its own measure inside that, so prose never
+    stretches with the viewport.
+  */
+  }
+  <div class="w-full px-8 py-12 max-[480px]:px-4">
+    <div class="flex max-w-[110rem] gap-12">
       <DocsSidebar open={section} />
 
       <div class="min-w-0 flex-1">
@@ -69,7 +85,7 @@ const showToc = toc.length >= 2;
             bare ? (
               <slot />
             ) : (
-              <div class="prose-docs max-w-[46rem]">
+              <div class:list={['prose-docs', wide ? 'prose-wide max-w-[68rem]' : 'max-w-[46rem]']}>
                 <slot />
               </div>
             )
