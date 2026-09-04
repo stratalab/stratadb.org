@@ -17,14 +17,13 @@ import examples from '../../data/command-examples.json';
 import registry from '../../data/error-registry.json';
 import bindings from '../../data/python-bindings.json';
 import { cliExampleText, pythonExampleText } from '../../lib/exampleText';
+import { FAMILY_TITLES } from '../../lib/publishedCommands';
 
 interface Props {
   /** Command id, e.g. "branch.merge". */
   id: string;
-  /** Guide pages that use this command. Site-side, because the artifact is not editable. */
-  guides?: { label: string; href: string }[];
 }
-const { id, guides = [] } = Astro.props;
+const { id } = Astro.props;
 
 type Command = (typeof index.commands)[number];
 
@@ -118,9 +117,15 @@ const errors = (command.errors ?? []).map((e) => {
   };
 });
 
-const siblings = (index.commands as Command[])
-  .filter((c) => c.family === command.family && c.id !== command.id)
-  .slice(0, 6);
+// Back to the family page, which lists every command in it. There is no
+// relevance signal in the catalog, so anything narrower than "all of them"
+// would be an arbitrary slice dressed up as a recommendation.
+const familyCount = (index.commands as Command[]).filter((c) => c.family === command.family).length;
+const familyTitle = FAMILY_TITLES[command.family] ?? command.family;
+// One string, not three expressions: a formatter is free to wrap between
+// expressions, and the newline it inserts collapses to nothing rather than a
+// space. That cost a rebuild once already ("All 16JSON commands").
+const familyLabel = `All ${familyCount} ${familyTitle} commands`;
 
 const cliInvocation = `strata ${command.cli?.path?.join(' ') ?? ''}`;
 
@@ -350,25 +355,12 @@ const RETRY_TONE: Record<string, string> = {
   }
 
   <section class="mt-10 border-t border-line pt-6">
-    <h2 class="text-small font-medium uppercase text-ink-mid">Related</h2>
-    {
-      guides.length > 0 && (
-        <p class="mt-3 text-body text-ink-mid">
-          Guides:{' '}
-          {guides.map((g, i) => (
-            <>
-              {i > 0 && ' · '}
-              <a href={g.href} class="text-ink-hi underline decoration-line underline-offset-4">
-                {g.label}
-              </a>
-            </>
-          ))}
-        </p>
-      )
-    }
-    <p class="mt-2 text-body text-ink-mid">
-      In this family: <span class="text-ink-low">{siblings.map((s) => s.title).join(' · ')}</span>
-    </p>
+    <a
+      href={`/docs/reference/${command.family}`}
+      class="font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+    >
+      &larr; {familyLabel}
+    </a>
   </section>
 </article>
 
