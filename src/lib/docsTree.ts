@@ -12,6 +12,14 @@
 //
 // Nothing links anywhere yet. A node gains an `href` as its page lands.
 
+import {
+  FAMILY_ORDER,
+  FAMILY_TITLES,
+  commandsInFamily,
+  groupTitle,
+  isFamilyPublished,
+} from './publishedCommands';
+
 export interface TreeNode {
   label: string;
   href?: string;
@@ -208,55 +216,7 @@ export const docsTree: TreeNode[] = [
           { label: 'command' },
         ],
       },
-      {
-        // One page per command, generated. Middle levels keep their own group
-        // and index rather than being flattened, so a reader drills toward an
-        // operation. Only `branch` is spelled out below: the rest render from
-        // the command index when the pages are restored.
-        label: 'Commands',
-        generated: true,
-        children: [
-          {
-            label: 'Branches',
-            generated: true,
-            children: [
-              { label: 'Create empty branch' },
-              { label: 'Fork branch from current head' },
-              { label: 'Fork branch at version' },
-              { label: 'Fork branch at timestamp' },
-              { label: 'Compare branches' },
-              { label: 'Preview branch promotion' },
-              { label: 'Promote branch' },
-              { label: 'Read one branch' },
-              { label: 'List branches' },
-              { label: 'Delete branch' },
-            ],
-          },
-          { label: 'Key-value', generated: true },
-          { label: 'JSON', generated: true, children: [{ label: 'Indexes' }] },
-          {
-            label: 'Vectors',
-            generated: true,
-            children: [{ label: 'Collections' }, { label: 'Indexes' }, { label: 'Metadata' }],
-          },
-          { label: 'Events', generated: true },
-          {
-            label: 'Graph',
-            generated: true,
-            children: [
-              { label: 'Nodes' },
-              { label: 'Edges' },
-              { label: 'Ontology' },
-              { label: 'Analytics' },
-            ],
-          },
-          { label: 'Spaces', generated: true },
-          { label: 'Inference', generated: true, children: [{ label: 'Models' }] },
-          { label: 'Admin', generated: true },
-          { label: 'Arrow', generated: true },
-          { label: 'Hub', generated: true },
-        ],
-      },
+      commandsNode(),
       { label: 'MCP tools', generated: true },
       { label: 'Configuration' },
       { label: 'Error codes' },
@@ -265,3 +225,46 @@ export const docsTree: TreeNode[] = [
     ],
   },
 ];
+
+// The generated half of the tree. Families keep their middle levels rather than
+// flattening, and only published entries carry an href, so the sidebar can
+// never link a page that has not been restored.
+function commandsNode(): TreeNode {
+  const families = FAMILY_ORDER.map((family) => {
+    const commands = commandsInFamily(family);
+    const live = isFamilyPublished(family);
+
+    // Group by the segment below the family, e.g. vector/collection/create.
+    const direct: TreeNode[] = [];
+    const groups = new Map<string, TreeNode[]>();
+    for (const command of commands) {
+      const node: TreeNode = {
+        label: command.title,
+        href: live ? command.docs : undefined,
+      };
+      if (command.segments.length > 1) {
+        const key = command.segments[0];
+        groups.set(key, [...(groups.get(key) ?? []), node]);
+      } else {
+        direct.push(node);
+      }
+    }
+
+    const children = [
+      ...direct,
+      ...[...groups.entries()].map(([key, items]) => ({
+        label: groupTitle(key),
+        children: items,
+      })),
+    ];
+
+    return {
+      label: FAMILY_TITLES[family] ?? family,
+      href: live ? `/docs/reference/${family}` : undefined,
+      generated: true,
+      children: children.length ? children : undefined,
+    };
+  });
+
+  return { label: 'Commands', generated: true, children: families };
+}

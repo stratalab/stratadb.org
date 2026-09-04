@@ -1,0 +1,26 @@
+---
+// Every published generated command, rendered from data. Which ones exist is
+// decided in src/lib/publishedCommands.ts, so restoring a family needs no edit
+// here.
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import CommandReference from '../../../../components/docs/CommandReference.astro';
+import { publishedCommands } from '../../../../lib/publishedCommands';
+
+export function getStaticPaths() {
+  return publishedCommands().map((command) => ({
+    params: { family: command.family, op: command.segments.join('/') },
+    props: { command },
+  }));
+}
+
+const { command } = Astro.props;
+---
+
+<DocsLayout
+  title={command.title}
+  description={command.summary}
+  section="Reference"
+  mdHref={`${command.docs}.md`}
+>
+  <CommandReference id={command.id} />
+</DocsLayout>

@@ -3,16 +3,16 @@
 // The HTML advertises it with <link rel="alternate">.
 import type { APIRoute } from 'astro';
 import { commandMarkdown } from '../../../../lib/commandMarkdown';
-
-// Only the commands whose pages are restored. Grows with them.
-const PUBLISHED = ['branch.merge', 'json.set'];
+import { publishedCommands } from '../../../../lib/publishedCommands';
 
 export function getStaticPaths() {
-  return PUBLISHED.map((id) => {
-    const [family, ...rest] = id.split('.');
-    return { params: { family, op: rest.join('/') }, props: { id } };
-  });
+  return publishedCommands().map((command) => ({
+    params: { family: command.family, op: command.segments.join('/') },
+    props: { id: command.id },
+  }));
 }
+
+const PUBLISHED = publishedCommands().map((command) => command.id);
 
 export const GET: APIRoute = ({ props }) =>
   new Response(commandMarkdown((props as { id: string }).id, { published: PUBLISHED }), {

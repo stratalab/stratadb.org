@@ -1,0 +1,73 @@
+---
+// A family landing: every command in one place, which is the comparison a
+// per-command page cannot give you. Generated from the index, so it can never
+// disagree with the pages it lists.
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import {
+  FAMILY_TITLES,
+  PUBLISHED_FAMILIES,
+  commandsInFamily,
+  groupTitle,
+} from '../../../../lib/publishedCommands';
+
+export function getStaticPaths() {
+  return PUBLISHED_FAMILIES.map((family) => ({ params: { family }, props: { family } }));
+}
+
+const { family } = Astro.props;
+const commands = commandsInFamily(family);
+const title = FAMILY_TITLES[family] ?? family;
+
+// Same middle-level grouping the sidebar uses.
+const direct = commands.filter((c) => c.segments.length === 1);
+const grouped = new Map<string, typeof commands>();
+for (const command of commands.filter((c) => c.segments.length > 1)) {
+  const key = command.segments[0];
+  grouped.set(key, [...(grouped.get(key) ?? []), command]);
+}
+---
+
+<DocsLayout
+  title={`${title} commands`}
+  description={`Every ${title} command in StrataDB, with its parameters, returns and error behavior.`}
+  section="Reference"
+>
+  <h1>{title} commands</h1>
+  <p>
+    {commands.length} commands. Each page carries the CLI, wire, MCP and Python spellings, the parameters
+    and return shape from the schema, and the error codes with their retry policy.
+  </p>
+
+  <div class="not-prose mt-8 overflow-hidden rounded-(--radius-frame) border border-line">
+    {
+      direct.map((command) => (
+        <a
+          href={command.docs}
+          class="flex flex-col gap-1 border-b border-line bg-raised px-5 py-4 transition-colors duration-200 last:border-b-0 hover:bg-elevated"
+        >
+          <span class="font-mono text-mono-body text-ink-hi">{command.id}</span>
+          <span class="text-small text-ink-mid">{command.summary}</span>
+        </a>
+      ))
+    }
+  </div>
+
+  {
+    [...grouped.entries()].map(([key, items]) => (
+      <section class="not-prose mt-8">
+        <h2 class="text-heading text-ink-hi">{groupTitle(key)}</h2>
+        <div class="mt-3 overflow-hidden rounded-(--radius-frame) border border-line">
+          {items.map((command) => (
+            <a
+              href={command.docs}
+              class="flex flex-col gap-1 border-b border-line bg-raised px-5 py-4 transition-colors duration-200 last:border-b-0 hover:bg-elevated"
+            >
+              <span class="font-mono text-mono-body text-ink-hi">{command.id}</span>
+              <span class="text-small text-ink-mid">{command.summary}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</DocsLayout>
