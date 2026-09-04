@@ -143,12 +143,15 @@
     text-underline-offset: 3px;
   }
 
-  /* Reference pages need width for code and wide tables, but running prose set
-     to that same width reads at roughly 130 characters a line. So the wide
-     measure applies to the block elements that earn it, and paragraphs, lists
-     and headings keep a normal reading measure. */
-  .prose-wide :where(p, ul, ol, blockquote, h1, h2, h3, h4) {
-    max-width: 46rem;
+  /* One command line of a generated example. Wraps instead of scrolling out of
+     sight, with a hanging indent so a wrapped line reads as a continuation and
+     not as the next command. */
+  .cmd-line {
+    display: block;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding-left: 2.5ch;
+    text-indent: -2.5ch;
   }
 
   /* Reveal recipe (03 §2) - applied via IntersectionObserver adding .is-revealed */

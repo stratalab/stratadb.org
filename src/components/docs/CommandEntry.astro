@@ -15,7 +15,7 @@
 // all three differ per interface. Unlike dbutils, our interfaces do not share
 // a signature: the CLI spells it `strata kv batch-delete` and Python spells it
 // `db.kv.delete_many`.
-import { cliExampleText, pythonExampleText } from '../../lib/exampleText';
+import { cliExampleText, exampleHtml, pythonExampleText } from '../../lib/exampleText';
 
 interface Props {
   /** Anchor id, also the rail target. */
@@ -53,11 +53,6 @@ const sample: Record<string, string> = {
   cli: cliExampleText(cliExample),
   python: pythonExampleText(python?.example),
 };
-
-// A <pre> keeps every character, including whitespace a formatter adds around
-// an expression, so set the text directly.
-const escapeHtml = (value: string) =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 ---
 
 <section id={id} data-command-entry class="not-prose mt-12 scroll-mt-24 border-b border-line pb-12">
@@ -119,10 +114,10 @@ const escapeHtml = (value: string) =>
     {
       ifaces.map((iface) => (
         <pre
-          class="overflow-x-auto px-5 py-4 font-mono text-mono-sm text-term-fg"
+          class="px-5 py-4 font-mono text-mono-sm text-term-fg"
           data-iface-panel={iface}
           hidden={iface !== 'cli'}
-          set:html={escapeHtml(sample[iface])}
+          set:html={exampleHtml(sample[iface])}
         />
       ))
     }

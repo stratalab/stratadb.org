@@ -41,13 +41,18 @@ const {
 const toc = explicitToc ?? headings.filter((h) => h.depth === 2 || h.depth === 3);
 // The centred group is exactly as wide as what it holds: the reading column,
 // the rail when there is one, and the 2rem gutters either side.
+//
+// A reference page's column is 60rem, near enough to the 958px Databricks sets
+// its own at. One width for the prose and the frames both: capping the prose
+// narrower left headings and descriptions stopping 300px short of the panels
+// beside them, which reads as a layout fault rather than as a measure.
 const showToc = toc.length >= 2;
 const groupWidth = bare
   ? 'max-w-[76rem]'
   : wide
     ? showToc
-      ? 'max-w-[88rem]'
-      : 'max-w-[72rem]'
+      ? 'max-w-[80rem]'
+      : 'max-w-[64rem]'
     : showToc
       ? 'max-w-[66rem]'
       : 'max-w-[50rem]';
@@ -114,12 +119,7 @@ const groupWidth = bare
                   bare ? (
                     <slot />
                   ) : (
-                    <div
-                      class:list={[
-                        'prose-docs',
-                        wide ? 'prose-wide max-w-[68rem]' : 'max-w-[46rem]',
-                      ]}
-                    >
+                    <div class:list={['prose-docs', wide ? 'max-w-[60rem]' : 'max-w-[46rem]']}>
                       <slot />
                     </div>
                   )

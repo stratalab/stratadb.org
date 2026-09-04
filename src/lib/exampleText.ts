@@ -26,3 +26,28 @@ export function cliExampleText(cli: string | undefined): string {
 export function pythonExampleText(lines: string[] | undefined): string {
   return lines?.join('\n') ?? '';
 }
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * An example as markup, one block element per command line.
+ *
+ * Long lines wrap rather than scroll away behind the edge of their frame: a
+ * graph batch_write example is 2912px wide against a 1036px column, and three
+ * screens of horizontal scroll hides most of it with nothing to say so. Each
+ * line is its own element so a wrapped line can hang-indent, which is what
+ * keeps a continuation from reading as a second command now that the examples
+ * carry no prompt.
+ *
+ * Built as one string rather than as elements in a template: whitespace a
+ * formatter adds around an expression inside a <pre> is preserved, and this
+ * repo has shipped that bug three times.
+ */
+export function exampleHtml(text: string): string {
+  if (!text) return '';
+  return text
+    .split('\n')
+    .map((line) => `<span class="cmd-line">${escapeHtml(line)}</span>`)
+    .join('');
+}

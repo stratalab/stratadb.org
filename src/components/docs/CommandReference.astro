@@ -16,7 +16,7 @@ import schemas from '../../data/command-schemas.json';
 import examples from '../../data/command-examples.json';
 import registry from '../../data/error-registry.json';
 import bindings from '../../data/python-bindings.json';
-import { cliExampleText, pythonExampleText } from '../../lib/exampleText';
+import { cliExampleText, exampleHtml, pythonExampleText } from '../../lib/exampleText';
 import { FAMILY_TITLES } from '../../lib/publishedCommands';
 
 interface Props {
@@ -145,11 +145,6 @@ const helpFor: Record<string, string> = {
   python: python ? `help(${python.call})` : '',
 };
 
-// A <pre> keeps every character, including the whitespace a formatter adds
-// around an expression. Setting the text directly is the only reliable way to
-// render an example exactly as generated.
-const escapeHtml = (value: string) =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const RETRY_TONE: Record<string, string> = {
   never: 'text-err',
   safe: 'text-ok',
@@ -241,10 +236,10 @@ const RETRY_TONE: Record<string, string> = {
         <div class="mt-3 overflow-hidden rounded-(--radius-frame) border border-line bg-inset">
           {ifaces.map((iface) => (
             <pre
-              class="overflow-x-auto p-5 font-mono text-mono-sm text-term-fg"
+              class="p-5 font-mono text-mono-sm text-term-fg"
               data-iface-panel={iface}
               hidden={iface !== 'cli'}
-              set:html={escapeHtml(
+              set:html={exampleHtml(
                 iface === 'cli' ? cliExampleText(example.cli) : pythonExampleText(python?.example),
               )}
             />
