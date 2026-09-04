@@ -29,10 +29,17 @@ import release from '../../../data/release.json';
 const oses = operatingSystems();
 const builds = platforms();
 
+// Clients that do not exist yet are shown, disabled, so the row says what the
+// surface will be rather than implying these two are all there will ever be.
+// No timeline is promised: Node has an open RFC upstream and Rust has none, so
+// "not available yet" is the most either can honestly claim.
 const clients = [
-  { key: 'cli', label: 'CLI', long: 'Command line (the strata binary)' },
-  { key: 'python', label: 'Python', long: 'The stratadb package, from PyPI' },
+  { key: 'cli', label: 'CLI', long: 'Command line (the strata binary)', ready: true },
+  { key: 'python', label: 'Python', long: 'The stratadb package, from PyPI', ready: true },
+  { key: 'node', label: 'Node.js', long: 'Not available yet', ready: false },
+  { key: 'rust', label: 'Rust', long: 'Not available yet', ready: false },
 ];
+const pending = clients.filter((c) => !c.ready);
 
 const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 ---
@@ -58,19 +65,34 @@ const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
       </summary>
       <div class="flex flex-wrap gap-2 px-5 pb-5">
         {
-          clients.map((c, i) => (
-            <button
-              type="button"
-              data-client={c.key}
-              data-long={c.long}
-              aria-pressed={i === 0 ? 'true' : 'false'}
-              class="flex items-center gap-2.5 rounded-(--radius-control) border border-line px-4 py-2 text-body text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi aria-pressed:border-terracotta-500 aria-pressed:bg-elevated aria-pressed:text-ink-hi"
-            >
-              <ClientIcon client={c.key} class="h-4 w-4 shrink-0" />
-              {c.label}
-            </button>
-          ))
+          clients.map((c, i) =>
+            c.ready ? (
+              <button
+                type="button"
+                data-client={c.key}
+                data-long={c.long}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+                class="flex items-center gap-2.5 rounded-(--radius-control) border border-line px-4 py-2 text-body text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi aria-pressed:border-terracotta-500 aria-pressed:bg-elevated aria-pressed:text-ink-hi"
+              >
+                <ClientIcon client={c.key} class="h-4 w-4 shrink-0" />
+                {c.label}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                title={`No ${c.label} client in this release`}
+                class="flex cursor-not-allowed items-center gap-2.5 rounded-(--radius-control) border border-dashed border-line px-4 py-2 text-body text-ink-low"
+              >
+                <ClientIcon client={c.key} class="h-4 w-4 shrink-0" />
+                {c.label}
+              </button>
+            ),
+          )
         }
+        <p class="basis-full text-small text-ink-low">
+          {pending.map((c) => c.label).join(' and ')} clients are not available yet.
+        </p>
       </div>
     </details>
 
