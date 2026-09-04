@@ -1,0 +1,121 @@
+---
+title: 'Branches'
+description: 'What a branch is, what a branch point records, and what happens when you compare, preview and merge.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+import Figure from '../../../components/docs/Figure.astro';
+
+A branch is a named line of database state. Every key, document, event, vector
+and graph row belongs to one. A new database starts with a single branch called
+`default`, and unless you say otherwise that is the branch you are reading and
+writing.
+
+Branches are not a collaboration feature and there is no remote to push them to.
+They are workspaces: an isolated place to make changes, whether that is a data
+cleanup you might abandon, an index you are rebuilding, or a task you handed to
+an agent and want to inspect before any of it counts.
+
+## Versions, and the point you branched from
+
+A version is a committed point in the database's history. Every write produces
+one, and a branch advances through them.
+
+When you create a branch from another, Strata records the version you left from.
+That is the branch point, and it is what makes every later question answerable:
+what changed on my side, what changed on theirs, and what a merge would have to
+reconcile. You never supply it. Strata derives it from the lineage it recorded
+at fork time, which is why comparing two unrelated branches fails rather than
+guessing.
+
+<Figure
+  kind="branch"
+  caption="A branch leaves its parent at a specific version, the branch point. Both lines then advance independently, and a merge lands as a new version on the target rather than rewriting the versions behind it."
+/>
+
+You can see the lineage on the branch itself:
+
+```console
+strata branch get cleaned
+```
+
+The `parent` block names the branch it came from and the `fork_version` it left
+at.
+
+## Forking does not copy the data
+
+`strata branch fork default cleaned` gives you every key, document and vector the
+source branch could see, and copies none of it. The new branch shares its
+parent's storage and diverges only where you write.
+
+That is worth being concrete about. Forking a 20 KB database costs about 1.5 KB.
+Forking a 730 KB database, thirty-six times the data, costs about the same 1.5 KB.
+What a fork writes is the record of the branch, not a copy of what it can see.
+
+The consequence is that branches stop being something you ration. You can give
+every experiment one, keep ten of them side by side, and delete the ones that
+did not work out without having paid for them.
+
+## Comparing two branches
+
+```console
+strata branch diff default cleaned
+```
+
+The comparison is organised by space and by data model, and reports what was
+added, removed and modified on each side since the branch point. It takes an
+`--as-of` timestamp if you want to compare the two branches as they stood
+earlier rather than now.
+
+## Previewing before you merge
+
+A merge changes the target branch, so Strata will tell you what it would do
+first:
+
+```console
+strata branch preview cleaned default
+```
+
+Preview answers three things. Whether the merge can apply at all. Which
+conflicts it would hit, with the source value and the target value for each.
+And which data models it covered. It does not touch the target branch, so you
+can ask as often as you like.
+
+## Merging
+
+```console
+strata branch merge cleaned default
+```
+
+The source branch is applied to the target. The target gains a new version; the
+source is left exactly as it was, so merging does not consume the branch you
+merged from. The operation is all or nothing.
+
+Two strategies decide what happens when both sides changed the same thing:
+
+- **`strict`**, the default, refuses the whole merge if there is any conflict.
+  You get the error `conflict.engine.promotion` and the target is untouched.
+- **`source-wins`** applies the source side's value for each conflict.
+
+The safe one is the default deliberately. A merge that silently picks a winner
+is a merge you find out about later.
+
+## What a merge covers
+
+This is the part to know before you rely on it. In 1.1.1 a merge covers
+key-value data, JSON documents and vectors. It does not cover events, graph data
+or vector collections.
+
+You do not have to remember that list. Preview and merge both report it, as
+`capabilities_covered` and `capabilities_unsupported`, against the actual
+release you are running. Read it before merging a branch whose interesting
+changes were graph edges.
+
+## The vocabulary, briefly
+
+Strata's own receipts and error codes say **promotion** where this page says
+merge, because the engine describes the operation as promoting one branch's
+changes into another. The command is `merge`, and that is the word these docs
+use. If you see `conflict.engine.promotion` in an error, it is talking about the
+merge you just attempted.
