@@ -41,14 +41,17 @@ for (const command of commands.filter((c) => c.segments.length > 1)) {
   grouped.set(command.segments[0], [...(grouped.get(command.segments[0]) ?? []), command]);
 }
 
-const anchor = (id: string) => id.replace(/\./g, '-');
+// The anchor is the command as the sidebar and the URL spell it, so
+// /docs/reference/kv#batch_delete reads as the command it lands on. Segments
+// are unique within a family, which is the only scope an anchor needs.
+const anchor = (segments: string[]) => segments.join('-');
 
 // The rail: groups at depth 2, commands at depth 3, exactly like the page.
 const toc = [
-  ...direct.map((c) => ({ depth: 2, slug: anchor(c.id), text: c.op })),
+  ...direct.map((c) => ({ depth: 2, slug: anchor(c.segments), text: c.op })),
   ...[...grouped.entries()].flatMap(([key, items]) => [
     { depth: 2, slug: `group-${key}`, text: groupTitle(key) },
-    ...items.map((c) => ({ depth: 3, slug: anchor(c.id), text: c.segments.join(' ') })),
+    ...items.map((c) => ({ depth: 3, slug: anchor(c.segments), text: c.segments.join(' ') })),
   ]),
 ];
 ---
@@ -69,7 +72,7 @@ const toc = [
   {
     direct.map((command) => (
       <CommandEntry
-        id={anchor(command.id)}
+        id={anchor(command.segments)}
         name={command.op}
         summary={command.summary}
         description={detail.get(command.id)?.description?.split('\n\n')[0]}
@@ -89,7 +92,7 @@ const toc = [
         </h2>
         {items.map((command) => (
           <CommandEntry
-            id={anchor(command.id)}
+            id={anchor(command.segments)}
             name={command.segments.join(' ')}
             level={3}
             summary={command.summary}

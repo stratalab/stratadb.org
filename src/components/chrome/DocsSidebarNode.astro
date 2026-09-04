@@ -26,12 +26,18 @@ const hasChildren = Boolean(node.children?.length);
 // The page being read, so the tree can say where you are. Trailing slashes vary
 // by host, so compare without one.
 const here = Astro.url.pathname.replace(/\/$/, '');
-const isCurrent = Boolean(node.href) && node.href!.replace(/\/$/, '') === here;
+const pathOf = (href: string) => href.split('#')[0].replace(/\/$/, '');
+
+// Commands link to an anchor on their family page, and the server cannot know
+// which anchor the reader is at. So a node that carries a fragment is never
+// marked here; the script in DocsSidebar marks it from location.hash instead.
+const isCurrent = Boolean(node.href) && !node.href!.includes('#') && pathOf(node.href!) === here;
 
 // A group stays open when it holds the current page, so a deep link arrives
-// with its ancestors already unfolded.
+// with its ancestors already unfolded. Fragments count for opening, since every
+// command on a family page is on the page being read.
 const holdsCurrent = (n: TreeNode): boolean =>
-  n.href?.replace(/\/$/, '') === here || (n.children?.some(holdsCurrent) ?? false);
+  (n.href !== undefined && pathOf(n.href) === here) || (n.children?.some(holdsCurrent) ?? false);
 const shouldOpen = open || (hasChildren && node.children!.some(holdsCurrent));
 ---
 
@@ -40,7 +46,21 @@ const shouldOpen = open || (hasChildren && node.children!.some(holdsCurrent));
     <details open={shouldOpen} class="tree-node">
       <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-(--radius-control) py-1.5 pl-1 pr-2 text-body text-ink-hi transition-colors duration-200 hover:text-terracotta-400">
         <span class="tree-chev w-3 shrink-0 text-center text-ink-low">›</span>
-        <span class="min-w-0 flex-1 truncate">{node.label}</span>
+        {node.href ? (
+          <a
+            href={node.href}
+            data-section-link
+            aria-current={isCurrent ? 'page' : undefined}
+            class:list={[
+              'min-w-0 flex-1 truncate hover:text-terracotta-400',
+              isCurrent && 'text-terracotta-500',
+            ]}
+          >
+            {node.label}
+          </a>
+        ) : (
+          <span class="min-w-0 flex-1 truncate">{node.label}</span>
+        )}
       </summary>
       <ul class="ml-2.5 space-y-px border-l border-line">
         {node.children!.map((child) => (
@@ -53,6 +73,7 @@ const shouldOpen = open || (hasChildren && node.children!.some(holdsCurrent));
   ) : node.href ? (
     <a
       href={node.href}
+      data-tree-leaf={node.href.includes('#') ? node.href : undefined}
       aria-current={isCurrent ? 'page' : undefined}
       class:list={[
         '-ml-px flex items-center gap-1.5 border-l-2 py-1.5 pl-1 pr-2 transition-colors duration-200',

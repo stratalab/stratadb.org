@@ -252,7 +252,11 @@ function commandsNode(): TreeNode {
       // up, on the family landing, which lists every command with its summary.
       const node: TreeNode = {
         label: command.segments[command.segments.length - 1],
-        href: live ? command.docs : undefined,
+        // The family page, at this command's anchor, rather than the command's
+        // own page. The family page carries every command in full, so landing
+        // there keeps the rest of the family one Ctrl-F away instead of one
+        // navigation. The detail page is still a click on "View details".
+        href: live ? `/docs/reference/${family}#${command.segments.join('-')}` : undefined,
         generated: true,
       };
       if (command.segments.length > 1) {

@@ -73,11 +73,39 @@ const { open } = Astro.props;
 </nav>
 
 <script>
-  // A section header that is both a link and a toggle: clicking the label
-  // navigates, clicking anywhere else in the summary folds the section. Without
+  // A group header that is both a link and a toggle: clicking the label
+  // navigates, clicking anywhere else in the summary folds the group. Without
   // stopping the event here, <summary> swallows the click and toggles instead.
   for (const link of document.querySelectorAll('[data-section-link]')) {
     link.addEventListener('click', (event) => event.stopPropagation());
+  }
+
+  // Commands link to an anchor on their family page, so on that page the tree
+  // is a table of contents and the fragment says which entry is being read.
+  // The server cannot know the fragment, so the marking happens here.
+  const ON = ['border-terracotta-500', 'text-ink-hi'];
+  const OFF = ['border-transparent', 'text-ink-mid'];
+  const leaves = [...document.querySelectorAll<HTMLAnchorElement>('[data-tree-leaf]')];
+
+  function markHash() {
+    // Path and fragment together: `scan` exists in kv, json and vector, so
+    // matching the fragment alone lights up all three.
+    const at = location.pathname.replace(/\/$/, '') + location.hash;
+    for (const leaf of leaves) {
+      const on = Boolean(location.hash) && leaf.dataset.treeLeaf === at;
+      leaf.classList.toggle('is-here', on);
+      leaf.classList.add(...(on ? ON : OFF));
+      leaf.classList.remove(...(on ? OFF : ON));
+      if (on) leaf.setAttribute('aria-current', 'true');
+      else leaf.removeAttribute('aria-current');
+    }
+  }
+
+  if (leaves.length) {
+    markHash();
+    addEventListener('hashchange', markHash);
+    // A click on the entry already showing does not fire hashchange.
+    for (const leaf of leaves) leaf.addEventListener('click', () => setTimeout(markHash, 0));
   }
 </script>
 
