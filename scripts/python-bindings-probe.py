@@ -84,6 +84,22 @@ def resolve(ns, client, fn):
     return []
 
 
+def better(candidate, existing):
+    """Which of two methods sending the same command should be shown.
+
+    Several methods can send one command: db.kv.keys and db.kv.iter_keys both
+    send kv_list. Prefer the plain one over the iterator wrapper, then the
+    shorter name, so a page shows db.kv.keys rather than db.kv.iter_keys.
+    """
+    if existing is None:
+        return True
+    a, b = candidate.split(".")[-1], existing.split(".")[-1]
+    a_iter, b_iter = a.startswith("iter_"), b.startswith("iter_")
+    if a_iter != b_iter:
+        return b_iter
+    return len(a) < len(b)
+
+
 def collect(ns, client, prefix, out):
     for name in sorted(dir(ns)):
         if name.startswith("_"):
@@ -104,12 +120,14 @@ def collect(ns, client, prefix, out):
                     for line in doc.splitlines()
                     if line.strip().startswith(">>> ")
                 ]
-                out.setdefault(wire, {
-                    "call": "%s.%s" % (prefix, name),
-                    "signature": signature,
-                    "summary": doc.split("\n")[0].strip(),
-                    "example": example,
-                })
+                call = "%s.%s" % (prefix, name)
+                if better(call, out.get(wire, {}).get("call")):
+                    out[wire] = {
+                        "call": call,
+                        "signature": signature,
+                        "summary": doc.split("\n")[0].strip(),
+                        "example": example,
+                    }
             continue
 
         # A sub-namespace: db.graphs.ontology, db.graphs.analytics, db.ai.models.

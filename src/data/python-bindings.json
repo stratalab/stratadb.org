@@ -875,10 +875,13 @@
     ]
   },
   "json.list": {
-    "call": "db.json.iter_keys",
-    "signature": "(prefix: 'Optional[str]' = None, *, as_of: 'Optional[int]' = None) -> 'Iterator[str]'",
-    "summary": "Iterates every document id under ``prefix``, paginating internally.",
-    "example": []
+    "call": "db.json.keys",
+    "signature": "(prefix: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "summary": "One page of document ids (``str`` each).",
+    "example": [
+      "_ = db.json.set_many([{\"key\": \"user:1\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"user:2\", \"path\": \"$\", \"value\": {\"v\": 2}}, {\"key\": \"other\", \"path\": \"$\", \"value\": {\"v\": 3}}])",
+      "db.json.keys(\"user:\").items"
+    ]
   },
   "json.sample": {
     "call": "db.json.sample",
@@ -890,10 +893,13 @@
     ]
   },
   "json.scan": {
-    "call": "db.json.iter_rows",
-    "signature": "(start: 'Optional[str]' = None) -> 'Iterator[Any]'",
-    "summary": "Iterates every document row from ``start``, paginating internally.",
-    "example": []
+    "call": "db.json.scan",
+    "signature": "(start: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None) -> 'Page'",
+    "summary": "One page of full documents (id + value + version) from ``start``.",
+    "example": [
+      "_ = db.json.set_many([{\"key\": \"a\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"b\", \"path\": \"$\", \"value\": {\"v\": 2}}])",
+      "[row.value for row in db.json.scan()]"
+    ]
   },
   "json.set": {
     "call": "db.json.set",
@@ -990,10 +996,13 @@
     ]
   },
   "kv.list": {
-    "call": "db.kv.iter_keys",
-    "signature": "(prefix: 'Optional[str | bytes]' = None, *, as_of: 'Optional[int]' = None) -> 'Iterator[bytes]'",
-    "summary": "Iterates every key under ``prefix``, paginating internally.",
-    "example": []
+    "call": "db.kv.keys",
+    "signature": "(prefix: 'Optional[str | bytes]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "summary": "One page of keys under ``prefix`` (``bytes`` each).",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"user:1\", \"value\": \"a\"}, {\"key\": \"user:2\", \"value\": \"b\"}, {\"key\": \"other\", \"value\": \"c\"}])",
+      "db.kv.keys(\"user:\").items"
+    ]
   },
   "kv.put": {
     "call": "db.kv.put",
@@ -1015,10 +1024,13 @@
     ]
   },
   "kv.scan": {
-    "call": "db.kv.iter_rows",
-    "signature": "(start: 'Optional[str | bytes]' = None) -> 'Iterator[Any]'",
-    "summary": "Iterates every row from ``start``, paginating internally.",
-    "example": []
+    "call": "db.kv.scan",
+    "signature": "(start: 'Optional[str | bytes]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None) -> 'Page'",
+    "summary": "One page of full rows (key + value + version) from ``start``/``cursor``.",
+    "example": [
+      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}])",
+      "[row.key for row in db.kv.scan()]"
+    ]
   },
   "space.create": {
     "call": "db.spaces.create",
@@ -1214,10 +1226,15 @@
     ]
   },
   "vector.keys": {
-    "call": "db.vectors.iter_keys",
-    "signature": "(collection: 'str', *, as_of: 'Optional[int]' = None) -> 'Iterator[str]'",
-    "summary": "Iterates every key in ``collection``, paginating internally.",
-    "example": []
+    "call": "db.vectors.keys",
+    "signature": "(collection: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "summary": "One page of keys in a collection (``str`` each).",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
+      "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0])",
+      "db.vectors.keys(\"docs\").items"
+    ]
   },
   "vector.metadata.update": {
     "call": "db.vectors.update_metadata",
