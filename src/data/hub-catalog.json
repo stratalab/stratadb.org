@@ -1,7 +1,7 @@
 {
   "hub": "https://stratahub.io",
   "source": "https://stratahub.io/v1/datasets",
-  "fetched_at": "2026-09-03",
+  "fetched_at": "2026-09-04",
   "datasets": [
     {
       "slug": "titanic",

@@ -17,15 +17,28 @@ interface Props {
   description?: string;
   /** Sidebar section to open for this page. */
   section?: string;
+  /** The same page as CommonMark. Advertised to crawlers and shown at the foot. */
+  mdHref?: string;
   headings?: Heading[];
 }
-const { title, description, section, headings = [] } = Astro.props;
+const { title, description, section, mdHref, headings = [] } = Astro.props;
 
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const showToc = toc.length >= 2;
 ---
 
 <BaseLayout title={`${title} | StrataDB Docs`} description={description}>
+  {
+    mdHref && (
+      <link
+        slot="head"
+        rel="alternate"
+        type="text/markdown"
+        href={mdHref}
+        title={`${title} as markdown`}
+      />
+    )
+  }
   <div class="mx-auto w-full max-w-[70rem] px-6 py-12 max-[480px]:px-4 xl:max-w-[86rem]">
     <div class="flex gap-12">
       <DocsSidebar open={section} />
@@ -44,6 +57,20 @@ const showToc = toc.length >= 2;
             <slot />
           </div>
         </article>
+
+        {
+          mdHref && (
+            <p class="mt-12 max-w-[46rem] border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
+              agents: this page as markdown &rarr;{' '}
+              <a
+                href={mdHref}
+                class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+              >
+                {mdHref}
+              </a>
+            </p>
+          )
+        }
       </div>
 
       {
@@ -74,3 +101,53 @@ const showToc = toc.length >= 2;
   </div>
   <DocsSearch />
 </BaseLayout>
+
+<script>
+  // A copy button on every code block in the reading column, so a reader or an
+  // agent can lift a line without selecting it. Prompts are stripped: copying
+  // `$ strata ...` or `>>> db.json.set(...)` should give the runnable command,
+  // not the shell decoration around it.
+  const RUNNABLE = /^\s*(?:\$ |>>> |\.\.\. )/;
+
+  function runnableText(pre: HTMLElement): string {
+    const raw = pre.innerText.replace(/\n$/, '');
+    const lines = raw.split('\n');
+    return lines.some((line) => RUNNABLE.test(line))
+      ? lines
+          .filter((line) => RUNNABLE.test(line))
+          .map((line) => line.replace(RUNNABLE, ''))
+          .join('\n')
+      : raw;
+  }
+
+  document.querySelectorAll<HTMLPreElement>('article pre').forEach((pre) => {
+    if (pre.dataset.copyReady) return;
+    pre.dataset.copyReady = 'true';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'group/code relative';
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className =
+      'absolute right-2.5 top-2.5 rounded-(--radius-control) border border-line bg-raised px-2.5 py-1 font-mono text-mono-sm text-ink-mid opacity-0 transition-opacity duration-200 hover:border-terracotta-500 hover:text-ink-hi focus-visible:opacity-100 group-hover/code:opacity-100';
+    button.textContent = 'copy';
+    button.setAttribute('aria-label', 'Copy this code');
+
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(runnableText(pre));
+        button.textContent = 'copied';
+        setTimeout(() => {
+          button.textContent = 'copy';
+        }, 1500);
+      } catch {
+        /* clipboard unavailable (permissions or an insecure context) */
+      }
+    });
+
+    wrapper.appendChild(button);
+  });
+</script>

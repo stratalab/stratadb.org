@@ -120,7 +120,12 @@ for (const root of SCAN_ROOTS) {
   for (const file of await walk(root)) {
     const rel = toPosix(relative(ROOT, file));
     const generatedMatch = rel.match(/^src\/content\/docs\/reference\/([^/]+)\//);
-    const isGeneratedReference = generatedMatch && familySet.has(generatedMatch[1]);
+    // src/pages/docs/reference is the renderer for generated commands, so it
+    // legitimately carries their URLs. The rule exists to keep command facts
+    // and links out of NARRATIVE pages, not out of the reference surface.
+    const isGeneratedReference =
+      (generatedMatch && familySet.has(generatedMatch[1])) ||
+      rel.startsWith('src/pages/docs/reference/');
     const text = await readFile(file, 'utf8');
 
     if (!isGeneratedReference) {

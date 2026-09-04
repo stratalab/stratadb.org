@@ -59,6 +59,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
         document.documentElement.dataset.motion = 'reduced';
     </script>
+    <slot name="head" />
   </head>
   <body class="flex min-h-screen flex-col">
     <Nav />
