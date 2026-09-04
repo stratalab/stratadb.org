@@ -33,11 +33,15 @@ const builds = platforms();
 // surface will be rather than implying these two are all there will ever be.
 // No timeline is promised: Node has an open RFC upstream and Rust has none, so
 // "not available yet" is the most either can honestly claim.
+// The header names the client, nothing more. It said "Command line (the strata
+// binary)" and "The stratadb package, from PyPI", which explained what the
+// reader had just clicked. Only CLI needs expanding, because only CLI is an
+// acronym; DuckDB spells theirs out the same way.
 const clients = [
-  { key: 'cli', label: 'CLI', long: 'Command line (the strata binary)', ready: true },
-  { key: 'python', label: 'Python', long: 'The stratadb package, from PyPI', ready: true },
-  { key: 'node', label: 'Node.js', long: 'Not available yet', ready: false },
-  { key: 'rust', label: 'Rust', long: 'Not available yet', ready: false },
+  { key: 'cli', label: 'CLI', long: 'Command Line Interface (CLI)', ready: true },
+  { key: 'python', label: 'Python', long: 'Python', ready: true },
+  { key: 'node', label: 'Node.js', long: 'Node.js', ready: false },
+  { key: 'rust', label: 'Rust', long: 'Rust', ready: false },
 ];
 const pending = clients.filter((c) => !c.ready);
 
