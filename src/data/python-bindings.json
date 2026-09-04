@@ -127,6 +127,24 @@
       "_ = db.branches.diff(\"default\", \"experiment\")  # reports the key-value change and the new vector, grouped by capability"
     ]
   },
+  "branch.fork": {
+    "call": "db.branches.fork",
+    "signature": "(source: 'str', name: 'str', *, version: 'Optional[int]' = None, timestamp: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Forks ``name`` from ``source`` - at its current head, a version, or a timestamp.",
+    "example": [
+      "_ = db.branches.fork(\"default\", \"experiment\")",
+      "sorted(b.name for b in db.branches.list())"
+    ]
+  },
+  "branch.fork_at_timestamp": {
+    "call": "db.branches.fork",
+    "signature": "(source: 'str', name: 'str', *, version: 'Optional[int]' = None, timestamp: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Forks ``name`` from ``source`` - at its current head, a version, or a timestamp.",
+    "example": [
+      "_ = db.branches.fork(\"default\", \"experiment\")",
+      "sorted(b.name for b in db.branches.list())"
+    ]
+  },
   "branch.fork_at_version": {
     "call": "db.branches.fork",
     "signature": "(source: 'str', name: 'str', *, version: 'Optional[int]' = None, timestamp: 'Optional[int]' = None) -> 'Any'",
@@ -271,6 +289,90 @@
     "example": [
       "_ = db.events.append(\"user.created\", {\"id\": 1})",
       "db.events.verify_chain().valid"
+    ]
+  },
+  "graph.analytics.bfs": {
+    "call": "db.graphs.analytics.bfs",
+    "signature": "(graph: 'str', start: 'str', *, direction: 'Optional[str]' = None, edge_types: 'Optional[list]' = None, max_depth: 'Optional[int]' = None, max_nodes: 'Optional[int]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Breadth-first traversal from ``start`` (``.visited``, ``.depths``, ``.edges``).",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "_ = db.graphs.add_node(\"g\", \"c\")",
+      "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
+      "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
+      "db.graphs.analytics.bfs(\"g\", \"a\").visited"
+    ]
+  },
+  "graph.analytics.cdlp": {
+    "call": "db.graphs.analytics.cdlp",
+    "signature": "(graph: 'str', *, direction: 'Optional[str]' = None, max_iterations: 'Optional[int]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Community detection by label propagation (``.labels``).",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "_ = db.graphs.add_node(\"g\", \"c\")",
+      "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
+      "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
+      "sorted(db.graphs.analytics.cdlp(\"g\").labels)"
+    ]
+  },
+  "graph.analytics.lcc": {
+    "call": "db.graphs.analytics.lcc",
+    "signature": "(graph: 'str', *, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Local clustering coefficient per node (``.coefficients``).",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "_ = db.graphs.add_node(\"g\", \"c\")",
+      "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
+      "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
+      "sorted(db.graphs.analytics.lcc(\"g\").coefficients)"
+    ]
+  },
+  "graph.analytics.pagerank": {
+    "call": "db.graphs.analytics.pagerank",
+    "signature": "(graph: 'str', *, damping: 'Optional[float]' = None, max_iterations: 'Optional[int]' = None, tolerance: 'Optional[float]' = None, personalization: 'Optional[dict]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "PageRank importance scores (``.ranks`` maps node id to score).",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "_ = db.graphs.add_node(\"g\", \"c\")",
+      "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
+      "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
+      "sorted(db.graphs.analytics.pagerank(\"g\").ranks)"
+    ]
+  },
+  "graph.analytics.sssp": {
+    "call": "db.graphs.analytics.sssp",
+    "signature": "(graph: 'str', source: 'str', *, direction: 'Optional[str]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Single-source shortest paths from ``source`` (``.distances``).",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "_ = db.graphs.add_node(\"g\", \"c\")",
+      "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
+      "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
+      "sorted(db.graphs.analytics.sssp(\"g\", \"a\").distances)"
+    ]
+  },
+  "graph.analytics.wcc": {
+    "call": "db.graphs.analytics.wcc",
+    "signature": "(graph: 'str', *, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Weakly-connected components (``.components`` maps node id to component).",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.add_node(\"g\", \"a\")",
+      "_ = db.graphs.add_node(\"g\", \"b\")",
+      "_ = db.graphs.add_node(\"g\", \"c\")",
+      "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
+      "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
+      "db.graphs.analytics.wcc(\"g\").component_count"
     ]
   },
   "graph.apply_delete_policy": {
@@ -457,6 +559,81 @@
       "[n.node_id for n in db.graphs.nodes_by_type(\"g\", \"person\")]"
     ]
   },
+  "graph.ontology.define_link_type": {
+    "call": "db.graphs.ontology.define_link_type",
+    "signature": "(graph: 'str', name: 'str', source: 'str', target: 'str', *, cardinality: 'Optional[str]' = None, properties: 'Optional[dict]' = None) -> 'Any'",
+    "summary": "Define a link (edge) type from a ``source`` to a ``target`` object type.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "_ = db.graphs.ontology.define_link_type(\"g\", \"knows\", \"person\", \"person\")",
+      "[l.name for l in db.graphs.ontology.get(\"g\").link_types]"
+    ]
+  },
+  "graph.ontology.define_object_type": {
+    "call": "db.graphs.ontology.define_object_type",
+    "signature": "(graph: 'str', name: 'str', *, properties: 'Optional[dict]' = None) -> 'Any'",
+    "summary": "Define an object (node) type, optionally with a property schema.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "[o.name for o in db.graphs.ontology.summary(\"g\").object_types]"
+    ]
+  },
+  "graph.ontology.delete_link_type": {
+    "call": "db.graphs.ontology.delete_link_type",
+    "signature": "(graph: 'str', name: 'str') -> 'Any'",
+    "summary": "Remove a link type from the ontology.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "_ = db.graphs.ontology.define_link_type(\"g\", \"knows\", \"person\", \"person\")",
+      "_ = db.graphs.ontology.delete_link_type(\"g\", \"knows\")"
+    ]
+  },
+  "graph.ontology.delete_object_type": {
+    "call": "db.graphs.ontology.delete_object_type",
+    "signature": "(graph: 'str', name: 'str') -> 'Any'",
+    "summary": "Remove an object type from the ontology.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"company\")",
+      "_ = db.graphs.ontology.delete_object_type(\"g\", \"company\")",
+      "[o.name for o in db.graphs.ontology.summary(\"g\").object_types]"
+    ]
+  },
+  "graph.ontology.freeze": {
+    "call": "db.graphs.ontology.freeze",
+    "signature": "(graph: 'str') -> 'Any'",
+    "summary": "Freeze the ontology so its types can no longer change.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "_ = db.graphs.ontology.freeze(\"g\")",
+      "db.graphs.ontology.get(\"g\").status"
+    ]
+  },
+  "graph.ontology.get": {
+    "call": "db.graphs.ontology.get",
+    "signature": "(graph: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "The full ontology, or ``None`` if none is defined.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "db.graphs.ontology.get(\"g\").status"
+    ]
+  },
+  "graph.ontology.summary": {
+    "call": "db.graphs.ontology.summary",
+    "signature": "(graph: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "A summary of the ontology (types and their node counts), or ``None``.",
+    "example": [
+      "_ = db.graphs.create(\"g\")",
+      "_ = db.graphs.ontology.define_object_type(\"g\", \"person\")",
+      "[o.name for o in db.graphs.ontology.summary(\"g\").object_types]"
+    ]
+  },
   "graph.sample": {
     "call": "db.graphs.sample",
     "signature": "(graph: 'str', *, count: 'Optional[int]' = None) -> 'Sample'",
@@ -508,6 +685,88 @@
     "summary": "The hub's yank deny-list - refs taken down (``GET /v1/yanked``).",
     "example": [
       "db.hub.list_yanked(since=\"2026-09-01T00:00:00Z\").total   # doctest: +SKIP"
+    ]
+  },
+  "inference.cache_status": {
+    "call": "db.ai.cache_status",
+    "signature": "() -> 'Any'",
+    "summary": "Which models are currently loaded in the runtime cache.",
+    "example": [
+      "db.ai.cache_status()[\"generation_models\"]"
+    ]
+  },
+  "inference.capability": {
+    "call": "db.ai.capability",
+    "signature": "(model: 'str') -> 'Any'",
+    "summary": "Report a model's capabilities (provider, features, key/network needs).",
+    "example": [
+      "db.ai.capability(\"openai:gpt-4o-mini\")[\"provider\"]"
+    ]
+  },
+  "inference.detokenize": {
+    "call": "db.ai.detokenize",
+    "signature": "(ids: 'Sequence[int]', *, model: 'str') -> 'Any'",
+    "summary": "Detokenize token ids with a local model.",
+    "example": []
+  },
+  "inference.embed": {
+    "call": "db.ai.embed",
+    "signature": "(input: 'Union[str, Sequence[str]]', *, model: 'str', dimensions: 'Optional[int]' = None, normalize: 'Optional[bool]' = None, input_type: 'Optional[str]' = None, instruction: 'Optional[str]' = None) -> 'Embeddings'",
+    "summary": "Embed one string or a list of strings.",
+    "example": [
+      "db.ai.embed([\"hello\", \"world\"],"
+    ]
+  },
+  "inference.generate": {
+    "call": "db.ai.chat",
+    "signature": "(messages: 'Union[str, Iterable[Mapping[str, Any]], None]' = None, *, model: 'str', prompt: 'Optional[str]' = None, response_format: 'Union[str, Mapping[str, Any], None]' = None, json_schema: 'Optional[Mapping[str, Any]]' = None, **knobs: 'Any') -> 'ChatCompletion'",
+    "summary": "Generate a chat completion.",
+    "example": [
+      "db.ai.chat(\"Summarize Strata in one line.\",",
+      "schema = {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}}",
+      "db.ai.chat(\"Where is the Eiffel Tower?\",",
+      "tools = [{\"type\": \"function\",",
+      "db.ai.chat(\"Weather in Paris?\","
+    ]
+  },
+  "inference.models.list": {
+    "call": "db.ai.models.list",
+    "signature": "() -> 'Any'",
+    "summary": "Catalog models available to pull.",
+    "example": [
+      "sorted(set(m[\"task\"] for m in db.ai.models.list()[\"items\"]))"
+    ]
+  },
+  "inference.models.local": {
+    "call": "db.ai.models.local",
+    "signature": "() -> 'Any'",
+    "summary": "Models already present locally.",
+    "example": []
+  },
+  "inference.models.pull": {
+    "call": "db.ai.models.pull",
+    "signature": "(model: 'str') -> 'Any'",
+    "summary": "Download a model into the local registry.",
+    "example": []
+  },
+  "inference.rank": {
+    "call": "db.ai.rank",
+    "signature": "(query: 'str', passages: 'Sequence[str]', *, model: 'str') -> 'Any'",
+    "summary": "Rerank ``passages`` by relevance to ``query``.",
+    "example": []
+  },
+  "inference.tokenize": {
+    "call": "db.ai.tokenize",
+    "signature": "(text: 'str', *, model: 'str', add_special: 'bool' = False) -> 'Any'",
+    "summary": "Tokenize text with a local model.",
+    "example": []
+  },
+  "inference.unload": {
+    "call": "db.ai.unload",
+    "signature": "(model: 'Optional[str]' = None) -> 'Any'",
+    "summary": "Evict a cached model (or all cached models when ``model`` is None).",
+    "example": [
+      "db.ai.unload()[\"unloaded\"]"
     ]
   },
   "json.batch_delete": {
