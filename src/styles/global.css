@@ -25,6 +25,30 @@
   font-display: swap;
 }
 
+/* The documentation carries its own pair. Same self-hosted, latin-subset
+   treatment; see .docs-typeface below for where it applies. */
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Variable.woff2') format('woff2');
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url('/fonts/DMMono-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url('/fonts/DMMono-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -63,6 +87,19 @@
 }
 
 @layer components {
+  /* Documentation typeface. The marketing site keeps General Sans and Commit
+     Mono; the docs run on DM Sans and DM Mono. Rebinding the two theme
+     variables is the whole mechanism, since every font-sans and font-mono
+     utility under this element resolves through them. */
+  .docs-typeface {
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+    font-family: var(--font-sans);
+  }
+  .docs-typeface :where(code, pre, kbd, samp) {
+    font-family: var(--font-mono);
+  }
+
   /* Docs prose: typography plugin mapped onto the token system (Phase 5) */
   .prose-docs {
     @apply prose prose-invert max-w-none;

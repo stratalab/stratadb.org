@@ -54,6 +54,22 @@ const groupWidth = bare
 ---
 
 <BaseLayout title={`${title} | StrataDB Docs`} description={description}>
+  <link
+    slot="head"
+    rel="preload"
+    href="/fonts/DMSans-Variable.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
+  <link
+    slot="head"
+    rel="preload"
+    href="/fonts/DMMono-400.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
   {
     mdHref && (
       <link
@@ -77,79 +93,86 @@ const groupWidth = bare
     never the viewport, so the empty space grows and the content does not.
   */
   }
-  <div class="w-full py-12">
-    <div class="flex">
-      <DocsSidebar open={section} />
+  <div class="docs-typeface">
+    <div class="w-full py-12">
+      <div class="flex">
+        <DocsSidebar open={section} />
 
-      <div class="min-w-0 flex-1">
-        <div class:list={['mx-auto flex w-full gap-12 px-8 max-[480px]:px-4', groupWidth]}>
-          <div class="min-w-0 flex-1">
-            <button
-              type="button"
-              class="docs-search-trigger mb-8 flex w-full items-center gap-2 rounded-(--radius-control) border border-line-hover bg-raised px-3 py-2.5 text-small text-ink-mid lg:hidden"
-              aria-label="Search the documentation"
-            >
-              <span>Search docs</span>
-            </button>
+        <div class="min-w-0 flex-1">
+          <div class:list={['mx-auto flex w-full gap-12 px-8 max-[480px]:px-4', groupWidth]}>
+            <div class="min-w-0 flex-1">
+              <button
+                type="button"
+                class="docs-search-trigger mb-8 flex w-full items-center gap-2 rounded-(--radius-control) border border-line-hover bg-raised px-3 py-2.5 text-small text-ink-mid lg:hidden"
+                aria-label="Search the documentation"
+              >
+                <span>Search docs</span>
+              </button>
 
-            <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
-              {
-                bare ? (
-                  <slot />
-                ) : (
-                  <div
-                    class:list={['prose-docs', wide ? 'prose-wide max-w-[68rem]' : 'max-w-[46rem]']}
-                  >
+              <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+                {
+                  bare ? (
                     <slot />
-                  </div>
+                  ) : (
+                    <div
+                      class:list={[
+                        'prose-docs',
+                        wide ? 'prose-wide max-w-[68rem]' : 'max-w-[46rem]',
+                      ]}
+                    >
+                      <slot />
+                    </div>
+                  )
+                }
+              </article>
+
+              {
+                mdHref && (
+                  <p class="mt-12 max-w-[46rem] border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
+                    agents: this page as markdown &rarr;{' '}
+                    <a
+                      href={mdHref}
+                      class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+                    >
+                      {mdHref}
+                    </a>
+                  </p>
                 )
               }
-            </article>
+            </div>
 
             {
-              mdHref && (
-                <p class="mt-12 max-w-[46rem] border-t border-line pt-6 font-mono text-mono-sm text-ink-low">
-                  agents: this page as markdown &rarr;{' '}
-                  <a
-                    href={mdHref}
-                    class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
-                  >
-                    {mdHref}
-                  </a>
-                </p>
+              showToc && (
+                <nav class="hidden w-52 shrink-0 xl:block" aria-label="On this page">
+                  <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                    <h2 class="mb-2.5 text-small font-medium uppercase text-ink-mid">
+                      On this page
+                    </h2>
+                    <ul class="space-y-px border-l border-line">
+                      {toc.map((h) => (
+                        <li>
+                          <a
+                            href={`#${h.slug}`}
+                            class:list={[
+                              '-ml-px block border-l-2 border-transparent py-1 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi',
+                              h.depth === 3 ? 'pl-7' : 'pl-4',
+                            ]}
+                          >
+                            {h.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </nav>
               )
             }
           </div>
-
-          {
-            showToc && (
-              <nav class="hidden w-52 shrink-0 xl:block" aria-label="On this page">
-                <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                  <h2 class="mb-2.5 text-small font-medium uppercase text-ink-mid">On this page</h2>
-                  <ul class="space-y-px border-l border-line">
-                    {toc.map((h) => (
-                      <li>
-                        <a
-                          href={`#${h.slug}`}
-                          class:list={[
-                            '-ml-px block border-l-2 border-transparent py-1 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi',
-                            h.depth === 3 ? 'pl-7' : 'pl-4',
-                          ]}
-                        >
-                          {h.text}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </nav>
-            )
-          }
         </div>
       </div>
     </div>
+    <DocsSearch />
   </div>
-  <DocsSearch />
 </BaseLayout>
 
 <script>
