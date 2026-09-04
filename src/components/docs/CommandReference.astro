@@ -109,18 +109,36 @@ const returns = Object.entries(schema?.response?.properties ?? {}).map(([name, s
 }));
 
 // Facts a hand-written page could not keep true across releases.
+//
+// A chip earns its place only if it varies and cannot be inferred. Measured
+// across the whole command set (percentages, not counts, so this comment does
+// not drift as the set grows):
+//   - wire_status is `stable` for almost everything, so printing it everywhere
+//     hides the few that are transitional. Shown only as the exception.
+//   - commit is `none` for 67%, and on a read that is simply what a read is.
+//     Shown only when the command actually commits.
+//   - batch and commit overlap: a batched command would read "itemwise, one
+//     shared commit" and then "batch (itemwise)" in the same row. Folded.
+//   - access splits roughly a third to two thirds and is not always inferable
+//     (import writes, export reads), and it decides whether a call is legal in
+//     read-only mode. Kept.
 const COMMIT_LABEL: Record<string, string> = {
-  none: 'no commit',
   commits_on_success: 'commits on success',
-  itemwise_shared_commit: 'itemwise, one shared commit',
+  itemwise_shared_commit: 'one shared commit',
   chunked_commits: 'chunked commits',
 };
+
+const commitLabel = COMMIT_LABEL[command.commit];
+const batched = command.batch && command.batch !== 'none' ? command.batch : null;
+const behaviour = batched
+  ? `batch: ${batched}, ${commitLabel ?? 'no commit'}`
+  : (commitLabel ?? null);
+
 const facts = [
   command.access === 'write' ? 'write' : 'read',
-  COMMIT_LABEL[command.commit] ?? command.commit,
-  command.wire_status === 'stable' ? 'stable' : command.wire_status,
+  behaviour,
   command.pagination && command.pagination !== 'none' ? `paginated (${command.pagination})` : null,
-  command.batch && command.batch !== 'none' ? `batch (${command.batch})` : null,
+  command.wire_status === 'transitional' ? 'transitional' : null,
 ].filter(Boolean) as string[];
 
 const errors = (command.errors ?? []).map((e) => {
@@ -160,7 +178,12 @@ const RETRY_TONE: Record<string, string> = {
     <ul class="mt-4 flex list-none flex-wrap gap-2 p-0" aria-label="Behavior">
       {
         facts.map((fact) => (
-          <li class="rounded-full border border-line px-2.5 py-0.5 font-mono text-mono-sm text-ink-mid">
+          <li
+            class:list={[
+              'rounded-full border px-2.5 py-0.5 font-mono text-mono-sm',
+              fact === 'transitional' ? 'border-warn/40 text-warn' : 'border-line text-ink-mid',
+            ]}
+          >
             {fact}
           </li>
         ))
