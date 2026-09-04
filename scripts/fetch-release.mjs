@@ -33,6 +33,31 @@ function releaseTargets(assets) {
     .sort((a, b) => a.target.localeCompare(b.target));
 }
 
+// The release publishes one sha256 manifest for every asset. install.sh refuses
+// to install without it, so the site can show the same digest a reader would
+// check by hand.
+async function attachChecksums(rel, targets) {
+  const manifest = (rel.assets ?? []).find((a) => a.name === 'checksums-sha256.txt');
+  if (!manifest) return;
+  try {
+    const res = await fetch(manifest.browser_download_url, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return;
+    const byAsset = new Map(
+      (await res.text())
+        .split('\n')
+        .map((line) => line.trim().split(/\s+/))
+        .filter((parts) => parts.length === 2)
+        .map(([sha, name]) => [name, sha]),
+    );
+    for (const t of targets) {
+      const sha = byAsset.get(t.asset);
+      if (sha) t.sha256 = sha;
+    }
+  } catch {
+    /* the digests are a nicety; a release without them still builds */
+  }
+}
+
 try {
   let version,
     source,
@@ -42,6 +67,7 @@ try {
     version = rel.tag_name.replace(/^v/, '');
     source = `GitHub release ${rel.tag_name}`;
     targets = releaseTargets(rel.assets ?? []);
+    await attachChecksums(rel, targets);
   } catch {
     const tags = await gh('/tags?per_page=1');
     version = tags[0].name.replace(/^v/, '');

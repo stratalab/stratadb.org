@@ -1,0 +1,276 @@
+---
+// Installation, on the shape of the DuckDB install page.
+//
+// Measured there under three user agents. The page *is* the selector: no
+// preamble, no prerequisites. Two collapsible facet rows, Client then Platform,
+// each printing its current choice in its header. Client opens; Platform stays
+// shut because it has been detected and is usually right. Then the version,
+// then exactly one command with a copy button. A Windows visitor gets Windows
+// selected and `winget install DuckDB.cli`, and their direct downloads listed
+// inline with a SHA256 beside each.
+//
+// So the platform facet earns its place by answering, not by decorating. Ours
+// answers three things: which archive Direct download hands you, which digest
+// to check, and whether there is a build for you at all. macOS and Linux share
+// a one-line installer, exactly as they do on DuckDB, where only Windows
+// diverges.
+//
+// Every platform fact comes from the release assets, and every digest from the
+// release's own checksums-sha256.txt, the file install.sh verifies against. A
+// hand-kept list is what let the homepage advertise Windows for a release that
+// ships no Windows build (strata-core issue 3060), so this page cannot name a
+// platform without a binary behind it, and will name a new one the day it
+// ships.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import { operatingSystems, platforms } from '../../../lib/platforms';
+import release from '../../../data/release.json';
+
+const oses = operatingSystems();
+const builds = platforms();
+
+const clients = [
+  { key: 'cli', label: 'CLI', long: 'Command line (the strata binary)' },
+  { key: 'python', label: 'Python', long: 'The stratadb package, from PyPI' },
+];
+
+const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+const toc = [
+  { depth: 2, slug: 'install', text: 'Installation' },
+  { depth: 2, slug: 'downloads', text: 'Direct downloads' },
+  { depth: 2, slug: 'verify', text: 'Check it worked' },
+];
+---
+
+<DocsLayout
+  title="Installation"
+  description={`Install StrataDB ${release.version}: the strata binary or the Python package.`}
+  section="Get Started"
+  wide
+  toc={toc}
+>
+  <h1>Installation</h1>
+
+  <div class="not-prose mt-8 space-y-3" data-install-picker>
+    <details class="facet rounded-(--radius-frame) border border-line bg-raised" open>
+      <summary
+        class="flex cursor-pointer list-none items-baseline gap-3 px-5 py-4 transition-colors duration-200 hover:text-terracotta-400"
+      >
+        <span class="text-body font-medium text-ink-hi">Client</span>
+        <span class="min-w-0 flex-1 truncate text-body text-ink-mid" data-picked="client"
+          >{clients[0].long}</span
+        >
+        <span class="facet-chev shrink-0 text-ink-low" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="flex flex-wrap gap-2 px-5 pb-5">
+        {
+          clients.map((c, i) => (
+            <button
+              type="button"
+              data-client={c.key}
+              data-long={c.long}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              class="rounded-(--radius-control) border border-line px-4 py-2 text-body text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi aria-pressed:border-terracotta-500 aria-pressed:bg-elevated aria-pressed:text-ink-hi"
+            >
+              {c.label}
+            </button>
+          ))
+        }
+      </div>
+    </details>
+
+    <details class="facet rounded-(--radius-frame) border border-line bg-raised">
+      <summary
+        class="flex cursor-pointer list-none items-baseline gap-3 px-5 py-4 transition-colors duration-200 hover:text-terracotta-400"
+      >
+        <span class="text-body font-medium text-ink-hi">Platform</span>
+        <span class="min-w-0 flex-1 truncate text-body text-ink-mid" data-picked="platform"
+          >{oses[0]?.label}</span
+        >
+        <span class="facet-chev shrink-0 text-ink-low" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="flex flex-wrap gap-2 px-5 pb-5">
+        {
+          builds.map((b, i) => (
+            <button
+              type="button"
+              data-build={b.target}
+              data-os={b.osKey}
+              data-label={`${b.os} ${b.arch}`}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              class="rounded-(--radius-control) border border-line px-4 py-2 text-body text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi aria-pressed:border-terracotta-500 aria-pressed:bg-elevated aria-pressed:text-ink-hi"
+            >
+              {b.os} {b.arch}
+            </button>
+          ))
+        }
+      </div>
+    </details>
+  </div>
+
+  <div class="not-prose mt-10 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <h2 id="install" class="text-heading text-ink-hi">Installation</h2>
+    <span class="text-body text-ink-mid"
+      >Version <span class="font-mono text-mono-sm text-ink-hi">{release.version}</span></span
+    >
+  </div>
+
+  <p
+    class="not-prose mt-4 rounded-(--radius-frame) border border-line bg-raised px-5 py-4 text-body text-ink-mid"
+    data-unsupported
+    hidden
+  >
+    There is no build for your platform in {release.version}. The commands below are for the
+    platforms this release ships.
+  </p>
+
+  <div
+    class="not-prose mt-4 flex items-center gap-4 rounded-(--radius-frame) border border-line bg-inset px-5 py-5"
+  >
+    <span class="select-none font-mono text-mono-body text-ink-low">$</span>
+    <code
+      class="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-mono-body text-ink-hi"
+      data-install-cmd>curl -fsSL https://stratadb.org/install.sh | sh</code
+    >
+    <button
+      type="button"
+      class="shrink-0 rounded-(--radius-control) border border-line px-3 py-1.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:border-terracotta-500 hover:text-ink-hi"
+      data-install-copy
+      aria-label="Copy the install command">copy</button
+    >
+  </div>
+
+  <p class="not-prose mt-3 text-body text-ink-mid" data-alt hidden>
+    Or with Homebrew: <span class="font-mono text-mono-sm text-ink-hi"
+      >brew install stratalab/tap/strata</span
+    >
+  </p>
+
+  <h2 id="downloads" class="mt-12">Direct downloads</h2>
+  <p>
+    Every archive this release ships, with the digest <code>install.sh</code> checks before it installs
+    anything.
+  </p>
+  <ul class="not-prose mt-4 space-y-3">
+    {
+      builds.map((b) => (
+        <li class="rounded-(--radius-frame) border border-line bg-raised px-5 py-4">
+          <a
+            href={b.url}
+            class="font-mono text-mono-body text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+          >
+            {b.asset}
+          </a>
+          <p class="mt-1 text-body text-ink-low">
+            {b.os} {b.arch} · {megabytes(b.size)}
+          </p>
+          {b.sha256 && (
+            <p class="mt-1.5 break-all font-mono text-mono-sm text-ink-low">
+              <span class="text-ink-mid">SHA256</span> {b.sha256}
+            </p>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2 id="verify" class="mt-12">Check it worked</h2>
+  <p>Ask the binary what it is. It answers without a database, a server or a config file.</p>
+  <pre class="not-prose"><code>strata --cache ping</code></pre>
+  <p>
+    That prints <code>pong</code> and the version you installed. If the command is not found, the install
+    directory is not on your <code>PATH</code>; the installer prints the directory it used on its
+    last line.
+  </p>
+</DocsLayout>
+
+<style>
+  .facet-chev {
+    display: inline-block;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  details.facet[open] > summary > .facet-chev {
+    transform: rotate(180deg);
+  }
+</style>
+
+<script>
+  // One command at a time, and the platform is detected rather than asked for.
+  const root = document.querySelector<HTMLElement>('[data-install-picker]');
+  const code = document.querySelector<HTMLElement>('[data-install-cmd]');
+  const copy = document.querySelector<HTMLButtonElement>('[data-install-copy]');
+  const pickedClient = document.querySelector<HTMLElement>('[data-picked="client"]');
+  const pickedPlatform = document.querySelector<HTMLElement>('[data-picked="platform"]');
+  const alt = document.querySelector<HTMLElement>('[data-alt]');
+  const unsupported = document.querySelector<HTMLElement>('[data-unsupported]');
+
+  const clientButtons = [...(root?.querySelectorAll<HTMLButtonElement>('[data-client]') ?? [])];
+  const buildButtons = [...(root?.querySelectorAll<HTMLButtonElement>('[data-build]') ?? [])];
+
+  let client = 'cli';
+  let build = buildButtons[0]?.dataset.build ?? '';
+
+  function render() {
+    if (!code) return;
+    const picked = buildButtons.find((b) => b.dataset.build === build);
+
+    // macOS and Linux share the installer, as they do on DuckDB, where only
+    // Windows diverges. Homebrew is offered beside it rather than instead.
+    code.textContent =
+      client === 'python'
+        ? 'pip install stratadb'
+        : 'curl -fsSL https://stratadb.org/install.sh | sh';
+    if (alt) alt.hidden = client !== 'cli';
+
+    if (pickedClient) {
+      pickedClient.textContent =
+        clientButtons.find((b) => b.dataset.client === client)?.dataset.long ?? '';
+    }
+    if (pickedPlatform) pickedPlatform.textContent = picked?.dataset.label ?? '';
+    for (const b of clientButtons) {
+      b.setAttribute('aria-pressed', String(b.dataset.client === client));
+    }
+    for (const b of buildButtons) b.setAttribute('aria-pressed', String(b.dataset.build === build));
+  }
+
+  for (const b of clientButtons) {
+    b.addEventListener('click', () => {
+      client = b.dataset.client ?? 'cli';
+      render();
+    });
+  }
+  for (const b of buildButtons) {
+    b.addEventListener('click', () => {
+      build = b.dataset.build ?? build;
+      render();
+    });
+  }
+
+  // Detect, and say so when the answer is that there is nothing for you. Only
+  // builds the release ships are rendered, so a Windows visitor matches none of
+  // them and is told, rather than being handed a macOS command.
+  const ua = navigator.userAgent;
+  const os = /Mac/i.test(ua) ? 'macos' : /Linux|X11|Android/i.test(ua) ? 'linux' : 'other';
+  const arch = /arm64|aarch64/i.test(ua) ? 'aarch64' : 'x86_64';
+  const forOs = buildButtons.filter((b) => b.dataset.os === os);
+  if (forOs.length) {
+    build =
+      (forOs.find((b) => b.dataset.build?.startsWith(arch)) ?? forOs[0]).dataset.build ?? build;
+  } else if (unsupported) {
+    unsupported.hidden = false;
+  }
+  render();
+
+  copy?.addEventListener('click', async () => {
+    if (!code?.textContent) return;
+    try {
+      await navigator.clipboard.writeText(code.textContent);
+      copy.textContent = 'copied';
+      setTimeout(() => {
+        copy.textContent = 'copy';
+      }, 1500);
+    } catch {
+      /* clipboard unavailable (permissions or an insecure context) */
+    }
+  });
+</script>

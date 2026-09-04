@@ -15,6 +15,8 @@ export interface ReleaseTarget {
   asset: string;
   url: string;
   size: number;
+  /** From the release's own checksums-sha256.txt, the file install.sh verifies against. */
+  sha256?: string;
 }
 
 export interface Platform extends ReleaseTarget {
