@@ -1,0 +1,110 @@
+---
+title: 'Time travel'
+description: 'Read the database as it was, and branch from a point in the past, without restoring anything.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+import Figure from '../../../components/docs/Figure.astro';
+
+Strata keeps what each version held, so reading the past is a read rather than a
+restore. There is no snapshot to mount and no backup to unpack: you name a point
+and run an ordinary command against it.
+
+This page assumes [Commits and versions](/docs/learn/commits-and-versions),
+which is where versions, timestamps and history come from.
+
+## Reading at a point
+
+Add `--as-of` to a read and it answers as of that position on the timeline:
+
+```console
+strata kv get k --as-of 4
+```
+
+The rule is **the latest committed state at or before the point you named**. That
+"or before" is the whole behaviour, and it is easy to miss until you watch it.
+Take a key written at timestamp 3 and again at 5, with somebody else's write
+landing at 4:
+
+| `--as-of` | answer  | why                                                    |
+| --------- | ------- | ------------------------------------------------------ |
+| 2         | nothing | the key did not exist yet                              |
+| 3         | `v1`    | the write landed here                                  |
+| 4         | `v1`    | nothing touched this key at 4, so 3 is still the truth |
+| 5         | `v2`    | the second write                                       |
+| 6         | error   | past the end of the timeline                           |
+
+You do not have to hit a point where your record changed. Any point resolves
+to what a reader would have seen standing there.
+
+Deletions are respected the same way. A key deleted at timestamp 7 reads as
+present at 6 and absent at 8, because the tombstone is part of the history
+rather than an absence in it.
+
+## Not every read takes a point
+
+In 1.1.1, `kv get`, `kv list`, `json get`, `vector query` and `graph neighbors`
+accept `--as-of`. `kv scan` and `event range` do not.
+
+That is worth checking before you build on it. A temporal read that is not
+supported fails rather than quietly answering from the present, but the failure
+is at the point of use, so it is better to know which commands you have.
+
+## Which number to pass
+
+This is the one sharp edge. History gives you two numbers per entry and they are
+not interchangeable.
+
+```json
+{ "timestamp": 88, "value": "0.62", "version": 38 }
+```
+
+`--as-of` takes the **timestamp**. Passing the version does not raise an error;
+in a database that started from a clone it quietly returns nothing, and in a
+fresh database it happens to work because the two numbers coincide there. So the
+mistake survives testing and fails later.
+
+`branch fork` is better behaved, because it names which one it wants:
+
+```console
+strata branch fork default before --version 3
+strata branch fork default before --timestamp 3
+```
+
+Both exist and both are honest about the counter they take. Filed upstream as
+strata-core issue 3066.
+
+## Branching from the past
+
+A point-in-time read answers a question. A branch from that point gives you
+somewhere to work.
+
+```console
+strata branch fork default before --version 3
+```
+
+`before` now holds the database as it stood at version 3, and it is an ordinary
+branch: you can write to it, compare it against the branch it came from, and
+merge it. The parent keeps moving without disturbing it.
+
+<Figure
+  kind="branch"
+  caption="A branch taken from an earlier version starts from what the database held then, and stays isolated as the parent keeps committing past that point."
+/>
+
+This is the recovery story, and it is worth seeing as one. A bad migration does
+not need a restore: branch from the version before it, check the state is what
+you expected, and merge that back. Nothing was rolled back, nothing was lost,
+and the bad versions stay in the history where you can still read them.
+
+## History is retained, not permanent
+
+Time travel reaches as far back as the retained history and no further. Ask for
+a point beyond the timeline and Strata says so with
+`history_unavailable.engine.persistence_history` rather than answering from the
+nearest thing it has.
+
+That is the right failure. A point-in-time read that silently substitutes a
+different point is worse than one that refuses, particularly for the audit and
+recovery work this feature exists for.
