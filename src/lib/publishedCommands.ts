@@ -9,7 +9,7 @@
 // routes and the cross-links from disagreeing about what exists.
 import index from '../data/command-index.json';
 
-export const PUBLISHED_FAMILIES = ['kv'] as const;
+export const PUBLISHED_FAMILIES = ['kv', 'json'] as const;
 
 export interface CommandEntry {
   id: string;

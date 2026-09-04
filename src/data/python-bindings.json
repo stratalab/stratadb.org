@@ -1,4 +1,76 @@
 {
+  "admin.config": {
+    "call": "db.admin.config",
+    "signature": "() -> 'Any'",
+    "summary": "The effective open configuration.",
+    "example": [
+      "db.admin.config().default_branch"
+    ]
+  },
+  "admin.config_key": {
+    "call": "db.admin.config_value",
+    "signature": "(key: 'str') -> 'Any'",
+    "summary": "One configuration value by key.",
+    "example": [
+      "db.admin.config_value(\"missing\") is None"
+    ]
+  },
+  "admin.describe": {
+    "call": "db.admin.describe",
+    "signature": "() -> 'Any'",
+    "summary": "A structured description of the database's capabilities and layout.",
+    "example": [
+      "db.admin.describe().default_branch"
+    ]
+  },
+  "admin.health": {
+    "call": "db.admin.health",
+    "signature": "() -> 'Any'",
+    "summary": "Control-plane health across the branch/space catalogs and registry.",
+    "example": [
+      "db.admin.health().status.value"
+    ]
+  },
+  "admin.info": {
+    "call": "db.admin.info",
+    "signature": "() -> 'Any'",
+    "summary": "Database info: target, durability, branch/space counts, version, and",
+    "example": [
+      "db.admin.info().branch_count"
+    ]
+  },
+  "admin.ipc_status": {
+    "call": "db.admin.ipc_status",
+    "signature": "() -> 'Any'",
+    "summary": "This process's multi-process IPC state.",
+    "example": [
+      "db.admin.ipc_status().hosting"
+    ]
+  },
+  "admin.ipc_stop": {
+    "call": "db.admin.ipc_stop",
+    "signature": "() -> 'Any'",
+    "summary": "Stop hosting the multi-process broker socket.",
+    "example": [
+      "db.admin.ipc_stop().stopped"
+    ]
+  },
+  "admin.metrics": {
+    "call": "db.admin.metrics",
+    "signature": "() -> 'Any'",
+    "summary": "Operational metrics.",
+    "example": [
+      "db.admin.metrics().branch_count"
+    ]
+  },
+  "admin.ping": {
+    "call": "db.admin.ping",
+    "signature": "() -> 'Any'",
+    "summary": "A liveness check; returns the engine version.",
+    "example": [
+      "isinstance(db.admin.ping().version, str)"
+    ]
+  },
   "arrow.export": {
     "call": "db.arrow.export",
     "signature": "(primitive: 'str', path: 'str', *, format: 'str' = 'parquet', collection: 'Optional[str]' = None, event_type: 'Optional[str]' = None, graph: 'Optional[str]' = None, limit: 'Optional[int]' = None, prefix: 'Optional[str]' = None) -> 'Any'",
@@ -172,6 +244,26 @@
       "[e.event.payload for e in db.events.range(0)]"
     ]
   },
+  "event.range_time": {
+    "call": "db.events.range_by_time",
+    "signature": "(start_ts: 'int', *, end_ts: 'Optional[int]' = None, limit: 'Optional[int]' = None, reverse: 'bool' = False, event_type: 'Optional[str]' = None) -> 'Page'",
+    "summary": "A page of events by **occurrence time** (the one wall-clock axis).",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "_ = db.events.append(\"user.updated\", {\"id\": 2})",
+      "[e.event.payload for e in db.events.range_by_time(0)]"
+    ]
+  },
+  "event.types": {
+    "call": "db.events.types",
+    "signature": "(*, as_of: 'Optional[int]' = None) -> 'list'",
+    "summary": "The distinct event types present in the log.",
+    "example": [
+      "_ = db.events.append(\"user.created\", {\"id\": 1})",
+      "_ = db.events.append(\"user.updated\", {\"id\": 2})",
+      "db.events.types()"
+    ]
+  },
   "event.verify_chain": {
     "call": "db.events.verify_chain",
     "signature": "() -> 'Any'",
@@ -200,6 +292,16 @@
       "_ = db.graphs.create(\"g\")",
       "_ = db.graphs.batch_write(\"g\", [{\"type\": \"upsert_node\", \"node_id\": \"a\", \"data\": {\"object_type\": \"person\"}}, {\"type\": \"upsert_node\", \"node_id\": \"b\", \"data\": {\"object_type\": \"person\"}}, {\"type\": \"upsert_edge\", \"src\": \"a\", \"edge_type\": \"knows\", \"dst\": \"b\", \"data\": {}}])  # All operations land in one engine commit, or none do.",
       "db.graphs.meta(\"g\").node_count"
+    ]
+  },
+  "graph.bindings": {
+    "call": "db.graphs.bindings_for_entity",
+    "signature": "(primitive: 'str', key: 'str', *, space: 'Optional[str]' = None) -> 'Page'",
+    "summary": "Graph nodes bound to a product entity (``primitive`` is kv/json/vector/event/graph).",
+    "example": [
+      "_ = db.graphs.create(\"kb\")",
+      "_ = db.graphs.add_node(\"kb\", \"ada\", binding={\"target\": {\"primitive\": \"kv\", \"space\": \"default\", \"key\": \"user:1\"}})  # Bind the node to a KV entity so retrieval can cross primitives.",
+      "[h.node_id for h in db.graphs.bindings_for_entity(\"kv\", \"user:1\")]"
     ]
   },
   "graph.bulk_insert": {
@@ -231,6 +333,44 @@
       "db.graphs.list()"
     ]
   },
+  "graph.edge.add": {
+    "call": "db.graphs.add_edge",
+    "signature": "(graph: 'str', src: 'str', edge_type: 'str', dst: 'str', *, weight: 'Optional[float]' = None, properties: 'Optional[dict]' = None) -> 'Any'",
+    "summary": "Adds or replaces a directed, typed edge from ``src`` to ``dst``.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.add_node(\"social\", \"bob\")",
+      "_ = db.graphs.add_edge(\"social\", \"alice\", \"knows\", \"bob\")",
+      "db.graphs.get_edge(\"social\", \"alice\", \"knows\", \"bob\").edge_type"
+    ]
+  },
+  "graph.edge.get": {
+    "call": "db.graphs.get_edge",
+    "signature": "(graph: 'str', src: 'str', edge_type: 'str', dst: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Returns an edge, or ``None`` if absent.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.add_node(\"social\", \"bob\")",
+      "_ = db.graphs.add_edge(\"social\", \"alice\", \"knows\", \"bob\")",
+      "db.graphs.get_edge(\"social\", \"alice\", \"knows\", \"bob\").edge_type",
+      "db.graphs.get_edge(\"social\", \"alice\", \"knows\", \"absent\") is None"
+    ]
+  },
+  "graph.edge.remove": {
+    "call": "db.graphs.remove_edge",
+    "signature": "(graph: 'str', src: 'str', edge_type: 'str', dst: 'str') -> 'Any'",
+    "summary": "Removes an edge.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.add_node(\"social\", \"bob\")",
+      "_ = db.graphs.add_edge(\"social\", \"alice\", \"knows\", \"bob\")",
+      "_ = db.graphs.remove_edge(\"social\", \"alice\", \"knows\", \"bob\")",
+      "db.graphs.get_edge(\"social\", \"alice\", \"knows\", \"bob\") is None"
+    ]
+  },
   "graph.list": {
     "call": "db.graphs.list",
     "signature": "() -> 'list'",
@@ -238,6 +378,17 @@
     "example": [
       "_ = db.graphs.create(\"social\")",
       "db.graphs.list()"
+    ]
+  },
+  "graph.meta": {
+    "call": "db.graphs.meta",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Returns a graph's metadata (node/edge counts, timestamps).",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.add_node(\"social\", \"bob\")",
+      "db.graphs.meta(\"social\").node_count"
     ]
   },
   "graph.neighbors": {
@@ -250,6 +401,49 @@
       "_ = db.graphs.add_node(\"social\", \"bob\")",
       "_ = db.graphs.add_edge(\"social\", \"alice\", \"knows\", \"bob\")",
       "[n.node_id for n in db.graphs.neighbors(\"social\", \"alice\", direction=\"outgoing\")]"
+    ]
+  },
+  "graph.node.add": {
+    "call": "db.graphs.add_node",
+    "signature": "(graph: 'str', node_id: 'str', *, properties: 'Optional[dict]' = None, object_type: 'Optional[str]' = None, binding: 'Optional[dict]' = None) -> 'Any'",
+    "summary": "Adds or replaces a node.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\", properties={\"age\": 30}, object_type=\"person\")",
+      "db.graphs.get_node(\"social\", \"alice\").properties"
+    ]
+  },
+  "graph.node.get": {
+    "call": "db.graphs.get_node",
+    "signature": "(graph: 'str', node_id: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Returns a node, or ``None`` if absent.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\", properties={\"age\": 30}, object_type=\"person\")",
+      "db.graphs.get_node(\"social\", \"alice\").properties",
+      "db.graphs.get_node(\"social\", \"absent\") is None"
+    ]
+  },
+  "graph.node.list": {
+    "call": "db.graphs.list_nodes",
+    "signature": "(graph: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, prefix: 'Optional[str]' = None) -> 'Page'",
+    "summary": "One page of a graph's nodes.",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.add_node(\"social\", \"bob\")",
+      "[n.node_id for n in db.graphs.list_nodes(\"social\")]"
+    ]
+  },
+  "graph.node.remove": {
+    "call": "db.graphs.remove_node",
+    "signature": "(graph: 'str', node_id: 'str') -> 'Any'",
+    "summary": "Removes a node (and its incident edges).",
+    "example": [
+      "_ = db.graphs.create(\"social\")",
+      "_ = db.graphs.add_node(\"social\", \"alice\")",
+      "_ = db.graphs.remove_node(\"social\", \"alice\")",
+      "db.graphs.get_node(\"social\", \"alice\") is None"
     ]
   },
   "graph.nodes_by_type": {
@@ -374,12 +568,51 @@
       "db.json.exists(\"absent\")"
     ]
   },
+  "json.get": {
+    "call": "db.json.get",
+    "signature": "(key: 'str', path: 'str' = '$', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "summary": "Returns the JSON value at ``path``, or ``None`` if absent.",
+    "example": [
+      "_ = db.json.set(\"user\", \"$\", {\"name\": \"alice\", \"age\": 30})",
+      "db.json.get(\"user\", \"$\")",
+      "db.json.get(\"user\", \"$.name\")",
+      "db.json.get(\"absent\", \"$\") is None"
+    ]
+  },
   "json.history": {
     "call": "db.json.history",
     "signature": "(key: 'str') -> 'Optional[list]'",
     "summary": "Full version history (newest first), or ``None`` if the document never existed.",
     "example": [
       "db.json.history(\"absent\") is None"
+    ]
+  },
+  "json.index.create": {
+    "call": "db.json.create_index",
+    "signature": "(name: 'str', field_path: 'str', *, index_type: 'str' = 'tag') -> 'Any'",
+    "summary": "Creates a secondary index over ``field_path``.",
+    "example": [
+      "_ = db.json.create_index(\"by_name\", \"$.name\", index_type=\"tag\")",
+      "[i.name for i in db.json.list_indexes()]"
+    ]
+  },
+  "json.index.drop": {
+    "call": "db.json.drop_index",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Drops a secondary index.",
+    "example": [
+      "_ = db.json.create_index(\"by_name\", \"$.name\", index_type=\"tag\")",
+      "_ = db.json.drop_index(\"by_name\")",
+      "[i.name for i in db.json.list_indexes()]"
+    ]
+  },
+  "json.index.list": {
+    "call": "db.json.list_indexes",
+    "signature": "() -> 'list'",
+    "summary": "Lists the defined secondary indexes.",
+    "example": [
+      "_ = db.json.create_index(\"by_name\", \"$.name\", index_type=\"tag\")",
+      "[i.name for i in db.json.list_indexes()]"
     ]
   },
   "json.list": {
@@ -597,6 +830,34 @@
       "db.vectors.count(\"docs\")"
     ]
   },
+  "vector.collection.create": {
+    "call": "db.vectors.create_collection",
+    "signature": "(name: 'str', dimension: 'int', *, metric: 'str' = 'cosine') -> 'Any'",
+    "summary": "Creates a collection of ``dimension``-d vectors under ``metric``.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "db.vectors.stats(\"docs\").dimension"
+    ]
+  },
+  "vector.collection.delete": {
+    "call": "db.vectors.delete_collection",
+    "signature": "(name: 'str') -> 'Any'",
+    "summary": "Deletes a collection and all its vectors.",
+    "example": [
+      "_ = db.vectors.create_collection(\"temp\", 3, metric=\"cosine\")",
+      "_ = db.vectors.delete_collection(\"temp\")",
+      "[c.name for c in db.vectors.list_collections()]"
+    ]
+  },
+  "vector.collection.list": {
+    "call": "db.vectors.list_collections",
+    "signature": "() -> 'Page'",
+    "summary": "Lists the collections.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "[c.name for c in db.vectors.list_collections()]"
+    ]
+  },
   "vector.collection.stats": {
     "call": "db.vectors.stats",
     "signature": "(name: 'str') -> 'Any'",
@@ -691,6 +952,23 @@
       "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0])",
       "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0])",
       "[m.key for m in db.vectors.index_query(\"docs\", [1.0, 0.0, 0.0], k=2)[0]]"
+    ]
+  },
+  "vector.keys": {
+    "call": "db.vectors.iter_keys",
+    "signature": "(collection: 'str', *, as_of: 'Optional[int]' = None) -> 'Iterator[str]'",
+    "summary": "Iterates every key in ``collection``, paginating internally.",
+    "example": []
+  },
+  "vector.metadata.update": {
+    "call": "db.vectors.update_metadata",
+    "signature": "(collection: 'str', key: 'str', metadata: 'dict') -> 'Any'",
+    "summary": "Patches the metadata of an existing vector.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0], metadata={\"tag\": \"x\"})",
+      "_ = db.vectors.update_metadata(\"docs\", \"a\", {\"tag\": \"z\"})",
+      "db.vectors.get(\"docs\", \"a\").data.metadata"
     ]
   },
   "vector.query": {
