@@ -3,6 +3,15 @@
 //
 // A node with children is a collapsible group; a leaf is a link once its page
 // exists and plain text until then, so the sidebar can never invent a link.
+//
+// Depth reads structurally, not by indentation alone: every level of children
+// hangs off its own vertical rule, so opening Reference draws one rule and
+// opening Commands inside it draws a second. At four levels deep that is the
+// only thing telling you where you are.
+//
+// Groups and leaves share a fixed-width chevron slot, so a group's label lines
+// up with the labels of the leaves beside it and the chevron hangs in the
+// gutter rather than pushing the text along.
 import type { TreeNode } from '../../lib/docsTree';
 import Self from './DocsSidebarNode.astro';
 
@@ -13,16 +22,27 @@ interface Props {
 }
 const { node, depth, open = false } = Astro.props;
 const hasChildren = Boolean(node.children?.length);
+
+// The page being read, so the tree can say where you are. Trailing slashes vary
+// by host, so compare without one.
+const here = Astro.url.pathname.replace(/\/$/, '');
+const isCurrent = Boolean(node.href) && node.href!.replace(/\/$/, '') === here;
+
+// A group stays open when it holds the current page, so a deep link arrives
+// with its ancestors already unfolded.
+const holdsCurrent = (n: TreeNode): boolean =>
+  n.href?.replace(/\/$/, '') === here || (n.children?.some(holdsCurrent) ?? false);
+const shouldOpen = open || (hasChildren && node.children!.some(holdsCurrent));
 ---
 
 {
   hasChildren ? (
-    <details open={open} class="tree-node">
-      <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-(--radius-control) py-1 pl-1 pr-2 text-small text-ink-mid transition-colors duration-200 hover:text-ink-hi">
-        <span class="tree-chev shrink-0 text-ink-low">›</span>
+    <details open={shouldOpen} class="tree-node">
+      <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-(--radius-control) py-1.5 pl-1 pr-2 text-body text-ink-hi transition-colors duration-200 hover:text-terracotta-400">
+        <span class="tree-chev w-3 shrink-0 text-center text-ink-low">›</span>
         <span class="min-w-0 flex-1 truncate">{node.label}</span>
       </summary>
-      <ul class="ml-2 space-y-px border-l border-line pl-1">
+      <ul class="ml-2.5 space-y-px border-l border-line">
         {node.children!.map((child) => (
           <li>
             <Self node={child} depth={depth + 1} />
@@ -33,21 +53,27 @@ const hasChildren = Boolean(node.children?.length);
   ) : node.href ? (
     <a
       href={node.href}
+      aria-current={isCurrent ? 'page' : undefined}
       class:list={[
-        '-ml-px block border-l-2 border-transparent py-1 pl-4 transition-colors duration-200 hover:border-line-hover hover:text-ink-hi',
-        node.generated ? 'font-mono text-mono-sm text-ink-mid' : 'text-small text-ink-mid',
+        '-ml-px flex items-center gap-1.5 border-l-2 py-1.5 pl-1 pr-2 transition-colors duration-200',
+        node.generated ? 'font-mono text-mono-body' : 'text-body',
+        isCurrent
+          ? 'border-terracotta-500 text-ink-hi'
+          : 'border-transparent text-ink-mid hover:border-line-hover hover:text-ink-hi',
       ]}
     >
-      {node.label}
+      <span class="w-3 shrink-0" aria-hidden="true" />
+      <span class="min-w-0 flex-1 truncate">{node.label}</span>
     </a>
   ) : (
     <span
       class:list={[
-        '-ml-px block border-l-2 border-transparent py-1 pl-4',
-        node.generated ? 'font-mono text-mono-sm text-ink-low' : 'text-small text-ink-low',
+        '-ml-px flex items-center gap-1.5 border-l-2 border-transparent py-1.5 pl-1 pr-2 text-ink-low',
+        node.generated ? 'font-mono text-mono-body' : 'text-body',
       ]}
     >
-      {node.label}
+      <span class="w-3 shrink-0" aria-hidden="true" />
+      <span class="min-w-0 flex-1 truncate">{node.label}</span>
     </span>
   )
 }

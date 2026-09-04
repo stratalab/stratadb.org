@@ -1,0 +1,113 @@
+---
+// The Reference landing.
+//
+// Reference holds two kinds of thing that look alike in a sidebar and are not:
+// the generated command catalog, and the binary's own surface. "Commands" and
+// "CLI" both read as the place `strata kv put` lives, and no sidebar label
+// short enough to fit will fix that. This page is where the distinction is
+// actually made, which is why every one of the six sites we studied has one.
+//
+// Counts are read from the staged data, so nothing here goes stale against a
+// release, and a family that has not been restored says so rather than
+// linking nowhere.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import {
+  FAMILY_ORDER,
+  FAMILY_TITLES,
+  commandsInFamily,
+  isFamilyPublished,
+} from '../../../lib/publishedCommands';
+import index from '../../../data/command-index.json';
+import registry from '../../../data/error-registry.json';
+import release from '../../../data/release.json';
+
+const families = FAMILY_ORDER.map((family) => ({
+  family,
+  title: FAMILY_TITLES[family] ?? family,
+  count: commandsInFamily(family).length,
+  href: isFamilyPublished(family) ? `/docs/reference/${family}` : undefined,
+}));
+
+const total = index.commands.length;
+const live = families.filter((f) => f.href).length;
+
+// The rest of the section. Nothing links yet; each gains an href as it lands.
+const tables = [
+  {
+    label: 'CLI',
+    note: 'The binary itself rather than the data commands: global options, init, doctor, agents, mcp, start and stop, ipc and remote.',
+  },
+  {
+    label: 'MCP tools',
+    note: `Every command as an MCP tool name, for wiring up a client. The same ${total} commands, addressed the way an MCP host addresses them.`,
+  },
+  { label: 'Configuration', note: 'Every setting, where it can be set, and what it defaults to.' },
+  {
+    label: 'Error codes',
+    note: `All ${registry.errors.length} codes, each with its retry policy and what happened to the commit.`,
+  },
+  { label: 'Data types', note: 'The types that appear in parameters and return shapes.' },
+  {
+    label: 'Compatibility and versioning',
+    note: 'What a version number promises, and what changes between them.',
+  },
+];
+---
+
+<DocsLayout
+  title="Reference"
+  description="Every StrataDB command, generated from the IDL, plus the tables to look things up in."
+  section="Reference"
+  wide
+>
+  <h1>Reference</h1>
+  <p>
+    Every command Strata exposes, plus the tables you look things up in. These pages are composed
+    from the interface definition shipped with strata-core {release.version}, not written by hand.
+  </p>
+
+  <section class="not-prose mt-10">
+    <h2 class="text-heading text-ink-hi">Commands</h2>
+    <p class="mt-2 max-w-[46rem] text-body text-ink-mid">
+      {total} commands across {families.length} families. Each one carries its CLI and Python spelling,
+      an example, its parameters, what it returns and the errors it can raise. {live} families are restored
+      so far.
+    </p>
+
+    <ul
+      class="mt-5 grid gap-px overflow-hidden rounded-(--radius-frame) border border-line bg-line sm:grid-cols-2 lg:grid-cols-3"
+    >
+      {
+        families.map((f) =>
+          f.href ? (
+            <li class="bg-raised transition-colors duration-200 hover:bg-elevated">
+              <a href={f.href} class="flex items-baseline justify-between gap-3 px-4 py-3.5">
+                <span class="text-body text-ink-hi">{f.title}</span>
+                <span class="shrink-0 font-mono text-mono-sm text-ink-low">{f.count}</span>
+              </a>
+            </li>
+          ) : (
+            <li class="flex items-baseline justify-between gap-3 bg-raised px-4 py-3.5">
+              <span class="text-body text-ink-low">{f.title}</span>
+              <span class="shrink-0 font-mono text-mono-sm text-ink-low">{f.count}</span>
+            </li>
+          ),
+        )
+      }
+    </ul>
+  </section>
+
+  <section class="not-prose mt-12">
+    <h2 class="text-heading text-ink-hi">Everything else</h2>
+    <dl class="mt-4 space-y-5">
+      {
+        tables.map((t) => (
+          <div class="border-l border-line pl-4">
+            <dt class="text-body font-medium text-ink-hi">{t.label}</dt>
+            <dd class="mt-1 max-w-[46rem] text-body text-ink-mid">{t.note}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+</DocsLayout>

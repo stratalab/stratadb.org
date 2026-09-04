@@ -201,6 +201,7 @@ export const docsTree: TreeNode[] = [
   },
   {
     label: 'Reference',
+    href: '/docs/reference',
     children: [
       // Commands leads. It is 135 of the roughly 150 pages in this section, and
       // it is what someone opening Reference came for. It also disambiguates
