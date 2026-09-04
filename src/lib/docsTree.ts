@@ -202,6 +202,12 @@ export const docsTree: TreeNode[] = [
   {
     label: 'Reference',
     children: [
+      // Commands leads. It is 135 of the roughly 150 pages in this section, and
+      // it is what someone opening Reference came for. It also disambiguates
+      // the node below it: with Commands first, "CLI" reads as the binary's own
+      // surface rather than as the way to run a command, which is the reading a
+      // reader after `strata kv put` would otherwise take.
+      commandsNode(),
       {
         label: 'CLI',
         children: [
@@ -216,7 +222,6 @@ export const docsTree: TreeNode[] = [
           { label: 'command' },
         ],
       },
-      commandsNode(),
       { label: 'MCP tools', generated: true },
       { label: 'Configuration' },
       { label: 'Error codes' },
