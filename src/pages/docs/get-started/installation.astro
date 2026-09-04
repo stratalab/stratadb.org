@@ -37,7 +37,6 @@ const megabytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 const toc = [
   { depth: 2, slug: 'install', text: 'Installation' },
-  { depth: 2, slug: 'downloads', text: 'Direct downloads' },
   { depth: 2, slug: 'verify', text: 'Check it worked' },
 ];
 ---
@@ -146,33 +145,41 @@ const toc = [
     >
   </p>
 
-  <h2 id="downloads" class="mt-12">Direct downloads</h2>
-  <p>
-    Every archive this release ships, with the digest <code>install.sh</code> checks before it installs
-    anything.
-  </p>
-  <ul class="not-prose mt-4 space-y-3">
-    {
-      builds.map((b) => (
-        <li class="rounded-(--radius-frame) border border-line bg-raised px-5 py-4">
-          <a
-            href={b.url}
-            class="font-mono text-mono-body text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
-          >
-            {b.asset}
-          </a>
-          <p class="mt-1 text-body text-ink-low">
-            {b.os} {b.arch} · {megabytes(b.size)}
-          </p>
-          {b.sha256 && (
-            <p class="mt-1.5 break-all font-mono text-mono-sm text-ink-low">
-              <span class="text-ink-mid">SHA256</span> {b.sha256}
-            </p>
-          )}
-        </li>
-      ))
-    }
-  </ul>
+  <details id="downloads" class="facet not-prose mt-6 scroll-mt-24">
+    <summary
+      class="inline-flex cursor-pointer list-none items-center gap-2 text-body text-ink-mid transition-colors duration-200 hover:text-terracotta-400"
+    >
+      <span class="facet-chev text-ink-low" aria-hidden="true">&rsaquo;</span>
+      Direct downloads and checksums
+    </summary>
+    <div class="mt-3 space-y-3">
+      <p class="text-body text-ink-mid">
+        Every archive this release ships, with the digest the installer verifies against.
+      </p>
+      <ul class="space-y-3">
+        {
+          builds.map((b) => (
+            <li class="rounded-(--radius-frame) border border-line bg-raised px-5 py-4">
+              <a
+                href={b.url}
+                class="font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+              >
+                {b.asset}
+              </a>
+              <p class="mt-1 text-small text-ink-low">
+                {b.os} {b.arch} · {megabytes(b.size)}
+              </p>
+              {b.sha256 && (
+                <p class="mt-1.5 break-all font-mono text-mono-sm text-ink-low">
+                  <span class="text-ink-mid">SHA256</span> {b.sha256}
+                </p>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </details>
 
   <h2 id="verify" class="mt-12">Check it worked</h2>
   <p>Ask the binary what it is. It answers without a database, a server or a config file.</p>
@@ -191,6 +198,10 @@ const toc = [
   }
   details.facet[open] > summary > .facet-chev {
     transform: rotate(180deg);
+  }
+  /* The downloads disclosure uses a right-pointing marker, so it turns down. */
+  details#downloads[open] > summary > .facet-chev {
+    transform: rotate(90deg);
   }
 </style>
 
