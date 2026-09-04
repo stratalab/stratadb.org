@@ -1,0 +1,97 @@
+---
+// One command as it appears on a family page: the light form.
+//
+// Shaped after the Databricks utilities reference, where each command is a
+// band with a heading, a sentence, a switched example and a pointer to the
+// full page. The switcher covers the invocation and the example together,
+// since unlike dbutils our interfaces do not share a signature: the CLI spells
+// it `strata kv batch-delete` and Python spells it `db.kv.delete_many`.
+//
+// The band carries its own rule and its own breathing room, so a reader
+// scanning thirteen commands has an edge to move their eye along.
+interface Props {
+  /** Anchor id, also the rail target. */
+  id: string;
+  /** Heading text: the engine op, as the sidebar spells it. */
+  name: string;
+  /** Heading level, since grouped commands sit under a group heading. */
+  level?: 2 | 3;
+  summary: string;
+  /** Full command page. */
+  href: string;
+  cli: string;
+  cliExample?: string;
+  python?: { call: string; signature: string; example?: string[] };
+}
+
+const { id, name, level = 2, summary, href, cli, cliExample, python } = Astro.props;
+
+const Heading = level === 2 ? 'h2' : 'h3';
+const ifaces = ['cli', ...(python ? ['python'] : [])];
+const IFACE_LABEL: Record<string, string> = { cli: 'CLI', python: 'Python' };
+
+const invocation: Record<string, string> = {
+  cli: cli,
+  python: python ? `${python.call}${python.signature}` : '',
+};
+const sample: Record<string, string> = {
+  cli: cliExample ?? '',
+  python: python?.example?.map((line) => `>>> ${line}`).join('\n') ?? '',
+};
+
+// A <pre> keeps every character, including whitespace a formatter adds around
+// an expression, so set the text directly.
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+---
+
+<section id={id} data-command-entry class="not-prose mt-10 scroll-mt-24 border-b border-line pb-10">
+  <Heading class:list={['font-mono text-ink-hi', level === 2 ? 'text-heading' : 'text-body-lg']}
+    >{name}</Heading
+  >
+  <p class="mt-2 text-body text-ink-mid">{summary}</p>
+
+  <div class="mt-5 overflow-hidden rounded-(--radius-frame) border border-line bg-raised">
+    <div
+      class:list={['gap-1 border-b border-line px-3 py-2', ifaces.length > 1 ? 'flex' : 'hidden']}
+      role="tablist"
+      aria-label={`Interface for ${name}`}
+    >
+      {
+        ifaces.map((iface, i) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+            data-iface-tab={iface}
+            class="rounded-(--radius-control) px-3 py-1.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:text-ink-hi aria-selected:bg-elevated aria-selected:text-ink-hi"
+          >
+            {IFACE_LABEL[iface]}
+          </button>
+        ))
+      }
+    </div>
+
+    {
+      ifaces.map((iface) => (
+        <div data-iface-panel={iface} hidden={iface !== 'cli'}>
+          <p class="px-5 py-3.5 font-mono text-mono-body text-ink-hi">{invocation[iface]}</p>
+          {sample[iface] && (
+            <pre
+              class="overflow-x-auto border-t border-line bg-inset px-5 py-4 font-mono text-mono-sm text-term-fg"
+              set:html={escapeHtml(sample[iface])}
+            />
+          )}
+        </div>
+      ))
+    }
+  </div>
+
+  <a
+    href={href}
+    class="mt-4 inline-block font-mono text-mono-sm text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+  >
+    View details &rarr;
+  </a>
+</section>
