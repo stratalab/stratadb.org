@@ -36,7 +36,7 @@ export const docsTree: TreeNode[] = [
       { label: 'Installation', href: '/docs/get-started/installation' },
       { label: 'Quickstart' },
       { label: 'Python quickstart' },
-      { label: 'AI agent quickstart' },
+      { label: 'AI agent quickstart', href: '/docs/get-started/agents' },
     ],
   },
   {

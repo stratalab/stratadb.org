@@ -73,10 +73,8 @@ const codes = new Map(registry.errors.map((e) => [e.code, e]));
 const python = (bindings as Record<string, PythonBinding>)[id];
 
 // The selector answers "what am I writing this in", so it carries languages
-// only. Node joins it when the SDK ships. The wire type and the MCP tool name
-// are single facts rather than languages, so they sit on one line below instead
-// of taking a tab each; the markdown twin still carries both, since an agent
-// configuring MCP or driving `strata command run` is exactly who wants them.
+// only. Node joins it when the SDK ships. The wire type is a single fact rather
+// than a language, so it sits on one line below instead of taking a tab.
 // An interface is offered only where the catalog actually has a spelling for
 // it. A command with no cli.path is programmatic only, and rendering "strata "
 // with an empty path would invent a command that does not exist.
@@ -218,15 +216,17 @@ const RETRY_TONE: Record<string, string> = {
     }
   </div>
 
+  {
+    /*
+    Wire type only. The catalog ships an mcp.name on every command, but the MCP
+    server deliberately serves a crafted handful of tools rather than one per
+    command, so most of those names address nothing a client can call. The line
+    comes back when the catalog distinguishes an exposed tool from a projected
+    name; reported on strata-core issue 2892.
+  */
+  }
   <p class="mt-3 font-mono text-mono-sm text-ink-low">
     wire <span class="text-ink-mid">{command.wire ?? command.id.replace(/\./g, '_')}</span>
-    {
-      command.mcp?.name && (
-        <>
-          {' · '}MCP tool <span class="text-ink-mid">{command.mcp.name}</span>
-        </>
-      )
-    }
   </p>
 
   <div class="prose-docs mt-8">

@@ -1,0 +1,158 @@
+---
+// Get Started for a coding agent, and for the person wiring one up.
+//
+// Every command on this page was run against the shipped binary before it was
+// written down, and the MCP exchange was spoken to `strata mcp serve` over
+// stdio rather than transcribed from a spec.
+//
+// The small tool set is the design, not a gap. A tool definition per command
+// would eat the context window before the model saw the task, so a crafted
+// handful covers the common path and one escape hatch reaches everything else.
+//
+// No tool list here even so. The set moves between releases and an agent calls
+// tools/list anyway, so naming them on a page only creates something to go
+// stale. The catalog carrying an mcp.name on every command, exposed or not, is
+// a separate matter, reported on strata-core issue 2892.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import release from '../../../data/release.json';
+import index from '../../../data/command-index.json';
+
+// Each of these prints and exits, so an agent can shell out and read stdout.
+const offline = [
+  {
+    cmd: 'strata agents guide',
+    note: 'The complete usage guide, as markdown, matched to the installed version.',
+  },
+  {
+    cmd: 'strata agents commands --json',
+    note: 'The command catalog: every command with its access, batch and commit facets.',
+  },
+  {
+    cmd: 'strata agents errors --json',
+    note: 'The error registry: every code with its retry policy and commit outcome.',
+  },
+];
+
+const toc = [
+  { depth: 2, slug: 'mcp', text: 'Connect over MCP' },
+  { depth: 3, slug: 'tools', text: 'Why there are so few tools' },
+  { depth: 2, slug: 'repo', text: 'Set up a repository' },
+  { depth: 2, slug: 'offline', text: 'Ask the binary' },
+  { depth: 2, slug: 'web', text: 'Read these docs' },
+];
+---
+
+<DocsLayout
+  title="Agents"
+  description="Wire StrataDB into a coding agent: MCP over stdio, repository setup, and docs an agent can read."
+  section="Get Started"
+  wide
+  toc={toc}
+>
+  <h1>Agents</h1>
+  <p>
+    Strata is built to be driven by an agent. The MCP server is in the binary rather than beside it,
+    the docs answer offline and version-matched, and every page on this site has a markdown twin.
+    You need <a href="/docs/get-started/installation">the binary</a> and nothing else.
+  </p>
+
+  <h2 id="mcp">Connect over MCP</h2>
+  <p>
+    The Model Context Protocol server ships inside <code>strata</code>. It speaks newline-delimited
+    JSON-RPC over stdio and logs to stderr, so it drops into any MCP client that can run a command.
+  </p>
+  <pre class="not-prose"><code>strata --db ./mydb mcp serve</code></pre>
+  <p>
+    Point a client at that. The shape is the same everywhere; this is the usual JSON block, with the
+    database path as the argument you change.
+  </p>
+  <pre
+    class="not-prose"><code>{`{
+  "mcpServers": {
+    "strata": {
+      "command": "strata",
+      "args": ["--db", "/absolute/path/to/mydb", "mcp", "serve"]
+    }
+  }
+}`}</code></pre>
+  <h3 id="tools">Why there are so few tools</h3>
+  <p>
+    Strata has {index.commands.length} commands and the server does not offer {
+      index.commands.length
+    }{' '}
+    tools. It offers a crafted handful. Every tool definition a server advertises is spent from the model's
+    context before it reads the task, so a server that hands over its entire surface has made the model
+    worse at using it.
+  </p>
+  <p>
+    So the set covers the path an agent actually walks, and one escape hatch reaches the rest: a
+    tool that runs any command in the catalog by name. Nothing is unreachable, and the common work
+    costs a short list rather than a long one.
+  </p>
+  <p>
+    Ask the server what it has rather than reading a list here. It answers <code>tools/list</code>{
+      ' '
+    }
+    with the current set, which moves between releases, and identifies itself as <code>strata</code
+    >{' '}
+    at the version you installed.
+  </p>
+
+  <h2 id="repo">Set up a repository</h2>
+  <p>
+    Two commands write the files a coding agent looks for. Both are safe to run in a repository that
+    already has them; neither overwrites differing content without <code>--force</code>.
+  </p>
+  <pre class="not-prose"><code>strata agents init</code></pre>
+  <p>
+    Writes <code>.strata/AGENTS.md</code>. With <code>--apply</code> it also appends a pointer block to
+    the repository's own <code>AGENTS.md</code> or <code>CLAUDE.md</code>, so an agent already
+    reading those finds Strata without being told.
+  </p>
+  <pre class="not-prose"><code>strata agents skill --write --for all</code></pre>
+  <p>
+    Installs the Strata skill for the agents that support one:{' '}
+    <code>.claude/skills/strata/SKILL.md</code>, <code>.cursor/rules/strata.mdc</code>, and a
+    marker-delimited section in <code>AGENTS.md</code> for Codex. Pass{' '}
+    <code>--for claude</code>, <code>--for cursor</code> or <code>--for codex</code> to install just one.
+    Without <code>--write</code> it prints the skill to stdout.
+  </p>
+
+  <h2 id="offline">Ask the binary</h2>
+  <p>
+    The installed binary answers the same questions this site does, without a network and matched to
+    the version in front of you. Each of these prints and exits.
+  </p>
+  <ul class="not-prose mt-4 space-y-4">
+    {
+      offline.map((o) => (
+        <li>
+          <p class="font-mono text-mono-body text-ink-hi">{o.cmd}</p>
+          <p class="mt-1 text-body text-ink-mid">{o.note}</p>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="mt-6">
+    That last one matters more than it looks. Strata returns a typed code on failure, and the
+    registry says for each one whether a retry is safe and whether the commit happened. An agent
+    that reads it can tell a conflict it should resolve from a timeout it should retry.
+  </p>
+
+  <h2 id="web">Read these docs</h2>
+  <p>
+    Every reference page has a markdown twin at the same URL with <code>.md</code> appended, and the HTML
+    advertises it with a <code>link rel="alternate"</code>. Static hosting cannot negotiate on{' '}
+    <code>Accept</code>, so the suffix is the mechanism.
+  </p>
+  <p>
+    For the whole corpus at once there is <a href="/llms-full.txt">llms-full.txt</a>, which is every
+    published page concatenated, each carrying the URL it is served at. The index is{' '}
+    <a href="/llms.txt">llms.txt</a>. Both are generated from the same data as the pages, so they
+    cannot describe a site that is not there.
+  </p>
+  <p>
+    Version {release.version}. If a page and the binary disagree, the binary is right: it was built
+    with the engine, and this site is built from what that release published.
+  </p>
+</DocsLayout>

@@ -76,7 +76,8 @@ export function commandMarkdown(id: string, options: MarkdownOptions = {}): stri
   out.push(`| Command | \`${command.id}\` |`);
   out.push(`| CLI | \`strata ${command.cli?.path?.join(' ') ?? ''}\` |`);
   if (command.wire) out.push(`| Wire type | \`${command.wire}\` |`);
-  if (command.mcp?.name) out.push(`| MCP tool | \`${command.mcp.name}\` |`);
+  // No MCP tool row: the catalog names one per command, the server serves 20,
+  // so 120 of those names address nothing (strata-core issue 2892).
   if (python) out.push(`| Python | \`${python.call}${python.signature}\` |`);
   out.push(`| Access | ${command.access} |`);
   out.push(`| Commit | ${COMMIT_LABEL[command.commit] ?? command.commit} |`);
