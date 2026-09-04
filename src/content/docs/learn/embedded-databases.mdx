@@ -34,23 +34,30 @@ opaque files is exactly the thing somebody eventually opens in an editor.
 What you can do is treat the directory as a unit. Copy it, move it, archive it,
 ship it. It is the database.
 
-## One process owns it at a time
+## One process owns it, others go through it
 
-A durable database has a single writer. The process that opens it takes a lock,
-and while it holds that lock another process opening the same directory is
-refused.
+A durable database has a single writer. One process holds the lock, and it is
+the only one touching the files.
 
-For a lot of embedded use this never comes up: your application is the one
-process, and it holds the database for as long as it runs. When you do need more
-than one, `strata start` hosts a database and keeps it alive so other processes
-can reach it, and `strata stop` releases it. The `--ipc` flag selects how a
-process behaves toward that arrangement.
+That does not mean only one process can use the database. Host it and the others
+reach it through the owner:
 
-Be aware that contention today reports itself poorly. A second process opening a
-held database fails with `unavailable.engine.persistence` wrapping a raw
-operating-system error, and the message names neither the process holding the
-lock nor what to do about it. That is filed upstream as strata-core issue 3005.
-If a command fails that way, something else has the database open.
+```console
+strata --db ./mydb start
+```
+
+That blocks, holding the database open and serving a socket beside it. Other
+processes then run ordinary commands against the same path and are brokered to
+the owner without knowing it. `strata stop` releases it, and `strata ipc status`
+reports who is currently attached.
+
+One thing about this looks alarming and is not. A brokered command tries the
+lock first, loses, and falls back to the owner, and the losing attempt is logged
+to stderr at ERROR level even though the command then succeeds. So every command
+against a hosted database prints `unavailable.engine.persistence` and a raw
+operating-system error, and then returns the right answer with a success exit
+code. Standard output stays clean, so scripts are unaffected. Filed upstream as
+strata-core issue 3071.
 
 ## Three ways to open one
 
