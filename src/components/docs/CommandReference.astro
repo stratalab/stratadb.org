@@ -229,8 +229,17 @@ const RETRY_TONE: Record<string, string> = {
     wire <span class="text-ink-mid">{command.wire ?? command.id.replace(/\./g, '_')}</span>
   </p>
 
+  {
+    /*
+    The whole description, not its first paragraph. Truncating dropped 44% of
+    the staged description text across 124 commands, and the dropped half is
+    the operational one: kv.scan's second paragraph is the rule that cursors
+    are opaque and must not be parsed. The markdown twin already emitted all of
+    it, so agents were reading more than people.
+  */
+  }
   <div class="prose-docs mt-8">
-    <p>{command.description.split('\n\n')[0]}</p>
+    {command.description.split('\n\n').map((para) => <p>{para}</p>)}
   </div>
 
   <section class:list={['mt-8', ifaces.length === 0 && 'hidden']}>
