@@ -1,0 +1,89 @@
+---
+// A namespace inside a branch.
+//
+// The page's claim is that the same key in two spaces is two records, so the
+// figure shows exactly that: one key name, three spaces, three values. The
+// write pulses into one lane and the other two do not move, which is the part
+// prose has to assert and a diagram can just show.
+//
+// The branch frame around them is doing work too. A space is not a property of
+// the database, it belongs to a branch, and drawing the box makes that
+// containment obvious without a sentence.
+const spaces = [
+  { name: 'default', value: 'main-value', active: false },
+  { name: 'analytics', value: 'analytics-value', active: true },
+  { name: 'staging', value: 'staged-value', active: false },
+];
+---
+
+<div class="p-6 sm:p-8">
+  <div class="rounded-(--radius-card) border border-line-hover p-4">
+    <p class="font-mono text-mono-sm text-ink-mid">
+      branch <span class="text-ink-hi">default</span>
+    </p>
+    <ul class="mt-3 grid gap-2">
+      {
+        spaces.map((s) => (
+          <li
+            class:list={[
+              'space-row flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-(--radius-control) border px-3 py-2.5',
+              s.active ? 'space-active border-terracotta-700' : 'border-line',
+            ]}
+          >
+            <span class="font-mono text-mono-sm text-ink-low">space</span>
+            <span class="w-24 font-mono text-mono-body text-ink-hi">{s.name}</span>
+            <span class="font-mono text-mono-sm text-ink-low">k =</span>
+            <span
+              class:list={[
+                'font-mono text-mono-body',
+                s.active ? 'space-value text-terracotta-500' : 'text-ink-mid',
+              ]}
+            >
+              {s.value}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <p class="mt-3 font-mono text-mono-sm text-ink-low">
+    one key name &middot; three records &middot; no read crosses a lane
+  </p>
+</div>
+
+<style>
+  /* Only the written lane moves. The stillness of the others is the point. */
+  .space-active {
+    animation: lane 4s var(--ease-out) infinite;
+  }
+  .space-value {
+    animation: value 4s var(--ease-out) infinite;
+  }
+
+  @keyframes lane {
+    0%,
+    100% {
+      background-color: transparent;
+    }
+    12%,
+    40% {
+      background-color: var(--color-elevated);
+    }
+  }
+  @keyframes value {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    12%,
+    40% {
+      opacity: 1;
+    }
+  }
+
+  html[data-motion='reduced'] .space-active,
+  html[data-motion='reduced'] .space-value {
+    animation: none;
+    opacity: 1;
+  }
+</style>

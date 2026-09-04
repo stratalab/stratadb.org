@@ -51,7 +51,7 @@ export const docsTree: TreeNode[] = [
           { label: 'Branches', href: '/docs/learn/branches' },
           { label: 'Commits and versions', href: '/docs/learn/commits-and-versions' },
           { label: 'Time travel', href: '/docs/learn/time-travel' },
-          { label: 'Spaces' },
+          { label: 'Spaces', href: '/docs/learn/spaces' },
           { label: 'Durability' },
           { label: 'Errors and retries' },
         ],

@@ -13,9 +13,10 @@ import EmbeddedShape from './figures/EmbeddedShape.astro';
 import ModelsShape from './figures/ModelsShape.astro';
 import BranchShape from './figures/BranchShape.astro';
 import VersionShape from './figures/VersionShape.astro';
+import SpaceShape from './figures/SpaceShape.astro';
 
 interface Props {
-  kind: 'embedded' | 'models' | 'branch' | 'versions';
+  kind: 'embedded' | 'models' | 'branch' | 'versions' | 'spaces';
   caption: string;
 }
 const { kind, caption } = Astro.props;
@@ -27,6 +28,7 @@ const { kind, caption } = Astro.props;
     {kind === 'models' && <ModelsShape />}
     {kind === 'branch' && <BranchShape />}
     {kind === 'versions' && <VersionShape />}
+    {kind === 'spaces' && <SpaceShape />}
   </div>
   <figcaption class="mt-3 text-body text-ink-mid">{caption}</figcaption>
 </figure>

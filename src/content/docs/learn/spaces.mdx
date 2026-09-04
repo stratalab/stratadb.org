@@ -1,0 +1,102 @@
+---
+title: 'Spaces'
+description: 'A space is a namespace inside a branch: separate application domains without separate databases.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+import Figure from '../../../components/docs/Figure.astro';
+
+A space is a logical namespace inside a database and a branch. It exists so you
+can keep unrelated application domains apart without opening a second database.
+
+Every command that touches data takes a `--space`, and every database starts
+with one called `default`. If you never mention spaces, everything you write is
+in `default` and this page changes nothing about how Strata behaves for you.
+
+## Keys are scoped to the space
+
+The same key in two spaces is two records:
+
+```console
+strata kv put k main-value
+strata space create analytics
+strata kv put k analytics-value --space analytics
+```
+
+`strata kv get k` returns `main-value`. `strata kv get k --space analytics`
+returns `analytics-value`. Neither read can see the other's record, and neither
+write can clobber it.
+
+That is the whole feature at the data level. What makes it worth having is how
+it interacts with everything else.
+
+<Figure
+  kind="spaces"
+  caption="One key name in three spaces is three records. A write lands in one space and the others are untouched, and all three belong to the branch that holds them."
+/>
+
+## Spaces live inside a branch
+
+A space is not a property of the database. It belongs to the branch it was
+created on, and it forks and diverges with that branch like any other state.
+
+```console
+strata space create shared
+strata branch fork default work
+strata space create after-fork
+```
+
+`work` has `default` and `shared`, the two that existed when it was forked. It
+does not have `after-fork`, because that was created on the parent afterwards.
+Creating a space on `work` likewise leaves the parent alone.
+
+Comparisons respect the same boundary. `branch diff` reports its results grouped
+by space and by data model, so a change in `analytics` and a change in `default`
+arrive as separate entries rather than as one undifferentiated list.
+
+## Reading and writing somewhere else
+
+`--space` is an override on the command, not a mode you enter:
+
+```console
+strata kv list --space analytics
+strata json get config '$' --space analytics
+```
+
+Commands that accept a branch and a space accept both independently, so
+"the analytics space on the work branch" is an ordinary thing to address.
+
+## Deleting one is deliberately awkward
+
+Deleting a space that still holds data is refused:
+
+```console
+strata space delete analytics
+```
+
+```
+failed_precondition.engine.space_not_empty: product space `analytics`
+contains visible data; retry with force=true to delete it
+```
+
+`--force` deletes the data and then the space. The refusal is the useful part:
+dropping a namespace is not the kind of thing that should succeed because you
+forgot what was in it.
+
+## Names
+
+Names are permissive. Spaces, mixed case and non-ASCII characters are all
+accepted. Two things are not: an empty name, and names reserved for the engine's
+own use, which fail with `invalid_argument.engine.product_space_reserved`.
+
+## When to use one
+
+Spaces are for separation that is permanent and structural. Two products
+sharing a database. Application data kept apart from data you imported to
+analyse. A tenant boundary you want to be sure a query cannot cross.
+
+They are not for separation that is temporary. If you want to change something
+and decide later whether to keep it, that is a branch, and
+[Branches](/docs/learn/branches) is the page for it. Spaces sit still; branches
+are the ones that move.
