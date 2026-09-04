@@ -1,0 +1,115 @@
+---
+title: 'Working with data'
+description: 'Five data models in one engine: what each is for, what it needs before you start, and how to choose.'
+section: 'Learn'
+source: 'strata-core@v1.1.1'
+---
+
+import Figure from '../../../components/docs/Figure.astro';
+
+Strata holds five kinds of data: key-value pairs, JSON documents, an append-only
+event log, vectors, and a property graph. They are not five databases behind one
+API. They share a commit, a version, a branch and a space, which is what makes
+using several of them together reasonable rather than a distributed systems
+problem.
+
+<Figure
+  kind="models"
+  caption="A write that touches several data models lands as a single commit with one version, so the whole database moves from one consistent state to the next together."
+/>
+
+This page is how to choose between them. Each has its own page for the detail.
+
+## Choosing
+
+**Key-value** stores bytes under a key. Use it when you know the key and want
+the value, and the value has no structure you need the database to understand.
+Counters, settings, blobs, cached computations.
+
+**JSON** stores documents you address by path. Use it when the shape matters:
+when you want to read or write one field of a record rather than the whole
+thing, or when different records have different fields. The database understands
+the document, so `$.name` is a thing you can ask for.
+
+**Events** are an append-only log. Use it when what happened is the data, and
+you want it in order and unmodifiable. Every entry has a type and a sequence
+number, and entries are hash-linked, so `strata event verify-chain` can prove
+nothing was inserted or altered after the fact.
+
+**Vectors** store embeddings you search by similarity. Use it for retrieval:
+finding the records closest to a query rather than the ones matching it exactly.
+Vectors live in collections, and a collection fixes its dimension.
+
+**Graph** stores nodes and edges with properties. Use it when the relationships
+are the thing you query, and traversal beats a join: who is connected to whom,
+what depends on what, how far apart two things are.
+
+## Three start empty, two need setting up
+
+Key-value, JSON and events work the moment you have a database:
+
+```console
+strata kv put user:1 alice
+strata json set user:1 '$' '{"name":"alice"}'
+strata event append signup '{"who":"alice"}'
+```
+
+Vectors and graphs need their container first, and say so plainly if you forget:
+
+```console
+strata vector upsert docs a 1,0,0
+```
+
+```
+not_found.engine.vector_collection: vector collection does not exist
+```
+
+A collection is created with a name and a dimension, and a graph with a name:
+
+```console
+strata vector collection create docs 3
+strata vector upsert docs a 1,0,0
+
+strata graph create kb
+strata graph add-node kb alice
+```
+
+The asymmetry is not an oversight. A vector collection has to know its dimension
+before it can accept anything, and a graph is a namespace for the nodes and
+edges inside it.
+
+## They do not share a namespace
+
+The same name in two models is two unrelated records:
+
+```console
+strata kv put thing kv-value
+strata json set thing '$' '{"from":"json"}'
+```
+
+`strata kv get thing` returns `kv-value` and `strata json get thing '$'` returns
+`{"from":"json"}`. Neither knows about the other. If you want a name to mean the
+same entity across models, that is a convention you keep, not one the database
+enforces.
+
+## Using several at once
+
+The usual shape of a real application is several models describing the same
+thing: the document in JSON, its embedding in a vector collection, what happened
+to it in the event log.
+
+Because a write is one commit, a change spanning several of them is atomic
+without any coordination on your part. And because a branch covers all of them,
+a fork gives you every model at that point together, rather than a consistent
+copy of one and a live view of the rest.
+
+That is the argument for one engine rather than four systems, and it is easier
+to feel than to read: [Branches](/docs/learn/branches) is where it becomes
+concrete.
+
+## Where each one is documented
+
+Every command for every model is in the [reference](/docs/reference), generated
+from the interface definition. The pages under this section are for the parts a
+command list cannot tell you: what the model is for, how it behaves, and what to
+watch out for.

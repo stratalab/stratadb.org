@@ -57,8 +57,8 @@ export const docsTree: TreeNode[] = [
       },
       {
         label: 'Working with data',
+        href: '/docs/learn/working-with-data',
         children: [
-          { label: 'Overview' },
           { label: 'Key-value' },
           { label: 'JSON' },
           { label: 'Events' },
