@@ -2,7 +2,7 @@
 title: 'Commits and versions'
 description: 'Every write is a commit, every commit advances one database-wide version, and history keeps what each version held.'
 section: 'Learn'
-source: 'strata-core@v1.1.1'
+source: 'strata-core@v1.2.0'
 ---
 
 import Figure from '../../../components/docs/Figure.astro';
@@ -73,7 +73,7 @@ strata kv get meta:survival_rate --as-of 85
 Two things about that flag are worth knowing before you use it.
 
 The timestamp is a position on the database's commit timeline. It is not
-wall-clock time, despite the flag's help text calling it microseconds in 1.1.1.
+wall-clock time, despite the flag's help text calling it microseconds.
 Passing a real clock reading fails with
 `history_unavailable.engine.persistence_history`, because the position is beyond
 anything the timeline holds.

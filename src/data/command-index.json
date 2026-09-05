@@ -26,6 +26,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::ConfigGet",
+      "wire": "config_get",
       "output": "Output::Config",
       "outputs": [
         "Output::Config"
@@ -48,8 +49,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.config.md"
-      },
-      "wire": "config_get"
+      }
     },
     {
       "id": "admin.config_key",
@@ -74,6 +74,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::ConfigureGetKey",
+      "wire": "configure_get_key",
       "output": "Output::ConfigValue",
       "outputs": [
         "Output::ConfigValue"
@@ -100,8 +101,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.config_key.md"
-      },
-      "wire": "configure_get_key"
+      }
     },
     {
       "id": "admin.describe",
@@ -125,6 +125,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::Describe",
+      "wire": "describe",
       "output": "Output::Described",
       "outputs": [
         "Output::Described"
@@ -155,8 +156,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.describe.md"
-      },
-      "wire": "describe"
+      }
     },
     {
       "id": "admin.health",
@@ -180,6 +180,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::Health",
+      "wire": "health",
       "output": "Output::Health",
       "outputs": [
         "Output::Health"
@@ -210,8 +211,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.health.md"
-      },
-      "wire": "health"
+      }
     },
     {
       "id": "admin.hub_clone",
@@ -235,6 +235,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::HubClone",
+      "wire": "hub_clone",
       "output": "Output::HubCloneResult",
       "outputs": [
         "Output::HubCloneResult",
@@ -259,8 +260,8 @@
           "docs": "https://stratadb.org/e/invalid_argument.executor.hub_branch"
         },
         {
-          "code": "invalid_argument.executor.hub_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.hub_feature_disabled"
+          "code": "unsupported.executor.hub_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.hub_url",
@@ -286,8 +287,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.hub_clone.md"
-      },
-      "wire": "hub_clone"
+      }
     },
     {
       "id": "admin.info",
@@ -311,6 +311,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::Info",
+      "wire": "info",
       "output": "Output::DatabaseInfo",
       "outputs": [
         "Output::DatabaseInfo"
@@ -341,8 +342,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.info.md"
-      },
-      "wire": "info"
+      }
     },
     {
       "id": "admin.ipc_status",
@@ -367,6 +367,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::IpcStatus",
+      "wire": "ipc_status",
       "output": "Output::IpcStatus",
       "outputs": [
         "Output::IpcStatus"
@@ -389,8 +390,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.ipc_status.md"
-      },
-      "wire": "ipc_status"
+      }
     },
     {
       "id": "admin.ipc_stop",
@@ -415,6 +415,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::IpcStop",
+      "wire": "ipc_stop",
       "output": "Output::IpcStop",
       "outputs": [
         "Output::IpcStop"
@@ -437,8 +438,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.ipc_stop.md"
-      },
-      "wire": "ipc_stop"
+      }
     },
     {
       "id": "admin.metrics",
@@ -462,6 +462,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::Metrics",
+      "wire": "metrics",
       "output": "Output::Metrics",
       "outputs": [
         "Output::Metrics"
@@ -492,8 +493,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.metrics.md"
-      },
-      "wire": "metrics"
+      }
     },
     {
       "id": "admin.ping",
@@ -517,6 +517,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::Ping",
+      "wire": "ping",
       "output": "Output::Pong",
       "outputs": [
         "Output::Pong"
@@ -539,8 +540,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.ping.md"
-      },
-      "wire": "ping"
+      }
     },
     {
       "id": "admin.remote",
@@ -564,6 +564,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::RemoteGet",
+      "wire": "remote_get",
       "output": "Output::RemoteOriginResult",
       "outputs": [
         "Output::RemoteOriginResult"
@@ -586,8 +587,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/admin.yaml",
         "prose": "commands/admin.remote.md"
-      },
-      "wire": "remote_get"
+      }
     },
     {
       "id": "arrow.export",
@@ -612,6 +612,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::ArrowExport",
+      "wire": "arrow_export",
       "output": "Output::ArrowExportResult",
       "outputs": [
         "Output::ArrowExportResult"
@@ -635,8 +636,8 @@
           "docs": "https://stratadb.org/e/invalid_argument.engine.product_space"
         },
         {
-          "code": "invalid_argument.executor.arrow_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.arrow_feature_disabled"
+          "code": "unsupported.executor.arrow_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.arrow_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.arrow_format",
@@ -683,8 +684,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/arrow.yaml",
         "prose": "commands/arrow.export.md"
-      },
-      "wire": "arrow_export"
+      }
     },
     {
       "id": "arrow.import",
@@ -709,6 +709,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::ArrowImport",
+      "wire": "arrow_import",
       "output": "Output::ArrowImportResult",
       "outputs": [
         "Output::ArrowImportResult"
@@ -732,8 +733,8 @@
           "docs": "https://stratadb.org/e/invalid_argument.engine.product_space"
         },
         {
-          "code": "invalid_argument.executor.arrow_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.arrow_feature_disabled"
+          "code": "unsupported.executor.arrow_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.arrow_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.arrow_format",
@@ -788,8 +789,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/arrow.yaml",
         "prose": "commands/arrow.import.md"
-      },
-      "wire": "arrow_import"
+      }
     },
     {
       "id": "branch.create",
@@ -814,6 +814,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::BranchCreate",
+      "wire": "branch_create",
       "output": "Output::Branch",
       "outputs": [
         "Output::Branch"
@@ -857,8 +858,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.create.md"
-      },
-      "wire": "branch_create"
+      }
     },
     {
       "id": "branch.delete",
@@ -883,6 +883,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::BranchDelete",
+      "wire": "branch_delete",
       "output": "Output::BranchDeleteResult",
       "outputs": [
         "Output::BranchDeleteResult"
@@ -924,8 +925,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.delete.md"
-      },
-      "wire": "branch_delete"
+      }
     },
     {
       "id": "branch.diff",
@@ -950,6 +950,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::BranchDiff",
+      "wire": "branch_diff",
       "output": "Output::BranchComparison",
       "outputs": [
         "Output::BranchComparison"
@@ -988,8 +989,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.diff.md"
-      },
-      "wire": "branch_diff"
+      }
     },
     {
       "id": "branch.fork",
@@ -1014,6 +1014,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::BranchForkCurrent",
+      "wire": "branch_fork_current",
       "output": "Output::Branch",
       "outputs": [
         "Output::Branch"
@@ -1055,8 +1056,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.fork.md"
-      },
-      "wire": "branch_fork_current"
+      }
     },
     {
       "id": "branch.fork_at_timestamp",
@@ -1081,6 +1081,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::BranchForkAtTimestamp",
+      "wire": "branch_fork_at_timestamp",
       "output": "Output::Branch",
       "outputs": [
         "Output::Branch"
@@ -1126,8 +1127,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.fork_at_timestamp.md"
-      },
-      "wire": "branch_fork_at_timestamp"
+      }
     },
     {
       "id": "branch.fork_at_version",
@@ -1152,6 +1152,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::BranchForkAtVersion",
+      "wire": "branch_fork_at_version",
       "output": "Output::Branch",
       "outputs": [
         "Output::Branch"
@@ -1197,8 +1198,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.fork_at_version.md"
-      },
-      "wire": "branch_fork_at_version"
+      }
     },
     {
       "id": "branch.get",
@@ -1223,6 +1223,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::BranchGet",
+      "wire": "branch_get",
       "output": "Output::Branch",
       "outputs": [
         "Output::Branch"
@@ -1260,8 +1261,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.get.md"
-      },
-      "wire": "branch_get"
+      }
     },
     {
       "id": "branch.list",
@@ -1286,6 +1286,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::BranchList",
+      "wire": "branch_list",
       "output": "Output::Branches",
       "outputs": [
         "Output::Branches"
@@ -1311,8 +1312,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.list.md"
-      },
-      "wire": "branch_list"
+      }
     },
     {
       "id": "branch.merge",
@@ -1337,6 +1337,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::BranchMerge",
+      "wire": "branch_merge",
       "output": "Output::BranchMerge",
       "outputs": [
         "Output::BranchMerge"
@@ -1403,8 +1404,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.merge.md"
-      },
-      "wire": "branch_merge"
+      }
     },
     {
       "id": "branch.preview",
@@ -1429,6 +1429,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::BranchPreview",
+      "wire": "branch_preview",
       "output": "Output::BranchPreview",
       "outputs": [
         "Output::BranchPreview"
@@ -1482,8 +1483,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/branch.yaml",
         "prose": "commands/branch.preview.md"
-      },
-      "wire": "branch_preview"
+      }
     },
     {
       "id": "event.append",
@@ -1508,6 +1508,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::EventAppend",
+      "wire": "event_append",
       "output": "Output::EventAppendResult",
       "outputs": [
         "Output::EventAppendResult"
@@ -1556,8 +1557,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.append.md"
-      },
-      "wire": "event_append"
+      }
     },
     {
       "id": "event.batch_append",
@@ -1582,6 +1582,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::EventBatchAppend",
+      "wire": "event_batch_append",
       "output": "Output::EventBatchAppendResults",
       "outputs": [
         "Output::EventBatchAppendResults"
@@ -1628,8 +1629,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.batch_append.md"
-      },
-      "wire": "event_batch_append"
+      }
     },
     {
       "id": "event.count",
@@ -1654,6 +1654,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventCount",
+      "wire": "event_count",
       "output": "Output::EventCount",
       "outputs": [
         "Output::EventCount"
@@ -1688,8 +1689,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.count.md"
-      },
-      "wire": "event_count"
+      }
     },
     {
       "id": "event.exists",
@@ -1714,6 +1714,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventExists",
+      "wire": "event_exists",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -1747,8 +1748,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.exists.md"
-      },
-      "wire": "event_exists"
+      }
     },
     {
       "id": "event.get",
@@ -1773,6 +1773,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventGet",
+      "wire": "event_get",
       "output": "Output::EventRecord",
       "outputs": [
         "Output::EventRecord"
@@ -1807,8 +1808,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.get.md"
-      },
-      "wire": "event_get"
+      }
     },
     {
       "id": "event.list",
@@ -1833,6 +1833,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventList",
+      "wire": "event_list",
       "output": "Output::EventRecords",
       "outputs": [
         "Output::EventRecords"
@@ -1876,8 +1877,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.list.md"
-      },
-      "wire": "event_list"
+      }
     },
     {
       "id": "event.range",
@@ -1886,7 +1886,7 @@
       "kind": "read.page",
       "title": "Read event sequence range",
       "summary": "Read a range of events by sequence number.",
-      "description": "Reads events from the selected branch and space by sequence range. The start sequence is inclusive and the optional end sequence is exclusive; reverse direction walks backward from the start sequence. An optional event type narrows the results.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
+      "description": "Reads events from the selected branch and space by sequence range. The start sequence is inclusive and the optional end sequence is exclusive; reverse direction returns the same `[start_seq, end_seq)` window in descending order (newest first). An optional event type narrows the results.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
       "docs": "/docs/reference/event/range",
       "cli": {
         "path": [
@@ -1902,6 +1902,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventRange",
+      "wire": "event_range",
       "output": "Output::EventRangeResult",
       "outputs": [
         "Output::EventRangeResult"
@@ -1945,8 +1946,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.range.md"
-      },
-      "wire": "event_range"
+      }
     },
     {
       "id": "event.range_time",
@@ -1955,7 +1955,7 @@
       "kind": "read.page",
       "title": "Read event time range",
       "summary": "Read a range of events by occurrence time.",
-      "description": "Reads events from the selected branch and space whose append timestamps fall inside an inclusive microsecond window. This queries when events occurred; historical log states are the timestamped read commands' job. An optional event type narrows the results.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
+      "description": "Reads events from the selected branch and space whose append timestamps fall inside a half-open `[start_ts, end_ts)` microsecond window - the start is inclusive and the end is exclusive, matching the sequence-addressed range. This queries when events occurred; historical log states are the timestamped read commands' job. An optional event type narrows the results.\n\nPaginated responses use opaque cursors. Clients should pass the returned cursor back to the same command shape and must not parse cursor contents.",
       "docs": "/docs/reference/event/range_time",
       "cli": {
         "path": [
@@ -1971,6 +1971,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventRangeByTime",
+      "wire": "event_range_by_time",
       "output": "Output::EventRangeResult",
       "outputs": [
         "Output::EventRangeResult"
@@ -2014,8 +2015,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.range_time.md"
-      },
-      "wire": "event_range_by_time"
+      }
     },
     {
       "id": "event.types",
@@ -2040,6 +2040,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventListTypes",
+      "wire": "event_list_types",
       "output": "Output::EventTypeList",
       "outputs": [
         "Output::EventTypeList"
@@ -2074,8 +2075,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.types.md"
-      },
-      "wire": "event_list_types"
+      }
     },
     {
       "id": "event.verify_chain",
@@ -2100,6 +2100,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::EventVerifyChain",
+      "wire": "event_verify_chain",
       "output": "Output::EventChainVerification",
       "outputs": [
         "Output::EventChainVerification"
@@ -2134,8 +2135,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/event.yaml",
         "prose": "commands/event.verify_chain.md"
-      },
-      "wire": "event_verify_chain"
+      }
     },
     {
       "id": "graph.analytics.bfs",
@@ -2160,6 +2160,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphBfs",
+      "wire": "graph_bfs",
       "output": "Output::GraphBfsResult",
       "outputs": [
         "Output::GraphBfsResult"
@@ -2226,8 +2227,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.bfs.md"
-      },
-      "wire": "graph_bfs"
+      }
     },
     {
       "id": "graph.analytics.cdlp",
@@ -2252,6 +2252,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphCdlp",
+      "wire": "graph_cdlp",
       "output": "Output::GraphCdlpResult",
       "outputs": [
         "Output::GraphCdlpResult"
@@ -2308,8 +2309,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.cdlp.md"
-      },
-      "wire": "graph_cdlp"
+      }
     },
     {
       "id": "graph.analytics.lcc",
@@ -2334,6 +2334,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphLcc",
+      "wire": "graph_lcc",
       "output": "Output::GraphLccResult",
       "outputs": [
         "Output::GraphLccResult"
@@ -2389,8 +2390,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.lcc.md"
-      },
-      "wire": "graph_lcc"
+      }
     },
     {
       "id": "graph.analytics.pagerank",
@@ -2415,6 +2415,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphPagerank",
+      "wire": "graph_pagerank",
       "output": "Output::GraphPagerankResult",
       "outputs": [
         "Output::GraphPagerankResult"
@@ -2479,8 +2480,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.pagerank.md"
-      },
-      "wire": "graph_pagerank"
+      }
     },
     {
       "id": "graph.analytics.sssp",
@@ -2505,6 +2505,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphSssp",
+      "wire": "graph_sssp",
       "output": "Output::GraphSsspResult",
       "outputs": [
         "Output::GraphSsspResult"
@@ -2567,8 +2568,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.sssp.md"
-      },
-      "wire": "graph_sssp"
+      }
     },
     {
       "id": "graph.analytics.wcc",
@@ -2593,6 +2593,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphWcc",
+      "wire": "graph_wcc",
       "output": "Output::GraphWccResult",
       "outputs": [
         "Output::GraphWccResult"
@@ -2649,8 +2650,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.analytics.wcc.md"
-      },
-      "wire": "graph_wcc"
+      }
     },
     {
       "id": "graph.apply_delete_policy",
@@ -2675,6 +2675,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphApplyDeletePolicy",
+      "wire": "graph_apply_delete_policy",
       "output": "Output::GraphDeletePolicyResult",
       "outputs": [
         "Output::GraphDeletePolicyResult"
@@ -2713,8 +2714,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.apply_delete_policy.md"
-      },
-      "wire": "graph_apply_delete_policy"
+      }
     },
     {
       "id": "graph.batch_write",
@@ -2723,7 +2723,7 @@
       "kind": "batch.atomic_mutation",
       "title": "Batch write graph",
       "summary": "Apply graph mutations atomically.",
-      "description": "Applies a list of graph operations - `upsert_node`, `delete_node`, `upsert_edge`, `delete_edge` - in one engine commit. Validation failures (bad ids, missing edge endpoints, frozen-ontology violations) reject the whole batch; nothing is partially applied. The response reports one positional item result per operation, all sharing the same commit receipt.\n\nAtomic batches validate every operation up front and apply all of them in one engine commit, or none at all. The response still reports one positional item result per operation; all item results share the same commit receipt.",
+      "description": "Applies a list of graph operations - `upsert_node`, `delete_node`, `upsert_edge`, `delete_edge` - in one engine commit. Validation failures (bad ids, missing edge endpoints, frozen-ontology violations) reject the whole batch; nothing is partially applied. The response reports one positional item result per operation, all sharing the same commit receipt.\n\nThis whole-batch atomicity is deliberate, and differs from the itemwise `kv`, `json`, and `event` batch writes (where the valid items of a mixed batch still commit and the invalid one carries a typed per-item error). A graph batch mixes node and edge upserts, and an edge references its endpoint nodes, so applying only the valid items could leave an edge pointing at a node that never landed. Rejecting the whole batch keeps graph references consistent - referential integrity is the reason the graph channel is atomic where its siblings are itemwise.\n\nAtomic batches validate every operation up front and apply all of them in one engine commit, or none at all. The response still reports one positional item result per operation; all item results share the same commit receipt.",
       "docs": "/docs/reference/graph/batch_write",
       "cli": {
         "path": [
@@ -2739,6 +2739,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphBatchWrite",
+      "wire": "graph_batch_write",
       "output": "Output::GraphBatchWriteResult",
       "outputs": [
         "Output::GraphBatchWriteResult"
@@ -2804,8 +2805,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.batch_write.md"
-      },
-      "wire": "graph_batch_write"
+      }
     },
     {
       "id": "graph.bindings",
@@ -2830,6 +2830,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphBindingsForEntity",
+      "wire": "graph_bindings_for_entity",
       "output": "Output::GraphBindingPage",
       "outputs": [
         "Output::GraphBindingPage"
@@ -2868,8 +2869,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.bindings.md"
-      },
-      "wire": "graph_bindings_for_entity"
+      }
     },
     {
       "id": "graph.bulk_insert",
@@ -2894,6 +2894,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphBulkInsert",
+      "wire": "graph_bulk_insert",
       "output": "Output::GraphBulkInsertResult",
       "outputs": [
         "Output::GraphBulkInsertResult"
@@ -2971,8 +2972,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.bulk_insert.md"
-      },
-      "wire": "graph_bulk_insert"
+      }
     },
     {
       "id": "graph.create",
@@ -2997,6 +2997,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphCreate",
+      "wire": "graph_create",
       "output": "Output::GraphCreateResult",
       "outputs": [
         "Output::GraphCreateResult"
@@ -3052,8 +3053,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.create.md"
-      },
-      "wire": "graph_create"
+      }
     },
     {
       "id": "graph.delete",
@@ -3078,6 +3078,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphDelete",
+      "wire": "graph_delete",
       "output": "Output::GraphDeleteResult",
       "outputs": [
         "Output::GraphDeleteResult"
@@ -3119,8 +3120,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.delete.md"
-      },
-      "wire": "graph_delete"
+      }
     },
     {
       "id": "graph.edge.add",
@@ -3145,6 +3145,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphAddEdge",
+      "wire": "graph_add_edge",
       "output": "Output::GraphEdgeWriteResult",
       "outputs": [
         "Output::GraphEdgeWriteResult"
@@ -3228,8 +3229,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.edge.add.md"
-      },
-      "wire": "graph_add_edge"
+      }
     },
     {
       "id": "graph.edge.get",
@@ -3254,6 +3254,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphGetEdge",
+      "wire": "graph_get_edge",
       "output": "Output::GraphEdgeResult",
       "outputs": [
         "Output::GraphEdgeResult"
@@ -3306,8 +3307,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.edge.get.md"
-      },
-      "wire": "graph_get_edge"
+      }
     },
     {
       "id": "graph.edge.remove",
@@ -3332,6 +3332,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphRemoveEdge",
+      "wire": "graph_remove_edge",
       "output": "Output::GraphDeleteResult",
       "outputs": [
         "Output::GraphDeleteResult"
@@ -3384,8 +3385,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.edge.remove.md"
-      },
-      "wire": "graph_remove_edge"
+      }
     },
     {
       "id": "graph.list",
@@ -3410,6 +3410,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphList",
+      "wire": "graph_list",
       "output": "Output::GraphNamePage",
       "outputs": [
         "Output::GraphNamePage"
@@ -3447,8 +3448,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.list.md"
-      },
-      "wire": "graph_list"
+      }
     },
     {
       "id": "graph.meta",
@@ -3473,6 +3473,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphGetMeta",
+      "wire": "graph_get_meta",
       "output": "Output::GraphInfoResult",
       "outputs": [
         "Output::GraphInfoResult"
@@ -3517,8 +3518,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.meta.md"
-      },
-      "wire": "graph_get_meta"
+      }
     },
     {
       "id": "graph.neighbors",
@@ -3543,6 +3543,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphNeighbors",
+      "wire": "graph_neighbors",
       "output": "Output::GraphNeighborPage",
       "outputs": [
         "Output::GraphNeighborPage"
@@ -3597,8 +3598,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.neighbors.md"
-      },
-      "wire": "graph_neighbors"
+      }
     },
     {
       "id": "graph.node.add",
@@ -3623,6 +3623,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphAddNode",
+      "wire": "graph_add_node",
       "output": "Output::GraphNodeWriteResult",
       "outputs": [
         "Output::GraphNodeWriteResult"
@@ -3696,8 +3697,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.add.md"
-      },
-      "wire": "graph_add_node"
+      }
     },
     {
       "id": "graph.node.get",
@@ -3722,6 +3722,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphGetNode",
+      "wire": "graph_get_node",
       "output": "Output::GraphNodeResult",
       "outputs": [
         "Output::GraphNodeResult"
@@ -3768,8 +3769,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.get.md"
-      },
-      "wire": "graph_get_node"
+      }
     },
     {
       "id": "graph.node.list",
@@ -3794,6 +3794,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphListNodes",
+      "wire": "graph_list_nodes",
       "output": "Output::GraphNodePage",
       "outputs": [
         "Output::GraphNodePage"
@@ -3842,8 +3843,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.list.md"
-      },
-      "wire": "graph_list_nodes"
+      }
     },
     {
       "id": "graph.node.remove",
@@ -3868,6 +3868,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphRemoveNode",
+      "wire": "graph_remove_node",
       "output": "Output::GraphDeleteResult",
       "outputs": [
         "Output::GraphDeleteResult"
@@ -3914,8 +3915,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.node.remove.md"
-      },
-      "wire": "graph_remove_node"
+      }
     },
     {
       "id": "graph.nodes_by_type",
@@ -3940,6 +3940,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphNodesByType",
+      "wire": "graph_nodes_by_type",
       "output": "Output::GraphNodePage",
       "outputs": [
         "Output::GraphNodePage"
@@ -3992,8 +3993,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.nodes_by_type.md"
-      },
-      "wire": "graph_nodes_by_type"
+      }
     },
     {
       "id": "graph.ontology.define_link_type",
@@ -4019,6 +4019,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphDefineLinkType",
+      "wire": "graph_define_link_type",
       "output": "Output::GraphOntologyWriteResult",
       "outputs": [
         "Output::GraphOntologyWriteResult"
@@ -4077,8 +4078,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.define_link_type.md"
-      },
-      "wire": "graph_define_link_type"
+      }
     },
     {
       "id": "graph.ontology.define_object_type",
@@ -4104,6 +4104,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphDefineObjectType",
+      "wire": "graph_define_object_type",
       "output": "Output::GraphOntologyWriteResult",
       "outputs": [
         "Output::GraphOntologyWriteResult"
@@ -4161,8 +4162,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.define_object_type.md"
-      },
-      "wire": "graph_define_object_type"
+      }
     },
     {
       "id": "graph.ontology.delete_link_type",
@@ -4188,6 +4188,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphDeleteLinkType",
+      "wire": "graph_delete_link_type",
       "output": "Output::GraphOntologyDeleteResult",
       "outputs": [
         "Output::GraphOntologyDeleteResult"
@@ -4239,8 +4240,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.delete_link_type.md"
-      },
-      "wire": "graph_delete_link_type"
+      }
     },
     {
       "id": "graph.ontology.delete_object_type",
@@ -4266,6 +4266,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphDeleteObjectType",
+      "wire": "graph_delete_object_type",
       "output": "Output::GraphOntologyDeleteResult",
       "outputs": [
         "Output::GraphOntologyDeleteResult"
@@ -4316,8 +4317,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.delete_object_type.md"
-      },
-      "wire": "graph_delete_object_type"
+      }
     },
     {
       "id": "graph.ontology.freeze",
@@ -4343,6 +4343,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::GraphFreezeOntology",
+      "wire": "graph_freeze_ontology",
       "output": "Output::GraphOntologyFreezeResult",
       "outputs": [
         "Output::GraphOntologyFreezeResult"
@@ -4394,8 +4395,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.freeze.md"
-      },
-      "wire": "graph_freeze_ontology"
+      }
     },
     {
       "id": "graph.ontology.get",
@@ -4421,6 +4421,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphGetOntology",
+      "wire": "graph_get_ontology",
       "output": "Output::GraphOntologyResult",
       "outputs": [
         "Output::GraphOntologyResult"
@@ -4465,8 +4466,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.get.md"
-      },
-      "wire": "graph_get_ontology"
+      }
     },
     {
       "id": "graph.ontology.summary",
@@ -4492,6 +4492,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphOntologySummary",
+      "wire": "graph_ontology_summary",
       "output": "Output::GraphOntologySummaryResult",
       "outputs": [
         "Output::GraphOntologySummaryResult"
@@ -4537,8 +4538,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.ontology.summary.md"
-      },
-      "wire": "graph_ontology_summary"
+      }
     },
     {
       "id": "graph.sample",
@@ -4563,6 +4563,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::GraphSample",
+      "wire": "graph_sample",
       "output": "Output::GraphSampleResult",
       "outputs": [
         "Output::GraphSampleResult"
@@ -4607,8 +4608,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/graph.yaml",
         "prose": "commands/graph.sample.md"
-      },
-      "wire": "graph_sample"
+      }
     },
     {
       "id": "hub.get_dataset",
@@ -4633,6 +4633,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::HubGetDataset",
+      "wire": "hub_get_dataset",
       "output": "Output::HubDataset",
       "outputs": [
         "Output::HubDataset"
@@ -4652,8 +4653,8 @@
           "docs": "https://stratadb.org/e/not_found.engine.branch"
         },
         {
-          "code": "invalid_argument.executor.hub_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.hub_feature_disabled"
+          "code": "unsupported.executor.hub_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.hub_url",
@@ -4680,8 +4681,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.get_dataset.md"
-      },
-      "wire": "hub_get_dataset"
+      }
     },
     {
       "id": "hub.info",
@@ -4706,6 +4706,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::HubInfo",
+      "wire": "hub_info",
       "output": "Output::HubInfo",
       "outputs": [
         "Output::HubInfo"
@@ -4725,8 +4726,8 @@
           "docs": "https://stratadb.org/e/not_found.engine.branch"
         },
         {
-          "code": "invalid_argument.executor.hub_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.hub_feature_disabled"
+          "code": "unsupported.executor.hub_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.hub_url",
@@ -4745,8 +4746,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.info.md"
-      },
-      "wire": "hub_info"
+      }
     },
     {
       "id": "hub.list_datasets",
@@ -4771,6 +4771,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::HubListDatasets",
+      "wire": "hub_list_datasets",
       "output": "Output::HubDatasets",
       "outputs": [
         "Output::HubDatasets"
@@ -4790,8 +4791,8 @@
           "docs": "https://stratadb.org/e/not_found.engine.branch"
         },
         {
-          "code": "invalid_argument.executor.hub_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.hub_feature_disabled"
+          "code": "unsupported.executor.hub_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.hub_url",
@@ -4820,8 +4821,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.list_datasets.md"
-      },
-      "wire": "hub_list_datasets"
+      }
     },
     {
       "id": "hub.list_refs",
@@ -4846,6 +4846,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::HubListRefs",
+      "wire": "hub_list_refs",
       "output": "Output::HubRefs",
       "outputs": [
         "Output::HubRefs"
@@ -4865,8 +4866,8 @@
           "docs": "https://stratadb.org/e/not_found.engine.branch"
         },
         {
-          "code": "invalid_argument.executor.hub_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.hub_feature_disabled"
+          "code": "unsupported.executor.hub_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.hub_url",
@@ -4893,8 +4894,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.list_refs.md"
-      },
-      "wire": "hub_list_refs"
+      }
     },
     {
       "id": "hub.list_yanked",
@@ -4919,6 +4919,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::HubListYanked",
+      "wire": "hub_list_yanked",
       "output": "Output::HubYanked",
       "outputs": [
         "Output::HubYanked"
@@ -4938,8 +4939,8 @@
           "docs": "https://stratadb.org/e/not_found.engine.branch"
         },
         {
-          "code": "invalid_argument.executor.hub_feature_disabled",
-          "docs": "https://stratadb.org/e/invalid_argument.executor.hub_feature_disabled"
+          "code": "unsupported.executor.hub_feature_disabled",
+          "docs": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled"
         },
         {
           "code": "invalid_argument.executor.hub_url",
@@ -4972,8 +4973,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/hub.yaml",
         "prose": "commands/hub.list_yanked.md"
-      },
-      "wire": "hub_list_yanked"
+      }
     },
     {
       "id": "inference.cache_status",
@@ -4998,6 +4998,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceCacheStatus",
+      "wire": "inference_cache_status",
       "output": "Output::InferenceCacheStatus",
       "outputs": [
         "Output::InferenceCacheStatus"
@@ -5024,8 +5025,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.cache_status.md"
-      },
-      "wire": "inference_cache_status"
+      }
     },
     {
       "id": "inference.capability",
@@ -5050,6 +5050,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceModelCapability",
+      "wire": "inference_model_capability",
       "output": "Output::InferenceCapability",
       "outputs": [
         "Output::InferenceCapability"
@@ -5080,8 +5081,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.capability.md"
-      },
-      "wire": "inference_model_capability"
+      }
     },
     {
       "id": "inference.detokenize",
@@ -5106,6 +5106,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceDetokenize",
+      "wire": "inference_detokenize",
       "output": "Output::InferenceText",
       "outputs": [
         "Output::InferenceText"
@@ -5152,8 +5153,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.detokenize.md"
-      },
-      "wire": "inference_detokenize"
+      }
     },
     {
       "id": "inference.embed",
@@ -5178,6 +5178,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceEmbed",
+      "wire": "inference_embed",
       "output": "Output::InferenceEmbeddings",
       "outputs": [
         "Output::InferenceEmbeddings"
@@ -5244,8 +5245,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.embed.md"
-      },
-      "wire": "inference_embed"
+      }
     },
     {
       "id": "inference.generate",
@@ -5270,6 +5270,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceGenerate",
+      "wire": "inference_generate",
       "output": "Output::InferenceGeneration",
       "outputs": [
         "Output::InferenceGeneration"
@@ -5352,8 +5353,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.generate.md"
-      },
-      "wire": "inference_generate"
+      }
     },
     {
       "id": "inference.models.list",
@@ -5379,6 +5379,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceModelsList",
+      "wire": "inference_models_list",
       "output": "Output::InferenceModels",
       "outputs": [
         "Output::InferenceModels"
@@ -5405,8 +5406,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.models.list.md"
-      },
-      "wire": "inference_models_list"
+      }
     },
     {
       "id": "inference.models.local",
@@ -5432,6 +5432,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceModelsLocal",
+      "wire": "inference_models_local",
       "output": "Output::InferenceModels",
       "outputs": [
         "Output::InferenceModels"
@@ -5458,8 +5459,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.models.local.md"
-      },
-      "wire": "inference_models_local"
+      }
     },
     {
       "id": "inference.models.pull",
@@ -5485,6 +5485,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceModelsPull",
+      "wire": "inference_models_pull",
       "output": "Output::InferenceModelPulled",
       "outputs": [
         "Output::InferenceModelPulled"
@@ -5535,8 +5536,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.models.pull.md"
-      },
-      "wire": "inference_models_pull"
+      }
     },
     {
       "id": "inference.rank",
@@ -5561,6 +5561,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceRank",
+      "wire": "inference_rank",
       "output": "Output::InferenceRanking",
       "outputs": [
         "Output::InferenceRanking"
@@ -5607,8 +5608,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.rank.md"
-      },
-      "wire": "inference_rank"
+      }
     },
     {
       "id": "inference.tokenize",
@@ -5633,6 +5633,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceTokenize",
+      "wire": "inference_tokenize",
       "output": "Output::InferenceTokenIds",
       "outputs": [
         "Output::InferenceTokenIds"
@@ -5679,8 +5680,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.tokenize.md"
-      },
-      "wire": "inference_tokenize"
+      }
     },
     {
       "id": "inference.unload",
@@ -5705,6 +5705,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::InferenceUnload",
+      "wire": "inference_unload",
       "output": "Output::InferenceUnloadResult",
       "outputs": [
         "Output::InferenceUnloadResult"
@@ -5731,8 +5732,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/inference.yaml",
         "prose": "commands/inference.unload.md"
-      },
-      "wire": "inference_unload"
+      }
     },
     {
       "id": "json.batch_delete",
@@ -5757,6 +5757,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::JsonBatchDelete",
+      "wire": "json_batch_delete",
       "output": "Output::JsonBatchResults",
       "outputs": [
         "Output::JsonBatchResults"
@@ -5810,8 +5811,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_delete.md"
-      },
-      "wire": "json_batch_delete"
+      }
     },
     {
       "id": "json.batch_exists",
@@ -5836,6 +5836,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonBatchExists",
+      "wire": "json_batch_exists",
       "output": "Output::JsonBatchExistsResults",
       "outputs": [
         "Output::JsonBatchExistsResults"
@@ -5873,8 +5874,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_exists.md"
-      },
-      "wire": "json_batch_exists"
+      }
     },
     {
       "id": "json.batch_get",
@@ -5899,6 +5899,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonBatchGet",
+      "wire": "json_batch_get",
       "output": "Output::JsonBatchGetResults",
       "outputs": [
         "Output::JsonBatchGetResults"
@@ -5944,8 +5945,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_get.md"
-      },
-      "wire": "json_batch_get"
+      }
     },
     {
       "id": "json.batch_set",
@@ -5970,6 +5970,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::JsonBatchSet",
+      "wire": "json_batch_set",
       "output": "Output::JsonBatchResults",
       "outputs": [
         "Output::JsonBatchResults"
@@ -6040,8 +6041,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.batch_set.md"
-      },
-      "wire": "json_batch_set"
+      }
     },
     {
       "id": "json.count",
@@ -6066,6 +6066,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonCount",
+      "wire": "json_count",
       "output": "Output::Uint",
       "outputs": [
         "Output::Uint"
@@ -6103,8 +6104,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.count.md"
-      },
-      "wire": "json_count"
+      }
     },
     {
       "id": "json.delete",
@@ -6129,6 +6129,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::JsonDelete",
+      "wire": "json_delete",
       "output": "Output::JsonDeleteResult",
       "outputs": [
         "Output::JsonDeleteResult"
@@ -6175,8 +6176,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.delete.md"
-      },
-      "wire": "json_delete"
+      }
     },
     {
       "id": "json.exists",
@@ -6201,6 +6201,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonExists",
+      "wire": "json_exists",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -6238,8 +6239,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.exists.md"
-      },
-      "wire": "json_exists"
+      }
     },
     {
       "id": "json.get",
@@ -6264,6 +6264,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonGet",
+      "wire": "json_get",
       "output": "Output::JsonVersionedValue",
       "outputs": [
         "Output::JsonValue",
@@ -6322,8 +6323,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.get.md"
-      },
-      "wire": "json_get"
+      }
     },
     {
       "id": "json.history",
@@ -6348,6 +6348,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonHistory",
+      "wire": "json_history",
       "output": "Output::JsonVersionHistory",
       "outputs": [
         "Output::JsonVersionHistory"
@@ -6386,8 +6387,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.history.md"
-      },
-      "wire": "json_history"
+      }
     },
     {
       "id": "json.index.create",
@@ -6413,6 +6413,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::JsonCreateIndex",
+      "wire": "json_create_index",
       "output": "Output::JsonIndexDefinition",
       "outputs": [
         "Output::JsonIndexDefinition"
@@ -6463,8 +6464,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.index.create.md"
-      },
-      "wire": "json_create_index"
+      }
     },
     {
       "id": "json.index.drop",
@@ -6490,6 +6490,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::JsonDropIndex",
+      "wire": "json_drop_index",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -6531,8 +6532,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.index.drop.md"
-      },
-      "wire": "json_drop_index"
+      }
     },
     {
       "id": "json.index.list",
@@ -6558,6 +6558,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonListIndexes",
+      "wire": "json_list_indexes",
       "output": "Output::JsonIndexList",
       "outputs": [
         "Output::JsonIndexList"
@@ -6591,8 +6592,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.index.list.md"
-      },
-      "wire": "json_list_indexes"
+      }
     },
     {
       "id": "json.list",
@@ -6617,6 +6617,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonList",
+      "wire": "json_list",
       "output": "Output::JsonListResult",
       "outputs": [
         "Output::JsonListResult"
@@ -6654,8 +6655,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.list.md"
-      },
-      "wire": "json_list"
+      }
     },
     {
       "id": "json.sample",
@@ -6680,6 +6680,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonSample",
+      "wire": "json_sample",
       "output": "Output::JsonSampleResult",
       "outputs": [
         "Output::JsonSampleResult"
@@ -6717,8 +6718,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.sample.md"
-      },
-      "wire": "json_sample"
+      }
     },
     {
       "id": "json.scan",
@@ -6743,6 +6743,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::JsonScan",
+      "wire": "json_scan",
       "output": "Output::JsonScanResult",
       "outputs": [
         "Output::JsonScanResult"
@@ -6780,8 +6781,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.scan.md"
-      },
-      "wire": "json_scan"
+      }
     },
     {
       "id": "json.set",
@@ -6806,6 +6806,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::JsonSet",
+      "wire": "json_set",
       "output": "Output::JsonWriteResult",
       "outputs": [
         "Output::JsonWriteResult"
@@ -6878,8 +6879,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/json.yaml",
         "prose": "commands/json.set.md"
-      },
-      "wire": "json_set"
+      }
     },
     {
       "id": "kv.batch_delete",
@@ -6904,6 +6904,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::KvBatchDelete",
+      "wire": "kv_batch_delete",
       "output": "Output::BatchResults",
       "outputs": [
         "Output::BatchResults"
@@ -6953,8 +6954,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_delete.md"
-      },
-      "wire": "kv_batch_delete"
+      }
     },
     {
       "id": "kv.batch_exists",
@@ -6979,6 +6979,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvBatchExists",
+      "wire": "kv_batch_exists",
       "output": "Output::BatchExistsResults",
       "outputs": [
         "Output::BatchExistsResults"
@@ -7020,8 +7021,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_exists.md"
-      },
-      "wire": "kv_batch_exists"
+      }
     },
     {
       "id": "kv.batch_get",
@@ -7046,6 +7046,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvBatchGet",
+      "wire": "kv_batch_get",
       "output": "Output::BatchGetResults",
       "outputs": [
         "Output::BatchGetResults"
@@ -7087,8 +7088,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_get.md"
-      },
-      "wire": "kv_batch_get"
+      }
     },
     {
       "id": "kv.batch_put",
@@ -7113,6 +7113,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::KvBatchPut",
+      "wire": "kv_batch_put",
       "output": "Output::BatchResults",
       "outputs": [
         "Output::BatchResults"
@@ -7165,8 +7166,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.batch_put.md"
-      },
-      "wire": "kv_batch_put"
+      }
     },
     {
       "id": "kv.count",
@@ -7191,6 +7191,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvCount",
+      "wire": "kv_count",
       "output": "Output::Uint",
       "outputs": [
         "Output::Uint"
@@ -7228,8 +7229,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.count.md"
-      },
-      "wire": "kv_count"
+      }
     },
     {
       "id": "kv.delete",
@@ -7254,6 +7254,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::KvDelete",
+      "wire": "kv_delete",
       "output": "Output::DeleteResult",
       "outputs": [
         "Output::DeleteResult"
@@ -7288,8 +7289,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.delete.md"
-      },
-      "wire": "kv_delete"
+      }
     },
     {
       "id": "kv.exists",
@@ -7314,6 +7314,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvExists",
+      "wire": "kv_exists",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -7351,8 +7352,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.exists.md"
-      },
-      "wire": "kv_exists"
+      }
     },
     {
       "id": "kv.get",
@@ -7377,6 +7377,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvGet",
+      "wire": "kv_get",
       "output": "Output::KvVersionedValue",
       "outputs": [
         "Output::KvVersionedValue"
@@ -7425,8 +7426,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.get.md"
-      },
-      "wire": "kv_get"
+      }
     },
     {
       "id": "kv.history",
@@ -7451,6 +7451,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvHistory",
+      "wire": "kv_history",
       "output": "Output::VersionHistory",
       "outputs": [
         "Output::VersionHistory"
@@ -7489,8 +7490,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.history.md"
-      },
-      "wire": "kv_history"
+      }
     },
     {
       "id": "kv.list",
@@ -7515,6 +7515,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvList",
+      "wire": "kv_list",
       "output": "Output::KeysPage",
       "outputs": [
         "Output::KeysPage"
@@ -7554,8 +7555,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.list.md"
-      },
-      "wire": "kv_list"
+      }
     },
     {
       "id": "kv.put",
@@ -7580,6 +7580,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::KvPut",
+      "wire": "kv_put",
       "output": "Output::WriteResult",
       "outputs": [
         "Output::WriteResult"
@@ -7620,8 +7621,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.put.md"
-      },
-      "wire": "kv_put"
+      }
     },
     {
       "id": "kv.sample",
@@ -7646,6 +7646,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvSample",
+      "wire": "kv_sample",
       "output": "Output::SampleResult",
       "outputs": [
         "Output::SampleResult"
@@ -7683,8 +7684,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.sample.md"
-      },
-      "wire": "kv_sample"
+      }
     },
     {
       "id": "kv.scan",
@@ -7709,6 +7709,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::KvScan",
+      "wire": "kv_scan",
       "output": "Output::KvScanResult",
       "outputs": [
         "Output::KvScanResult"
@@ -7748,8 +7749,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/kv.yaml",
         "prose": "commands/kv.scan.md"
-      },
-      "wire": "kv_scan"
+      }
     },
     {
       "id": "space.create",
@@ -7774,6 +7774,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::SpaceCreate",
+      "wire": "space_create",
       "output": "Output::SpaceCreateResult",
       "outputs": [
         "Output::SpaceCreateResult"
@@ -7808,8 +7809,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.create.md"
-      },
-      "wire": "space_create"
+      }
     },
     {
       "id": "space.delete",
@@ -7834,6 +7834,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::SpaceDelete",
+      "wire": "space_delete",
       "output": "Output::SpaceDeleteResult",
       "outputs": [
         "Output::SpaceDeleteResult"
@@ -7889,8 +7890,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.delete.md"
-      },
-      "wire": "space_delete"
+      }
     },
     {
       "id": "space.exists",
@@ -7915,6 +7915,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::SpaceExists",
+      "wire": "space_exists",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -7952,8 +7953,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.exists.md"
-      },
-      "wire": "space_exists"
+      }
     },
     {
       "id": "space.list",
@@ -7978,6 +7978,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::SpaceList",
+      "wire": "space_list",
       "output": "Output::SpaceList",
       "outputs": [
         "Output::SpaceList"
@@ -8007,8 +8008,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/space.yaml",
         "prose": "commands/space.list.md"
-      },
-      "wire": "space_list"
+      }
     },
     {
       "id": "vector.batch_delete",
@@ -8033,6 +8033,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorBatchDelete",
+      "wire": "vector_batch_delete",
       "output": "Output::VectorBatchDeleteResults",
       "outputs": [
         "Output::VectorBatchDeleteResults"
@@ -8088,8 +8089,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_delete.md"
-      },
-      "wire": "vector_batch_delete"
+      }
     },
     {
       "id": "vector.batch_exists",
@@ -8114,6 +8114,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorBatchExists",
+      "wire": "vector_batch_exists",
       "output": "Output::VectorBatchExistsResults",
       "outputs": [
         "Output::VectorBatchExistsResults"
@@ -8161,8 +8162,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_exists.md"
-      },
-      "wire": "vector_batch_exists"
+      }
     },
     {
       "id": "vector.batch_get",
@@ -8187,6 +8187,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorBatchGet",
+      "wire": "vector_batch_get",
       "output": "Output::VectorBatchGetResults",
       "outputs": [
         "Output::VectorBatchGetResults"
@@ -8238,8 +8239,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_get.md"
-      },
-      "wire": "vector_batch_get"
+      }
     },
     {
       "id": "vector.batch_upsert",
@@ -8264,6 +8264,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorBatchUpsert",
+      "wire": "vector_batch_upsert",
       "output": "Output::VectorBatchUpsertResults",
       "outputs": [
         "Output::VectorBatchUpsertResults"
@@ -8329,8 +8330,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.batch_upsert.md"
-      },
-      "wire": "vector_batch_upsert"
+      }
     },
     {
       "id": "vector.collection.create",
@@ -8356,6 +8356,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorCreateCollection",
+      "wire": "vector_create_collection",
       "output": "Output::VectorCollectionList",
       "outputs": [
         "Output::VectorCollectionList"
@@ -8412,8 +8413,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.create.md"
-      },
-      "wire": "vector_create_collection"
+      }
     },
     {
       "id": "vector.collection.delete",
@@ -8439,6 +8439,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorDeleteCollection",
+      "wire": "vector_delete_collection",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -8484,8 +8485,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.delete.md"
-      },
-      "wire": "vector_delete_collection"
+      }
     },
     {
       "id": "vector.collection.list",
@@ -8511,6 +8511,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorListCollections",
+      "wire": "vector_list_collections",
       "output": "Output::VectorCollectionList",
       "outputs": [
         "Output::VectorCollectionList"
@@ -8556,8 +8557,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.list.md"
-      },
-      "wire": "vector_list_collections"
+      }
     },
     {
       "id": "vector.collection.stats",
@@ -8583,6 +8583,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorCollectionStats",
+      "wire": "vector_collection_stats",
       "output": "Output::VectorCollectionList",
       "outputs": [
         "Output::VectorCollectionList"
@@ -8628,8 +8629,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.collection.stats.md"
-      },
-      "wire": "vector_collection_stats"
+      }
     },
     {
       "id": "vector.count",
@@ -8654,6 +8654,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorCount",
+      "wire": "vector_count",
       "output": "Output::Uint",
       "outputs": [
         "Output::Uint"
@@ -8699,8 +8700,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.count.md"
-      },
-      "wire": "vector_count"
+      }
     },
     {
       "id": "vector.delete",
@@ -8725,6 +8725,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorDelete",
+      "wire": "vector_delete",
       "output": "Output::VectorDeleteResult",
       "outputs": [
         "Output::VectorDeleteResult"
@@ -8772,8 +8773,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.delete.md"
-      },
-      "wire": "vector_delete"
+      }
     },
     {
       "id": "vector.delete_all",
@@ -8798,6 +8798,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorDeleteAll",
+      "wire": "vector_delete_all",
       "output": "Output::VectorBulkDeleteResult",
       "outputs": [
         "Output::VectorBulkDeleteResult"
@@ -8845,8 +8846,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.delete_all.md"
-      },
-      "wire": "vector_delete_all"
+      }
     },
     {
       "id": "vector.delete_by_filter",
@@ -8871,6 +8871,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorDeleteByFilter",
+      "wire": "vector_delete_by_filter",
       "output": "Output::VectorBulkDeleteResult",
       "outputs": [
         "Output::VectorBulkDeleteResult"
@@ -8922,8 +8923,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.delete_by_filter.md"
-      },
-      "wire": "vector_delete_by_filter"
+      }
     },
     {
       "id": "vector.exists",
@@ -8948,6 +8948,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorExists",
+      "wire": "vector_exists",
       "output": "Output::Bool",
       "outputs": [
         "Output::Bool"
@@ -8995,8 +8996,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.exists.md"
-      },
-      "wire": "vector_exists"
+      }
     },
     {
       "id": "vector.get",
@@ -9021,6 +9021,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorGet",
+      "wire": "vector_get",
       "output": "Output::VectorData",
       "outputs": [
         "Output::VectorData"
@@ -9074,8 +9075,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.get.md"
-      },
-      "wire": "vector_get"
+      }
     },
     {
       "id": "vector.history",
@@ -9100,6 +9100,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorHistory",
+      "wire": "vector_history",
       "output": "Output::VectorVersionHistory",
       "outputs": [
         "Output::VectorVersionHistory"
@@ -9147,8 +9148,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.history.md"
-      },
-      "wire": "vector_history"
+      }
     },
     {
       "id": "vector.index.query",
@@ -9174,6 +9174,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorIndexQuery",
+      "wire": "vector_index_query",
       "output": "Output::VectorIndexQuery",
       "outputs": [
         "Output::VectorIndexQuery"
@@ -9229,8 +9230,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.index.query.md"
-      },
-      "wire": "vector_index_query"
+      }
     },
     {
       "id": "vector.keys",
@@ -9255,6 +9255,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorListKeys",
+      "wire": "vector_list_keys",
       "output": "Output::VectorKeyPage",
       "outputs": [
         "Output::VectorKeyPage"
@@ -9302,8 +9303,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.keys.md"
-      },
-      "wire": "vector_list_keys"
+      }
     },
     {
       "id": "vector.metadata.update",
@@ -9328,6 +9328,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorUpdateMetadata",
+      "wire": "vector_update_metadata",
       "output": "Output::VectorMetadataUpdateResult",
       "outputs": [
         "Output::VectorMetadataUpdateResult"
@@ -9379,8 +9380,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.metadata.update.md"
-      },
-      "wire": "vector_update_metadata"
+      }
     },
     {
       "id": "vector.query",
@@ -9405,6 +9405,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorQuery",
+      "wire": "vector_query",
       "output": "Output::VectorMatches",
       "outputs": [
         "Output::VectorMatches"
@@ -9460,8 +9461,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.query.md"
-      },
-      "wire": "vector_query"
+      }
     },
     {
       "id": "vector.sample",
@@ -9486,6 +9486,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorSample",
+      "wire": "vector_sample",
       "output": "Output::VectorSampleResult",
       "outputs": [
         "Output::VectorSampleResult"
@@ -9533,8 +9534,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.sample.md"
-      },
-      "wire": "vector_sample"
+      }
     },
     {
       "id": "vector.scan",
@@ -9559,6 +9559,7 @@
       "feature": "core",
       "access": "read",
       "input": "Command::VectorScan",
+      "wire": "vector_scan",
       "output": "Output::VectorScanResult",
       "outputs": [
         "Output::VectorScanResult"
@@ -9606,8 +9607,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.scan.md"
-      },
-      "wire": "vector_scan"
+      }
     },
     {
       "id": "vector.upsert",
@@ -9632,6 +9632,7 @@
       "feature": "core",
       "access": "write",
       "input": "Command::VectorUpsert",
+      "wire": "vector_upsert",
       "output": "Output::VectorWriteResult",
       "outputs": [
         "Output::VectorWriteResult"
@@ -9693,8 +9694,7 @@
       "source": {
         "command": "crates/executor/idl/v1/commands/vector.yaml",
         "prose": "commands/vector.upsert.md"
-      },
-      "wire": "vector_upsert"
+      }
     }
   ]
 }

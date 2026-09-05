@@ -1,12 +1,12 @@
 {
   "hub": "https://stratahub.io",
   "source": "https://stratahub.io/v1/datasets",
-  "fetched_at": "2026-09-04",
+  "fetched_at": "2026-09-05",
   "datasets": [
     {
       "slug": "titanic",
       "title": "Titanic Passengers",
-      "description": "Passenger records from the 1912 voyage with raw and cleaned branches - the canonical beginner table, restructured for experiment isolation.",
+      "description": "Passenger records from the 1912 RMS Titanic voyage - the canonical beginner classification dataset. This bundle carries the **complete** Kaggle \"Titanic: Machine Learning from Disaster\" distribution: all 1309 passengers, the official 891/418 train/test split, and the `gender_submission` baseline, restructured for Strata so the split and the curation steps are branches rather than a folder of CSVs.",
       "tasks": [
         "classification",
         "tabular"
@@ -16,13 +16,14 @@
         "beginner",
         "demo",
         "branches",
-        "time-travel"
+        "time-travel",
+        "train-test-split"
       ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "size_bytes": 6887,
-      "downloads": 32,
-      "last_updated": "2026-09-01T01:19:32.333026064Z",
+      "size_bytes": 276334,
+      "downloads": 57,
+      "last_updated": "2026-09-04T20:34:49.83488364Z",
       "primitives": [
         "json",
         "kv"
@@ -56,7 +57,7 @@
     {
       "slug": "ab-test-results",
       "title": "A/B Test Results",
-      "description": "A seeded three-arm A/B test with one branch per arm and per-arm summary documents for cross-branch comparison in two reads.",
+      "description": "A synthetic, deterministic A/B test - one experiment, three arms - laid out so each arm lives on its own Strata branch (`control`, `variant-a`, `variant-b`). It exists to demonstrate the cross-branch comparison workflow: the same query, run per branch, is the entire analysis loop.",
       "tasks": [
         "ab-testing",
         "analytics",
@@ -72,7 +73,7 @@
       "size_category": "small",
       "size_bytes": 1249,
       "downloads": 7,
-      "last_updated": "2026-09-01T01:19:37.213385179Z",
+      "last_updated": "2026-09-04T20:34:26.90790987Z",
       "primitives": [
         "json",
         "kv"
@@ -104,9 +105,44 @@
       ]
     },
     {
+      "slug": "world-bank-indicators",
+      "title": "World Bank Indicators",
+      "description": "Population, GDP, and inflation for every country and region the World Bank tracks, 2000-2025 - the \"how big / how rich / how fast are prices moving\" table agents reach for in analysis tasks, one document per country instead of six thousand API rows.",
+      "tasks": [
+        "reference-data",
+        "time-series",
+        "analysis"
+      ],
+      "tags": [
+        "world-bank",
+        "economics",
+        "population",
+        "gdp",
+        "inflation",
+        "countries",
+        "reference"
+      ],
+      "license": "CC-BY-4.0",
+      "size_category": "small",
+      "size_bytes": 533840,
+      "downloads": 6,
+      "last_updated": "2026-09-04T20:34:52.245998661Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone world-bank-indicators ./world-bank-indicators"
+      ]
+    },
+    {
       "slug": "iana-http-reference",
       "title": "IANA HTTP Reference",
-      "description": "The IANA HTTP registries - status codes, methods, header fields - as one-read KV lookups with RFC references in JSON.",
+      "description": "The three IANA HTTP registries - status codes, methods, and header fields - as one-read lookups. The reference an agent writing or debugging HTTP calls needs constantly, without bundling a copy or guessing from memory.",
       "tasks": [
         "reference-data",
         "lookup",
@@ -124,8 +160,8 @@
       "license": "LicenseRef-Public-Domain",
       "size_category": "small",
       "size_bytes": 80154,
-      "downloads": 3,
-      "last_updated": "2026-09-01T01:19:44.911825726Z",
+      "downloads": 4,
+      "last_updated": "2026-09-04T20:34:36.581415293Z",
       "primitives": [
         "json",
         "kv"
@@ -139,9 +175,54 @@
       ]
     },
     {
+      "slug": "iris",
+      "title": "Iris Flowers",
+      "description": "Fisher's 1936 iris measurements - the smallest, most familiar dataset in machine learning, restructured for Strata as a tutorial-grade bundle whose version history walks through the dataset's real, documented curation corrections.",
+      "tasks": [
+        "classification",
+        "tabular",
+        "tutorial"
+      ],
+      "tags": [
+        "classic",
+        "beginner",
+        "tiny",
+        "time-travel",
+        "complete"
+      ],
+      "license": "CC0-1.0",
+      "size_category": "small",
+      "size_bytes": 20649,
+      "downloads": 4,
+      "last_updated": "2026-09-04T20:34:37.670161843Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
+      "includes": [
+        {
+          "primitive": "json",
+          "detail": "One document per flower (iris:<row>) with the four measurements and species - corrections visible via json history."
+        },
+        {
+          "primitive": "kv",
+          "detail": "Per-species counts under meta:."
+        }
+      ],
+      "quickstart": [
+        "strata clone iris ./iris",
+        "strata ./iris json get iris:1 '$'",
+        "strata ./iris json history iris:35",
+        "strata ./iris kv get meta:species:setosa:count"
+      ]
+    },
+    {
       "slug": "github-events",
       "title": "GitHub Events",
-      "description": "GitHub-shaped developer activity - pushes, PRs, issues, stars - as an append-only event log grouped into per-type streams.",
+      "description": "GitHub Events-shaped developer activity - pushes, pull requests, issues, stars, forks - restructured for Strata as an append-only event log grouped into streams by event type, the natural shape for \"what happened, in what order\" questions over developer activity.",
       "tasks": [
         "event-stream",
         "activity-log",
@@ -157,8 +238,8 @@
       "license": "CC-BY-SA-4.0",
       "size_category": "small",
       "size_bytes": 528696,
-      "downloads": 2,
-      "last_updated": "2026-09-01T01:15:11.385558Z",
+      "downloads": 3,
+      "last_updated": "2026-09-04T20:29:16.327441Z",
       "primitives": [
         "events",
         "kv"
@@ -184,28 +265,30 @@
       ]
     },
     {
-      "slug": "world-bank-indicators",
-      "title": "World Bank Indicators",
-      "description": "Population, GDP, and inflation for 266 countries and regions, 2000-2025, one year-keyed series document per entity.",
+      "slug": "semver-test-corpus",
+      "title": "SemVer Test Corpus",
+      "description": "108 version strings with their validity verdict under Semantic Versioning 2.0.0, 45 ordered precedence pairs, and a full precedence ranking of every valid string - the edge cases dependency logic gets wrong, as one-read lookups. Plus a second branch that reads the same corpus through the tolerant dialect real tooling actually uses, so `v1.2.3` is one `--branch` flag away from being valid.",
       "tasks": [
         "reference-data",
-        "time-series",
-        "analysis"
+        "lookup",
+        "eval",
+        "tooling",
+        "agent-development"
       ],
       "tags": [
-        "world-bank",
-        "economics",
-        "population",
-        "gdp",
-        "inflation",
-        "countries",
+        "semver",
+        "versioning",
+        "dependencies",
+        "parsing",
+        "precedence",
+        "edge-cases",
         "reference"
       ],
-      "license": "CC-BY-4.0",
+      "license": "CC0-1.0",
       "size_category": "small",
-      "size_bytes": 533840,
-      "downloads": 2,
-      "last_updated": "2026-09-01T01:19:45.711510357Z",
+      "size_bytes": 61371,
+      "downloads": 3,
+      "last_updated": "2026-09-04T20:34:41.256971814Z",
       "primitives": [
         "json",
         "kv"
@@ -215,13 +298,49 @@
       ],
       "includes": [],
       "quickstart": [
-        "strata clone world-bank-indicators ./world-bank-indicators"
+        "strata clone semver-test-corpus ./semver-test-corpus"
+      ]
+    },
+    {
+      "slug": "spdx-license-reference",
+      "title": "SPDX License Reference",
+      "description": "The SPDX License List - 727 licenses and 84 exceptions, release 3.28.0 - as one-read lookups. What an agent reviewing dependencies, generating a NOTICE file, or gating redistribution needs from the list, without bundling a copy of it or recalling it from memory.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "compliance",
+        "tooling"
+      ],
+      "tags": [
+        "spdx",
+        "license",
+        "licensing",
+        "sbom",
+        "compliance",
+        "reference",
+        "lookup"
+      ],
+      "license": "NOASSERTION",
+      "size_category": "small",
+      "size_bytes": 506544,
+      "downloads": 2,
+      "last_updated": "2026-09-04T20:34:42.419365218Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone spdx-license-reference ./spdx-license-reference"
       ]
     },
     {
       "slug": "agent-memory-with-experiments",
       "title": "Agent Memory, With Experiments",
-      "description": "A synthetic agent memory snapshot - episodic memories, event trace, working state - pre-forked into three retention-policy branches.",
+      "description": "A fully synthetic, deterministic snapshot of a working AI agent's memory - episodic memories, an append-only event trace, and live working state - pre-forked into three experiment branches that each apply a different memory-retention policy, so you can compare retention strategies against identical starting conditions with a single clone.",
       "tasks": [
         "agent-memory",
         "retrieval",
@@ -238,7 +357,7 @@
       "size_category": "small",
       "size_bytes": 12817,
       "downloads": 1,
-      "last_updated": "2026-09-01T01:12:28.389402Z",
+      "last_updated": "2026-09-04T20:27:41.274732Z",
       "primitives": [
         "events",
         "json",
@@ -276,126 +395,9 @@
       ]
     },
     {
-      "slug": "semver-test-corpus",
-      "title": "SemVer Test Corpus",
-      "description": "Version validity and precedence cases from SemVer 2.0.0 - strict answers on default, a documented lenient dialect as a branch.",
-      "tasks": [
-        "reference-data",
-        "lookup",
-        "eval",
-        "tooling",
-        "agent-development"
-      ],
-      "tags": [
-        "semver",
-        "versioning",
-        "dependencies",
-        "parsing",
-        "precedence",
-        "edge-cases",
-        "reference"
-      ],
-      "license": "CC0-1.0",
-      "size_category": "small",
-      "size_bytes": 61371,
-      "downloads": 1,
-      "last_updated": "2026-09-01T01:19:47.512414152Z",
-      "primitives": [
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "main"
-      ],
-      "includes": [],
-      "quickstart": [
-        "strata clone semver-test-corpus ./semver-test-corpus"
-      ]
-    },
-    {
-      "slug": "spdx-license-reference",
-      "title": "SPDX License Reference",
-      "description": "The SPDX license list as one-read lookups: id to name, OSI/FSF flags, deprecation status, pinned to a list release.",
-      "tasks": [
-        "reference-data",
-        "lookup",
-        "compliance",
-        "tooling"
-      ],
-      "tags": [
-        "spdx",
-        "license",
-        "licensing",
-        "sbom",
-        "compliance",
-        "reference",
-        "lookup"
-      ],
-      "license": "NOASSERTION",
-      "size_category": "small",
-      "size_bytes": 506544,
-      "downloads": 1,
-      "last_updated": "2026-09-01T01:19:46.685104418Z",
-      "primitives": [
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "main"
-      ],
-      "includes": [],
-      "quickstart": [
-        "strata clone spdx-license-reference ./spdx-license-reference"
-      ]
-    },
-    {
-      "slug": "iris",
-      "title": "Iris Flowers",
-      "description": "Fisher's 1936 iris measurements as a tutorial-grade bundle whose version history replays the dataset's real documented corrections.",
-      "tasks": [
-        "classification",
-        "tabular",
-        "tutorial"
-      ],
-      "tags": [
-        "classic",
-        "beginner",
-        "tiny",
-        "time-travel"
-      ],
-      "license": "CC0-1.0",
-      "size_category": "small",
-      "size_bytes": 4945,
-      "downloads": 0,
-      "last_updated": "2026-09-01T01:19:33.090452523Z",
-      "primitives": [
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "default"
-      ],
-      "includes": [
-        {
-          "primitive": "json",
-          "detail": "One document per flower (iris:<row>) with the four measurements and species - corrections visible via json history."
-        },
-        {
-          "primitive": "kv",
-          "detail": "Per-species counts under meta:."
-        }
-      ],
-      "quickstart": [
-        "strata clone iris ./iris",
-        "strata ./iris json get iris:1 '$'",
-        "strata ./iris json history iris:35",
-        "strata ./iris kv get meta:species:setosa:count"
-      ]
-    },
-    {
       "slug": "iso-reference",
       "title": "ISO Reference Codes",
-      "description": "ISO country, currency, and language codes as one-read KV lookups with JSON detail documents for codes and numeric ids.",
+      "description": "Country, currency, and language codes from three ISO standards, compiled directly into Strata as a lookup table - the small, dependency-free reference data an agent developer reaches for constantly and shouldn't have to bundle by hand.",
       "tasks": [
         "reference-data",
         "lookup",
@@ -412,8 +414,8 @@
       "license": "CC0-1.0",
       "size_category": "small",
       "size_bytes": 73440,
-      "downloads": 0,
-      "last_updated": "2026-09-01T01:19:41.945202286Z",
+      "downloads": 1,
+      "last_updated": "2026-09-04T20:34:38.759778405Z",
       "primitives": [
         "json",
         "kv"
@@ -438,9 +440,58 @@
       ]
     },
     {
+      "slug": "strata-bench-results",
+      "title": "Strata Benchmark Results",
+      "description": "Thirty real benchmark runs from Strata's own performance suite, replayed as an event log - a first-party history of how the engine's latency, scaling, and workload numbers moved across roughly two months of development, and a worked example of storing run history as events rather than a flat CSV.",
+      "tasks": [
+        "benchmarking",
+        "observability",
+        "tutorial"
+      ],
+      "tags": [
+        "benchmarks",
+        "performance",
+        "events",
+        "first-party",
+        "real-world"
+      ],
+      "license": "CC0-1.0",
+      "size_category": "small",
+      "size_bytes": 109410,
+      "downloads": 1,
+      "last_updated": "2026-09-04T20:30:59.871497Z",
+      "primitives": [
+        "events",
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
+      "includes": [
+        {
+          "primitive": "events",
+          "detail": "latency, scaling, and workload suite runs in order - two months of the engine's own numbers."
+        },
+        {
+          "primitive": "json",
+          "detail": "One full result document per run (run:<id>)."
+        },
+        {
+          "primitive": "kv",
+          "detail": "Latest-run pointers under meta:latest:."
+        }
+      ],
+      "quickstart": [
+        "strata clone strata-bench-results ./bench",
+        "strata ./bench event by-type latency --limit 5",
+        "strata ./bench kv get meta:latest:scaling"
+      ]
+    },
+    {
       "slug": "movielens-100k",
       "title": "MovieLens 100K",
-      "description": "MovieLens 100K across three primitives - movie JSON documents, KV catalog aggregates, and similarity-searchable genre vectors.",
+      "description": "The GroupLens MovieLens 100K catalog restructured across three Strata primitives - movie metadata as JSON documents, catalog aggregates as KV, and per-movie genre vectors in a similarity-searchable vector collection - so a single clone gives you a recommendation sandbox with no preprocessing step.",
       "tasks": [
         "recommendation",
         "retrieval",
@@ -456,7 +507,7 @@
       "size_category": "small",
       "size_bytes": 6577,
       "downloads": 0,
-      "last_updated": "2026-09-01T01:19:33.922805934Z",
+      "last_updated": "2026-09-04T20:34:40.120651574Z",
       "primitives": [
         "json",
         "kv",
@@ -494,7 +545,7 @@
     {
       "slug": "stackoverflow",
       "title": "Stack Overflow Q&A",
-      "description": "Stack Overflow questions and answers as JSON documents with comment threads embedded inline - a full discussion in one read.",
+      "description": "Stack Overflow questions and answers restructured for Strata as JSON documents with their comment threads embedded inline, so a single `json get` returns a full discussion - no join against a separate comments table.",
       "tasks": [
         "qa-retrieval",
         "forum-analytics",
@@ -511,7 +562,7 @@
       "size_category": "small",
       "size_bytes": 830470,
       "downloads": 0,
-      "last_updated": "2026-09-01T01:19:40.263818193Z",
+      "last_updated": "2026-09-04T20:34:43.48179225Z",
       "primitives": [
         "json",
         "kv"
@@ -537,58 +588,9 @@
       ]
     },
     {
-      "slug": "strata-bench-results",
-      "title": "Strata Benchmark Results",
-      "description": "Thirty real StrataDB benchmark runs replayed as an event log - the engine's own latency and scaling history over two months.",
-      "tasks": [
-        "benchmarking",
-        "observability",
-        "tutorial"
-      ],
-      "tags": [
-        "benchmarks",
-        "performance",
-        "events",
-        "first-party",
-        "real-world"
-      ],
-      "license": "CC0-1.0",
-      "size_category": "small",
-      "size_bytes": 109385,
-      "downloads": 0,
-      "last_updated": "2026-09-01T01:16:51.29767Z",
-      "primitives": [
-        "events",
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "default"
-      ],
-      "includes": [
-        {
-          "primitive": "events",
-          "detail": "latency, scaling, and workload suite runs in order - two months of the engine's own numbers."
-        },
-        {
-          "primitive": "json",
-          "detail": "One full result document per run (run:<id>)."
-        },
-        {
-          "primitive": "kv",
-          "detail": "Latest-run pointers under meta:latest:."
-        }
-      ],
-      "quickstart": [
-        "strata clone strata-bench-results ./bench",
-        "strata ./bench event by-type latency --limit 5",
-        "strata ./bench kv get meta:latest:scaling"
-      ]
-    },
-    {
       "slug": "wikipedia",
       "title": "Wikipedia Articles",
-      "description": "Wikipedia article metadata as one JSON document per article with a KV title index - the seed shape for a retrieval corpus.",
+      "description": "Wikipedia article metadata restructured for Strata as one JSON document per article, with a KV title-to-slug index over the top - the shape a future retrieval-augmented-generation corpus would build on once article text and embeddings are added.",
       "tasks": [
         "retrieval",
         "tutorial",
@@ -604,7 +606,7 @@
       "size_category": "small",
       "size_bytes": 87945,
       "downloads": 0,
-      "last_updated": "2026-09-01T01:19:41.061175336Z",
+      "last_updated": "2026-09-04T20:34:51.175799695Z",
       "primitives": [
         "json",
         "kv"

@@ -4838,6 +4838,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -5630,7 +5635,7 @@
           "description": "Result ordering."
         },
         "end_seq": {
-          "description": "Optional exclusive end sequence; with reverse direction, exclusive lower bound.",
+          "description": "Optional exclusive upper bound of the sequence window (same in both directions).",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -5662,7 +5667,7 @@
           ]
         },
         "start_seq": {
-          "description": "Inclusive start sequence; with reverse direction, walk backward from this sequence.",
+          "description": "Inclusive lower bound of the sequence window (same in both directions).",
           "format": "uint64",
           "minimum": 0,
           "type": "integer"
@@ -5817,7 +5822,7 @@
           "description": "Result ordering."
         },
         "end_ts": {
-          "description": "Optional inclusive end timestamp in microseconds.",
+          "description": "Optional exclusive end timestamp in microseconds (half-open window,\nmatching the sequence-addressed range's exclusive end).",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -7610,6 +7615,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {
@@ -16346,6 +16356,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -16921,6 +16936,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -17483,6 +17503,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {
@@ -18088,6 +18113,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {
@@ -20135,6 +20165,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -20702,6 +20737,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {
@@ -21301,6 +21341,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -21880,6 +21925,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {
@@ -24124,6 +24174,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -24704,6 +24759,11 @@
             "type": "string"
           },
           {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
+            "type": "string"
+          },
+          {
             "const": "serialization",
             "description": "Encoding, decoding, schema, format, or protocol conversion failed.",
             "type": "string"
@@ -25255,6 +25315,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {
@@ -25904,6 +25969,11 @@
           {
             "const": "corruption",
             "description": "Durable state or provider output violates integrity expectations.",
+            "type": "string"
+          },
+          {
+            "const": "data_loss",
+            "description": "Durable engine state that should exist cannot be reconstructed - a\nstored record failed to decode or a required artifact is gone. Distinct\nfrom `Corruption` (integrity violation detected) in that the data is\nunrecoverable, not merely inconsistent.",
             "type": "string"
           },
           {

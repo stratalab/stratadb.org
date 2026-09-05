@@ -2,7 +2,7 @@
 title: 'Time travel'
 description: 'Read the database as it was, and branch from a point in the past, without restoring anything.'
 section: 'Learn'
-source: 'strata-core@v1.1.1'
+source: 'strata-core@v1.2.0'
 ---
 
 import Figure from '../../../components/docs/Figure.astro';
@@ -44,8 +44,8 @@ rather than an absence in it.
 
 ## Not every read takes a point
 
-In 1.1.1, `kv get`, `kv list`, `json get`, `vector query` and `graph neighbors`
-accept `--as-of`. `kv scan` and `event range` do not.
+`kv get`, `kv list`, `json get`, `vector query` and `graph neighbors` accept
+`--as-of`. `kv scan` and `event range` do not.
 
 That is worth checking before you build on it. A temporal read that is not
 supported fails rather than quietly answering from the present, but the failure
