@@ -17,7 +17,9 @@ async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) out.push(...(await walk(path)));
-    else if (extname(path) === '.md') out.push(path);
+    // .mdx as well: the prose pages written since the rebuild are MDX, and a
+    // walker that only knew .md silently excluded every one of them.
+    else if (extname(path) === '.md' || extname(path) === '.mdx') out.push(path);
   }
   return out;
 }
@@ -28,6 +30,9 @@ function frontmatter(text) {
 }
 
 function sourceValue(fm) {
+  // YAML quotes are part of the line, not part of the value. Leaving them on
+  // made the version pattern below never match, so every page fell through the
+  // `!match` escape and this check passed without checking anything.
   const match = fm.match(/^source:\s*(.+)$/m);
   return match?.[1]?.trim().replace(/^["']|["']$/g, '') ?? null;
 }

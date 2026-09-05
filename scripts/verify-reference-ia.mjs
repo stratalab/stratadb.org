@@ -12,7 +12,7 @@ const SCAN_ROOTS = [
   'src/components',
   'src/lib',
 ];
-const EXTENSIONS = new Set(['.astro', '.md', '.ts', '.tsx']);
+const EXTENSIONS = new Set(['.astro', '.md', '.mdx', '.ts', '.tsx']);
 const TOP_LEVEL_REFERENCE = [
   'index.md',
   'cli.md',

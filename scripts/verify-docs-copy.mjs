@@ -12,7 +12,7 @@ const TARGETS = [
   'src/pages/llms-full.txt.ts',
   'src/pages/specimen.astro',
 ];
-const EXTENSIONS = new Set(['.astro', '.md', '.ts']);
+const EXTENSIONS = new Set(['.astro', '.md', '.mdx', '.ts']);
 
 const FORBIDDEN = [
   { label: 'old AI-era positioning', pattern: /\bAI era\b/i },
