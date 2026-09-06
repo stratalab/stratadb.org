@@ -1,0 +1,93 @@
+---
+// The landing page for a documentation section.
+//
+// The contents are read from the same manifest the sidebar renders, so a
+// landing cannot list a page the sidebar does not, or miss one it gained. The
+// only thing written per section is the prose at the top.
+//
+// Pages that do not exist yet are shown rather than hidden, muted and without a
+// link. A section that silently omits half its plan reads as finished when it is
+// not, and someone arriving from the sidebar has already seen those labels
+// greyed out beside them.
+import { docsTree, type TreeNode } from '../../lib/docsTree';
+
+interface Props {
+  /** Section label, matching its node in docsTree. */
+  section: string;
+}
+const { section } = Astro.props;
+
+const node = docsTree.find((n) => n.label === section);
+if (!node) throw new Error(`SectionLanding: no section "${section}" in docsTree`);
+
+/** A group is a child with children of its own; a leaf stands alone. */
+const groups = (node.children ?? []).filter((c) => c.children?.length);
+const leaves = (node.children ?? []).filter((c) => !c.children?.length);
+
+const count = (n: TreeNode): { live: number; total: number } => {
+  const kids = n.children ?? [];
+  if (!kids.length) return { live: n.href ? 1 : 0, total: 1 };
+  return kids.reduce(
+    (acc, k) => {
+      const c = count(k);
+      return { live: acc.live + c.live, total: acc.total + c.total };
+    },
+    { live: n.href ? 1 : 0, total: n.href ? 1 : 0 },
+  );
+};
+const tally = count(node);
+---
+
+<div class="not-prose mt-8 space-y-10">
+  {
+    leaves.length > 0 && (
+      <ul class="grid gap-px overflow-hidden rounded-(--radius-frame) border border-line bg-line sm:grid-cols-2">
+        {leaves.map((leaf) =>
+          leaf.href ? (
+            <li class="bg-raised transition-colors duration-200 hover:bg-elevated">
+              <a href={leaf.href} class="block px-5 py-4 text-body text-ink-hi">
+                {leaf.label}
+              </a>
+            </li>
+          ) : (
+            <li class="bg-raised px-5 py-4 text-body text-ink-low">{leaf.label}</li>
+          ),
+        )}
+      </ul>
+    )
+  }
+
+  {
+    groups.map((group) => (
+      <section>
+        <h2 class="text-heading text-ink-hi">
+          {group.href ? (
+            <a href={group.href} class="transition-colors duration-200 hover:text-terracotta-400">
+              {group.label}
+            </a>
+          ) : (
+            group.label
+          )}
+        </h2>
+        <ul class="mt-4 grid gap-px overflow-hidden rounded-(--radius-frame) border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+          {(group.children ?? []).map((child) =>
+            child.href ? (
+              <li class="bg-raised transition-colors duration-200 hover:bg-elevated">
+                <a href={child.href} class="block px-4 py-3.5 text-body text-ink-hi">
+                  {child.label}
+                </a>
+              </li>
+            ) : (
+              <li class="bg-raised px-4 py-3.5 text-body text-ink-low">{child.label}</li>
+            ),
+          )}
+        </ul>
+      </section>
+    ))
+  }
+
+  <p class="text-body text-ink-low">
+    {tally.live} of {tally.total} pages in this section are written. The rest are listed so you can see
+    what is planned rather than what is finished.
+  </p>
+</div>

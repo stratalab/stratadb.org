@@ -1,0 +1,27 @@
+---
+// Guides: the task-shaped half of the documentation.
+//
+// Contents come from the manifest via SectionLanding, so this file owns only
+// the framing. Unwritten pages are listed rather than hidden; the sidebar shows
+// them greyed out beside this page and pretending otherwise would be worse.
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import SectionLanding from '../../components/docs/SectionLanding.astro';
+---
+
+<DocsLayout
+  title="Guides"
+  description="Task-shaped instructions: isolate an experiment, build retrieval, give an agent a branch, run Strata in production."
+  section="Guides"
+  wide
+>
+  <h1>Guides</h1>
+  <p>
+    Learn explains how Strata works and Reference lists what every command takes. Guides are the
+    third thing: a task you actually have, followed end to end.
+  </p>
+  <p>
+    Each one assumes you have <a href="/docs/get-started/installation">installed Strata</a> and picks
+    up from there.
+  </p>
+  <SectionLanding section="Guides" />
+</DocsLayout>

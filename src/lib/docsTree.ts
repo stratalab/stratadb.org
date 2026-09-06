@@ -31,8 +31,8 @@ export interface TreeNode {
 export const docsTree: TreeNode[] = [
   {
     label: 'Get Started',
+    href: '/docs/get-started',
     children: [
-      { label: 'Overview' },
       { label: 'Installation', href: '/docs/get-started/installation' },
       { label: 'Quickstart' },
       { label: 'Python quickstart' },
@@ -84,6 +84,7 @@ export const docsTree: TreeNode[] = [
   },
   {
     label: 'Guides',
+    href: '/docs/guides',
     children: [
       {
         label: 'Branching and history',
@@ -150,6 +151,7 @@ export const docsTree: TreeNode[] = [
   },
   {
     label: 'Develop',
+    href: '/docs/develop',
     children: [
       {
         label: 'Python',

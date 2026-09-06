@@ -18,6 +18,10 @@ interface Props {
   open?: string;
 }
 const { open } = Astro.props;
+
+// A section landing marks itself, the same as any other page. Trailing slashes
+// vary by host, so compare without one.
+const here = Astro.url.pathname.replace(/\/$/, '');
 ---
 
 <nav class="hidden w-80 shrink-0 border-r border-line lg:block" aria-label="Documentation">
@@ -51,7 +55,11 @@ const { open } = Astro.props;
               <a
                 href={section.href}
                 data-section-link
-                class="min-w-0 flex-1 truncate hover:text-terracotta-400"
+                aria-current={here === section.href.replace(/\/$/, '') ? 'page' : undefined}
+                class:list={[
+                  'min-w-0 flex-1 truncate hover:text-terracotta-400',
+                  here === section.href.replace(/\/$/, '') && 'text-terracotta-500',
+                ]}
               >
                 {section.label}
               </a>

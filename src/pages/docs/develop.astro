@@ -1,0 +1,25 @@
+---
+// Develop: the per-interface half, for people writing code against Strata.
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import SectionLanding from '../../components/docs/SectionLanding.astro';
+---
+
+<DocsLayout
+  title="Develop"
+  description="Building against Strata from Python, the CLI, an agent framework, or MCP."
+  section="Develop"
+  wide
+>
+  <h1>Develop</h1>
+  <p>
+    Learn and Guides are the same whichever way you drive Strata. This section is where the
+    interface matters: what the Python package gives you, how the CLI behaves in a script, and how
+    an agent framework talks to the engine.
+  </p>
+  <p>
+    Every command is documented once, in the <a href="/docs/reference">reference</a>, with its CLI
+    and Python spelling side by side. These pages are the surrounding detail that a command list
+    cannot carry.
+  </p>
+  <SectionLanding section="Develop" />
+</DocsLayout>
