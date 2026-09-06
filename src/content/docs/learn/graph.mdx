@@ -1,0 +1,160 @@
+---
+title: 'Graph'
+description: 'Nodes, edges and traversal, with an ontology you can leave loose and freeze when you know the shape.'
+section: 'Learn'
+source: 'strata-core@v1.2.0'
+---
+
+Graph is for data where the relationships are the thing you query. Use it when
+you want to ask who is connected to whom, what depends on what, or how far apart
+two things are, and when answering that with joins would mean joining a table to
+itself an unknown number of times.
+
+```console
+strata graph create social
+strata graph add-node social alice
+strata graph add-node social bob
+strata graph add-edge social alice knows bob
+```
+
+Note the edge argument order: graph, **source, type, destination**. It reads as
+a sentence, `alice knows bob`, and getting it wrong is the easiest mistake to
+make here because every argument is a bare string.
+
+## Nodes, edges and what they carry
+
+Both take properties, and an edge carries a weight that defaults to 1:
+
+```console
+strata graph add-node social alice --properties '{"age":30}'
+strata graph get-edge social alice knows bob
+```
+
+```json
+{"src":"alice","edge_type":"knows","dst":"bob","weight":1.0,"graph":"social", ...}
+```
+
+`graph meta` reports the counts:
+
+```console
+strata graph meta social
+```
+
+```json
+{"graph":"social","node_count":4,"edge_count":3, ...}
+```
+
+## Walking the graph
+
+`neighbors` is the one-hop question, and it returns the edge and the node
+together with the direction it was traversed, so you do not need a second read
+to find out why a node came back.
+
+```console
+strata graph neighbors social alice
+```
+
+For more than one hop there is a bounded breadth-first traversal:
+
+```console
+strata graph bfs social alice
+```
+
+```json
+{"depths":{"alice":0,"bob":1,"carol":2}, "edges":[...]}
+```
+
+Depths come back keyed by node, which is usually what you wanted rather than the
+path itself.
+
+## Analytics
+
+Five whole-graph algorithms ship as commands rather than as something you
+implement on top of reads:
+
+```console
+strata graph wcc social
+strata graph pagerank social
+strata graph sssp social alice
+strata graph lcc social
+strata graph cdlp social
+```
+
+Weakly connected components, PageRank, single-source shortest paths, local
+clustering coefficients, and community detection by label propagation. `wcc`
+reports a component per node and a count, which is the quickest way to find out
+whether your graph is one thing or several:
+
+```json
+{"component_count":2,"components":{"alice":"alice","bob":"alice", ...}}
+```
+
+## The ontology is optional until you freeze it
+
+This is the part worth understanding, because it is unusual and it is the reason
+graph here is not just a table of edges.
+
+A graph starts with a draft ontology. You can declare object and link types, and
+you can also ignore them entirely: while the ontology is a draft, a node may
+declare a type nobody defined.
+
+```console
+strata graph ontology define-object-type kb person
+strata graph add-node kb alice --type person
+strata graph add-node kb ghost --type alien
+```
+
+Both writes succeed, including the one using an undeclared type. Then you
+freeze:
+
+```console
+strata graph ontology freeze kb
+strata graph add-node kb bob --type alien
+```
+
+```
+failed_precondition.engine.graph_ontology_node_type: node object type ...
+```
+
+After the freeze, writes validate against the declared types. So the shape is
+explore first, commit later: leave it loose while you are still learning what
+your data looks like, and freeze once you know.
+
+Three things about freezing are worth knowing before you do it.
+
+It is one way. Defining a new type afterwards fails with
+`failed_precondition.engine.graph_ontology_frozen`.
+
+It is not retroactive. `ghost`, written with an undeclared type before the
+freeze, is still there and still readable afterwards. Freezing constrains what
+happens next, it does not audit what already happened.
+
+And the ontology only knows about declared types, so
+`strata graph ontology summary kb` counts nodes per declared type and does not
+mention `ghost` at all. If you froze a graph that already had loose data in it,
+the summary understates what is actually stored.
+
+## Sharp edges
+
+**Names differ between the CLI and the catalog.** The CLI uses compound verbs,
+`add-node` and `get-edge`, while the command catalog and the reference pages use
+nested names, `graph.node.add` and `graph.edge.get`. They are the same
+operations.
+
+**Three commands have no CLI form.** `bindings`, `batch_write` and
+`apply_delete_policy` exist in the engine and are reachable from the SDK or the
+command escape hatch, but `strata graph bindings` is not a command.
+
+**Deleting a graph takes its contents with it, without asking.**
+`strata graph delete social` on a populated graph succeeds immediately. Compare
+`space delete`, which refuses when a space still holds data and makes you pass
+`--force`. Tracked as strata-core issue 3122.
+
+**Some published examples do not run.** A few of the generated examples on the
+graph reference pages use flags the CLI does not accept, including
+`--object-type` where the flag is `--type`. Tracked as strata-core issue 3073.
+
+## Where to look next
+
+Every graph command, with its parameters, return shape and error codes, is in
+the [graph reference](/docs/reference/graph).
