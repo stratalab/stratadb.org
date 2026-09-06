@@ -1,0 +1,175 @@
+---
+title: 'Key-value'
+description: 'Bytes under a key: reads, writes, listing, history, and the two things that surprise people.'
+section: 'Learn'
+source: 'strata-core@v1.2.0'
+---
+
+Key-value is the plainest of the five models. A key is bytes, a value is bytes,
+and you get the value back by naming the key.
+
+```console
+strata kv put user:1 alice
+strata kv get user:1
+```
+
+```
+alice
+```
+
+Use it when you know the key and want the value, and the value has no structure
+the database needs to understand. When the shape matters, JSON is the model that
+can read one field.
+
+## The basics
+
+```console
+strata kv put user:1 alice
+strata kv exists user:1
+strata kv count
+strata kv delete user:1
+```
+
+A `put` on an existing key replaces the visible value and records a new version;
+it does not fail and there is no separate update. `delete` removes the key from
+view and leaves a tombstone in history, so a deleted key reads as absent while
+still being distinguishable from one that was never written.
+
+```console
+strata kv get user:1
+strata kv exists user:1
+```
+
+```
+(nil)
+false
+```
+
+## What a write promises
+
+The engine states two guarantees for a KV write, and they are worth knowing
+because they remove work you might otherwise do yourself.
+
+**Atomic per key.** The write is a single commit. It applies fully, value plus
+a new version, or not at all. No reader ever sees a partial or torn value.
+
+**Read-after-write visibility.** Once the command returns success, every later
+read through any handle of the same database sees that write or a newer one,
+including immediately from the handle that issued it. An acknowledged write is
+never transiently invisible, so there is no window to poll through.
+
+## Listing and scanning are different commands
+
+`list` gives you keys. `scan` gives you rows: key, value, and the version facts.
+
+```console
+strata kv list --prefix user:
+```
+
+```
+user:1
+user:2
+user:3
+```
+
+```console
+strata kv scan --limit 2
+```
+
+```
+{"key":"k:1","timestamp":3,"value":"v1","version":3}
+{"key":"k:2","timestamp":4,"value":"v2","version":4}
+-- more: add --cursor azoz to the same command
+```
+
+Both take `--prefix`. Reach for `list` when you only need to know what is there,
+because it does not carry the values back.
+
+## Pagination hands you the cursor
+
+A truncated `scan` tells you how to continue, and you pass that value straight
+back:
+
+```console
+strata kv scan --limit 2 --cursor azoz
+```
+
+The cursor is opaque. It looks like base64 and it sometimes decodes to something
+recognisable, but the engine's contract is that you pass it back unmodified and
+never parse it. Treat it as a token, not as a key.
+
+`sample` is the other way to look at a lot of keys, when you want a few
+arbitrary rows rather than an ordered page:
+
+```console
+strata kv sample --count 2
+```
+
+## History and reading the past
+
+Every version of a key is retained, newest first:
+
+```console
+strata kv history k:1
+```
+
+```
+{"timestamp":8,"tombstone":false,"value":"v1-updated","version":8}
+{"timestamp":3,"tombstone":false,"value":"v1","version":3}
+```
+
+And any read can be taken at a point on the timeline:
+
+```console
+strata kv get k:1 --as-of 3
+```
+
+```
+v1
+```
+
+Pass the `timestamp` from the history output, not the `version`.
+[Time travel](/docs/learn/time-travel) is the page for why those are different
+numbers and what happens if you confuse them.
+
+## Two things that surprise people
+
+**Batch operations are not CLI verbs.** There is no `strata kv batch-put`. The
+batch commands exist in the engine and are reachable from the SDK or through the
+command escape hatch, and all the entries land in one commit:
+
+```console
+strata command run --command-json '{"entries":[{"key":"YQ==","value":"MQ=="},{"key":"Yg==","value":"Mg=="}],"type":"kv_batch_put"}'
+```
+
+Both results in that response carry the same `version`, which is the point of a
+batch: several keys, one commit, one version.
+
+**Values that are not valid UTF-8 come back base64-encoded, and nothing says
+so.** Writing arbitrary bytes is well supported:
+
+```console
+strata kv put raw --file ./payload.bin
+```
+
+Reading them back is where it gets sharp. A value the terminal can print comes
+back as text. A value it cannot comes back as base64, on the default output, on
+`--raw`, and inside `--json` alike:
+
+```console
+strata kv get raw
+```
+
+```
+AAH/
+```
+
+The bytes are intact and decoding by hand recovers them exactly. But no CLI flag
+returns the raw bytes, and no marker distinguishes a value that happens to read
+as `AAH/` from one that was encoded. If you store binary through the CLI, decode
+on the way out and know that you are doing it.
+
+## Where to look next
+
+Every KV command, with its parameters, return shape and error codes, is in the
+[key-value reference](/docs/reference/kv).
