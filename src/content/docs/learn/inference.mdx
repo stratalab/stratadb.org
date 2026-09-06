@@ -1,0 +1,147 @@
+---
+title: 'Inference'
+description: 'Embeddings, generation and reranking, from a cloud provider or a local model, through the same commands.'
+section: 'Learn'
+source: 'strata-core@v1.2.0'
+---
+
+Strata can call a model as well as store what comes back. Embeddings, text
+generation and reranking are commands, so the thing that produces a vector and
+the thing that stores it are the same tool.
+
+```console
+strata inference embed openai:text-embedding-3-small "hello world"
+strata inference generate anthropic:claude-3-5-haiku-latest "write a haiku"
+```
+
+## Two ways to run a model, and only one of them works out of the box
+
+This is the first thing to know, because the rest of the surface does not make
+it obvious.
+
+**Cloud providers work with the released binary.** `openai`, `anthropic` and
+`google` are built in. They are HTTP clients, so they cost nothing to ship, and
+all they need is an API key.
+
+**Local models need a binary built from source.** The releases are compiled
+without the local inference feature, because it vendors llama.cpp and cmake and
+would turn a twelve-megabyte download into something much larger. So on a
+released binary every local operation fails:
+
+```console
+strata inference embed miniLM "hello"
+```
+
+```
+inference.unsupported_operation: local embedding requires the local feature
+```
+
+Confusingly, the model catalog still lists local models, `inference models local`
+still lists the ones on your disk, and `capability` still reports `can_embed`
+for them. The field that tells the truth is `provider_feature_enabled`. This is
+strata-core issue 3124.
+
+If you want local inference, build the CLI from source with the
+`inference-local` feature. If you want it to work today with the binary you
+installed, use a provider.
+
+## Setting up a provider
+
+Keys go in the global config or the environment, and the environment wins:
+
+```console
+strata config set openai.api_key sk-...
+```
+
+```console
+export OPENAI_API_KEY=sk-...
+```
+
+The config file is written with owner-only permissions, and
+`strata config get-key openai.api_key` prints it redacted. `strata config unset`
+removes it.
+
+If you forget, the error tells you exactly what to do rather than making you
+guess:
+
+```
+inference.missing_api_key: OPENAI_API_KEY is not set: the openai API key is
+missing. Get a key at https://platform.openai.com/api-keys, then set it with
+`strata config set openai.api_key <KEY>` or by exporting OPENAI_API_KEY.
+```
+
+## Ask before you call
+
+`capability` reports what a spec can do, and what it will need, without calling
+anything:
+
+```console
+strata inference capability openai:gpt-4o-mini
+```
+
+```json
+{
+  "can_embed": true, "can_generate": true, "can_rank": false,
+  "requires_api_key": true, "requires_network": true,
+  "supports_json_schema": true, "supports_tools": true, ...
+}
+```
+
+That is worth using before you wire a model into anything. It will tell you that
+a reranker cannot generate, that a local embedding model needs no key and no
+network, and whether a cloud model supports structured output and tools.
+
+## What the commands do
+
+```console
+strata inference embed <model> <text>
+strata inference generate <model> <prompt>
+strata inference rank <model> <query> <passage>...
+strata inference tokenize <model> <text>
+strata inference detokenize <model> <ids>
+```
+
+`generate` takes `--message` and `--system` for chat-shaped calls, with a bare
+prompt becoming a trailing user message. `tokenize` and `detokenize` are local
+only, since they need the model's own vocabulary.
+
+The model catalog is browsable:
+
+```console
+strata inference models list
+strata inference models local
+```
+
+Each row gives the name, what it is for, the architecture, the quantisation,
+whether it is local or remote, and its size.
+
+## Models are cached, and you can look
+
+Loaded models stay in memory between calls:
+
+```console
+strata inference cache-status
+strata inference unload
+```
+
+`unload` with no argument clears everything, which matters more than it sounds
+like when the model in question is several gigabytes.
+
+## Embeddings and the vector model
+
+The natural pairing is embedding text and storing the result:
+
+```console
+strata vector collection create docs 1536
+strata inference embed openai:text-embedding-3-small "some text"
+strata vector upsert docs doc:1 <the embedding>
+```
+
+The collection's dimension has to match what the model produces, and
+`capability` reports `embedding_dim` for local models so you can check before
+creating the collection. [Vectors](/docs/learn/vectors) covers the storage side.
+
+## Where to look next
+
+Every inference command, with its parameters, return shape and error codes, is
+in the [inference reference](/docs/reference/inference).

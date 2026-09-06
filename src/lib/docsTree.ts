@@ -68,8 +68,8 @@ export const docsTree: TreeNode[] = [
       },
       {
         label: 'Inference',
+        href: '/docs/learn/inference',
         children: [
-          { label: 'Overview' },
           { label: 'Models' },
           { label: 'Generation' },
           { label: 'Embeddings' },
