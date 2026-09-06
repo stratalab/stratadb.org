@@ -62,7 +62,7 @@ export const docsTree: TreeNode[] = [
           { label: 'Key-value', href: '/docs/learn/key-value' },
           { label: 'JSON', href: '/docs/learn/json' },
           { label: 'Events', href: '/docs/learn/events' },
-          { label: 'Vectors' },
+          { label: 'Vectors', href: '/docs/learn/vectors' },
           { label: 'Graph' },
         ],
       },

@@ -1,0 +1,139 @@
+---
+title: 'Vectors'
+description: 'Embeddings searched by similarity: collections, metadata filters, and the upsert behaviour to watch.'
+section: 'Learn'
+source: 'strata-core@v1.2.0'
+---
+
+Vectors are for finding things that are _like_ a query rather than equal to it.
+You store an embedding under a key, and you search by handing over another
+embedding and asking what is closest.
+
+```console
+strata vector collection create docs 3
+strata vector upsert docs a 1,0,0
+strata vector upsert docs b 0.9,0.1,0
+strata vector query docs 1,0,0
+```
+
+```
+a	1.0
+b	0.9938837289810181
+```
+
+Results come back ranked, closest first, as key and score.
+
+## Collections fix the dimension
+
+Unlike the other models, vectors need setting up. A collection is created with a
+name, a dimension, and a metric:
+
+```console
+strata vector collection create docs 3 --metric cosine
+```
+
+```json
+{ "count": 0, "dimension": 3, "metric": "cosine", "name": "docs" }
+```
+
+The metric is `cosine` by default, with `euclidean` and `dot-product` available.
+The dimension is fixed at creation and enforced on every write:
+
+```console
+strata vector upsert docs bad 1,0
+```
+
+```
+invalid_argument.engine.vector_dimension: vector dimension mismatch
+```
+
+That is the behaviour you want. A collection whose vectors have different widths
+cannot be searched meaningfully, so the error arrives at write time rather than
+as nonsense at query time.
+
+`strata vector collection stats docs` reports the name, dimension, metric and
+current count.
+
+## Metadata and filtering
+
+A vector can carry metadata, and a query can filter on it:
+
+```console
+strata vector upsert docs a 1,0,0 --metadata '{"lang":"en","tier":1}'
+```
+
+The filter is more elaborate than it looks like it should be. Conditions are
+AND-composed, and each value is tagged with its type:
+
+```console
+strata vector query docs 1,0,0 \
+  --filter '{"conditions":[{"field":"lang","op":"eq","value":{"type":"string","value":"en"}}]}'
+```
+
+`eq` is currently the only operator, so a filter is "all of these fields equal
+these values". There are no ranges, no negation and no OR.
+
+Writing the plain form `{"lang":"en"}` fails, and the error names an internal
+Rust type rather than the shape it wanted, so the structure above is worth
+copying rather than deriving. Tracked as strata-core issue 3120.
+
+The same filter shape drives bulk deletion:
+
+```console
+strata vector delete-by-filter docs --filter '{"conditions":[...]}'
+```
+
+## Upsert replaces the whole record
+
+This is the one to know. `upsert` without `--metadata` does not leave the
+existing metadata alone. It removes it.
+
+```console
+strata vector upsert docs a 1,0,0 --metadata '{"lang":"en","tier":1}'
+strata vector upsert docs a 0.5,0.5,0
+strata vector get docs a
+```
+
+```json
+{"data":{"embedding":[0.5,0.5,0.0]}, ...}
+```
+
+The metadata is gone, and the command reported success.
+
+Meanwhile `update-metadata` **merges**, leaving fields you did not mention
+intact:
+
+```console
+strata vector update-metadata docs a '{"lang":"de"}'
+```
+
+```json
+{"data":{"embedding":[...],"metadata":{"lang":"de","tier":1}}, ...}
+```
+
+So one half of the record patches and the other half replaces everything, and
+there is no command that updates an embedding alone. Re-embedding a document,
+which is the ordinary reason to touch a vector twice, means passing its metadata
+again or losing it.
+
+Until that changes, read before you write, or keep the metadata somewhere you
+control. Also strata-core issue 3120.
+
+## Reading without searching
+
+Not every access is a similarity search:
+
+```console
+strata vector get docs a
+strata vector keys docs
+strata vector count docs
+strata vector history docs a
+```
+
+`query` takes `-k` for the number of matches, defaulting to 10, and `--as-of`
+to search the collection as it stood earlier.
+
+## Where to look next
+
+Every vector command, with its parameters, return shape and error codes, is in
+the [vector reference](/docs/reference/vector).
