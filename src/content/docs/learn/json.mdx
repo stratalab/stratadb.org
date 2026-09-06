@@ -1,0 +1,187 @@
+---
+title: 'JSON'
+description: 'Documents addressed by path: partial reads and writes, pagination guarantees, and the path syntax limits to know about.'
+section: 'Learn'
+source: 'strata-core@v1.2.0'
+---
+
+JSON stores documents the database understands. Where key-value hands back
+whatever bytes you put in, JSON lets you address a field inside a document and
+read or write just that.
+
+```console
+strata json set user:1 '$' '{"name":"alice","age":30,"addr":{"city":"NYC"}}'
+strata json get user:1 '$.name'
+```
+
+```
+"alice"
+```
+
+Reach for it when the shape matters. When it does not, key-value is cheaper to
+think about.
+
+## Paths
+
+Every read and write takes a path. `$` is the whole document, and you walk into
+it with dots and brackets.
+
+```console
+strata json get user:1 '$'
+strata json get user:1 '$.name'
+strata json get user:1 '$.addr.city'
+strata json get user:1 '$.tags[0]'
+```
+
+Writes take a path too, and only that path changes:
+
+```console
+strata json set user:1 '$.age' 31
+strata json get user:1 '$'
+```
+
+```
+{"addr":{"city":"NYC"},"age":31,"name":"alice"}
+```
+
+Note the keys came back in byte order rather than the order you wrote them. A
+document is a value, not a text file, so field order is not preserved.
+
+`set` creates the document if it is missing, and builds the intermediate
+structure the path implies:
+
+```console
+strata json set fresh '$.a.b' 1
+strata json get fresh '$'
+```
+
+```
+{"a":{"b":1}}
+```
+
+## Deleting a path or a document
+
+The same command does both, and the difference is the path:
+
+```console
+strata json delete user:1 '$.age'
+strata json delete user:1 '$'
+```
+
+The first removes one field. The second removes the document, after which
+`strata json exists user:1` is `false`.
+
+## Listing, and what pagination promises
+
+`list` gives document keys, `scan` gives documents with their version facts, and
+both take `--prefix`.
+
+```console
+strata json list --prefix user:
+strata json scan --limit 2
+```
+
+Pagination here has a written contract, which is worth knowing because it
+decides whether your enumeration is correct:
+
+- **Ordering** is ascending byte-lexicographic, stable across calls for
+  unchanged data.
+- **Cursors** are plain positions. They stay valid indefinitely, across
+  interleaved writes, and even if the document the cursor names is deleted. A
+  key is never returned twice for the same cursor chain.
+- **Interleaved writes** are visible: each page reads the latest committed
+  state, so documents created behind the cursor do not appear and ones ahead of
+  it show up in later pages. For an enumeration that is stable across pages,
+  pass the same `--as-of` on every page.
+- **Termination** is explicit: the last page reports `has_more: false` and a
+  null cursor.
+
+That last-but-one point is the one people get wrong. A long enumeration over a
+changing database is not a snapshot unless you make it one.
+
+## Null and missing are different, but only just
+
+A field stored as `null` and a field that was never written both look like
+nothing:
+
+```console
+strata json get n '$.a'
+strata json get n '$.b'
+```
+
+```
+null
+(nil)
+```
+
+The structured output is where the distinction is carried, and it is carried by
+`found` rather than by the value:
+
+```console
+strata --json json get n '$.a'
+strata --json json get n '$.b'
+```
+
+```json
+{"data":{"found":true,"value":{"value":null,...}},"type":"json_versioned_value"}
+{"data":{"found":false,"value":null},"type":"json_versioned_value"}
+```
+
+If you read only the value you cannot tell them apart. Read `found`.
+
+## What paths cannot address
+
+This is the sharp edge of the model. A document can hold keys that the path
+syntax cannot reach, and writing them succeeds.
+
+```console
+strata json set d '$' '{"plain":"ok","with space":"S","with.dot":"D"}'
+```
+
+All three are stored, and `strata json get d '$'` returns all three. Reading them
+individually does not go as well:
+
+```console
+strata json get d '$.plain'
+strata json get d '$.with space'
+strata json get d '$.with.dot'
+```
+
+```
+"ok"
+invalid_argument.engine.json_path: unsupported character in JSON path
+(nil)
+```
+
+A space is rejected outright. A dot in a key is silently shadowed by the path
+separator, so you get an empty result rather than an error. Emoji and astral
+characters are rejected the same way as a space; ordinary non-ASCII such as
+`café` works. There is no quoting or bracket escape to reach the rest.
+
+So: if you control the document shape, keep field names to plain identifiers. If
+you do not, read the whole document at `$` and pick fields apart yourself. This
+is tracked upstream as strata-core issue 2703.
+
+## Indexes exist but nothing queries them
+
+You can create a secondary index on a field path, list it, and drop it:
+
+```console
+strata json index create by-city '$.city'
+strata json index list
+```
+
+What you cannot do is use one. No read takes an index name, and there is no
+find, where or query command in the JSON surface. The indexes are metadata
+today.
+
+The path you pass is also normalised in a way worth knowing: `$.city` is stored
+as `city`, and an empty path is accepted and becomes `$`.
+
+Treat index creation as staking out intent for later rather than as something
+that makes a read faster now. Same upstream issue, 2703.
+
+## Where to look next
+
+Every JSON command, with its parameters, return shape and error codes, is in the
+[JSON reference](/docs/reference/json).
