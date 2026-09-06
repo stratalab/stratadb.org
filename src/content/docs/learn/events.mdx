@@ -1,0 +1,141 @@
+---
+title: 'Events'
+description: 'An append-only log with a hash chain: sequences, types, windows, and proving nothing was altered.'
+section: 'Learn'
+source: 'strata-core@v1.2.0'
+---
+
+Events are an append-only log. You add entries to the end and you never change
+one. Use it when what happened is the data, and when the order it happened in
+matters.
+
+```console
+strata event append user.created '{"who":"alice"}'
+strata event append order.placed '{"id":7}'
+strata event list
+```
+
+Every entry gets a type, a payload, a sequence number, and a hash of itself and
+the one before it.
+
+## What an entry carries
+
+```json
+{
+  "event_type": "user.created",
+  "payload": { "who": "alice" },
+  "sequence": 0,
+  "timestamp": 1788707488353652,
+  "hash": "e731a80a961a3ea0011515e83abbaeff2d24dbfcfd1017ecc1aa434dbace4de4",
+  "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+
+Sequences start at zero and increase by one. The first entry's `previous_hash`
+is all zeros, and every entry after it carries the hash of its predecessor.
+
+The `timestamp` here is when the event occurred, in microseconds of wall-clock
+time. That is a different clock from the commit timeline that versions use, and
+the two are not interchangeable: this one is real time, and the one in
+[Commits and versions](/docs/learn/commits-and-versions) is a position.
+
+## The chain is checkable
+
+Because each entry commits to its predecessor, the log can be verified rather
+than trusted:
+
+```console
+strata event verify-chain
+```
+
+```json
+{ "error": null, "first_invalid": null, "length": 3, "valid": true }
+```
+
+That checks both density, meaning no sequence numbers are missing, and linkage,
+meaning each hash matches the entry before it. `first_invalid` names the
+sequence where a broken chain stops being trustworthy.
+
+This is what makes an event log worth choosing over a table you only ever insert
+into. Append-only is a convention; a hash chain is evidence.
+
+## Reading a window
+
+`range` reads by sequence. The window is `[start, end)`, start inclusive and end
+exclusive:
+
+```console
+strata event range 2 --end-seq 5
+```
+
+```
+2, 3, 4
+```
+
+`--direction reverse` returns **the same window**, newest first. It does not
+walk backwards from the start:
+
+```console
+strata event range 2 --end-seq 5 --direction reverse
+```
+
+```
+4, 3, 2
+```
+
+Leave the end off and the window runs to the end of the log, which makes reverse
+plus a limit the way to ask for the newest few:
+
+```console
+strata event range 0 --direction reverse --limit 2
+```
+
+```
+5, 4
+```
+
+The binary's own `--help` currently describes the pre-1.2.0 behaviour for these
+arguments and will tell you reverse walks backward from the start sequence. It
+does not. This is strata-core issue 3119; the behaviour above is what 1.2.0
+does.
+
+## Reading by time
+
+`range-time` takes the occurrence timestamps, and the window is half-open the
+same way:
+
+```console
+strata event range-time 1788707575233255 --end-ts 1788707575379032
+```
+
+An event whose timestamp is exactly the end bound is excluded. As above, the
+help text says inclusive and is wrong.
+
+## Filtering and counting
+
+```console
+strata event types
+strata event list --event-type user.created
+strata event count
+strata event get 2
+```
+
+`types` gives the distinct types in the log, and both `list` and `range` take
+`--event-type` to narrow to one.
+
+## Two things to know
+
+**Batch appends land in one commit.** `strata event batch-append` is not a CLI
+verb, but the batch command exists in the engine and through the SDK, and its
+whole point is that many entries share a single version.
+
+**Event reads are not time-travelable.** `kv get`, `json get` and others take
+`--as-of` to read the past. `event range` does not. The log already carries its
+own time in every entry, so reading history means choosing a window rather than
+choosing a version, but it does mean you cannot ask what the log looked like at
+an earlier commit.
+
+## Where to look next
+
+Every event command, with its parameters, return shape and error codes, is in
+the [events reference](/docs/reference/event).
