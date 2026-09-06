@@ -42,14 +42,65 @@ Deletions are respected the same way. A key deleted at timestamp 7 reads as
 present at 6 and absent at 8, because the tombstone is part of the history
 rather than an absence in it.
 
-## Not every read takes a point
+## Which reads take a point
 
-`kv get`, `kv list`, `json get`, `vector query` and `graph neighbors` accept
-`--as-of`. `kv scan` and `event range` do not.
+Temporal reading is not uniform across the five data models. Before you build on
+it, know what you have.
 
-That is worth checking before you build on it. A temporal read that is not
-supported fails rather than quietly answering from the present, but the failure
-is at the point of use, so it is better to know which commands you have.
+| model     | reads that take `--as-of`                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| Key-value | `get`, `list`                                                                                         |
+| JSON      | `get`, `list`                                                                                         |
+| Events    | `get`, `count`, `list`, `types`, `by-type`                                                            |
+| Vectors   | `get`, `query`                                                                                        |
+| Graph     | `meta`, `get-node`, `list-nodes`, `get-edge`, `neighbors`, `nodes-by-type`, `bfs`, and every analytic |
+| Branches  | `diff`                                                                                                |
+
+Three patterns are worth pulling out of that table.
+
+**`scan` never takes a point, and `list` always does.** That holds for key-value,
+JSON and vectors alike. If you need a full-row historical read, `list` the keys
+as of your point and `get` each one at the same point.
+
+**Graph goes deepest.** Not just the reads but the whole analytics suite, so you
+can run a community detection or a PageRank against the graph as it stood
+earlier and compare. That is a genuinely different question from "what does the
+graph look like now", and it is one command:
+
+```console
+strata graph wcc g --as-of 7
+```
+
+```
+component_count: 2
+```
+
+against a graph that today reports one component, because the edge that joined
+them landed after that point.
+
+**Events are the exception, and for a reason.** `event range` and
+`event range-time` do not take `--as-of`, because the log already carries its own
+clock. Each entry records when it occurred, so asking for a window of the log is
+already a question about time. What you cannot do is ask what the log looked like
+at an earlier commit, which is a different question and one the log's own
+ordering makes largely moot.
+
+## Enumerating the past takes care
+
+A paginated read is several commands, and the database can move between them.
+JSON states this explicitly: each page reads the latest committed state unless
+you pin it, so documents created behind your cursor never appear and ones ahead
+of it show up in later pages.
+
+For a stable enumeration, pass the same `--as-of` on every page:
+
+```console
+strata json list --limit 2 --as-of 42
+strata json list --limit 2 --as-of 42 --cursor k:2
+```
+
+Without that, a long enumeration over a changing database is not a snapshot of
+anything. With it, every page answers as of the same instant.
 
 ## Which number to pass
 
