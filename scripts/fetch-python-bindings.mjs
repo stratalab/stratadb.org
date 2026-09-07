@@ -7,8 +7,12 @@
 // because the client's method NAME is not a reliable key. Signatures and the
 // first docstring line come from inspect, and the doctest is a runnable example.
 //
-// Resolution: STRATA_PYTHON, else python3. If stratadb is not importable the
-// build keeps whatever was last written, exactly like the other fetchers.
+// Resolution: STRATA_PYTHON, else a repo-local .venv, else python3. The venv
+// step matters because stratadb is not a site dependency and will not be on the
+// system python: without it every build on a fresh machine silently kept the
+// floor, which is how the committed data sat a version behind while the CLI
+// data moved to 1.2.1. If stratadb is importable nowhere the build keeps
+// whatever was last written, exactly like the other fetchers.
 //
 // Output: src/data/python-bindings.json, keyed by command id (git-ignored? no -
 // committed as the clean-checkout floor, like command-index.json).
@@ -25,7 +29,8 @@ const INDEX = join(ROOT, 'src/data/command-index.json');
 const OUT = join(ROOT, 'src/data/python-bindings.json');
 
 async function main() {
-  const python = process.env.STRATA_PYTHON || 'python3';
+  const venv = join(ROOT, '.venv/bin/python');
+  const python = process.env.STRATA_PYTHON || (existsSync(venv) ? venv : 'python3');
   let byWire;
   try {
     const probe = join(ROOT, 'scripts/python-bindings-probe.py');

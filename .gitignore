@@ -36,3 +36,6 @@ Thumbs.db
 # the strata-core release asset (strata-wasm-web.tar.gz). NOT committed - it is
 # ~8MB and versioned with the release, so the repo never carries the blob.
 public/playground/pkg/
+
+# Local interpreter for the Python SDK probe (scripts/fetch-python-bindings.mjs).
+.venv/

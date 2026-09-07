@@ -214,7 +214,7 @@
   },
   "event.count": {
     "call": "db.events.len",
-    "signature": "(*, as_of: 'Optional[int]' = None) -> 'int'",
+    "signature": "(*, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'int'",
     "summary": "Number of events in the log.",
     "example": [
       "_ = db.events.append(\"user.created\", {\"id\": 1})",
@@ -234,7 +234,7 @@
   },
   "event.get": {
     "call": "db.events.get",
-    "signature": "(sequence: 'int', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(sequence: 'int', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Returns the event at ``sequence``, or ``None`` if out of range.",
     "example": [
       "_ = db.events.append(\"user.created\", {\"id\": 1})",
@@ -244,7 +244,7 @@
   },
   "event.list": {
     "call": "db.events.list",
-    "signature": "(event_type: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, after_sequence: 'Optional[int]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "signature": "(event_type: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, after_sequence: 'Optional[int]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "A page of events, optionally filtered by type / after a sequence.",
     "example": [
       "_ = db.events.append(\"user.created\", {\"id\": 1})",
@@ -255,7 +255,7 @@
   "event.range": {
     "call": "db.events.range",
     "signature": "(start: 'int', *, end: 'Optional[int]' = None, limit: 'Optional[int]' = None, reverse: 'bool' = False, event_type: 'Optional[str]' = None) -> 'Page'",
-    "summary": "A page of events by sequence, from ``start`` (to ``end`` if given).",
+    "summary": "A page of events over the half-open sequence window ``[start, end)``.",
     "example": [
       "_ = db.events.append(\"user.created\", {\"id\": 1})",
       "_ = db.events.append(\"user.updated\", {\"id\": 2})",
@@ -274,7 +274,7 @@
   },
   "event.types": {
     "call": "db.events.types",
-    "signature": "(*, as_of: 'Optional[int]' = None) -> 'list'",
+    "signature": "(*, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'list'",
     "summary": "The distinct event types present in the log.",
     "example": [
       "_ = db.events.append(\"user.created\", {\"id\": 1})",
@@ -293,7 +293,7 @@
   },
   "graph.analytics.bfs": {
     "call": "db.graphs.analytics.bfs",
-    "signature": "(graph: 'str', start: 'str', *, direction: 'Optional[str]' = None, edge_types: 'Optional[list]' = None, max_depth: 'Optional[int]' = None, max_nodes: 'Optional[int]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', start: 'str', *, direction: 'Optional[str]' = None, edge_types: 'Optional[list]' = None, max_depth: 'Optional[int]' = None, max_nodes: 'Optional[int]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Breadth-first traversal from ``start`` (``.visited``, ``.depths``, ``.edges``).",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -307,7 +307,7 @@
   },
   "graph.analytics.cdlp": {
     "call": "db.graphs.analytics.cdlp",
-    "signature": "(graph: 'str', *, direction: 'Optional[str]' = None, max_iterations: 'Optional[int]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', *, direction: 'Optional[str]' = None, max_iterations: 'Optional[int]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Community detection by label propagation (``.labels``).",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -321,7 +321,7 @@
   },
   "graph.analytics.lcc": {
     "call": "db.graphs.analytics.lcc",
-    "signature": "(graph: 'str', *, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', *, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Local clustering coefficient per node (``.coefficients``).",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -335,7 +335,7 @@
   },
   "graph.analytics.pagerank": {
     "call": "db.graphs.analytics.pagerank",
-    "signature": "(graph: 'str', *, damping: 'Optional[float]' = None, max_iterations: 'Optional[int]' = None, tolerance: 'Optional[float]' = None, personalization: 'Optional[dict]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', *, damping: 'Optional[float]' = None, max_iterations: 'Optional[int]' = None, tolerance: 'Optional[float]' = None, personalization: 'Optional[dict]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "PageRank importance scores (``.ranks`` maps node id to score).",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -349,7 +349,7 @@
   },
   "graph.analytics.sssp": {
     "call": "db.graphs.analytics.sssp",
-    "signature": "(graph: 'str', source: 'str', *, direction: 'Optional[str]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', source: 'str', *, direction: 'Optional[str]' = None, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Single-source shortest paths from ``source`` (``.distances``).",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -363,7 +363,7 @@
   },
   "graph.analytics.wcc": {
     "call": "db.graphs.analytics.wcc",
-    "signature": "(graph: 'str', *, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', *, budget: 'Optional[dict]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Weakly-connected components (``.components`` maps node id to component).",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -398,7 +398,7 @@
   },
   "graph.bindings": {
     "call": "db.graphs.bindings_for_entity",
-    "signature": "(primitive: 'str', key: 'str', *, space: 'Optional[str]' = None) -> 'Page'",
+    "signature": "(primitive: 'str', key: 'str', *, space: 'Optional[str]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "Graph nodes bound to a product entity (``primitive`` is kv/json/vector/event/graph).",
     "example": [
       "_ = db.graphs.create(\"kb\")",
@@ -449,7 +449,7 @@
   },
   "graph.edge.get": {
     "call": "db.graphs.get_edge",
-    "signature": "(graph: 'str', src: 'str', edge_type: 'str', dst: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', src: 'str', edge_type: 'str', dst: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Returns an edge, or ``None`` if absent.",
     "example": [
       "_ = db.graphs.create(\"social\")",
@@ -475,7 +475,7 @@
   },
   "graph.list": {
     "call": "db.graphs.list",
-    "signature": "() -> 'list'",
+    "signature": "(*, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'list'",
     "summary": "Lists the graphs (with node/edge counts).",
     "example": [
       "_ = db.graphs.create(\"social\")",
@@ -484,7 +484,7 @@
   },
   "graph.meta": {
     "call": "db.graphs.meta",
-    "signature": "(name: 'str') -> 'Any'",
+    "signature": "(name: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Returns a graph's metadata (node/edge counts, timestamps).",
     "example": [
       "_ = db.graphs.create(\"social\")",
@@ -495,7 +495,7 @@
   },
   "graph.neighbors": {
     "call": "db.graphs.neighbors",
-    "signature": "(graph: 'str', node_id: 'str', *, direction: 'str' = 'outgoing', edge_type: 'Optional[str]' = None, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "signature": "(graph: 'str', node_id: 'str', *, direction: 'str' = 'outgoing', edge_type: 'Optional[str]' = None, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "A page of a node's neighbors (``direction`` is outgoing/incoming/both).",
     "example": [
       "_ = db.graphs.create(\"social\")",
@@ -517,7 +517,7 @@
   },
   "graph.node.get": {
     "call": "db.graphs.get_node",
-    "signature": "(graph: 'str', node_id: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', node_id: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Returns a node, or ``None`` if absent.",
     "example": [
       "_ = db.graphs.create(\"social\")",
@@ -528,7 +528,7 @@
   },
   "graph.node.list": {
     "call": "db.graphs.list_nodes",
-    "signature": "(graph: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, prefix: 'Optional[str]' = None) -> 'Page'",
+    "signature": "(graph: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None, prefix: 'Optional[str]' = None) -> 'Page'",
     "summary": "One page of a graph's nodes.",
     "example": [
       "_ = db.graphs.create(\"social\")",
@@ -550,7 +550,7 @@
   },
   "graph.nodes_by_type": {
     "call": "db.graphs.nodes_by_type",
-    "signature": "(graph: 'str', object_type: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "signature": "(graph: 'str', object_type: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "A page of nodes of a given object type.",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -616,7 +616,7 @@
   },
   "graph.ontology.get": {
     "call": "db.graphs.ontology.get",
-    "signature": "(graph: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "The full ontology, or ``None`` if none is defined.",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -626,7 +626,7 @@
   },
   "graph.ontology.summary": {
     "call": "db.graphs.ontology.summary",
-    "signature": "(graph: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(graph: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "A summary of the ontology (types and their node counts), or ``None``.",
     "example": [
       "_ = db.graphs.create(\"g\")",
@@ -799,7 +799,7 @@
   },
   "json.count": {
     "call": "db.json.count",
-    "signature": "(prefix: 'Optional[str]' = None, *, as_of: 'Optional[int]' = None) -> 'int'",
+    "signature": "(prefix: 'Optional[str]' = None, *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'int'",
     "summary": "Number of documents, optionally under an id prefix.",
     "example": [
       "_ = db.json.set(\"a\", \"$\", {\"v\": 1})",
@@ -829,7 +829,7 @@
   },
   "json.get": {
     "call": "db.json.get",
-    "signature": "(key: 'str', path: 'str' = '$', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(key: 'str', path: 'str' = '$', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Returns the JSON value at ``path``, or ``None`` if absent.",
     "example": [
       "_ = db.json.set(\"user\", \"$\", {\"name\": \"alice\", \"age\": 30})",
@@ -876,10 +876,12 @@
   },
   "json.list": {
     "call": "db.json.keys",
-    "signature": "(prefix: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "signature": "(prefix: 'Optional[str]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "One page of document ids (``str`` each).",
     "example": [
-      "_ = db.json.set_many([{\"key\": \"user:1\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"user:2\", \"path\": \"$\", \"value\": {\"v\": 2}}, {\"key\": \"other\", \"path\": \"$\", \"value\": {\"v\": 3}}])",
+      "_ = db.json.set(\"user:1\", \"$\", {\"v\": 1})",
+      "_ = db.json.set(\"user:2\", \"$\", {\"v\": 2})",
+      "_ = db.json.set(\"other\", \"$\", {\"v\": 3})",
       "db.json.keys(\"user:\").items"
     ]
   },
@@ -888,7 +890,9 @@
     "signature": "(prefix: 'Optional[str]' = None, *, count: 'Optional[int]' = None) -> 'Sample'",
     "summary": "A deterministic representative sample plus the total count.",
     "example": [
-      "_ = db.json.set_many([{\"key\": \"a\", \"path\": \"$\", \"value\": {\"v\": 1}}, {\"key\": \"b\", \"path\": \"$\", \"value\": {\"v\": 2}}, {\"key\": \"c\", \"path\": \"$\", \"value\": {\"v\": 3}}])",
+      "_ = db.json.set(\"a\", \"$\", {\"v\": 1})",
+      "_ = db.json.set(\"b\", \"$\", {\"v\": 2})",
+      "_ = db.json.set(\"c\", \"$\", {\"v\": 3})",
       "db.json.sample().total_count"
     ]
   },
@@ -949,7 +953,7 @@
   },
   "kv.count": {
     "call": "db.kv.count",
-    "signature": "(prefix: 'Optional[str | bytes]' = None, *, as_of: 'Optional[int]' = None) -> 'int'",
+    "signature": "(prefix: 'Optional[str | bytes]' = None, *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'int'",
     "summary": "Number of visible keys, optionally under a prefix.",
     "example": [
       "_ = db.kv.put(\"a\", \"1\")",
@@ -979,7 +983,7 @@
   },
   "kv.get": {
     "call": "db.kv.get",
-    "signature": "(key: 'str | bytes', *, as_of: 'Optional[int]' = None) -> 'Optional[bytes]'",
+    "signature": "(key: 'str | bytes', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Optional[bytes]'",
     "summary": "Returns the value bytes, or ``None`` if absent.",
     "example": [
       "_ = db.kv.put(\"greeting\", \"hello\")",
@@ -997,10 +1001,12 @@
   },
   "kv.list": {
     "call": "db.kv.keys",
-    "signature": "(prefix: 'Optional[str | bytes]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "signature": "(prefix: 'Optional[str | bytes]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "One page of keys under ``prefix`` (``bytes`` each).",
     "example": [
-      "_ = db.kv.put_many([{\"key\": \"user:1\", \"value\": \"a\"}, {\"key\": \"user:2\", \"value\": \"b\"}, {\"key\": \"other\", \"value\": \"c\"}])",
+      "_ = db.kv.put(\"user:1\", \"a\")",
+      "_ = db.kv.put(\"user:2\", \"b\")",
+      "_ = db.kv.put(\"other\", \"c\")",
       "db.kv.keys(\"user:\").items"
     ]
   },
@@ -1019,7 +1025,9 @@
     "signature": "(prefix: 'Optional[str | bytes]' = None, *, count: 'Optional[int]' = None) -> 'Sample'",
     "summary": "A deterministic representative sample plus the total count.",
     "example": [
-      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}, {\"key\": \"c\", \"value\": \"3\"}])",
+      "_ = db.kv.put(\"a\", \"1\")",
+      "_ = db.kv.put(\"b\", \"2\")",
+      "_ = db.kv.put(\"c\", \"3\")",
       "db.kv.sample().total_count"
     ]
   },
@@ -1028,7 +1036,8 @@
     "signature": "(start: 'Optional[str | bytes]' = None, *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None) -> 'Page'",
     "summary": "One page of full rows (key + value + version) from ``start``/``cursor``.",
     "example": [
-      "_ = db.kv.put_many([{\"key\": \"a\", \"value\": \"1\"}, {\"key\": \"b\", \"value\": \"2\"}])",
+      "_ = db.kv.put(\"a\", \"1\")",
+      "_ = db.kv.put(\"b\", \"2\")",
       "[row.key for row in db.kv.scan()]"
     ]
   },
@@ -1140,7 +1149,7 @@
   },
   "vector.count": {
     "call": "db.vectors.count",
-    "signature": "(name: 'str', *, as_of: 'Optional[int]' = None) -> 'int'",
+    "signature": "(name: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'int'",
     "summary": "Number of vectors in a collection.",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
@@ -1196,7 +1205,7 @@
   },
   "vector.get": {
     "call": "db.vectors.get",
-    "signature": "(collection: 'str', key: 'str', *, as_of: 'Optional[int]' = None) -> 'Any'",
+    "signature": "(collection: 'str', key: 'str', *, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Any'",
     "summary": "Returns the stored vector + metadata, or ``None`` if absent.",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
@@ -1216,7 +1225,7 @@
   },
   "vector.index.query": {
     "call": "db.vectors.index_query",
-    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None) -> 'Tuple[list, Any]'",
+    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Tuple[list, Any]'",
     "summary": "Like ``query`` but also returns index diagnostics: ``(matches, diagnostics)``.",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
@@ -1227,7 +1236,7 @@
   },
   "vector.keys": {
     "call": "db.vectors.keys",
-    "signature": "(collection: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None) -> 'Page'",
+    "signature": "(collection: 'str', *, limit: 'Optional[int]' = None, cursor: 'Optional[Any]' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'Page'",
     "summary": "One page of keys in a collection (``str`` each).",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
@@ -1249,7 +1258,7 @@
   },
   "vector.query": {
     "call": "db.vectors.query",
-    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None) -> 'list'",
+    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'list'",
     "summary": "Returns the ``k`` nearest matches, optionally metadata-filtered.",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
