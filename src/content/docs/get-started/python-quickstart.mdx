@@ -1,0 +1,209 @@
+---
+title: 'Python quickstart'
+description: 'The same database from Python: bytes and objects, scoped branch views, typed results and typed errors.'
+section: 'Get Started'
+source: 'strata-core@v1.2.1'
+---
+
+The same shape as the [CLI quickstart](/docs/get-started/quickstart), in
+Python. A database that is a directory, several data models inside it, and
+branching and history over all of them. This page is about what the SDK does
+differently, so it is worth reading after that one rather than instead of it.
+
+## Install and open
+
+```console
+pip install stratadb
+```
+
+`open` creates the database if it is not there, and the handle is a context
+manager, so it closes itself.
+
+```python
+import stratadb
+
+with stratadb.open("./quickstart") as db:
+    db.kv.put("greeting", "hello")
+    print(db.kv.get("greeting"))
+```
+
+```
+b'hello'
+```
+
+For tests, `stratadb.open(cache=True)` gives you an in-memory database with no
+directory and nothing to clean up.
+
+## Bytes out of key-value, objects out of JSON
+
+Note that `b` above. Key-value stores bytes and hands bytes back, so decode
+when you want text.
+
+```python
+db.kv.get("greeting").decode()
+```
+
+```
+'hello'
+```
+
+JSON is the opposite. It gives you the Python value, already parsed, and a path
+reads one field without loading the document.
+
+```python
+db.json.set("user:ada", "$", {"name": "Ada", "role": "engineer"})
+db.json.get("user:ada", "$.role")
+db.json.get("user:ada")
+```
+
+```
+'engineer'
+{'name': 'Ada', 'role': 'engineer'}
+```
+
+## Fork the database
+
+A branch covers every model at once, and forking copies nothing.
+
+```python
+db.branches.fork("default", "work")
+```
+
+Reach for `fork` rather than `create`, which makes an empty root branch with no
+parent. Writing to one of those works, so the mistake stays invisible until a
+merge fails and the work has to be redone.
+
+## Scope a view to the branch
+
+Where the CLI takes `--branch`, Python gives you a view. `db.at()` returns a
+lightweight handle over the same database, so you keep both branches in hand at
+once.
+
+```python
+work = db.at(branch="work")
+work.json.set("user:ada", "$.role", "director")
+
+work.json.get("user:ada", "$.role")
+db.json.get("user:ada", "$.role")
+```
+
+```
+'director'
+'engineer'
+```
+
+## Compare, then merge
+
+Results are typed objects, not dictionaries, so you read them with attributes
+and the capability fields are enums.
+
+```python
+preview = db.branches.preview("work", "default")
+
+preview.conflicts
+preview.branch_point
+[c.value for c in preview.capabilities_covered]
+```
+
+```
+[]
+4
+['key_value', 'json', 'vector']
+```
+
+That covered list is worth reading. Merging carries key-value, JSON and vector
+data; events and graph data it does not.
+[Branches](/docs/learn/branches) covers why.
+
+```python
+db.branches.merge("work", "default")
+db.branches.delete("work")
+
+db.json.get("user:ada", "$.role")
+```
+
+```
+'director'
+```
+
+## Read the past
+
+Every version is still addressable, and history comes back newest first.
+
+```python
+db.kv.put("greeting", "goodbye")
+for item in db.kv.history("greeting"):
+    print(item.version, item.value)
+```
+
+```
+15 b'goodbye'
+3 b'hello'
+```
+
+`as_of` takes a position on the commit timeline:
+
+```python
+db.kv.get("greeting", as_of=3)
+```
+
+```
+b'hello'
+```
+
+`as_of_time` takes a wall-clock instant instead, and it is generous about the
+form: an aware `datetime`, a date, a string, or microseconds. Take the instant
+from an entry's `committed_at`, which `to_datetime` converts for you.
+
+```python
+from stratadb import to_datetime
+
+first = list(db.kv.history("greeting"))[-1]
+when = to_datetime(first.committed_at)
+
+db.kv.get("greeting", as_of_time=when)
+db.kv.get("greeting", as_of_time=str(when))
+```
+
+```
+b'hello'
+b'hello'
+```
+
+Reach back past the first commit and it raises `HistoryUnavailableError` rather
+than returning nothing, so a window that does not exist fails loudly.
+
+These are two different clocks. Passing both raises rather than guessing which
+you meant. [Time travel](/docs/learn/time-travel) is the page for choosing.
+
+## Errors are exceptions, and they carry the code
+
+Every failure raises a subclass of `StrataError`, so you can catch a whole
+family or one kind, and the exception carries the same code the CLI prints.
+
+```python
+from stratadb.errors import NotFoundError
+
+try:
+    db.branches.merge("nope", "default")
+except NotFoundError as err:
+    print(err.code)
+    print(err.ref)
+```
+
+```
+not_found.engine.branch
+https://stratadb.org/e/not_found.engine.branch
+```
+
+That `ref` is a page on this site.
+[Error codes](/docs/reference/errors) explains the shape of a code and which
+failures are safe to retry.
+
+## Where to go next
+
+[Working with data](/docs/learn/working-with-data) covers the models this page
+skipped.
+
+The [command reference](/docs/reference) gives the Python call and signature
+beside every command.
