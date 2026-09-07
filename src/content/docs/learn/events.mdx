@@ -2,7 +2,7 @@
 title: 'Events'
 description: 'An append-only log with a hash chain: sequences, types, windows, and proving nothing was altered.'
 section: 'Learn'
-source: 'strata-core@v1.2.0'
+source: 'strata-core@v1.2.1'
 ---
 
 Events are an append-only log. You add entries to the end and you never change
@@ -94,10 +94,10 @@ strata event range 0 --direction reverse --limit 2
 5, 4
 ```
 
-The binary's own `--help` currently describes the pre-1.2.0 behaviour for these
+The binary's own `--help` still describes the older behaviour for these
 arguments and will tell you reverse walks backward from the start sequence. It
-does not. This is strata-core issue 3119; the behaviour above is what 1.2.0
-does.
+does not. The behaviour above is what the engine actually does; the stale help
+text is strata-core issue 3119.
 
 ## Reading by time
 

@@ -2,7 +2,7 @@
 title: 'Time travel'
 description: 'Read the database as it was, and branch from a point in the past, without restoring anything.'
 section: 'Learn'
-source: 'strata-core@v1.2.0'
+source: 'strata-core@v1.2.1'
 ---
 
 import Figure from '../../../components/docs/Figure.astro';
@@ -102,29 +102,60 @@ strata json list --limit 2 --as-of 42 --cursor k:2
 Without that, a long enumeration over a changing database is not a snapshot of
 anything. With it, every page answers as of the same instant.
 
-## Which number to pass
+## Two clocks, and which flag reads each
 
-This is the one sharp edge. History gives you two numbers per entry and they are
-not interchangeable.
+History gives you three ways to name a moment, and they are not
+interchangeable:
 
 ```json
-{ "timestamp": 88, "value": "0.62", "version": 38 }
+{ "version": 38, "timestamp": 88, "committed_at": "2026-09-07 00:09:21.577135 -05:00" }
 ```
 
-`--as-of` takes the **timestamp**. Passing the version does not raise an error;
-in a database that started from a clone it quietly returns nothing, and in a
-fresh database it happens to work because the two numbers coincide there. So the
-mistake survives testing and fails later.
+`--as-of` takes the **timestamp**: a position on the logical commit timeline, a
+per-commit counter that has nothing to do with the calendar. Passing the
+`version` instead does not raise an error, and in a fresh database the two
+numbers happen to be equal so the mistake works. In a database that came from a
+clone they differ and it quietly returns nothing.
 
-`branch fork` is better behaved, because it names which one it wants:
+`--as-of-time` takes a real moment, and accepts most ways of writing one:
 
 ```console
-strata branch fork default before --version 3
-strata branch fork default before --timestamp 3
+strata kv get k --as-of-time 2026-09-05
+strata kv get k --as-of-time "2026-09-05 15:00"
+strata kv get k --as-of-time 2026-09-05T15:00:00Z
 ```
 
-Both exist and both are honest about the counter they take. Filed upstream as
-strata-core issue 3066.
+A time without an offset is read as local time. The two flags cannot be
+combined; doing so fails with `invalid_argument.executor.as_of_conflict`.
+
+Use the logical clock when you need exact reproducibility, and the wall clock
+when you have a real moment in mind. `committed_at` is best effort: it comes
+from the machine that made the commit, so a clock adjustment can move it
+backwards. Only the logical timeline is guaranteed ordered.
+
+### Wall-clock reads stop at the last commit
+
+Asking for a moment later than the newest dated commit is an error rather than a
+synonym for "now":
+
+```console
+strata kv get k --as-of-time "2026-09-07 09:00"
+```
+
+```
+history_unavailable.engine.persistence_history:
+  wall-clock instant is after the latest dated commit
+```
+
+That is deliberate. A point-in-time read that silently answered from the present
+whenever the instant was in the future would be indistinguishable from one that
+found what you asked for.
+
+Two more limits are worth knowing before you rely on the wall clock. Commits
+made before this feature existed carry no instant at all, so a wall-clock query
+landing before the first dated commit refuses with its own reason. And commits
+produced by replay or import are undated by design, because sampling a clock
+during deterministic replay would make it non-deterministic.
 
 ## Branching from the past
 

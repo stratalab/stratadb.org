@@ -2,7 +2,7 @@
 title: 'Graph'
 description: 'Nodes, edges and traversal, with an ontology you can leave loose and freeze when you know the shape.'
 section: 'Learn'
-source: 'strata-core@v1.2.0'
+source: 'strata-core@v1.2.1'
 ---
 
 Graph is for data where the relationships are the thing you query. Use it when
@@ -143,16 +143,14 @@ operations.
 
 **Three commands have no CLI form.** `bindings`, `batch_write` and
 `apply_delete_policy` exist in the engine and are reachable from the SDK or the
-command escape hatch, but `strata graph bindings` is not a command.
+command escape hatch, but `strata graph bindings` is not a command. Their
+reference pages show the Python spelling and the wire type rather than an
+invocation that would not run.
 
 **Deleting a graph takes its contents with it, without asking.**
 `strata graph delete social` on a populated graph succeeds immediately. Compare
 `space delete`, which refuses when a space still holds data and makes you pass
 `--force`. Tracked as strata-core issue 3122.
-
-**Some published examples do not run.** A few of the generated examples on the
-graph reference pages use flags the CLI does not accept, including
-`--object-type` where the flag is `--type`. Tracked as strata-core issue 3073.
 
 ## Where to look next
 

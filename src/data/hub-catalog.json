@@ -1,7 +1,7 @@
 {
   "hub": "https://stratahub.io",
   "source": "https://stratahub.io/v1/datasets",
-  "fetched_at": "2026-09-05",
+  "fetched_at": "2026-09-07",
   "datasets": [
     {
       "slug": "titanic",
@@ -22,7 +22,7 @@
       "license": "CC0-1.0",
       "size_category": "small",
       "size_bytes": 276334,
-      "downloads": 57,
+      "downloads": 137,
       "last_updated": "2026-09-04T20:34:49.83488364Z",
       "primitives": [
         "json",
@@ -489,6 +489,49 @@
       ]
     },
     {
+      "slug": "wikipedia",
+      "title": "Wikipedia Articles",
+      "description": "Wikipedia article metadata restructured for Strata as one JSON document per article, with a KV title-to-slug index over the top - the shape a future retrieval-augmented-generation corpus would build on once article text and embeddings are added.",
+      "tasks": [
+        "retrieval",
+        "tutorial",
+        "knowledge-base"
+      ],
+      "tags": [
+        "wikipedia",
+        "articles",
+        "real-world",
+        "catalog"
+      ],
+      "license": "CC-BY-SA-4.0",
+      "size_category": "small",
+      "size_bytes": 87945,
+      "downloads": 1,
+      "last_updated": "2026-09-04T20:34:51.175799695Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "default"
+      ],
+      "includes": [
+        {
+          "primitive": "json",
+          "detail": "One document per article (article:<slug>) with title, categories, internal links, and word counts."
+        },
+        {
+          "primitive": "kv",
+          "detail": "An exact-title index (title:<Title> → slug) plus catalog totals under meta:."
+        }
+      ],
+      "quickstart": [
+        "strata clone wikipedia ./wiki",
+        "strata ./wiki kv get \"title:Quantum mechanics\"",
+        "strata ./wiki json get article:quantum-mechanics '$'"
+      ]
+    },
+    {
       "slug": "movielens-100k",
       "title": "MovieLens 100K",
       "description": "The GroupLens MovieLens 100K catalog restructured across three Strata primitives - movie metadata as JSON documents, catalog aggregates as KV, and per-movie genre vectors in a similarity-searchable vector collection - so a single clone gives you a recommendation sandbox with no preprocessing step.",
@@ -585,49 +628,6 @@
         "strata ./so json get post:74970000 '$'",
         "strata ./so json get post:74970000 '$.comments'",
         "strata ./so kv get meta:tag:pandas:count"
-      ]
-    },
-    {
-      "slug": "wikipedia",
-      "title": "Wikipedia Articles",
-      "description": "Wikipedia article metadata restructured for Strata as one JSON document per article, with a KV title-to-slug index over the top - the shape a future retrieval-augmented-generation corpus would build on once article text and embeddings are added.",
-      "tasks": [
-        "retrieval",
-        "tutorial",
-        "knowledge-base"
-      ],
-      "tags": [
-        "wikipedia",
-        "articles",
-        "real-world",
-        "catalog"
-      ],
-      "license": "CC-BY-SA-4.0",
-      "size_category": "small",
-      "size_bytes": 87945,
-      "downloads": 0,
-      "last_updated": "2026-09-04T20:34:51.175799695Z",
-      "primitives": [
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "default"
-      ],
-      "includes": [
-        {
-          "primitive": "json",
-          "detail": "One document per article (article:<slug>) with title, categories, internal links, and word counts."
-        },
-        {
-          "primitive": "kv",
-          "detail": "An exact-title index (title:<Title> → slug) plus catalog totals under meta:."
-        }
-      ],
-      "quickstart": [
-        "strata clone wikipedia ./wiki",
-        "strata ./wiki kv get \"title:Quantum mechanics\"",
-        "strata ./wiki json get article:quantum-mechanics '$'"
       ]
     }
   ]

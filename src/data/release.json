@@ -1,28 +1,28 @@
 {
-  "version": "1.2.0",
-  "source": "GitHub release v1.2.0",
-  "fetched_at": "2026-09-05",
+  "version": "1.2.1",
+  "source": "GitHub release v1.2.1",
+  "fetched_at": "2026-09-07",
   "targets": [
     {
       "target": "aarch64-apple-darwin",
-      "asset": "strata-v1.2.0-aarch64-apple-darwin.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.0/strata-v1.2.0-aarch64-apple-darwin.tar.gz",
-      "size": 11087456,
-      "sha256": "9ad723d6d329eb6369111b8b301206ad820003d880009986dd7660df3593f078"
+      "asset": "strata-v1.2.1-aarch64-apple-darwin.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.1/strata-v1.2.1-aarch64-apple-darwin.tar.gz",
+      "size": 11215897,
+      "sha256": "3bd2735a81ad9b8afd17ddd0410ac140bf9879acf0b5092308ef860a2810f580"
     },
     {
       "target": "aarch64-unknown-linux-gnu",
-      "asset": "strata-v1.2.0-aarch64-unknown-linux-gnu.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.0/strata-v1.2.0-aarch64-unknown-linux-gnu.tar.gz",
-      "size": 11620222,
-      "sha256": "93414b7c286904e2e62e488c8135083c2ecce34b040faacd7fa7fe0a20bea287"
+      "asset": "strata-v1.2.1-aarch64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.1/strata-v1.2.1-aarch64-unknown-linux-gnu.tar.gz",
+      "size": 11757570,
+      "sha256": "5ba863db5a93514f9ec1b56b5942b92a6e50cac42201c9f0d85a62fe589df164"
     },
     {
       "target": "x86_64-unknown-linux-gnu",
-      "asset": "strata-v1.2.0-x86_64-unknown-linux-gnu.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.0/strata-v1.2.0-x86_64-unknown-linux-gnu.tar.gz",
-      "size": 12550962,
-      "sha256": "038f6dd17018c01245dd90b57d0826fc6550a23ca1acdf233dbe88b6b8b13946"
+      "asset": "strata-v1.2.1-x86_64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.1/strata-v1.2.1-x86_64-unknown-linux-gnu.tar.gz",
+      "size": 12690392,
+      "sha256": "b7f115ed0934ef4424d1bd949e8b38d9018de283ed96681bd9fcfdfca13dc0e6"
     }
   ]
 }

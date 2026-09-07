@@ -2,7 +2,7 @@
 title: 'Commits and versions'
 description: 'Every write is a commit, every commit advances one database-wide version, and history keeps what each version held.'
 section: 'Learn'
-source: 'strata-core@v1.2.0'
+source: 'strata-core@v1.2.1'
 ---
 
 import Figure from '../../../components/docs/Figure.astro';
@@ -72,11 +72,10 @@ strata kv get meta:survival_rate --as-of 85
 
 Two things about that flag are worth knowing before you use it.
 
-The timestamp is a position on the database's commit timeline. It is not
-wall-clock time, despite the flag's help text calling it microseconds.
-Passing a real clock reading fails with
-`history_unavailable.engine.persistence_history`, because the position is beyond
-anything the timeline holds.
+The timestamp is a position on the commit timeline, a per-commit counter rather
+than a calendar date. To read as of a real moment there is a separate flag,
+`--as-of-time`, and [Time travel](/docs/learn/time-travel) covers the difference
+and the limits of each.
 
 And passing a **version** where a timestamp belongs does not fail. In a fresh
 database the two numbers happen to be equal, so the mistake works. In a database
@@ -84,8 +83,6 @@ that came from somewhere else, a clone for instance, they differ by a fixed
 offset, and the same mistake quietly returns an empty result instead of the
 value you asked for. Take the number from the `timestamp` field, not the
 `version` field.
-
-This is filed upstream as strata-core issue 3066.
 
 ## What a write gives back
 

@@ -51,12 +51,12 @@
   },
   "arrow.export": {
     "intro": "Export a primitive to a Parquet file, then import it back.",
-    "cli": "$ strata kv put greeting hello\n$ strata arrow export kv parquet /tmp/exports/kv.parquet  # One file per primitive; Parquet by default.\n$ strata kv delete greeting\n$ strata arrow import /tmp/exports/kv.parquet kv\n$ strata kv get greeting",
+    "cli": "$ strata kv put greeting hello\n$ strata command run --command-json '{\"format\":\"parquet\",\"path\":\"/tmp/exports/kv.parquet\",\"primitive\":\"kv\",\"type\":\"arrow_export\"}'  # One file per primitive; Parquet by default.\n$ strata kv delete greeting\n$ strata arrow import /tmp/exports/kv.parquet --target kv\n$ strata kv get greeting",
     "wire": "{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_put\",\"value\":\"aGVsbG8=\"}\n{\"format\":\"parquet\",\"path\":\"/tmp/exports/kv.parquet\",\"primitive\":\"kv\",\"type\":\"arrow_export\"}\n{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_delete\"}\n{\"file_path\":\"/tmp/exports/kv.parquet\",\"target\":\"kv\",\"type\":\"arrow_import\"}\n{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_get\"}"
   },
   "arrow.import": {
     "intro": "Import a primitive's rows from a Parquet file written by export.",
-    "cli": "$ strata kv put greeting hello\n$ strata arrow export kv parquet /tmp/exports/kv.parquet\n$ strata kv delete greeting\n$ strata arrow import /tmp/exports/kv.parquet kv  # Rows are keyed by their source column; kv restores greeting=hello.\n$ strata kv get greeting",
+    "cli": "$ strata kv put greeting hello\n$ strata command run --command-json '{\"format\":\"parquet\",\"path\":\"/tmp/exports/kv.parquet\",\"primitive\":\"kv\",\"type\":\"arrow_export\"}'\n$ strata kv delete greeting\n$ strata arrow import /tmp/exports/kv.parquet --target kv  # Rows are keyed by their source column; kv restores greeting=hello.\n$ strata kv get greeting",
     "wire": "{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_put\",\"value\":\"aGVsbG8=\"}\n{\"format\":\"parquet\",\"path\":\"/tmp/exports/kv.parquet\",\"primitive\":\"kv\",\"type\":\"arrow_export\"}\n{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_delete\"}\n{\"file_path\":\"/tmp/exports/kv.parquet\",\"target\":\"kv\",\"type\":\"arrow_import\"}\n{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_get\"}"
   },
   "branch.create": {
@@ -71,7 +71,7 @@
   },
   "branch.diff": {
     "intro": "Compare a fork against the branch it came from, across primitives.",
-    "cli": "$ strata vector collection create notes 2 cosine\n$ strata kv put config base\n$ strata branch fork default experiment\n$ strata kv put config tuned --branch experiment  # diverge the key-value entry on the fork\n$ strata vector upsert notes n1 [0.1,0.2] --branch experiment  # add a vector on the fork\n$ strata branch diff default experiment  # reports the key-value change and the new vector, grouped by capability",
+    "cli": "$ strata vector collection create notes 2 --metric cosine\n$ strata kv put config base\n$ strata branch fork default experiment\n$ strata command run --command-json '{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}'  # diverge the key-value entry on the fork\n$ strata command run --command-json '{\"branch\":\"experiment\",\"collection\":\"notes\",\"key\":\"n1\",\"type\":\"vector_upsert\",\"vector\":[0.1,0.2]}'  # add a vector on the fork\n$ strata branch diff default experiment  # reports the key-value change and the new vector, grouped by capability",
     "wire": "{\"collection\":\"notes\",\"dimension\":2,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"YmFzZQ==\"}\n{\"branch\":\"experiment\",\"source\":\"default\",\"type\":\"branch_fork_current\"}\n{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}\n{\"branch\":\"experiment\",\"collection\":\"notes\",\"key\":\"n1\",\"type\":\"vector_upsert\",\"vector\":[0.1,0.2]}\n{\"branch_a\":\"default\",\"branch_b\":\"experiment\",\"type\":\"branch_diff\"}"
   },
   "branch.fork": {
@@ -81,12 +81,12 @@
   },
   "branch.fork_at_timestamp": {
     "intro": "Fork a branch at an earlier commit timestamp - time-travel into a branch.",
-    "cli": "$ strata kv put greeting original  # The receipt carries this commit's timestamp (microseconds).\n$ strata kv put greeting updated\n$ strata command run --command-json '{\"branch\":\"snapshot\",\"source\":\"default\",\"timestamp\":3,\"type\":\"branch_fork_at_timestamp\"}'  # snapshot forks default's history as of that instant.\n$ strata kv get greeting --branch snapshot",
+    "cli": "$ strata kv put greeting original  # The receipt carries this commit's timestamp (microseconds).\n$ strata kv put greeting updated\n$ strata command run --command-json '{\"branch\":\"snapshot\",\"source\":\"default\",\"timestamp\":3,\"type\":\"branch_fork_at_timestamp\"}'  # snapshot forks default's history as of that instant.\n$ strata command run --command-json '{\"branch\":\"snapshot\",\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_get\"}'",
     "wire": "{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_put\",\"value\":\"b3JpZ2luYWw=\"}\n{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_put\",\"value\":\"dXBkYXRlZA==\"}\n{\"branch\":\"snapshot\",\"source\":\"default\",\"timestamp\":3,\"type\":\"branch_fork_at_timestamp\"}\n{\"branch\":\"snapshot\",\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_get\"}"
   },
   "branch.fork_at_version": {
     "intro": "Fork a branch at an earlier commit version - a snapshot of history.",
-    "cli": "$ strata kv put greeting original  # The receipt carries this commit's version.\n$ strata kv put greeting updated\n$ strata command run --command-json '{\"branch\":\"snapshot\",\"source\":\"default\",\"type\":\"branch_fork_at_version\",\"version\":3}'  # snapshot forks default's history at that version.\n$ strata kv get greeting --branch snapshot",
+    "cli": "$ strata kv put greeting original  # The receipt carries this commit's version.\n$ strata kv put greeting updated\n$ strata command run --command-json '{\"branch\":\"snapshot\",\"source\":\"default\",\"type\":\"branch_fork_at_version\",\"version\":3}'  # snapshot forks default's history at that version.\n$ strata command run --command-json '{\"branch\":\"snapshot\",\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_get\"}'",
     "wire": "{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_put\",\"value\":\"b3JpZ2luYWw=\"}\n{\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_put\",\"value\":\"dXBkYXRlZA==\"}\n{\"branch\":\"snapshot\",\"source\":\"default\",\"type\":\"branch_fork_at_version\",\"version\":3}\n{\"branch\":\"snapshot\",\"key\":\"Z3JlZXRpbmc=\",\"type\":\"kv_get\"}"
   },
   "branch.get": {
@@ -101,12 +101,12 @@
   },
   "branch.merge": {
     "intro": "Promote a fork's change back into the branch it came from.",
-    "cli": "$ strata kv put config base\n$ strata branch fork default experiment\n$ strata kv put config tuned --branch experiment  # change on the fork\n$ strata branch merge experiment default --strategy strict  # applies the fork's change onto default",
+    "cli": "$ strata kv put config base\n$ strata branch fork default experiment\n$ strata command run --command-json '{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}'  # change on the fork\n$ strata branch merge experiment default --strategy strict  # applies the fork's change onto default",
     "wire": "{\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"YmFzZQ==\"}\n{\"branch\":\"experiment\",\"source\":\"default\",\"type\":\"branch_fork_current\"}\n{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}\n{\"source\":\"experiment\",\"strategy\":\"strict\",\"target\":\"default\",\"type\":\"branch_merge\"}"
   },
   "branch.preview": {
     "intro": "Preview promoting a fork into the branch it came from.",
-    "cli": "$ strata kv put config base\n$ strata branch fork default experiment\n$ strata kv put config tuned --branch experiment  # change on the fork\n$ strata branch preview experiment default --strategy strict  # a clean preview - no conflicting changes on default",
+    "cli": "$ strata kv put config base\n$ strata branch fork default experiment\n$ strata command run --command-json '{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}'  # change on the fork\n$ strata branch preview experiment default --strategy strict  # a clean preview - no conflicting changes on default",
     "wire": "{\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"YmFzZQ==\"}\n{\"branch\":\"experiment\",\"source\":\"default\",\"type\":\"branch_fork_current\"}\n{\"branch\":\"experiment\",\"key\":\"Y29uZmln\",\"type\":\"kv_put\",\"value\":\"dHVuZWQ=\"}\n{\"source\":\"experiment\",\"strategy\":\"strict\",\"target\":\"default\",\"type\":\"branch_preview\"}"
   },
   "event.append": {
@@ -141,12 +141,12 @@
   },
   "event.range": {
     "intro": "Read a range of events by sequence.",
-    "cli": "$ strata event append user.created {\"id\":1}\n$ strata event append user.updated {\"id\":2}\n$ strata event range 0 forward",
+    "cli": "$ strata event append user.created {\"id\":1}\n$ strata event append user.updated {\"id\":2}\n$ strata event range 0 --direction forward",
     "wire": "{\"event_type\":\"user.created\",\"payload\":{\"id\":1},\"type\":\"event_append\"}\n{\"event_type\":\"user.updated\",\"payload\":{\"id\":2},\"type\":\"event_append\"}\n{\"direction\":\"forward\",\"start_seq\":0,\"type\":\"event_range\"}"
   },
   "event.range_time": {
     "intro": "Read a range of events by timestamp.",
-    "cli": "$ strata event append user.created {\"id\":1}\n$ strata event append user.updated {\"id\":2}\n$ strata event range-time 0 forward",
+    "cli": "$ strata event append user.created {\"id\":1}\n$ strata event append user.updated {\"id\":2}\n$ strata event range-time 0 --direction forward",
     "wire": "{\"event_type\":\"user.created\",\"payload\":{\"id\":1},\"type\":\"event_append\"}\n{\"event_type\":\"user.updated\",\"payload\":{\"id\":2},\"type\":\"event_append\"}\n{\"direction\":\"forward\",\"start_ts\":0,\"type\":\"event_range_by_time\"}"
   },
   "event.types": {
@@ -191,7 +191,7 @@
   },
   "graph.apply_delete_policy": {
     "intro": "Cascade-delete graph facts bound to an entity.",
-    "cli": "$ strata graph create kb\n$ strata graph add-node kb ada --binding {\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"}}\n$ strata command run --command-json '{\"policy\":\"cascade\",\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"},\"type\":\"graph_apply_delete_policy\"}'  # cascade removes the bound node and its incident edges.\n$ strata graph get-node kb ada",
+    "cli": "$ strata graph create kb\n$ strata command run --command-json '{\"binding\":{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"}},\"graph\":\"kb\",\"node_id\":\"ada\",\"type\":\"graph_add_node\"}'\n$ strata command run --command-json '{\"policy\":\"cascade\",\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"},\"type\":\"graph_apply_delete_policy\"}'  # cascade removes the bound node and its incident edges.\n$ strata graph get-node kb ada",
     "wire": "{\"graph\":\"kb\",\"type\":\"graph_create\"}\n{\"binding\":{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"}},\"graph\":\"kb\",\"node_id\":\"ada\",\"type\":\"graph_add_node\"}\n{\"policy\":\"cascade\",\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"},\"type\":\"graph_apply_delete_policy\"}\n{\"graph\":\"kb\",\"node_id\":\"ada\",\"type\":\"graph_get_node\"}"
   },
   "graph.batch_write": {
@@ -201,12 +201,12 @@
   },
   "graph.bindings": {
     "intro": "List graph nodes bound to a product entity.",
-    "cli": "$ strata graph create kb\n$ strata graph add-node kb ada --binding {\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"}}  # Bind the node to a KV entity so retrieval can cross primitives.\n$ strata command run --command-json '{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"},\"type\":\"graph_bindings_for_entity\"}'",
+    "cli": "$ strata graph create kb\n$ strata command run --command-json '{\"binding\":{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"}},\"graph\":\"kb\",\"node_id\":\"ada\",\"type\":\"graph_add_node\"}'  # Bind the node to a KV entity so retrieval can cross primitives.\n$ strata command run --command-json '{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"},\"type\":\"graph_bindings_for_entity\"}'",
     "wire": "{\"graph\":\"kb\",\"type\":\"graph_create\"}\n{\"binding\":{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"}},\"graph\":\"kb\",\"node_id\":\"ada\",\"type\":\"graph_add_node\"}\n{\"target\":{\"key\":\"user:1\",\"primitive\":\"kv\",\"space\":\"default\"},\"type\":\"graph_bindings_for_entity\"}"
   },
   "graph.bulk_insert": {
     "intro": "Insert many nodes and edges in one commit.",
-    "cli": "$ strata graph create g\n$ strata graph bulk-insert g --edges [{\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\"}] --nodes [{\"node_id\":\"a\",\"object_type\":\"person\"},{\"node_id\":\"b\",\"object_type\":\"person\"}]\n$ strata graph meta g",
+    "cli": "$ strata graph create g\n$ strata command run --command-json '{\"edges\":[{\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\"}],\"graph\":\"g\",\"nodes\":[{\"node_id\":\"a\",\"object_type\":\"person\"},{\"node_id\":\"b\",\"object_type\":\"person\"}],\"type\":\"graph_bulk_insert\"}'\n$ strata graph meta g",
     "wire": "{\"graph\":\"g\",\"type\":\"graph_create\"}\n{\"edges\":[{\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\"}],\"graph\":\"g\",\"nodes\":[{\"node_id\":\"a\",\"object_type\":\"person\"},{\"node_id\":\"b\",\"object_type\":\"person\"}],\"type\":\"graph_bulk_insert\"}\n{\"graph\":\"g\",\"type\":\"graph_get_meta\"}"
   },
   "graph.create": {
@@ -246,17 +246,17 @@
   },
   "graph.neighbors": {
     "intro": "Find a node's neighbors along outgoing edges.",
-    "cli": "$ strata graph create social\n$ strata graph add-node social alice\n$ strata graph add-node social bob\n$ strata graph add-edge social alice knows bob\n$ strata graph neighbors social alice outgoing",
+    "cli": "$ strata graph create social\n$ strata graph add-node social alice\n$ strata graph add-node social bob\n$ strata graph add-edge social alice knows bob\n$ strata graph neighbors social alice --direction outgoing",
     "wire": "{\"graph\":\"social\",\"type\":\"graph_create\"}\n{\"graph\":\"social\",\"node_id\":\"alice\",\"type\":\"graph_add_node\"}\n{\"graph\":\"social\",\"node_id\":\"bob\",\"type\":\"graph_add_node\"}\n{\"dst\":\"bob\",\"edge_type\":\"knows\",\"graph\":\"social\",\"src\":\"alice\",\"type\":\"graph_add_edge\"}\n{\"direction\":\"outgoing\",\"graph\":\"social\",\"node_id\":\"alice\",\"type\":\"graph_neighbors\"}"
   },
   "graph.node.add": {
     "intro": "Add a node with an object type and properties.",
-    "cli": "$ strata graph create social\n$ strata graph add-node social alice --object-type person --properties {\"age\":30}\n$ strata graph get-node social alice",
+    "cli": "$ strata graph create social\n$ strata graph add-node social alice --type person --properties {\"age\":30}\n$ strata graph get-node social alice",
     "wire": "{\"graph\":\"social\",\"type\":\"graph_create\"}\n{\"graph\":\"social\",\"node_id\":\"alice\",\"object_type\":\"person\",\"properties\":{\"age\":30},\"type\":\"graph_add_node\"}\n{\"graph\":\"social\",\"node_id\":\"alice\",\"type\":\"graph_get_node\"}"
   },
   "graph.node.get": {
     "intro": "Read a node's properties, or nothing if absent.",
-    "cli": "$ strata graph create social\n$ strata graph add-node social alice --object-type person --properties {\"age\":30}\n$ strata graph get-node social alice\n$ strata graph get-node social absent",
+    "cli": "$ strata graph create social\n$ strata graph add-node social alice --type person --properties {\"age\":30}\n$ strata graph get-node social alice\n$ strata graph get-node social absent",
     "wire": "{\"graph\":\"social\",\"type\":\"graph_create\"}\n{\"graph\":\"social\",\"node_id\":\"alice\",\"object_type\":\"person\",\"properties\":{\"age\":30},\"type\":\"graph_add_node\"}\n{\"graph\":\"social\",\"node_id\":\"alice\",\"type\":\"graph_get_node\"}\n{\"graph\":\"social\",\"node_id\":\"absent\",\"type\":\"graph_get_node\"}"
   },
   "graph.node.list": {
@@ -271,7 +271,7 @@
   },
   "graph.nodes_by_type": {
     "intro": "List nodes of a given object type.",
-    "cli": "$ strata graph create g\n$ strata graph add-node g a --object-type person\n$ strata graph add-node g b --object-type person\n$ strata graph nodes-by-type g person",
+    "cli": "$ strata graph create g\n$ strata graph add-node g a --type person\n$ strata graph add-node g b --type person\n$ strata graph nodes-by-type g person",
     "wire": "{\"graph\":\"g\",\"type\":\"graph_create\"}\n{\"graph\":\"g\",\"node_id\":\"a\",\"object_type\":\"person\",\"type\":\"graph_add_node\"}\n{\"graph\":\"g\",\"node_id\":\"b\",\"object_type\":\"person\",\"type\":\"graph_add_node\"}\n{\"graph\":\"g\",\"object_type\":\"person\",\"type\":\"graph_nodes_by_type\"}"
   },
   "graph.ontology.define_link_type": {
@@ -381,33 +381,33 @@
   },
   "json.index.create": {
     "intro": "Create a secondary index on a JSON field.",
-    "cli": "$ strata json index create by_name $.name tag\n$ strata json index list",
+    "cli": "$ strata json index create by_name $.name --index-type tag\n$ strata json index list",
     "wire": "{\"field_path\":\"$.name\",\"index_type\":\"tag\",\"name\":\"by_name\",\"type\":\"json_create_index\"}\n{\"type\":\"json_list_indexes\"}"
   },
   "json.index.drop": {
     "intro": "Drop a secondary index.",
-    "cli": "$ strata json index create by_name $.name tag\n$ strata json index drop by_name\n$ strata json index list",
+    "cli": "$ strata json index create by_name $.name --index-type tag\n$ strata json index drop by_name\n$ strata json index list",
     "wire": "{\"field_path\":\"$.name\",\"index_type\":\"tag\",\"name\":\"by_name\",\"type\":\"json_create_index\"}\n{\"name\":\"by_name\",\"type\":\"json_drop_index\"}\n{\"type\":\"json_list_indexes\"}"
   },
   "json.index.list": {
     "intro": "List secondary indexes.",
-    "cli": "$ strata json index create by_name $.name tag\n$ strata json index list",
+    "cli": "$ strata json index create by_name $.name --index-type tag\n$ strata json index list",
     "wire": "{\"field_path\":\"$.name\",\"index_type\":\"tag\",\"name\":\"by_name\",\"type\":\"json_create_index\"}\n{\"type\":\"json_list_indexes\"}"
   },
   "json.list": {
     "intro": "List document keys under a prefix, in key order.",
-    "cli": "$ strata command run --command-json '{\"entries\":[{\"key\":\"user:1\",\"path\":\"$\",\"value\":{\"v\":1}},{\"key\":\"user:2\",\"path\":\"$\",\"value\":{\"v\":2}},{\"key\":\"other\",\"path\":\"$\",\"value\":{\"v\":3}}],\"type\":\"json_batch_set\"}'\n$ strata json list --prefix user:",
-    "wire": "{\"entries\":[{\"key\":\"user:1\",\"path\":\"$\",\"value\":{\"v\":1}},{\"key\":\"user:2\",\"path\":\"$\",\"value\":{\"v\":2}},{\"key\":\"other\",\"path\":\"$\",\"value\":{\"v\":3}}],\"type\":\"json_batch_set\"}\n{\"prefix\":\"user:\",\"type\":\"json_list\"}"
+    "cli": "$ strata json set user:1 $ {\"v\":1}\n$ strata json set user:2 $ {\"v\":2}\n$ strata json set other $ {\"v\":3}\n$ strata json list --prefix user:",
+    "wire": "{\"key\":\"user:1\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":1}}\n{\"key\":\"user:2\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":2}}\n{\"key\":\"other\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":3}}\n{\"prefix\":\"user:\",\"type\":\"json_list\"}"
   },
   "json.sample": {
     "intro": "A representative sample plus the total population size.",
-    "cli": "$ strata command run --command-json '{\"entries\":[{\"key\":\"a\",\"path\":\"$\",\"value\":{\"v\":1}},{\"key\":\"b\",\"path\":\"$\",\"value\":{\"v\":2}},{\"key\":\"c\",\"path\":\"$\",\"value\":{\"v\":3}}],\"type\":\"json_batch_set\"}'\n$ strata json sample",
-    "wire": "{\"entries\":[{\"key\":\"a\",\"path\":\"$\",\"value\":{\"v\":1}},{\"key\":\"b\",\"path\":\"$\",\"value\":{\"v\":2}},{\"key\":\"c\",\"path\":\"$\",\"value\":{\"v\":3}}],\"type\":\"json_batch_set\"}\n{\"type\":\"json_sample\"}"
+    "cli": "$ strata json set a $ {\"v\":1}\n$ strata json set b $ {\"v\":2}\n$ strata json set c $ {\"v\":3}\n$ strata json sample",
+    "wire": "{\"key\":\"a\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":1}}\n{\"key\":\"b\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":2}}\n{\"key\":\"c\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":3}}\n{\"type\":\"json_sample\"}"
   },
   "json.scan": {
     "intro": "Scan documents from the start, in key order.",
-    "cli": "$ strata command run --command-json '{\"entries\":[{\"key\":\"a\",\"path\":\"$\",\"value\":{\"v\":1}},{\"key\":\"b\",\"path\":\"$\",\"value\":{\"v\":2}}],\"type\":\"json_batch_set\"}'\n$ strata json scan",
-    "wire": "{\"entries\":[{\"key\":\"a\",\"path\":\"$\",\"value\":{\"v\":1}},{\"key\":\"b\",\"path\":\"$\",\"value\":{\"v\":2}}],\"type\":\"json_batch_set\"}\n{\"type\":\"json_scan\"}"
+    "cli": "$ strata json set a $ {\"v\":1}\n$ strata json set b $ {\"v\":2}\n$ strata json scan",
+    "wire": "{\"key\":\"a\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":1}}\n{\"key\":\"b\",\"path\":\"$\",\"type\":\"json_set\",\"value\":{\"v\":2}}\n{\"type\":\"json_scan\"}"
   },
   "json.set": {
     "intro": "Store a JSON document, then read it back.",
@@ -461,8 +461,8 @@
   },
   "kv.list": {
     "intro": "List keys under a prefix, in key order.",
-    "cli": "$ strata command run --command-json '{\"entries\":[{\"key\":\"dXNlcjox\",\"value\":\"YQ==\"},{\"key\":\"dXNlcjoy\",\"value\":\"Yg==\"},{\"key\":\"b3RoZXI=\",\"value\":\"Yw==\"}],\"type\":\"kv_batch_put\"}'\n$ strata kv list --prefix user:",
-    "wire": "{\"entries\":[{\"key\":\"dXNlcjox\",\"value\":\"YQ==\"},{\"key\":\"dXNlcjoy\",\"value\":\"Yg==\"},{\"key\":\"b3RoZXI=\",\"value\":\"Yw==\"}],\"type\":\"kv_batch_put\"}\n{\"prefix\":\"dXNlcjo=\",\"type\":\"kv_list\"}"
+    "cli": "$ strata kv put user:1 a\n$ strata kv put user:2 b\n$ strata kv put other c\n$ strata kv list --prefix user:",
+    "wire": "{\"key\":\"dXNlcjox\",\"type\":\"kv_put\",\"value\":\"YQ==\"}\n{\"key\":\"dXNlcjoy\",\"type\":\"kv_put\",\"value\":\"Yg==\"}\n{\"key\":\"b3RoZXI=\",\"type\":\"kv_put\",\"value\":\"Yw==\"}\n{\"prefix\":\"dXNlcjo=\",\"type\":\"kv_list\"}"
   },
   "kv.put": {
     "intro": "Store a value, then replace it.",
@@ -471,13 +471,13 @@
   },
   "kv.sample": {
     "intro": "A representative sample plus the total population size.",
-    "cli": "$ strata command run --command-json '{\"entries\":[{\"key\":\"YQ==\",\"value\":\"MQ==\"},{\"key\":\"Yg==\",\"value\":\"Mg==\"},{\"key\":\"Yw==\",\"value\":\"Mw==\"}],\"type\":\"kv_batch_put\"}'\n$ strata kv sample",
-    "wire": "{\"entries\":[{\"key\":\"YQ==\",\"value\":\"MQ==\"},{\"key\":\"Yg==\",\"value\":\"Mg==\"},{\"key\":\"Yw==\",\"value\":\"Mw==\"}],\"type\":\"kv_batch_put\"}\n{\"type\":\"kv_sample\"}"
+    "cli": "$ strata kv put a 1\n$ strata kv put b 2\n$ strata kv put c 3\n$ strata kv sample",
+    "wire": "{\"key\":\"YQ==\",\"type\":\"kv_put\",\"value\":\"MQ==\"}\n{\"key\":\"Yg==\",\"type\":\"kv_put\",\"value\":\"Mg==\"}\n{\"key\":\"Yw==\",\"type\":\"kv_put\",\"value\":\"Mw==\"}\n{\"type\":\"kv_sample\"}"
   },
   "kv.scan": {
     "intro": "Scan full rows from the start, in key order.",
-    "cli": "$ strata command run --command-json '{\"entries\":[{\"key\":\"YQ==\",\"value\":\"MQ==\"},{\"key\":\"Yg==\",\"value\":\"Mg==\"}],\"type\":\"kv_batch_put\"}'\n$ strata kv scan",
-    "wire": "{\"entries\":[{\"key\":\"YQ==\",\"value\":\"MQ==\"},{\"key\":\"Yg==\",\"value\":\"Mg==\"}],\"type\":\"kv_batch_put\"}\n{\"type\":\"kv_scan\"}"
+    "cli": "$ strata kv put a 1\n$ strata kv put b 2\n$ strata kv scan",
+    "wire": "{\"key\":\"YQ==\",\"type\":\"kv_put\",\"value\":\"MQ==\"}\n{\"key\":\"Yg==\",\"type\":\"kv_put\",\"value\":\"Mg==\"}\n{\"type\":\"kv_scan\"}"
   },
   "space.create": {
     "intro": "Create a product space.",
@@ -501,112 +501,112 @@
   },
   "vector.batch_delete": {
     "intro": "Delete many vectors in one commit.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata command run --command-json '{\"collection\":\"docs\",\"keys\":[\"a\",\"b\"],\"type\":\"vector_batch_delete\"}'\n$ strata vector count docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata command run --command-json '{\"collection\":\"docs\",\"keys\":[\"a\",\"b\"],\"type\":\"vector_batch_delete\"}'\n$ strata vector count docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}\n{\"collection\":\"docs\",\"keys\":[\"a\",\"b\"],\"type\":\"vector_batch_delete\"}\n{\"collection\":\"docs\",\"type\":\"vector_count\"}"
   },
   "vector.batch_exists": {
     "intro": "Check existence for many keys at once.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata command run --command-json '{\"collection\":\"docs\",\"keys\":[\"a\",\"missing\"],\"type\":\"vector_batch_exists\"}'",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata command run --command-json '{\"collection\":\"docs\",\"keys\":[\"a\",\"missing\"],\"type\":\"vector_batch_exists\"}'",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]}],\"type\":\"vector_batch_upsert\"}\n{\"collection\":\"docs\",\"keys\":[\"a\",\"missing\"],\"type\":\"vector_batch_exists\"}"
   },
   "vector.batch_get": {
     "intro": "Read many vectors at once.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata command run --command-json '{\"collection\":\"docs\",\"keys\":[\"a\",\"b\"],\"type\":\"vector_batch_get\"}'",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata command run --command-json '{\"collection\":\"docs\",\"keys\":[\"a\",\"b\"],\"type\":\"vector_batch_get\"}'",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}\n{\"collection\":\"docs\",\"keys\":[\"a\",\"b\"],\"type\":\"vector_batch_get\"}"
   },
   "vector.batch_upsert": {
     "intro": "Upsert many vectors in one commit.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata vector count docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata command run --command-json '{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}'\n$ strata vector count docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"entries\":[{\"key\":\"a\",\"vector\":[1.0,0.0,0.0]},{\"key\":\"b\",\"vector\":[0.0,1.0,0.0]}],\"type\":\"vector_batch_upsert\"}\n{\"collection\":\"docs\",\"type\":\"vector_count\"}"
   },
   "vector.collection.create": {
     "intro": "Create a vector collection, then confirm its dimension.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector collection stats docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector collection stats docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"type\":\"vector_collection_stats\"}"
   },
   "vector.collection.delete": {
     "intro": "Delete a collection.",
-    "cli": "$ strata vector collection create temp 3 cosine\n$ strata vector collection delete temp\n$ strata vector collection list",
+    "cli": "$ strata vector collection create temp 3 --metric cosine\n$ strata vector collection delete temp\n$ strata vector collection list",
     "wire": "{\"collection\":\"temp\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"temp\",\"type\":\"vector_delete_collection\"}\n{\"type\":\"vector_list_collections\"}"
   },
   "vector.collection.list": {
     "intro": "List vector collections.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector collection list",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector collection list",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"type\":\"vector_list_collections\"}"
   },
   "vector.collection.stats": {
     "intro": "Read a collection's dimension, metric, and size.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector collection stats docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector collection stats docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"type\":\"vector_collection_stats\"}"
   },
   "vector.count": {
     "intro": "Count vectors in a collection.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector count docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector count docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"type\":\"vector_count\"}"
   },
   "vector.delete": {
     "intro": "Delete one vector.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector delete docs a\n$ strata vector exists docs a",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector delete docs a\n$ strata vector exists docs a",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_delete\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_exists\"}"
   },
   "vector.delete_all": {
     "intro": "Delete every vector in a collection.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector delete-all docs\n$ strata vector count docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector delete-all docs\n$ strata vector count docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"type\":\"vector_delete_all\"}\n{\"collection\":\"docs\",\"type\":\"vector_count\"}"
   },
   "vector.delete_by_filter": {
     "intro": "Delete every vector whose metadata matches a filter.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0] --metadata {\"tag\":\"keep\"}\n$ strata vector upsert docs b [0.0,1.0,0.0] --metadata {\"tag\":\"drop\"}\n$ strata vector delete-by-filter docs {\"conditions\":[{\"field\":\"tag\",\"op\":\"eq\",\"value\":{\"type\":\"string\",\"value\":\"drop\"}}]}\n$ strata vector count docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0] --metadata {\"tag\":\"keep\"}\n$ strata vector upsert docs b [0.0,1.0,0.0] --metadata {\"tag\":\"drop\"}\n$ strata vector delete-by-filter docs --filter {\"conditions\":[{\"field\":\"tag\",\"op\":\"eq\",\"value\":{\"type\":\"string\",\"value\":\"drop\"}}]}\n$ strata vector count docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"metadata\":{\"tag\":\"keep\"},\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"metadata\":{\"tag\":\"drop\"},\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"filter\":{\"conditions\":[{\"field\":\"tag\",\"op\":\"eq\",\"value\":{\"type\":\"string\",\"value\":\"drop\"}}]},\"type\":\"vector_delete_by_filter\"}\n{\"collection\":\"docs\",\"type\":\"vector_count\"}"
   },
   "vector.exists": {
     "intro": "Check whether a key exists in a collection.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector exists docs a\n$ strata vector exists docs absent",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector exists docs a\n$ strata vector exists docs absent",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_exists\"}\n{\"collection\":\"docs\",\"key\":\"absent\",\"type\":\"vector_exists\"}"
   },
   "vector.get": {
     "intro": "Read a stored vector, or nothing if the key is absent.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector get docs a\n$ strata vector get docs absent",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector get docs a\n$ strata vector get docs absent",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_get\"}\n{\"collection\":\"docs\",\"key\":\"absent\",\"type\":\"vector_get\"}"
   },
   "vector.history": {
     "intro": "A key that never existed has no history.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector history docs absent",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector history docs absent",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"absent\",\"type\":\"vector_history\"}"
   },
   "vector.index.query": {
     "intro": "Nearest-neighbor search that also returns index diagnostics.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata command run --command-json '{\"collection\":\"docs\",\"k\":2,\"query\":[1.0,0.0,0.0],\"type\":\"vector_index_query\"}'",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata command run --command-json '{\"collection\":\"docs\",\"k\":2,\"query\":[1.0,0.0,0.0],\"type\":\"vector_index_query\"}'",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"k\":2,\"query\":[1.0,0.0,0.0],\"type\":\"vector_index_query\"}"
   },
   "vector.keys": {
     "intro": "List keys in a collection, in key order.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector keys docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector keys docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"type\":\"vector_list_keys\"}"
   },
   "vector.metadata.update": {
     "intro": "Patch the metadata of an existing vector.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0] --metadata {\"tag\":\"x\"}\n$ strata vector update-metadata docs a {\"tag\":\"z\"}\n$ strata vector get docs a",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0] --metadata {\"tag\":\"x\"}\n$ strata vector update-metadata docs a {\"tag\":\"z\"}\n$ strata vector get docs a",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"metadata\":{\"tag\":\"x\"},\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"a\",\"patch\":{\"tag\":\"z\"},\"type\":\"vector_update_metadata\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_get\"}"
   },
   "vector.query": {
     "intro": "Find the nearest vectors to a query vector.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector query docs [1.0,0.0,0.0] 2",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector query docs [1.0,0.0,0.0] --k 2",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"k\":2,\"query\":[1.0,0.0,0.0],\"type\":\"vector_query\"}"
   },
   "vector.sample": {
     "intro": "A representative sample of stored vectors plus the total count.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector sample docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector sample docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"type\":\"vector_sample\"}"
   },
   "vector.scan": {
     "intro": "Scan stored vectors from the start, in key order.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector scan docs",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0]\n$ strata vector upsert docs b [0.0,1.0,0.0]\n$ strata vector scan docs",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"b\",\"type\":\"vector_upsert\",\"vector\":[0.0,1.0,0.0]}\n{\"collection\":\"docs\",\"type\":\"vector_scan\"}"
   },
   "vector.upsert": {
     "intro": "Insert or replace a vector with optional metadata.",
-    "cli": "$ strata vector collection create docs 3 cosine\n$ strata vector upsert docs a [1.0,0.0,0.0] --metadata {\"tag\":\"x\"}\n$ strata vector exists docs a",
+    "cli": "$ strata vector collection create docs 3 --metric cosine\n$ strata vector upsert docs a [1.0,0.0,0.0] --metadata {\"tag\":\"x\"}\n$ strata vector exists docs a",
     "wire": "{\"collection\":\"docs\",\"dimension\":3,\"metric\":\"cosine\",\"type\":\"vector_create_collection\"}\n{\"collection\":\"docs\",\"key\":\"a\",\"metadata\":{\"tag\":\"x\"},\"type\":\"vector_upsert\",\"vector\":[1.0,0.0,0.0]}\n{\"collection\":\"docs\",\"key\":\"a\",\"type\":\"vector_exists\"}"
   }
 }

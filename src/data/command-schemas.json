@@ -2558,7 +2558,7 @@
       "description": "Compares two branches.",
       "properties": {
         "at_timestamp": {
-          "description": "Optional timestamp in microseconds; compare each branch as of it.",
+          "description": "Optional read-as-of commit timestamp: compare each branch as of the\n`timestamp` from `history` output (a commit-timeline position, not\nthe `version`).",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -4334,6 +4334,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -4348,6 +4358,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -4736,6 +4747,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -4750,6 +4771,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -5105,7 +5127,16 @@
       "description": "Counts visible events.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -5314,7 +5345,16 @@
       "description": "Reads one event by sequence.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -5449,7 +5489,16 @@
           ]
         },
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -5923,7 +5972,16 @@
       "description": "Lists event types.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -6205,7 +6263,16 @@
       "description": "Runs a bounded breadth-first traversal from a start node.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -6390,7 +6457,16 @@
       "description": "Detects communities via label propagation.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -6532,7 +6608,16 @@
       "description": "Computes local clustering coefficients over a graph snapshot.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -6664,7 +6749,16 @@
       "description": "Computes `PageRank` scores, optionally personalized by seed weights.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -6850,7 +6944,16 @@
       "description": "Computes shortest-path distances from a source node.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -6993,7 +7096,16 @@
       "description": "Computes weakly connected components over a graph snapshot.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -7089,6 +7201,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -7103,6 +7225,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -7516,6 +7639,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -7530,6 +7663,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -8258,7 +8392,16 @@
       "description": "Lists graph nodes bound to one entity target.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -8382,6 +8525,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -8396,6 +8549,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -8702,6 +8856,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -8716,6 +8880,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -8943,6 +9108,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -8957,6 +9132,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -9170,6 +9346,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -9184,6 +9370,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -9449,7 +9636,16 @@
       "description": "Reads a graph edge.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -9549,6 +9745,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -9563,6 +9769,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -9770,7 +9977,16 @@
       "description": "Lists graphs.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -9918,7 +10134,16 @@
       "description": "Reads graph metadata.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -10213,7 +10438,16 @@
       "description": "Lists neighboring graph nodes.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -10354,6 +10588,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -10368,6 +10612,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -10762,7 +11007,16 @@
       "description": "Reads a graph node.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -10946,7 +11200,16 @@
       "description": "Lists graph nodes.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -11077,6 +11340,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -11091,6 +11364,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -11403,7 +11677,16 @@
       "description": "Lists nodes declaring an object type (node-id ordered).",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -11532,6 +11815,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -11546,6 +11839,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -11780,6 +12074,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -11794,6 +12098,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -12011,6 +12316,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -12025,6 +12340,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -12225,6 +12541,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -12239,6 +12565,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -12439,6 +12766,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -12453,6 +12790,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -12672,7 +13010,16 @@
       "description": "Reads the graph's ontology (status plus every declared type).",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -12863,7 +13210,16 @@
       "description": "Reads the ontology with per-type node and edge usage counts.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds. Reads the graph state visible at that instant.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -16254,6 +16610,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -16268,6 +16634,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -16834,6 +17201,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -16848,6 +17225,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -17404,6 +17782,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -17418,6 +17806,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -18014,6 +18403,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -18028,6 +18427,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -18377,7 +18777,16 @@
       "description": "Counts JSON documents.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -18466,6 +18875,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -18480,6 +18899,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -18706,6 +19126,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -18771,7 +19192,16 @@
       "description": "Reads a JSON value at a document path.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -18872,6 +19302,15 @@
       "JsonHistoryItem": {
         "description": "JSON version-history item.",
         "properties": {
+          "committed_at": {
+            "description": "The commit's wall-clock instant in microseconds since the Unix epoch\n(UTC), or absent when unknown - a commit written before the database\nrecorded instants, or one whose date the branch cannot vouch for.\nDistinct from `timestamp`, which is a commit-timeline position, not a\ndate.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "document_version": {
             "format": "uint64",
             "minimum": 0,
@@ -18881,6 +19320,7 @@
             ]
           },
           "timestamp": {
+            "description": "This change's position on the logical commit timeline: a monotonic\ncounter assigned per commit, so a fresh database starts small (near 1)\nand it is never a calendar date. Pass it to `as_of` to read this exact\npoint; do not format it as a Unix/epoch timestamp. For when the change\nactually happened, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -18890,6 +19330,7 @@
           },
           "value": true,
           "version": {
+            "description": "The commit version this change was written at - the commit's identity,\ndistinct from its position in time.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -19281,7 +19722,16 @@
       "description": "Lists JSON document keys.\n\n# Guaranteed semantics\n\n- **Ordering.** Keys are returned in ascending byte-lexicographic\n  order, stable across calls for unchanged data.\n- **Cursor.** The returned cursor is the last key of a non-terminal\n  page; resuming lists strictly *after* that key. Cursors are plain\n  positions: they stay valid indefinitely, across interleaved writes,\n  and even if the cursor document itself is deleted. A key is never\n  returned twice for the same cursor chain.\n- **Interleaved writes.** Each page reads the latest committed state\n  unless `as_of` is set: documents created behind the cursor position\n  do not appear; documents created or deleted ahead of it are\n  reflected in later pages. For a snapshot-stable enumeration across\n  pages, pass the same `as_of` timestamp on every page.\n- **Termination.** The terminal page reports `has_more: false` and\n  `cursor: null`. A `limit` of zero returns an empty terminal page.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -19660,6 +20110,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -19674,6 +20134,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -20063,6 +20524,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -20077,6 +20548,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -20638,6 +21110,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -20652,6 +21134,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -21239,6 +21722,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -21253,6 +21746,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -21826,6 +22320,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -21840,6 +22344,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -22182,7 +22687,16 @@
       "description": "Counts keys.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -22280,6 +22794,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -22294,6 +22818,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -22544,6 +23069,7 @@
         "description": "Stored value with commit metadata.",
         "properties": {
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -22573,7 +23099,16 @@
       "description": "Reads one KV entry.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -22638,7 +23173,17 @@
       "HistoryItem": {
         "description": "Version-history item.",
         "properties": {
+          "committed_at": {
+            "description": "The commit's wall-clock instant in microseconds since the Unix epoch\n(UTC), or absent when unknown - a commit written before the database\nrecorded instants, or one whose date the branch cannot vouch for.\nDistinct from `timestamp`, which is a commit-timeline position, not a\ndate.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "timestamp": {
+            "description": "This change's position on the logical commit timeline: a monotonic\ncounter assigned per commit, so a fresh database starts small (near 1)\nand it is never a calendar date. Pass it to `as_of` to read this exact\npoint; do not format it as a Unix/epoch timestamp. For when the change\nactually happened, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -22657,6 +23202,7 @@
             ]
           },
           "version": {
+            "description": "The commit version this change was written at - the commit's identity,\ndistinct from its position in time.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -22762,7 +23308,16 @@
       "description": "Lists KV keys.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -22905,6 +23460,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -22919,6 +23484,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -23226,6 +23792,7 @@
             "$ref": "#/$defs/Bytes"
           },
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -23374,6 +23941,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -23388,6 +23965,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -23566,6 +24144,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -23580,6 +24168,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -24072,6 +24661,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -24086,6 +24685,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -24657,6 +25257,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -24671,6 +25281,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -25216,6 +25827,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -25230,6 +25851,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -25547,6 +26169,7 @@
             "type": "string"
           },
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -25870,6 +26493,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -25884,6 +26517,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -26684,7 +27318,16 @@
       "description": "Counts visible vectors in one collection.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -26771,6 +27414,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -26785,6 +27438,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -26980,6 +27634,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -26994,6 +27658,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -27179,6 +27844,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -27193,6 +27868,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -27579,6 +28255,7 @@
             "type": "string"
           },
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -27612,7 +28289,16 @@
       "description": "Reads one vector.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -27694,6 +28380,15 @@
       "VectorHistoryItem": {
         "description": "Vector history item.",
         "properties": {
+          "committed_at": {
+            "description": "The commit's wall-clock instant in microseconds since the Unix epoch\n(UTC), or absent when unknown - a commit written before the database\nrecorded instants, or one whose date the branch cannot vouch for.\nDistinct from `timestamp`, which is a commit-timeline position, not a\ndate.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "data": {
             "anyOf": [
               {
@@ -27708,6 +28403,7 @@
             "type": "string"
           },
           "timestamp": {
+            "description": "This change's position on the logical commit timeline: a monotonic\ncounter assigned per commit, so a fresh database starts small (near 1)\nand it is never a calendar date. Pass it to `as_of` to read this exact\npoint; do not format it as a Unix/epoch timestamp. For when the change\nactually happened, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -27724,6 +28420,7 @@
             ]
           },
           "version": {
+            "description": "The commit version this change was written at - the commit's identity,\ndistinct from its position in time.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -28175,7 +28872,16 @@
       "description": "Runs vector search and returns index planner diagnostics.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -28266,7 +28972,16 @@
       "description": "Lists vector keys.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -28397,6 +29112,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -28411,6 +29136,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -28733,7 +29459,16 @@
       "description": "Runs vector search with the default engine planner.",
       "properties": {
         "as_of": {
-          "description": "Optional timestamp in microseconds.",
+          "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read as of a real time: a wall-clock instant in microseconds since\nthe Unix epoch (UTC), as reported by `committed_at` on a write ack\nor on any `history` row. Resolves to the commit at or before that\ninstant, and fails rather than guessing if the instant falls\noutside the branch's recorded history. Mutually exclusive with\n`as_of`.",
           "format": "uint64",
           "minimum": 0,
           "type": [
@@ -28847,6 +29582,7 @@
             "type": "string"
           },
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -28994,6 +29730,7 @@
             "type": "string"
           },
           "timestamp": {
+            "description": "Logical commit-timeline position of the commit that wrote this value: a\nmonotonic per-commit counter (a fresh database starts small, near 1),\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
@@ -29142,6 +29879,16 @@
       "CommitReceipt": {
         "description": "Commit facts returned by mutating operations.",
         "properties": {
+          "committed_at": {
+            "default": null,
+            "description": "The wall-clock instant the commit was applied (UTC epoch microseconds) -\nthe value to format as a calendar date. `null` when unknown (a replayed\nor imported commit). Distinct from the logical `timestamp` (#3112).",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "delete_count": {
             "format": "uint64",
             "minimum": 0,
@@ -29156,6 +29903,7 @@
             "type": "integer"
           },
           "timestamp": {
+            "description": "Commit's position on the logical commit timeline: a monotonic counter\nassigned per commit, so a fresh database starts small (near 1) and it is\nnever a calendar date. Pass it to `--as-of` and match it against\n`history`; do not format it as a Unix/epoch timestamp. For the real\nwall-clock time, use `committed_at`.",
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
