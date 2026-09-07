@@ -33,5 +33,13 @@ const slug = entry.id.replace(/\/index$/, '');
   mdHref={`/docs/${slug}.md`}
   toc={headings.filter((h) => h.depth === 2 || h.depth === 3)}
 >
+  {
+    /* The generated reference pages have always titled themselves; these
+      hand-written ones did not, so the prose section was the only part of the
+      docs whose heading hierarchy started at h2. The markdown twin emitted
+      `# Title` the whole time, which meant agents got a title and readers did
+      not. Bare h1, styled by prose-docs, exactly as the reference pages do. */
+  }
+  <h1>{entry.data.title}</h1>
   <Content />
 </DocsLayout>
