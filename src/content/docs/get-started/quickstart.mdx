@@ -1,0 +1,220 @@
+---
+title: 'Quickstart'
+description: 'Create a database, fork it, change the fork, merge it back, and read the state you had before. About ten minutes.'
+section: 'Get Started'
+source: 'strata-core@v1.2.1'
+---
+
+This is the whole shape of Strata in ten minutes: a database that is a
+directory, five data models inside it, and branching and history over all of
+them. You need the CLI, which [Installation](/docs/get-started/installation)
+covers, and nothing else. No server, no schema, no signup.
+
+## Create a database
+
+Write a key. The database is created by the write.
+
+```console
+strata ./quickstart kv put greeting hello
+```
+
+```
+created greeting applied=true
+```
+
+```console
+strata ./quickstart kv get greeting
+```
+
+```
+hello
+```
+
+`./quickstart` is an ordinary directory that now exists. Copy it, back it up or
+delete it with the tools you already use.
+
+```console
+ls ./quickstart
+```
+
+```
+locks  manifest  meta  README.md  snapshots  wal
+```
+
+## Store a document beside it
+
+The same database holds other shapes. JSON documents live next to the key you
+just wrote, in the same directory, under the same history.
+
+```console
+strata ./quickstart json set user:ada '$' '{"name":"Ada","role":"engineer"}'
+strata ./quickstart json get user:ada '$.role'
+```
+
+```
+"engineer"
+```
+
+The `$` is a path into the document, so you can read one field without loading
+the rest. Events, vectors and graphs work the same way.
+[Working with data](/docs/learn/working-with-data) is the tour of all five.
+
+## Fork the database
+
+This is the part that is not like other embedded databases. A branch is a whole
+line of database state, covering every model at once.
+
+```console
+strata ./quickstart branch fork default work
+```
+
+```json
+{"name":"work","parent":{"name":"default","fork_version":4}, ...}
+```
+
+Forking copies nothing. It records the version you forked at and diverges from
+there, so it stays fast on a large database.
+
+Use `branch fork`, not `branch create`. `create` makes an empty root branch with
+no parent, and because writing to one works fine, the mistake does not surface
+until a merge fails with `invalid_argument.engine.branch_point` and the work has
+to be redone.
+
+## Change the fork, not the original
+
+Point any command at a branch with `--branch`.
+
+```console
+strata ./quickstart --branch work json set user:ada '$.role' '"director"'
+strata ./quickstart --branch work json get user:ada '$.role'
+```
+
+```
+"director"
+```
+
+`default` has not moved:
+
+```console
+strata ./quickstart json get user:ada '$.role'
+```
+
+```
+"engineer"
+```
+
+## Compare, then merge
+
+`branch diff` reports what actually differs.
+
+```console
+strata ./quickstart branch diff default work
+```
+
+```json
+{
+  "branch_a": "default",
+  "branch_b": "work",
+  "spaces": [
+    {
+      "capability": "json",
+      "added": [],
+      "modified": [{ "identity": "user:ada", "version": 8 }],
+      "removed": []
+    }
+  ]
+}
+```
+
+`branch preview` is the dry run. It finds conflicts before you commit to
+anything, and it tells you which models the merge covers.
+
+```console
+strata ./quickstart branch preview work default
+```
+
+```json
+{"branch_point":4,"conflicts":[],
+ "capabilities_covered":["key_value","json","vector"], ...}
+```
+
+Note what that list leaves out. Merging carries key-value, JSON and vector data;
+events and graph data it does not.
+[Branches](/docs/learn/branches) covers why, and what to do about it.
+
+With no conflicts, merge and delete the branch.
+
+```console
+strata ./quickstart branch merge work default
+strata ./quickstart branch delete work
+```
+
+The change is on `default` now, and the branch it came from is gone.
+
+```console
+strata ./quickstart json get user:ada '$.role'
+```
+
+```
+"director"
+```
+
+## Read the past
+
+Nothing you have done destroyed anything. Every version of that first key is
+still addressable.
+
+```console
+strata ./quickstart kv put greeting goodbye
+strata ./quickstart kv history greeting
+```
+
+```json
+{"committed_at":"2026-09-07 01:23:54.020579 -05:00","value":"goodbye","version":15,"timestamp":15}
+{"committed_at":"2026-09-07 01:23:28.960831 -05:00","value":"hello","version":3,"timestamp":3}
+```
+
+Read at a point on the commit timeline with `--as-of`, taking the number from
+the `timestamp` field:
+
+```console
+strata ./quickstart kv get greeting --as-of 3
+```
+
+```
+hello
+```
+
+Or read at a wall-clock instant with `--as-of-time`:
+
+```console
+strata ./quickstart kv get greeting --as-of-time '2026-09-07 01:23:40'
+```
+
+```
+hello
+```
+
+Those are two different clocks and they are not interchangeable. Passing both
+fails rather than guessing:
+
+```
+invalid_argument.executor.as_of_conflict: as_of and as_of_time are mutually
+exclusive: pass a commit timestamp or a wall-clock instant, not both
+```
+
+[Time travel](/docs/learn/time-travel) is the page for which clock to reach for.
+
+## Where to go next
+
+[Introduction to StrataDB](/docs/learn/introduction) is the unhurried version of
+what you just did and why it is built this way.
+
+[Working with data](/docs/learn/working-with-data) covers the four models this
+page skipped.
+
+[Branches](/docs/learn/branches) goes deeper on forking, conflicts and what a
+merge covers.
+
+The [command reference](/docs/reference) documents every command, with
+parameters, return shapes and error codes.
