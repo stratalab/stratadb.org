@@ -1,0 +1,182 @@
+---
+// Reference / Error codes.
+//
+// The registry itself already ships at /e/, one page per code, grouped by class
+// on its index. That is the shape Postgres uses for its error appendix and it
+// works. What was missing is the half Stripe spends four thousand words on:
+// what to actually do when you get one.
+//
+// So this page is the handling contract rather than a second copy of the list.
+// It leans on the two fields that make Strata's registry more useful than the
+// ones I compared it against: neither Stripe nor Postgres tells you whether the
+// operation took effect, and this one does, per code.
+//
+// Every count is computed from the registry rather than written down, which is
+// what keeps the page honest when codes are added, removed or reclassified.
+// 1.2.0 reclassified two of them and broke a build over it.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import registry from '../../../data/error-registry.json';
+import index from '../../../data/command-index.json';
+
+interface ErrorEntry {
+  class: string;
+  code: string;
+  commit_outcome: string;
+  hint: string;
+  message: string;
+  retry_policy: string;
+}
+const errors = registry.errors as ErrorEntry[];
+
+const tally = (key: 'retry_policy' | 'commit_outcome') => {
+  const counts = new Map<string, number>();
+  for (const e of errors) counts.set(e[key], (counts.get(e[key]) ?? 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+};
+
+const classes = new Set(errors.map((e) => e.class)).size;
+const ambiguous = errors.filter((e) => e.commit_outcome === 'maybe_committed');
+
+// Which codes a catalogued command can raise, so the page can say how much of
+// the registry is reachable from the command surface.
+const raised = new Set<string>();
+for (const command of index.commands) {
+  for (const e of command.errors ?? []) raised.add(e.code);
+}
+
+const RETRY_MEANING: Record<string, string> = {
+  never:
+    'Retrying the same request will fail the same way. Something has to change first, usually your input.',
+  same_request: 'The identical request is worth retrying, typically after a backoff.',
+  after_state_change:
+    'Retry once the condition has changed: reload the current state, or wait for the resource to exist.',
+  unknown: 'Strata cannot say. Treat it as unsafe to retry blindly and reconcile first.',
+};
+const OUTCOME_MEANING: Record<string, string> = {
+  not_started: 'The command was rejected before it touched anything. Nothing was written.',
+  not_applicable: 'The command does not write, so there is nothing to have committed.',
+  definitely_not_committed: 'The command started and did not commit. Nothing was written.',
+  maybe_committed: 'Strata does not know whether the write landed. Check before acting.',
+};
+
+const toc = [
+  { depth: 2, slug: 'shape', text: 'What a code looks like' },
+  { depth: 2, slug: 'act', text: 'The two fields worth branching on' },
+  { depth: 2, slug: 'ambiguous', text: 'When Strata does not know' },
+  { depth: 2, slug: 'find', text: 'Finding a code' },
+];
+---
+
+<DocsLayout
+  title="Error codes"
+  description="Every failure carries a typed code that says whether a retry is safe and whether the write landed."
+  section="Reference"
+  wide
+  toc={toc}
+>
+  <h1>Error codes</h1>
+  <p>
+    Every failure in Strata carries a code. Not a message you match on, and not a number you look up
+    in a table somewhere: a stable identifier that says what kind of failure it was, whether
+    retrying is safe, and whether your write took effect.
+  </p>
+  <p>
+    That last part is the unusual one. Most error registries tell you what went wrong. This one also
+    tells you what happened to your data, which is the question you actually need answered before
+    you decide what to do next.
+  </p>
+
+  <h2 id="shape">What a code looks like</h2>
+  <p>Codes read left to right, from the kind of problem to the specific case:</p>
+  <pre
+    class="not-prose"><code>conflict.engine.promotion
+│        │      └ the specific failure
+│        └ the component that raised it
+└ the class, one of {classes}</code></pre>
+  <p>
+    Match on the code, or on its class prefix if you want to handle a whole family at once. Do not
+    match on the message: messages are written for people and are free to change, while codes are
+    the contract.
+  </p>
+
+  <h2 id="act">The two fields worth branching on</h2>
+  <p>Every entry in the registry carries both, and between them they decide what you do next.</p>
+
+  <h3 class="mt-8 text-body-lg font-medium text-ink-hi">retry_policy</h3>
+  <dl class="not-prose mt-3 space-y-4">
+    {
+      tally('retry_policy').map(([value, count]) => (
+        <div class="border-l border-line pl-4">
+          <dt class="font-mono text-mono-body text-ink-hi">
+            {value} <span class="font-sans text-small text-ink-low">· {count} codes</span>
+          </dt>
+          <dd class="mt-1 max-w-[46rem] text-body text-ink-mid">{RETRY_MEANING[value]}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <h3 class="mt-8 text-body-lg font-medium text-ink-hi">commit_outcome</h3>
+  <dl class="not-prose mt-3 space-y-4">
+    {
+      tally('commit_outcome').map(([value, count]) => (
+        <div class="border-l border-line pl-4">
+          <dt class="font-mono text-mono-body text-ink-hi">
+            {value} <span class="font-sans text-small text-ink-low">· {count} codes</span>
+          </dt>
+          <dd class="mt-1 max-w-[46rem] text-body text-ink-mid">{OUTCOME_MEANING[value]}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <p class="mt-8">
+    A caller that reads these two fields can recover automatically without guessing. A conflict on a
+    merge says <code>never</code> and <code>not_started</code>: your target branch is untouched, and
+    repeating the identical request will fail identically, so reload and decide. A closed runtime
+    says <code>after_state_change</code>: the same call will work once the runtime is open again.
+  </p>
+
+  <h2 id="ambiguous">When Strata does not know</h2>
+  <p>
+    {ambiguous.length} of the {errors.length} codes report{' '}
+    <code>maybe_committed</code>. They are worth knowing by name, because they are the only ones
+    where reading the error is not enough:
+  </p>
+  <ul class="not-prose mt-4 space-y-3">
+    {
+      ambiguous.map((e) => (
+        <li class="rounded-(--radius-frame) border border-line bg-raised px-5 py-4">
+          <a
+            href={`/e/${e.code}`}
+            class="font-mono text-mono-body text-terracotta-500 transition-colors duration-200 hover:text-terracotta-400"
+          >
+            {e.code}
+          </a>
+          <p class="mt-1 text-body text-ink-mid">{e.hint}</p>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="mt-6">
+    Both are transport and persistence failures where the write may have landed before the answer
+    was lost. There is an error class named <code>ambiguous_commit</code> for exactly this, which is a
+    deliberate choice: a system that cannot tell you should say so rather than guess. Read the record
+    back before retrying, or make the write idempotent so that retrying is harmless either way.
+  </p>
+
+  <h2 id="find">Finding a code</h2>
+  <p>
+    The full registry is at <a href="/e/">the error index</a>, grouped by class, with a page per
+    code carrying its message, hint, retry policy and commit outcome. Every code links there
+    directly, so <code>https://stratadb.org/e/&lt;code&gt;</code> resolves for any of the{' '}
+    {errors.length} of them, and the binary prints that URL in the error itself.
+  </p>
+  <p>
+    {raised.size} of them are declared by a command in the catalog, so each{' '}
+    <a href="/docs/reference">command page</a> lists the codes it can raise alongside their retry policy
+    and commit outcome. The rest come from the runtime and the storage layer beneath the command surface.
+  </p>
+  <p>The same registry is available offline, matched to the version you installed:</p>
+  <pre class="not-prose"><code>strata agents errors --json</code></pre>
+</DocsLayout>

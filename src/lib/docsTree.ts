@@ -227,7 +227,7 @@ export const docsTree: TreeNode[] = [
       },
       { label: 'MCP tools', generated: true },
       { label: 'Configuration' },
-      { label: 'Error codes' },
+      { label: 'Error codes', href: '/docs/reference/errors' },
       { label: 'Data types' },
       { label: 'Compatibility and versioning' },
     ],

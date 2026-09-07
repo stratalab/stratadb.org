@@ -44,6 +44,7 @@ const tables = [
   { label: 'Configuration', note: 'Every setting, where it can be set, and what it defaults to.' },
   {
     label: 'Error codes',
+    href: '/docs/reference/errors',
     note: `All ${registry.errors.length} codes, each with its retry policy and what happened to the commit.`,
   },
   { label: 'Data types', note: 'The types that appear in parameters and return shapes.' },
@@ -103,7 +104,15 @@ const tables = [
       {
         tables.map((t) => (
           <div class="border-l border-line pl-4">
-            <dt class="text-body font-medium text-ink-hi">{t.label}</dt>
+            <dt class="text-body font-medium text-ink-hi">
+              {t.href ? (
+                <a href={t.href} class="transition-colors duration-200 hover:text-terracotta-400">
+                  {t.label}
+                </a>
+              ) : (
+                t.label
+              )}
+            </dt>
             <dd class="mt-1 max-w-[46rem] text-body text-ink-mid">{t.note}</dd>
           </div>
         ))
