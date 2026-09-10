@@ -21,19 +21,23 @@ const REQUIRED = [
       // hand-built rather than a content page, so it has no markdown twin at
       // either the old path or the new one. Pinned so it cannot rot again.
       'https://stratadb.org/docs/get-started/agents',
-      '#primitive-kv',
-      '#primitive-event',
-      '#primitive-json',
-      '#primitive-vector',
-      '#primitive-graph',
-      '#hub',
-      'data-primitive-link',
       'data-install-mode',
-      'data-hub-link',
-      'data-section-jump',
       "jumpToSection('install')",
-      'strata:primitive-request',
       'strata:install-mode-request',
+      // The hero tiles run the real engine. Each of the five must still carry
+      // a script, the panel they write into must exist, and the wasm bundle
+      // must still be loaded from the path fetch-wasm.mjs stages it to. If any
+      // of these drifts the tiles go quiet with nothing to say so.
+      'data-demo',
+      'data-script',
+      'hero-demo-out',
+      '/playground/pkg/strata_wasm.js',
+      'executeCli',
+      "key: 'kv'",
+      "key: 'event'",
+      "key: 'json'",
+      "key: 'vector'",
+      "key: 'graph'",
     ],
   },
   {

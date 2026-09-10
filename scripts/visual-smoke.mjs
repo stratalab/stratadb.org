@@ -43,31 +43,44 @@ async function waitForServer(proc) {
   throw new Error(`preview did not become ready at ${BASE_URL}: ${lastError}`);
 }
 
-async function assertHomepagePrimitiveLinks(page, viewport) {
-  await page.locator('[data-primitive-link="json"]').click();
-  await page.waitForFunction(() => window.location.hash === '#primitive-json', undefined, {
-    timeout: 5_000,
-  });
-  await page.locator('#prim-tab-json[aria-selected="true"]').waitFor({
-    state: 'visible',
-    timeout: 10_000,
-  });
+// The hero tiles run the real engine in the browser. This is the check that
+// the whole path still works: the wasm module loads, a session opens, and the
+// JSON script produces the value the engine actually computed. A canned
+// transcript would pass a text assertion, so this waits for a value that only
+// appears if the commands really ran, and confirms the version badge is the
+// engine reporting itself.
+async function assertHomepageLiveDemo(page, viewport) {
+  await page.locator('[data-demo="json"]').click();
 
   await page
     .waitForFunction(
       () => {
-        const panelText = document.querySelector('#prim-panel')?.textContent ?? '';
-        return /portfolio/i.test(panelText) && /aggressive/i.test(panelText);
+        const out = document.getElementById('hero-demo-out')?.textContent ?? '';
+        return /"engineer"/.test(out) && /"director"/.test(out);
       },
       undefined,
-      { timeout: 5_000 },
+      { timeout: 60_000 },
     )
     .catch(() => {
-      throw new Error(
-        `${viewport.name} /: JSON hero tile did not activate the JSON primitive panel`,
-      );
+      throw new Error(`${viewport.name} /: JSON hero tile did not run against the wasm engine`);
     });
 
+  const badge = (await page.locator('[data-demo-status]').textContent()) ?? '';
+  if (!/^strata \d+\.\d+\.\d+$/.test(badge.trim())) {
+    throw new Error(
+      `${viewport.name} /: demo badge should carry the engine's own version, got "${badge.trim()}"`,
+    );
+  }
+
+  await page.locator('[data-demo="json"][aria-selected="true"]').waitFor({
+    state: 'visible',
+    timeout: 5_000,
+  });
+
+  // The primitives section is still on the page and still has to hold up; the
+  // hero tiles just no longer scroll to it, so go there the way the reader
+  // does rather than as a side effect of pressing a tile.
+  await scrollSectionToNav(page, 'primitives');
   await assertSectionRuleDocked(page, viewport, 'primitives');
   await assertSectionTitleVisible(
     page,
@@ -127,9 +140,11 @@ async function assertHomepageInferenceWorkbench(page, viewport) {
 }
 
 async function assertHomepageHubSection(page, viewport) {
-  await page.locator('[data-hub-link="true"]').click();
-  await page.waitForFunction(() => window.location.hash === '#hub', undefined, {
-    timeout: 5_000,
+  // The hub tile left the hero when the tiles became live demos: hub needs a
+  // host environment and does not run in an embedded session. Go there the way
+  // a reader now does.
+  await page.evaluate(() => {
+    document.getElementById('hub')?.scrollIntoView();
   });
 
   await assertSectionRuleDocked(page, viewport, 'strata-hub');
@@ -485,7 +500,7 @@ async function assertPage(browser, route, viewport) {
     if (route.path === '/') {
       await assertHomepageSectionBreaks(page, viewport);
       await assertHomepageInferenceWorkbench(page, viewport);
-      await assertHomepagePrimitiveLinks(page, viewport);
+      await assertHomepageLiveDemo(page, viewport);
       await assertHomepageHubSection(page, viewport);
     }
     if (consoleErrors.length > 0 || pageErrors.length > 0) {
