@@ -109,4 +109,50 @@ export const redirects = {
   '/docs/why-strata': '/docs/learn/introduction',
   '/docs/why-strata/comparisons': '/docs/learn/introduction',
   '/docs/why-strata/when-to-use': '/docs/learn/introduction',
+
+  // Retired before the last successful deploy, so these were not in the
+  // sitemap the redirect map was first built from. They were live on main,
+  // which means they were crawled, and they 404ed until this was added.
+  // The v0.12.5 architecture pages, replaced by the V1 whitepapers and then by Learn.
+  '/architecture/boundary-conditions': '/docs/learn/embedded-databases',
+  '/architecture/branch-primitive': '/docs/learn/branches',
+  '/architecture/concurrency-invariants': '/docs/learn/embedded-databases',
+  '/architecture/concurrency-model': '/docs/learn/embedded-databases',
+  '/architecture/crate-structure': '/docs/learn/embedded-databases',
+  '/architecture/durability-modes': '/docs/learn/embedded-databases',
+  '/architecture/error-propagation': '/docs/reference/errors',
+  '/architecture/event-primitive': '/docs/learn/events',
+  '/architecture/json-primitive': '/docs/learn/json',
+  '/architecture/kv-primitive': '/docs/learn/key-value',
+  '/architecture/session-transaction-completeness': '/docs/learn/commits-and-versions',
+  '/architecture/state-primitive': '/docs/learn/working-with-data',
+  '/architecture/storage-engine': '/docs/learn/embedded-databases',
+  '/architecture/vector-primitive': '/docs/learn/vectors',
+  '/architecture/version-semantics': '/docs/learn/commits-and-versions',
+
+  // v0.12.5 guides, from when each data model had a guide rather than a Learn page.
+  '/docs/guides/agents-and-mcp': '/docs/get-started/agents',
+  '/docs/guides/arrow': '/docs/guides',
+  '/docs/guides/branch-bundles': '/docs/learn/branches',
+  '/docs/guides/branch-management': '/docs/learn/branches',
+  '/docs/guides/database-configuration': '/docs/reference',
+  '/docs/guides/event-log': '/docs/learn/events',
+  '/docs/guides/graph': '/docs/learn/graph',
+  '/docs/guides/inference': '/docs/learn/inference',
+  '/docs/guides/json-store': '/docs/learn/json',
+  '/docs/guides/kv-store': '/docs/learn/key-value',
+  '/docs/guides/search': '/docs/learn/vectors',
+  '/docs/guides/sessions-and-transactions': '/docs/learn/commits-and-versions',
+  '/docs/guides/state-cell': '/docs/learn/working-with-data',
+  '/docs/guides/vector-store': '/docs/learn/vectors',
+
+  // Other v0.12.5 pages.
+  '/docs/concepts/transactions': '/docs/learn/commits-and-versions',
+  '/docs/getting-started/for-agents': '/docs/get-started/agents',
+  '/docs/reference/json/create': '/docs/reference/json',
+  '/docs/reference/json/drop': '/docs/reference/json',
+  '/docs/reference/mcp': '/docs/get-started/agents',
+  '/docs/reference/node-sdk': '/docs/get-started/installation',
+  '/docs/reference/python-sdk': '/docs/get-started/python-quickstart',
+  '/pitch': '/internals',
 };
