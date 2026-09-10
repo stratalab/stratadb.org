@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "npm run typecheck && npm run verify:source && astro build && npm run verify:links && npm run verify:transcripts",
+    "build": "npm run typecheck && npm run verify:source && astro build && npm run verify:links && npm run verify:redirects && npm run verify:transcripts",
     "check": "npm run format:check && npm run lint && npm run build && npm run visual:smoke && npm run audit:runtime",
     "typecheck": "astro check",
     "format": "prettier --write \"*.{js,json,md,mjs}\" \".github/**/*.yml\" \"scripts/**/*.mjs\" \"src/**/*.{astro,css,ts,tsx,json}\"",
@@ -33,7 +33,8 @@
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-error-registry.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs"
+    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-error-registry.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs",
+    "verify:redirects": "node scripts/verify-redirects.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import { redirects } from './src/lib/redirects.mjs';
 import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
@@ -6,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   site: 'https://stratadb.org',
+  redirects,
   integrations: [
     sitemap({
       filter: (page) =>

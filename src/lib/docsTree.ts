@@ -41,6 +41,7 @@ export const docsTree: TreeNode[] = [
   },
   {
     label: 'Learn',
+    href: '/docs/learn',
     children: [
       { label: 'Introduction to StrataDB', href: '/docs/learn/introduction' },
       {

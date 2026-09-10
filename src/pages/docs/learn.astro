@@ -1,0 +1,35 @@
+---
+// Learn: the section that explains the database rather than driving it.
+//
+// The only section that had no landing, which also made it the only one whose
+// name in the sidebar did not go anywhere. Contents come from the manifest, so
+// what is written and what is planned stay honest without being listed here.
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import SectionLanding from '../../components/docs/SectionLanding.astro';
+---
+
+<DocsLayout
+  title="Learn"
+  description="How Strata works, what each data model is for, and how branching and history run across all of them."
+  section="Learn"
+  wide
+>
+  <h1>Learn</h1>
+  <p>
+    The reference tells you what a command takes. This section tells you what the database is doing
+    and why, which is the part that decides whether you reach for the right command in the first
+    place.
+  </p>
+  <p>
+    <a href="/docs/learn/introduction">Introduction to StrataDB</a> is the long-form answer to what Strata
+    is. From there, <b>How Strata works</b> covers the machinery that is shared by everything else: branches,
+    commits and versions, time travel, and what it means for a database to be a directory.
+  </p>
+  <p>
+    <b>Working with data</b> takes the five data models one at a time. They live in the same database,
+    under the same history, and
+    <a href="/docs/learn/working-with-data">the tour</a> is the place to start if you are not sure which
+    one you want.
+  </p>
+  <SectionLanding section="Learn" />
+</DocsLayout>
