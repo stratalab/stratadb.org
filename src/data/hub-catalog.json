@@ -21,9 +21,9 @@
       ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "size_bytes": 276334,
-      "downloads": 137,
-      "last_updated": "2026-09-04T20:34:49.83488364Z",
+      "size_bytes": 1143870,
+      "downloads": 144,
+      "last_updated": "2026-09-07T05:59:45.640705132Z",
       "primitives": [
         "json",
         "kv"
@@ -57,7 +57,7 @@
     {
       "slug": "ab-test-results",
       "title": "A/B Test Results",
-      "description": "A synthetic, deterministic A/B test - one experiment, three arms - laid out so each arm lives on its own Strata branch (`control`, `variant-a`, `variant-b`). It exists to demonstrate the cross-branch comparison workflow: the same query, run per branch, is the entire analysis loop.",
+      "description": "A synthetic, deterministic A/B test - one experiment, three arms - laid out so each arm lives on its own Strata branch (`control`, `variant-a`, `variant-b`). It exists to demonstrate the cross-branch comparison workflow: the same query, run per branch, is the entire analysis loop. ## What's in the data",
       "tasks": [
         "ab-testing",
         "analytics",
@@ -71,9 +71,9 @@
       ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "size_bytes": 1249,
-      "downloads": 7,
-      "last_updated": "2026-09-04T20:34:26.90790987Z",
+      "size_bytes": 52582,
+      "downloads": 8,
+      "last_updated": "2026-09-07T05:59:27.936839342Z",
       "primitives": [
         "json",
         "kv"
@@ -126,7 +126,7 @@
       "size_category": "small",
       "size_bytes": 533840,
       "downloads": 6,
-      "last_updated": "2026-09-04T20:34:52.245998661Z",
+      "last_updated": "2026-09-07T05:59:47.111883688Z",
       "primitives": [
         "json",
         "kv"
@@ -161,7 +161,7 @@
       "size_category": "small",
       "size_bytes": 80154,
       "downloads": 4,
-      "last_updated": "2026-09-04T20:34:36.581415293Z",
+      "last_updated": "2026-09-07T05:59:33.53902058Z",
       "primitives": [
         "json",
         "kv"
@@ -194,7 +194,7 @@
       "size_category": "small",
       "size_bytes": 20649,
       "downloads": 4,
-      "last_updated": "2026-09-04T20:34:37.670161843Z",
+      "last_updated": "2026-09-07T05:59:34.179720637Z",
       "primitives": [
         "json",
         "kv"
@@ -220,6 +220,43 @@
       ]
     },
     {
+      "slug": "semver-test-corpus",
+      "title": "SemVer Test Corpus",
+      "description": "108 version strings with their validity verdict under Semantic Versioning 2.0.0, 45 ordered precedence pairs, and a full precedence ranking of every valid string - the edge cases dependency logic gets wrong, as one-read lookups. Plus a second branch that reads the same corpus through the tolerant dialect real tooling actually uses, so `v1.2.3` is one `--branch` flag away from being valid.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "eval",
+        "tooling",
+        "agent-development"
+      ],
+      "tags": [
+        "semver",
+        "versioning",
+        "dependencies",
+        "parsing",
+        "precedence",
+        "edge-cases",
+        "reference"
+      ],
+      "license": "CC0-1.0",
+      "size_category": "small",
+      "size_bytes": 124683,
+      "downloads": 4,
+      "last_updated": "2026-09-07T05:59:38.717558914Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone semver-test-corpus ./semver-test-corpus"
+      ]
+    },
+    {
       "slug": "github-events",
       "title": "GitHub Events",
       "description": "GitHub Events-shaped developer activity - pushes, pull requests, issues, stars, forks - restructured for Strata as an append-only event log grouped into streams by event type, the natural shape for \"what happened, in what order\" questions over developer activity.",
@@ -239,7 +276,7 @@
       "size_category": "small",
       "size_bytes": 528696,
       "downloads": 3,
-      "last_updated": "2026-09-04T20:29:16.327441Z",
+      "last_updated": "2026-09-07T05:54:32.188798Z",
       "primitives": [
         "events",
         "kv"
@@ -265,82 +302,9 @@
       ]
     },
     {
-      "slug": "semver-test-corpus",
-      "title": "SemVer Test Corpus",
-      "description": "108 version strings with their validity verdict under Semantic Versioning 2.0.0, 45 ordered precedence pairs, and a full precedence ranking of every valid string - the edge cases dependency logic gets wrong, as one-read lookups. Plus a second branch that reads the same corpus through the tolerant dialect real tooling actually uses, so `v1.2.3` is one `--branch` flag away from being valid.",
-      "tasks": [
-        "reference-data",
-        "lookup",
-        "eval",
-        "tooling",
-        "agent-development"
-      ],
-      "tags": [
-        "semver",
-        "versioning",
-        "dependencies",
-        "parsing",
-        "precedence",
-        "edge-cases",
-        "reference"
-      ],
-      "license": "CC0-1.0",
-      "size_category": "small",
-      "size_bytes": 61371,
-      "downloads": 3,
-      "last_updated": "2026-09-04T20:34:41.256971814Z",
-      "primitives": [
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "main"
-      ],
-      "includes": [],
-      "quickstart": [
-        "strata clone semver-test-corpus ./semver-test-corpus"
-      ]
-    },
-    {
-      "slug": "spdx-license-reference",
-      "title": "SPDX License Reference",
-      "description": "The SPDX License List - 727 licenses and 84 exceptions, release 3.28.0 - as one-read lookups. What an agent reviewing dependencies, generating a NOTICE file, or gating redistribution needs from the list, without bundling a copy of it or recalling it from memory.",
-      "tasks": [
-        "reference-data",
-        "lookup",
-        "compliance",
-        "tooling"
-      ],
-      "tags": [
-        "spdx",
-        "license",
-        "licensing",
-        "sbom",
-        "compliance",
-        "reference",
-        "lookup"
-      ],
-      "license": "NOASSERTION",
-      "size_category": "small",
-      "size_bytes": 506544,
-      "downloads": 2,
-      "last_updated": "2026-09-04T20:34:42.419365218Z",
-      "primitives": [
-        "json",
-        "kv"
-      ],
-      "branches": [
-        "main"
-      ],
-      "includes": [],
-      "quickstart": [
-        "strata clone spdx-license-reference ./spdx-license-reference"
-      ]
-    },
-    {
       "slug": "agent-memory-with-experiments",
       "title": "Agent Memory, With Experiments",
-      "description": "A fully synthetic, deterministic snapshot of a working AI agent's memory - episodic memories, an append-only event trace, and live working state - pre-forked into three experiment branches that each apply a different memory-retention policy, so you can compare retention strategies against identical starting conditions with a single clone.",
+      "description": "A fully synthetic, deterministic snapshot of a working AI agent's memory - episodic memories, an append-only event trace, and live working state - pre-forked into three experiment branches that each apply a different memory-retention policy, so you can compare retention strategies against identical starting conditions with a single clone. ## What's in the data",
       "tasks": [
         "agent-memory",
         "retrieval",
@@ -355,9 +319,9 @@
       ],
       "license": "CC0-1.0",
       "size_category": "small",
-      "size_bytes": 12817,
-      "downloads": 1,
-      "last_updated": "2026-09-04T20:27:41.274732Z",
+      "size_bytes": 45398,
+      "downloads": 2,
+      "last_updated": "2026-09-07T05:53:23.167928Z",
       "primitives": [
         "events",
         "json",
@@ -395,6 +359,42 @@
       ]
     },
     {
+      "slug": "spdx-license-reference",
+      "title": "SPDX License Reference",
+      "description": "The SPDX License List - 727 licenses and 84 exceptions, release 3.28.0 - as one-read lookups. What an agent reviewing dependencies, generating a NOTICE file, or gating redistribution needs from the list, without bundling a copy of it or recalling it from memory.",
+      "tasks": [
+        "reference-data",
+        "lookup",
+        "compliance",
+        "tooling"
+      ],
+      "tags": [
+        "spdx",
+        "license",
+        "licensing",
+        "sbom",
+        "compliance",
+        "reference",
+        "lookup"
+      ],
+      "license": "NOASSERTION",
+      "size_category": "small",
+      "size_bytes": 506544,
+      "downloads": 2,
+      "last_updated": "2026-09-07T05:59:39.476162369Z",
+      "primitives": [
+        "json",
+        "kv"
+      ],
+      "branches": [
+        "main"
+      ],
+      "includes": [],
+      "quickstart": [
+        "strata clone spdx-license-reference ./spdx-license-reference"
+      ]
+    },
+    {
       "slug": "iso-reference",
       "title": "ISO Reference Codes",
       "description": "Country, currency, and language codes from three ISO standards, compiled directly into Strata as a lookup table - the small, dependency-free reference data an agent developer reaches for constantly and shouldn't have to bundle by hand.",
@@ -415,7 +415,7 @@
       "size_category": "small",
       "size_bytes": 73440,
       "downloads": 1,
-      "last_updated": "2026-09-04T20:34:38.759778405Z",
+      "last_updated": "2026-09-07T05:59:34.849339307Z",
       "primitives": [
         "json",
         "kv"
@@ -440,6 +440,60 @@
       ]
     },
     {
+      "slug": "movielens-100k",
+      "title": "MovieLens 100K",
+      "description": "The GroupLens MovieLens 100K catalog restructured across three Strata primitives - movie metadata as JSON documents, catalog aggregates as KV, and per-movie genre vectors in a similarity-searchable vector collection - so a single clone gives you a recommendation sandbox with no preprocessing step.",
+      "tasks": [
+        "recommendation",
+        "retrieval",
+        "tabular"
+      ],
+      "tags": [
+        "classic",
+        "vectors",
+        "embeddings",
+        "branches"
+      ],
+      "license": "MovieLens-Research",
+      "size_category": "small",
+      "size_bytes": 10267,
+      "downloads": 1,
+      "last_updated": "2026-09-07T05:59:37.1464168Z",
+      "primitives": [
+        "json",
+        "kv",
+        "vectors"
+      ],
+      "branches": [
+        "default",
+        "sample"
+      ],
+      "includes": [
+        {
+          "primitive": "json",
+          "detail": "One document per movie (movie:<id>) with title, year, genres, and rating summary stats."
+        },
+        {
+          "primitive": "vectors",
+          "detail": "Collection movie-genres - 19-dimension cosine vectors, so nearest-neighbor queries work right after clone."
+        },
+        {
+          "primitive": "kv",
+          "detail": "Catalog aggregates under meta: - movie count, genre list, source id."
+        },
+        {
+          "primitive": "branches",
+          "detail": "The sample branch trims the catalog to the ten most-rated movies - the small/full split without duplicating storage."
+        }
+      ],
+      "quickstart": [
+        "strata clone movielens-100k ./ml",
+        "strata ./ml json get movie:1 '$'",
+        "strata ./ml vector query movie-genres '[0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]' --json",
+        "strata ./ml --branch sample json list"
+      ]
+    },
+    {
       "slug": "strata-bench-results",
       "title": "Strata Benchmark Results",
       "description": "Thirty real benchmark runs from Strata's own performance suite, replayed as an event log - a first-party history of how the engine's latency, scaling, and workload numbers moved across roughly two months of development, and a worked example of storing run history as events rather than a flat CSV.",
@@ -459,7 +513,7 @@
       "size_category": "small",
       "size_bytes": 109410,
       "downloads": 1,
-      "last_updated": "2026-09-04T20:30:59.871497Z",
+      "last_updated": "2026-09-07T05:56:02.940044Z",
       "primitives": [
         "events",
         "json",
@@ -507,7 +561,7 @@
       "size_category": "small",
       "size_bytes": 87945,
       "downloads": 1,
-      "last_updated": "2026-09-04T20:34:51.175799695Z",
+      "last_updated": "2026-09-07T05:59:46.399006628Z",
       "primitives": [
         "json",
         "kv"
@@ -532,60 +586,6 @@
       ]
     },
     {
-      "slug": "movielens-100k",
-      "title": "MovieLens 100K",
-      "description": "The GroupLens MovieLens 100K catalog restructured across three Strata primitives - movie metadata as JSON documents, catalog aggregates as KV, and per-movie genre vectors in a similarity-searchable vector collection - so a single clone gives you a recommendation sandbox with no preprocessing step.",
-      "tasks": [
-        "recommendation",
-        "retrieval",
-        "tabular"
-      ],
-      "tags": [
-        "classic",
-        "vectors",
-        "embeddings",
-        "branches"
-      ],
-      "license": "MovieLens-Research",
-      "size_category": "small",
-      "size_bytes": 6577,
-      "downloads": 0,
-      "last_updated": "2026-09-04T20:34:40.120651574Z",
-      "primitives": [
-        "json",
-        "kv",
-        "vectors"
-      ],
-      "branches": [
-        "default",
-        "sample"
-      ],
-      "includes": [
-        {
-          "primitive": "json",
-          "detail": "One document per movie (movie:<id>) with title, year, genres, and rating summary stats."
-        },
-        {
-          "primitive": "vectors",
-          "detail": "Collection movie-genres - 19-dimension cosine vectors, so nearest-neighbor queries work right after clone."
-        },
-        {
-          "primitive": "kv",
-          "detail": "Catalog aggregates under meta: - movie count, genre list, source id."
-        },
-        {
-          "primitive": "branches",
-          "detail": "The sample branch trims the catalog to the ten most-rated movies - the small/full split without duplicating storage."
-        }
-      ],
-      "quickstart": [
-        "strata clone movielens-100k ./ml",
-        "strata ./ml json get movie:1 '$'",
-        "strata ./ml vector query movie-genres '[0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]' --json",
-        "strata ./ml --branch sample json list"
-      ]
-    },
-    {
       "slug": "stackoverflow",
       "title": "Stack Overflow Q&A",
       "description": "Stack Overflow questions and answers restructured for Strata as JSON documents with their comment threads embedded inline, so a single `json get` returns a full discussion - no join against a separate comments table.",
@@ -605,7 +605,7 @@
       "size_category": "small",
       "size_bytes": 830470,
       "downloads": 0,
-      "last_updated": "2026-09-04T20:34:43.48179225Z",
+      "last_updated": "2026-09-07T05:59:40.183063481Z",
       "primitives": [
         "json",
         "kv"
