@@ -33,6 +33,11 @@ const REQUIRED = [
       'hero-demo-out',
       '/playground/pkg/strata_wasm.js',
       'executeCli',
+      // The prompt shares the tiles' session, which is the point: a reader can
+      // carry on from wherever a script left the database.
+      'data-demo-input',
+      'data-demo-form',
+      'href="/playground"',
       "key: 'kv'",
       "key: 'event'",
       "key: 'json'",

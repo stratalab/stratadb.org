@@ -263,6 +263,26 @@ const dataModel = [
           </span>
           <span class="hero-demo-title">strata</span>
           <span class="hero-demo-badge" data-demo-status> in your browser </span>
+          <a
+            class="hero-demo-open"
+            href="/playground"
+            aria-label="Open this session in the full playground"
+            title="Open the full playground"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M14 4h6v6"></path>
+              <path d="M20 4 11 13"></path>
+              <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path>
+            </svg>
+          </a>
         </div>
         <pre
           id="hero-demo-out"
@@ -270,7 +290,24 @@ const dataModel = [
           role="tabpanel"
           tabindex="0"
           aria-live="polite"
-          aria-label="Demo output"><span class="hero-demo-rest">Pick a data model above. It runs here, on the real engine, in this tab.</span></pre>
+          aria-label="Demo output"><span class="hero-demo-rest">Pick a data model above, or type a command. It runs here, on the real engine, in this tab.</span></pre>
+        <form class="hero-demo-form" data-demo-form>
+          <label class="sr-only" for="hero-demo-input">Strata command</label>
+          <span class="hero-demo-prompt" data-demo-prompt aria-hidden="true"
+            >strata:default &rsaquo;</span
+          >
+          <input
+            id="hero-demo-input"
+            class="hero-demo-input"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            placeholder="kv get portfolio.cash"
+            data-demo-input
+          />
+        </form>
       </div>
     </div>
   </div>
@@ -330,6 +367,59 @@ const dataModel = [
     text-align: left;
     scrollbar-width: thin;
   }
+  .hero-demo-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: -0.375rem;
+    border-radius: var(--radius-control);
+    color: var(--color-ink-low);
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .hero-demo-open:hover {
+    color: var(--color-ink-hi);
+    background: var(--color-panel);
+  }
+  .hero-demo-open svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  .hero-demo-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1.25rem;
+    height: 3rem;
+    border-top: 1px solid var(--color-line);
+    background: var(--color-raised);
+  }
+  .hero-demo-prompt {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.9375rem;
+    color: var(--color-terracotta-400);
+    white-space: nowrap;
+  }
+  .hero-demo-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    padding: 0;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.9375rem;
+    color: var(--color-ink-hi);
+  }
+  .hero-demo-input::placeholder {
+    color: var(--color-ink-low);
+  }
+  .hero-demo-form:focus-within {
+    background: var(--color-panel);
+  }
   .hero-demo-rest {
     color: var(--color-ink-low);
   }
@@ -348,7 +438,7 @@ const dataModel = [
   }
   @media (max-width: 640px) {
     .hero-demo-out {
-      height: 15rem;
+      height: 13rem;
       font-size: 0.875rem;
     }
   }
@@ -637,12 +727,34 @@ const dataModel = [
     type Engine = {
       StrataSession: new () => {
         executeCli: (line: string) => string;
+        readonly branch: string;
+        setBranch: (branch: string) => void;
         close?: () => void;
       };
       engineVersion: () => string;
     };
     let enginePromise: Promise<Engine> | null = null;
     let runToken = 0;
+    // The session outlives the script. A tile leaves a database behind with
+    // real state in it, and the prompt below carries on in that same session,
+    // which is the whole reason to run the engine rather than replay a
+    // transcript: `kv get portfolio.cash` still answers 10 afterwards.
+    type Session = InstanceType<Engine['StrataSession']>;
+    let session: Session | null = null;
+
+    const form = document.querySelector<HTMLFormElement>('[data-demo-form]');
+    const input = document.querySelector<HTMLInputElement>('[data-demo-input]');
+    const prompt = document.querySelector<HTMLElement>('[data-demo-prompt]');
+    const past: string[] = [];
+    let pastAt = 0;
+
+    // The prompt shows the branch the session is actually on, so the reader
+    // can see `--branch risky` land somewhere real.
+    const syncPrompt = () => {
+      if (!prompt) return;
+      const branch = session?.branch ?? 'default';
+      prompt.textContent = `strata:${branch} \u203a`;
+    };
 
     const write = (text: string, cls?: string) => {
       const span = document.createElement('span');
@@ -714,8 +826,10 @@ const dataModel = [
       }
       if (token !== runToken) return;
 
-      const session = new mod.StrataSession();
+      session?.close?.();
+      session = new mod.StrataSession();
       if (status) status.textContent = 'strata ' + mod.engineVersion();
+      syncPrompt();
 
       for (const line of script) {
         if (token !== runToken) break;
@@ -733,8 +847,88 @@ const dataModel = [
         await pause(300);
       }
 
-      if (token === runToken) session.close?.();
+      if (token === runToken) {
+        syncPrompt();
+        if (input) input.disabled = false;
+      }
     };
+
+    const submit = async (line: string) => {
+      runToken++; // a typed command outranks a script still streaming
+      const rest = demoOut.querySelector('.hero-demo-rest');
+      if (rest) demoOut.textContent = '';
+
+      write('$ ' + line + '\n', 'hero-demo-cmd');
+      if (!session) {
+        if (status) status.textContent = 'starting the engine';
+        try {
+          const mod = await loadEngine();
+          session = new mod.StrataSession();
+          if (status) status.textContent = 'strata ' + mod.engineVersion();
+        } catch (error) {
+          if (status) status.textContent = 'engine unavailable';
+          write(
+            'Could not load the Strata engine: ' +
+              ((error as Error)?.message ?? String(error)) +
+              '\n',
+            'hero-demo-err',
+          );
+          return;
+        }
+      }
+
+      const useBranch = /^use\s+(\S+)\s*$/.exec(line);
+      if (useBranch) {
+        try {
+          session.setBranch(useBranch[1]);
+          write('now on ' + useBranch[1] + '\n', 'hero-demo-res');
+        } catch (error) {
+          write(String((error as Error)?.message ?? error) + '\n', 'hero-demo-err');
+        }
+        syncPrompt();
+        return;
+      }
+
+      let output: string;
+      try {
+        output = session.executeCli(line);
+      } catch (error) {
+        output = String((error as Error)?.message ?? error);
+      }
+      const body = (output ?? '').toString().replace(/\s+$/, '');
+      if (body) write(body + '\n', 'hero-demo-res');
+      syncPrompt();
+    };
+
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const line = input?.value.trim();
+      if (!line || !input) return;
+      past.push(line);
+      pastAt = past.length;
+      input.value = '';
+      void submit(line);
+    });
+
+    // Up and down walk what you have already run, as a shell would.
+    input?.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp' && pastAt > 0) {
+        pastAt--;
+        input.value = past[pastAt];
+        event.preventDefault();
+      } else if (event.key === 'ArrowDown') {
+        if (pastAt < past.length - 1) {
+          pastAt++;
+          input.value = past[pastAt];
+        } else {
+          pastAt = past.length;
+          input.value = '';
+        }
+        event.preventDefault();
+      }
+    });
+
+    syncPrompt();
 
     for (const tab of demoTabs) {
       tab.addEventListener('click', () => void run(tab));
