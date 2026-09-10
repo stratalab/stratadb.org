@@ -10,7 +10,7 @@ const EXTERNAL_BASE_URL = process.env.VISUAL_BASE_URL;
 const BASE_URL = EXTERNAL_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 const routes = [
-  { path: '/', h1: /embedded database/i },
+  { path: '/', h1: /database for vibecoders/i },
   // Docs rebuild: /docs is the zero-state route. Restore the section rows
   // (reference, guides, ...) as their pages come back.
   { path: '/docs/', h1: /^documentation$/i },

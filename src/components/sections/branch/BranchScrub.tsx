@@ -33,15 +33,12 @@ const ACTS = [
   { verb: 'Promote', line: 'Merge the result when it is right. Discard it when it is not.' },
 ];
 
-const USES = ['agent runs', 'migrations', 'what-if changes', 'review before merge'];
-
 // The section head lives inside the island (04 §3 v5) so it can ride the pin.
 // The feature name sits above the H2; the SectionRule remains the register mark.
 const HEAD = {
   eyebrow: 'Branching',
   h2: 'Branch the whole database.',
-  intro:
-    'Test agent writes, migrations, and risky data changes away from default. Compare the branch, preview the merge, and promote only what should land.',
+  intro: 'Compare the branch, preview the merge, and promote only what should land.',
 };
 
 // The accumulated session (left terminal). Lines flash in with their act,
@@ -110,7 +107,7 @@ function JsonCard({
   const cool = kind === 'main';
   return (
     <div
-      className="w-[28rem] max-w-[94vw] overflow-hidden rounded-(--radius-frame)"
+      className="w-[clamp(17rem,24vw,27rem)] max-w-[94vw] overflow-hidden rounded-(--radius-frame)"
       style={{
         background: cool ? 'var(--color-branch-main-surface)' : 'var(--color-branch-risky-surface)',
         border: `1px solid ${cool ? COOL(0.28) : EMBER(0.32)}`,
@@ -118,16 +115,20 @@ function JsonCard({
       }}
     >
       <div
-        className="flex h-11 items-center gap-2.5 px-5"
+        className="flex h-11 items-center gap-2 px-4"
         style={{ borderBottom: `1px solid ${cool ? COOL(0.18) : EMBER(0.2)}` }}
       >
         <span
-          className="h-2.5 w-2.5 rounded-full"
+          className="h-2.5 w-2.5 shrink-0 rounded-full"
           style={{ background: cool ? 'var(--color-strata-kv)' : 'var(--color-terracotta-500)' }}
           aria-hidden="true"
         />
-        <span className="font-mono text-mono-body text-ink-hi">{cool ? 'default' : 'risky'}</span>
-        <span className="ml-auto font-mono text-mono-sm text-ink-low">json · portfolio</span>
+        <span className="whitespace-nowrap font-mono text-mono-body text-ink-hi">
+          {cool ? 'default' : 'risky'}
+        </span>
+        <span className="ml-auto whitespace-nowrap font-mono text-mono-sm text-ink-low">
+          json · portfolio
+        </span>
         {chip !== undefined && (
           <motion.span
             className="ml-2 rounded-full border border-line px-2.5 py-0.5 font-mono text-mono-sm text-ok"
@@ -391,21 +392,6 @@ function Stage({ p, staticScene }: { p?: MotionValue<number>; staticScene?: numb
 }
 
 // Stacked head for in-flow layouts (mobile, reduced motion).
-function UseCases({ className = '' }: { className?: string }) {
-  return (
-    <div className={`flex flex-wrap gap-2.5 ${className}`} aria-label="Branch use cases">
-      {USES.map((use) => (
-        <span
-          key={use}
-          className="rounded-full border border-line bg-panel/80 px-3 py-1 font-mono text-mono-sm text-ink-mid"
-        >
-          {use}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function FlowHead() {
   return (
     <div className="max-w-[42rem]">
@@ -417,7 +403,6 @@ function FlowHead() {
       </p>
       <h2 className="text-display text-balance text-ink-hi">{HEAD.h2}</h2>
       <p className="mt-6 text-body-lg text-ink-mid">{HEAD.intro}</p>
-      <UseCases className="mt-7" />
     </div>
   );
 }
@@ -497,9 +482,12 @@ function ActHeader({ active }: { active: number }) {
   const act = ACTS[active];
   return (
     <div>
+      {/* The verb alone. The stage beside it is already showing what the step
+          does, so the sentence under it was saying the same thing twice. The
+          mobile carousel below keeps its line, because there is no stage there
+          to carry the meaning. */}
       <p className="text-title font-semibold text-ink-hi">{act.verb}</p>
-      <p className="mt-2 text-body-lg text-ink-mid">{act.line}</p>
-      <div className="mt-4 flex gap-2.5" aria-hidden="true">
+      <div className="mt-5 flex gap-2.5" aria-hidden="true">
         {ACTS.map((_, i) => (
           <span
             key={i}
@@ -597,7 +585,6 @@ export default function BranchScrub() {
               </p>
               <h2 className="text-title text-balance text-ink-hi xl:text-display">{HEAD.h2}</h2>
               <p className="mt-5 max-w-[44rem] text-body-lg text-ink-mid">{HEAD.intro}</p>
-              <UseCases className="mt-6" />
             </div>
             <div className="mx-auto mt-8 grid w-full max-w-[96rem] items-center gap-12 px-12 lg:grid-cols-12 xl:gap-16">
               <div className="flex flex-col justify-center lg:col-span-4">

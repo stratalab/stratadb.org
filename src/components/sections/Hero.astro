@@ -144,8 +144,11 @@ const dataModel = [
     <div class="mb-14 text-center">
       <Badge href="/changelog" class="mb-8">Research preview · v{release.version}</Badge>
       <Heading level={1} size="display-xl" class="mx-auto max-w-[66rem]"
-        >An embedded database you can fork</Heading
+        >The database for vibecoders</Heading
       >
+      <p class="mx-auto mt-6 max-w-[40rem] text-body-lg text-ink-mid">
+        Zero setup. Zero infrastructure. Just build.
+      </p>
 
       <!-- The acquisition control: install is the primary motion; the browser
            playground stays in navigation as a secondary try-before-install path. -->
@@ -163,7 +166,7 @@ const dataModel = [
         <button
           type="button"
           class="copy-chip group inline-flex items-center gap-2.5 rounded-full border border-line bg-panel/90 px-4 py-1.5 font-mono text-mono-sm text-ink-mid transition-colors duration-200 hover:border-line-hover hover:text-ink-hi"
-          data-copy="Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/getting-started/quickstart-agents.md - report the verification output when done."
+          data-copy="Set up StrataDB in this project by following the instructions at https://stratadb.org/docs/get-started/agents - report the verification output when done."
           aria-label="Copy setup instructions for your AI agent"
         >
           <span>Set up with your agent</span>
@@ -227,19 +230,6 @@ const dataModel = [
 
     <div class="mx-auto max-w-[56rem]">
       <ForkingTerminal client:visible />
-    </div>
-
-    <div class="mx-auto mt-14 max-w-[48rem] border-t border-line pt-8 text-center">
-      <a
-        href="/docs"
-        class="group inline-flex items-center justify-center gap-3 text-body-lg font-medium text-ink-hi transition-colors duration-200 hover:text-terracotta-300"
-      >
-        <span>Why does AI application state need a different database?</span>
-        <span
-          class="translate-y-px text-terracotta-500 transition-transform duration-200 group-hover:translate-x-1"
-          aria-hidden="true">&rarr;</span
-        >
-      </a>
     </div>
   </div>
 </section>

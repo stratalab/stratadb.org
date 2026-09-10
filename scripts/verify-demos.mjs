@@ -14,9 +14,13 @@ const REQUIRED = [
     file: 'src/components/sections/Hero.astro',
     strings: [
       'id="hero"',
-      'An embedded database you can fork',
-      'Why does AI application state need a different database?',
-      'href="/docs"',
+      'The database for vibecoders',
+      'Zero setup. Zero infrastructure. Just build.',
+      // The agent door's target. It pointed at the v0.12.5 path
+      // /docs/getting-started/quickstart-agents.md, which 404ed: that page is
+      // hand-built rather than a content page, so it has no markdown twin at
+      // either the old path or the new one. Pinned so it cannot rot again.
+      'https://stratadb.org/docs/get-started/agents',
       '#primitive-kv',
       '#primitive-event',
       '#primitive-json',
