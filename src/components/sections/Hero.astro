@@ -140,9 +140,9 @@ const dataModel = [
   >
   </div>
 
-  <div class="relative mx-auto w-full max-w-[70rem] px-6 pb-24 pt-20 max-[480px]:px-4 md:pt-28">
-    <div class="mb-14 text-center">
-      <Badge href="/changelog" class="mb-8">Research preview · v{release.version}</Badge>
+  <div class="relative mx-auto w-full max-w-[70rem] px-6 pb-20 pt-12 max-[480px]:px-4 md:pt-16">
+    <div class="mb-8 text-center">
+      <Badge href="/changelog" class="mb-6">Research preview · v{release.version}</Badge>
       <Heading level={1} size="display-xl" class="mx-auto max-w-[66rem]"
         >The database for vibecoders</Heading
       >
@@ -152,7 +152,7 @@ const dataModel = [
 
       <!-- The acquisition control: install is the primary motion; the browser
            playground stays in navigation as a secondary try-before-install path. -->
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button href="#install" variant="primary">Install Strata</Button>
         <CopyChip
           value="curl -fsSL https://stratadb.org/install.sh | sh"
@@ -193,7 +193,7 @@ const dataModel = [
       </p>
 
       <nav
-        class="mt-12 flex flex-wrap items-start justify-center gap-x-3 gap-y-4"
+        class="mt-8 flex flex-wrap items-start justify-center gap-x-3 gap-y-4"
         aria-label="Core capabilities"
       >
         {
