@@ -2,7 +2,7 @@
 title: 'Graph'
 description: 'Nodes, edges and traversal, with an ontology you can leave loose and freeze when you know the shape.'
 section: 'Learn'
-source: 'strata-core@v1.2.1'
+source: 'strata-core@v1.2.2'
 ---
 
 Graph is for data where the relationships are the thing you query. Use it when
@@ -30,8 +30,13 @@ strata graph add-node social alice --properties '{"age":30}'
 strata graph get-edge social alice knows bob
 ```
 
-```json
-{"src":"alice","edge_type":"knows","dst":"bob","weight":1.0,"graph":"social", ...}
+```
+src        alice
+edge_type  knows
+dst        bob
+graph      social
+weight     1.0
+version    9
 ```
 
 `graph meta` reports the counts:
@@ -40,8 +45,12 @@ strata graph get-edge social alice knows bob
 strata graph meta social
 ```
 
-```json
-{"graph":"social","node_count":4,"edge_count":3, ...}
+```
+graph            social
+node_count       5
+edge_count       3
+created_version  3
+updated_version  11
 ```
 
 ## Walking the graph
@@ -60,8 +69,11 @@ For more than one hop there is a bounded breadth-first traversal:
 strata graph bfs social alice
 ```
 
-```json
-{"depths":{"alice":0,"bob":1,"carol":2}, "edges":[...]}
+```
+NODE   DEPTH
+alice      0
+bob        1
+carol      2
 ```
 
 Depths come back keyed by node, which is usually what you wanted rather than the
@@ -82,12 +94,20 @@ strata graph cdlp social
 
 Weakly connected components, PageRank, single-source shortest paths, local
 clustering coefficients, and community detection by label propagation. `wcc`
-reports a component per node and a count, which is the quickest way to find out
-whether your graph is one thing or several:
+names the component each node belongs to, which is the quickest way to find out
+whether your graph is one thing or several. Two component names here, so two
+islands:
 
-```json
-{"component_count":2,"components":{"alice":"alice","bob":"alice", ...}}
 ```
+NODE   COMPONENT
+alice  alice
+bob    alice
+carol  alice
+dave   dave
+erin   dave
+```
+
+The count itself is in `--json` as `component_count`, not in the table.
 
 ## The ontology is optional until you freeze it
 

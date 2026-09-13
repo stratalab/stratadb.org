@@ -2,7 +2,7 @@
 title: 'Quickstart'
 description: 'Create a database, fork it, change the fork, merge it back, and read the state you had before. About ten minutes.'
 section: 'Get Started'
-source: 'strata-core@v1.2.1'
+source: 'strata-core@v1.2.2'
 ---
 
 This is the whole shape of Strata in ten minutes: a database that is a
@@ -19,7 +19,7 @@ strata ./quickstart kv put greeting hello
 ```
 
 ```
-created greeting applied=true
+created greeting
 ```
 
 ```console
@@ -68,8 +68,8 @@ line of database state, covering every model at once.
 strata ./quickstart branch fork default work
 ```
 
-```json
-{"name":"work","parent":{"name":"default","fork_version":4}, ...}
+```
+forked work from default
 ```
 
 Forking copies nothing. It records the version you forked at and diverges from
@@ -111,19 +111,12 @@ strata ./quickstart json get user:ada '$.role'
 strata ./quickstart branch diff default work
 ```
 
-```json
-{
-  "branch_a": "default",
-  "branch_b": "work",
-  "spaces": [
-    {
-      "capability": "json",
-      "added": [],
-      "modified": [{ "identity": "user:ada", "version": 8 }],
-      "removed": []
-    }
-  ]
-}
+```
+branch_a  default
+branch_b  work
+
+SPACE    CAPABILITY  CHANGE    IDENTITY  VERSION
+default  json        modified  user:ada        8
 ```
 
 `branch preview` is the dry run. It finds conflicts before you commit to
@@ -133,9 +126,14 @@ anything, and it tells you which models the merge covers.
 strata ./quickstart branch preview work default
 ```
 
-```json
-{"branch_point":4,"conflicts":[],
- "capabilities_covered":["key_value","json","vector"], ...}
+```
+source                    work
+target                    default
+strategy                  strict
+branch_point              4
+capabilities_covered      kv json vector
+capabilities_unsupported  vector_collection event graph_metadata graph_node graph_edge graph_ontology
+conflicts                 -
 ```
 
 Note what that list leaves out. Merging carries key-value, JSON and vector data;
@@ -169,13 +167,14 @@ strata ./quickstart kv put greeting goodbye
 strata ./quickstart kv history greeting
 ```
 
-```json
-{"committed_at":"2026-09-07 01:23:54.020579 -05:00","value":"goodbye","version":15,"timestamp":15}
-{"committed_at":"2026-09-07 01:23:28.960831 -05:00","value":"hello","version":3,"timestamp":3}
+```
+VERSION  COMMITTED_AT                    VALUE
+     15  2026-09-13 06:52:24.548704 UTC  goodbye
+      3  2026-09-13 06:52:16.724642 UTC  hello
 ```
 
 Read at a point on the commit timeline with `--as-of`, taking the number from
-the `timestamp` field:
+the `VERSION` column:
 
 ```console
 strata ./quickstart kv get greeting --as-of 3
@@ -188,7 +187,7 @@ hello
 Or read at a wall-clock instant with `--as-of-time`:
 
 ```console
-strata ./quickstart kv get greeting --as-of-time '2026-09-07 01:23:40'
+strata ./quickstart kv get greeting --as-of-time '2026-09-13 06:52:20Z'
 ```
 
 ```

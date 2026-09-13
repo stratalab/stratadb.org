@@ -2,7 +2,7 @@
 title: 'Vectors'
 description: 'Embeddings searched by similarity: collections, metadata filters, and the upsert behaviour to watch.'
 section: 'Learn'
-source: 'strata-core@v1.2.1'
+source: 'strata-core@v1.2.2'
 ---
 
 Vectors are for finding things that are _like_ a query rather than equal to it.
@@ -17,8 +17,9 @@ strata vector query docs 1,0,0
 ```
 
 ```
-a	1.0
-b	0.9938837289810181
+KEY  SCORE     METADATA
+a         1.0  -
+b    0.993884  -
 ```
 
 Results come back ranked, closest first, as key and score.
@@ -32,8 +33,8 @@ name, a dimension, and a metric:
 strata vector collection create docs 3 --metric cosine
 ```
 
-```json
-{ "count": 0, "dimension": 3, "metric": "cosine", "name": "docs" }
+```
+created collection docs (3 dimensions, cosine)
 ```
 
 The metric is `cosine` by default, with `euclidean` and `dot-product` available.
@@ -94,11 +95,15 @@ strata vector upsert docs a 0.5,0.5,0
 strata vector get docs a
 ```
 
-```json
-{"data":{"embedding":[0.5,0.5,0.0]}, ...}
+```
+key              a
+vector_revision  2
+version          5
+embedding        [0.5,0.5,0.0]
+metadata         -
 ```
 
-The metadata is gone, and the command reported success.
+The metadata column reads `-`: it is gone, and the command reported success.
 
 Meanwhile `update-metadata` **merges**, leaving fields you did not mention
 intact:
@@ -107,8 +112,12 @@ intact:
 strata vector update-metadata docs a '{"lang":"de"}'
 ```
 
-```json
-{"data":{"embedding":[...],"metadata":{"lang":"de","tier":1}}, ...}
+```
+key              a
+vector_revision  2
+version          5
+embedding        [1.0,0.0,0.0]
+metadata         {"lang":"de","tier":1}
 ```
 
 So one half of the record patches and the other half replaces everything, and

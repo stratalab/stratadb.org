@@ -9,17 +9,37 @@
 // puts them in a ```console fence where the prompt is the convention. That is
 // still right for the markdown twins, so the stripping happens here at render
 // rather than in the staged data.
+//
+// Since 1.2.2 those examples are transcripts, not invocations: the prompt marks
+// the command and the lines under it are what the binary printed back. That
+// prompt is now the only thing separating a command from its result, so it is
+// what decides how a line is rendered. Without it `created setting` reads as
+// something you type.
 
 /** A shell prompt at the head of a line, as the bundle writes it. */
 const PROMPT = /^\s*\$ /;
 
-/** CLI example, one command per line, ready to paste. */
+/**
+ * The CLI example as a transcript: prompt stripped, output kept in place.
+ *
+ * Rendering needs the output lines; copying must not include them. Both read
+ * this, so the distinction is carried in the markup rather than by parsing
+ * twice.
+ */
 export function cliExampleText(cli: string | undefined): string {
   if (!cli) return '';
   return cli
     .split('\n')
     .map((line) => line.replace(PROMPT, ''))
     .join('\n');
+}
+
+/** Which lines of a CLI example the binary printed back. */
+export function cliOutputMask(cli: string | undefined): boolean[] {
+  if (!cli) return [];
+  const lines = cli.split('\n');
+  if (!lines.some((line) => PROMPT.test(line))) return lines.map(() => false);
+  return lines.map((line) => !PROMPT.test(line));
 }
 
 /** Python example, one statement per line, ready to paste. */
@@ -44,10 +64,13 @@ const escapeHtml = (value: string) =>
  * formatter adds around an expression inside a <pre> is preserved, and this
  * repo has shipped that bug three times.
  */
-export function exampleHtml(text: string): string {
+export function exampleHtml(text: string, outputMask: boolean[] = []): string {
   if (!text) return '';
   return text
     .split('\n')
-    .map((line) => `<span class="cmd-line">${escapeHtml(line)}</span>`)
+    .map(
+      (line, i) =>
+        `<span class="cmd-line${outputMask[i] ? ' cmd-out' : ''}">${escapeHtml(line)}</span>`,
+    )
     .join('');
 }

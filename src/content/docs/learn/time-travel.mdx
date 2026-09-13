@@ -2,7 +2,7 @@
 title: 'Time travel'
 description: 'Read the database as it was, and branch from a point in the past, without restoring anything.'
 section: 'Learn'
-source: 'strata-core@v1.2.1'
+source: 'strata-core@v1.2.2'
 ---
 
 import Figure from '../../../components/docs/Figure.astro';
@@ -107,8 +107,9 @@ anything. With it, every page answers as of the same instant.
 History gives you three ways to name a moment, and they are not
 interchangeable:
 
-```json
-{ "version": 38, "timestamp": 88, "committed_at": "2026-09-07 00:09:21.577135 -05:00" }
+```
+VERSION  TIMESTAMP  COMMITTED_AT
+     38         88  2026-09-13 06:52:24.548704 UTC
 ```
 
 `--as-of` takes the **timestamp**: a position on the logical commit timeline, a

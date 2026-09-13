@@ -1,0 +1,165 @@
+---
+// Reference / CLI / Global options.
+//
+// Written rather than generated: these flags are the shape of the binary, not
+// a command in the catalog, so nothing in the release tarball describes them.
+//
+// It lives here as a page rather than in src/content/docs/reference/, because
+// the presence of that directory is what switches generated-reference staging
+// on in scripts/fetch-docs.mjs. Creating one file there stages 148 pages that
+// collide with the routes under src/pages/docs/reference/.
+//
+// The output-format half is the part that matters most: 1.2.2 gave the default
+// mode to people (strata-core issue 3306) and made --raw return bytes, and the
+// site had nowhere that said so.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="Global options"
+  description="The flags every command accepts: which database to open, how durable a commit is, who else may open it, and which of the three output formats you get."
+  section="Reference"
+>
+  <h1>Global options</h1>
+  <p>
+    These flags sit before the command and apply to all of them. <code
+      >strata --json ./db kv get k</code
+    > and <code>strata ./db --json kv get k</code> are the same line.
+  </p>
+  <h2>Choosing the database</h2>
+  <pre
+    class="not-prose gopt-console"><code>strata ./mydb kv get k
+strata --db ./mydb kv get k
+strata --cache kv get k</code></pre>
+  <p>The positional path and <code>--db</code> are the same thing and cannot be combined.</p>
+  <p>
+    <code>--cache</code> opens an in-memory database instead: nothing is written to disk and nothing survives
+    the process, which is what you want in a test.
+  </p>
+  <p>
+    <code>STRATA_DB</code> names a default path, so a shell that exports it can drop the argument entirely.
+  </p>
+  <h2>Output formats</h2>
+  <p>Three formats, and the one you get when you ask for nothing is the one meant for a person.</p>
+  <table>
+    <thead><tr><th>flag</th><th>for</th><th>shape</th></tr></thead><tbody
+      ><tr
+        ><td><code>--human</code></td><td>a reader</td><td>lines, tables and one-line receipts</td
+        ></tr
+      ><tr
+        ><td><code>--json</code></td><td>a program</td><td
+          >one compact JSON document, enveloped and typed</td
+        ></tr
+      ><tr
+        ><td><code>--raw</code></td><td>a shell</td><td
+          >bare values, tab-separated, no header or summary</td
+        ></tr
+      ></tbody
+    >
+  </table>
+  <p>The same read in each:</p>
+  <pre
+    class="not-prose gopt-console"><code>strata ./db kv get greeting
+strata --raw ./db kv get greeting
+strata --json ./db kv get greeting</code></pre>
+  <pre
+    class="not-prose gopt-out"><code>hello
+hello
+&#123;&quot;data&quot;:&#123;&quot;found&quot;:true,&quot;value&quot;:&#123;&quot;timestamp&quot;:3,&quot;value&quot;:&quot;aGVsbG8=&quot;,&quot;version&quot;:3&#125;&#125;,&quot;type&quot;:&quot;kv_versioned_value&quot;&#125;</code></pre>
+  <p>
+    A list is where they diverge most. <code>--human</code> draws a table, <code>--raw</code> drops the
+    header so <code>cut</code> and <code>awk</code> work:
+  </p>
+  <pre class="not-prose gopt-console"><code>strata ./db kv scan --limit 2</code></pre>
+  <pre
+    class="not-prose gopt-out"><code>KEY  VERSION  VALUE
+a          3  1
+b          4  2</code></pre>
+  <pre class="not-prose gopt-console"><code>strata --raw ./db kv scan --limit 2</code></pre>
+  <pre class="not-prose gopt-out"><code>a	3	1
+b	4	2</code></pre>
+  <p>
+    A write is a receipt in <code>--human</code>, its identity alone in <code>--raw</code>, and the
+    full commit record in <code>--json</code>:
+  </p>
+  <pre
+    class="not-prose gopt-console"><code>strata ./db kv put c 3
+strata --raw ./db kv put d 4</code></pre>
+  <pre class="not-prose gopt-out"><code>created c
+d</code></pre>
+  <p>
+    <code>--human</code> is worth naming explicitly in one case: a line inside a session that was opened
+    with <code>--json</code> or <code>--raw</code> inherits that session's format, and
+  </p>
+  <p><code>--human</code> is how you get a reader's lines back for one command.</p>
+  <p>
+    <code>--json</code> is the stable contract. It is the format to parse, and the only one whose shape
+    is promised across releases.
+  </p>
+  <h2>Values that are not text</h2>
+  <p><code>--human</code> marks an encoded value rather than handing you something ambiguous:</p>
+  <pre class="not-prose gopt-console"><code>strata ./db kv get raw</code></pre>
+  <pre class="not-prose gopt-out"><code>base64:AAH/</code></pre>
+  <p>
+    The <code>base64:</code> prefix means a value that happens to read as <code>AAH/</code> cannot be
+    confused with one that was encoded. For the bytes themselves, ask <code>--raw</code>, which
+    writes them exactly and adds <strong>no trailing newline</strong>, so the file round trips back
+    through <code>kv put --file</code>:
+  </p>
+  <pre
+    class="not-prose gopt-console"><code>strata --raw ./db kv get raw &gt; payload.bin</code></pre>
+  <p>
+    Inside a session or a pipe each answer still ends with a line break. That separator belongs to
+    the stream, not to the value.
+  </p>
+  <h2>Durability and sharing</h2>
+  <pre
+    class="not-prose gopt-console"><code>strata --durability always ./db kv put k v
+strata --ipc off ./db kv get k
+strata --read-only ./db kv get k</code></pre>
+  <p>
+    <code>--durability</code> is <code>standard</code> by default, which acknowledges from a buffered
+    write-ahead log and syncs at close or at a threshold. <code>always</code> syncs every commit before
+    acknowledging it.
+  </p>
+  <p>
+    <code>--ipc</code> decides how a durable database is shared. <code>host</code>, the default,
+    wins the lock and serves a socket other processes broker to; <code>client</code> brokers to an existing
+    owner without hosting one; <code>off</code> opts out of both, for a single process with no socket.
+  </p>
+  <p>
+    <code>--read-only</code> rejects every write-classified command, enforced by the owner's dispatch
+    gate when brokered and at the connection otherwise.
+  </p>
+  <h2>Defaults for branch and space</h2>
+  <pre
+    class="not-prose gopt-console"><code>strata --branch work ./db kv get k
+strata --space analytics ./db kv get k</code></pre>
+  <p>
+    Both set the default for commands that accept one, so they save repeating the flag. <a
+      href="/docs/learn/branches">Branches</a
+    > and <a href="/docs/learn/spaces">Spaces</a> cover what they select.
+  </p>
+</DocsLayout>
+
+<style>
+  .gopt-console,
+  .gopt-out {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--text-mono-body, 0.9375rem);
+    line-height: 1.7;
+  }
+  .gopt-console {
+    background: var(--color-inset);
+    color: var(--color-ink-hi);
+  }
+  .gopt-out {
+    background: var(--color-panel);
+    color: var(--color-ink-mid);
+  }
+</style>

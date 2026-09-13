@@ -688,6 +688,48 @@
             "type": "string"
           }
         ]
+      },
+      "HubCloneResult": {
+        "description": "A completed hub clone.",
+        "properties": {
+          "branch": {
+            "description": "Branch fetched.",
+            "type": "string"
+          },
+          "dataset": {
+            "description": "Dataset cloned.",
+            "type": "string"
+          },
+          "dest": {
+            "description": "Destination directory holding the new database.",
+            "type": "string"
+          },
+          "manifest_hash": {
+            "description": "The bundle's manifest hash.",
+            "type": "string"
+          },
+          "object_count": {
+            "description": "Objects fetched.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "total_bytes": {
+            "description": "Total bytes fetched.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dataset",
+          "branch",
+          "dest",
+          "manifest_hash",
+          "object_count",
+          "total_bytes"
+        ],
+        "type": "object"
       }
     },
     "$id": "https://stratadb.org/idl/v1/schemas/admin.hub_clone.json",
@@ -735,45 +777,7 @@
       "description": "A completed hub clone.",
       "properties": {
         "data": {
-          "properties": {
-            "branch": {
-              "description": "Branch fetched.",
-              "type": "string"
-            },
-            "dataset": {
-              "description": "Dataset cloned.",
-              "type": "string"
-            },
-            "dest": {
-              "description": "Destination directory holding the new database.",
-              "type": "string"
-            },
-            "manifest_hash": {
-              "description": "The bundle's manifest hash.",
-              "type": "string"
-            },
-            "object_count": {
-              "description": "Objects fetched.",
-              "format": "uint64",
-              "minimum": 0,
-              "type": "integer"
-            },
-            "total_bytes": {
-              "description": "Total bytes fetched.",
-              "format": "uint64",
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "dataset",
-            "branch",
-            "dest",
-            "manifest_hash",
-            "object_count",
-            "total_bytes"
-          ],
-          "type": "object"
+          "$ref": "#/$defs/HubCloneResult"
         },
         "type": {
           "const": "hub_clone_result",
@@ -791,45 +795,7 @@
         "description": "A completed hub clone.",
         "properties": {
           "data": {
-            "properties": {
-              "branch": {
-                "description": "Branch fetched.",
-                "type": "string"
-              },
-              "dataset": {
-                "description": "Dataset cloned.",
-                "type": "string"
-              },
-              "dest": {
-                "description": "Destination directory holding the new database.",
-                "type": "string"
-              },
-              "manifest_hash": {
-                "description": "The bundle's manifest hash.",
-                "type": "string"
-              },
-              "object_count": {
-                "description": "Objects fetched.",
-                "format": "uint64",
-                "minimum": 0,
-                "type": "integer"
-              },
-              "total_bytes": {
-                "description": "Total bytes fetched.",
-                "format": "uint64",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "dataset",
-              "branch",
-              "dest",
-              "manifest_hash",
-              "object_count",
-              "total_bytes"
-            ],
-            "type": "object"
+            "$ref": "#/$defs/HubCloneResult"
           },
           "type": {
             "const": "hub_clone_result",
@@ -1346,6 +1312,21 @@
     }
   },
   "admin.ping": {
+    "$defs": {
+      "AdminPing": {
+        "description": "Liveness probe output.",
+        "properties": {
+          "version": {
+            "description": "Engine package version.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "type": "object"
+      }
+    },
     "$id": "https://stratadb.org/idl/v1/schemas/admin.ping.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "command": "admin.ping",
@@ -1367,16 +1348,7 @@
       "description": "Lightweight admin liveness result.",
       "properties": {
         "data": {
-          "properties": {
-            "version": {
-              "description": "Engine package version.",
-              "type": "string"
-            }
-          },
-          "required": [
-            "version"
-          ],
-          "type": "object"
+          "$ref": "#/$defs/AdminPing"
         },
         "type": {
           "const": "pong",
@@ -2446,7 +2418,7 @@
         "description": "The data capability a branch comparison entry belongs to.",
         "oneOf": [
           {
-            "const": "key_value",
+            "const": "kv",
             "description": "The key-value capability.",
             "type": "string"
           },
@@ -3652,7 +3624,7 @@
         "description": "The data capability a branch comparison entry belongs to.",
         "oneOf": [
           {
-            "const": "key_value",
+            "const": "kv",
             "description": "The key-value capability.",
             "type": "string"
           },
@@ -4076,7 +4048,7 @@
         "description": "The data capability a branch comparison entry belongs to.",
         "oneOf": [
           {
-            "const": "key_value",
+            "const": "kv",
             "description": "The key-value capability.",
             "type": "string"
           },
@@ -5315,7 +5287,7 @@
         "type": "object"
       },
       "Maybe3": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso a JSON read answers with\n[`MaybeJsonVersionedValue`](super::MaybeJsonVersionedValue), whose payload\ncarries a non-optional `value` to keep found-null distinct from absent.\nBoth envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -9606,7 +9578,7 @@
         "type": "object"
       },
       "Maybe5": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso a JSON read answers with\n[`MaybeJsonVersionedValue`](super::MaybeJsonVersionedValue), whose payload\ncarries a non-optional `value` to keep found-null distinct from absent.\nBoth envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -10977,7 +10949,7 @@
         "type": "object"
       },
       "Maybe4": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso a JSON read answers with\n[`MaybeJsonVersionedValue`](super::MaybeJsonVersionedValue), whose payload\ncarries a non-optional `value` to keep found-null distinct from absent.\nBoth envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -14445,23 +14417,77 @@
   },
   "inference.capability": {
     "$defs": {
+      "AvailabilityKind": {
+        "description": "[`Availability`] without its payload: the one word a caller branches on.\n\nSerializes as the snake_case variant name (`not_downloaded`), which is the\nvalue of `details.availability` on every inference refusal.",
+        "oneOf": [
+          {
+            "const": "ready",
+            "description": "[`Availability::Ready`].",
+            "type": "string"
+          },
+          {
+            "const": "not_in_catalog",
+            "description": "[`Availability::NotInCatalog`].",
+            "type": "string"
+          },
+          {
+            "const": "path_missing",
+            "description": "[`Availability::PathMissing`].",
+            "type": "string"
+          },
+          {
+            "const": "task_not_supported",
+            "description": "[`Availability::TaskNotSupported`].",
+            "type": "string"
+          },
+          {
+            "const": "local_execution_not_built",
+            "description": "[`Availability::LocalExecutionNotBuilt`].",
+            "type": "string"
+          },
+          {
+            "const": "provider_not_built",
+            "description": "[`Availability::ProviderNotBuilt`].",
+            "type": "string"
+          },
+          {
+            "const": "network_disabled",
+            "description": "[`Availability::NetworkDisabled`].",
+            "type": "string"
+          },
+          {
+            "const": "key_missing",
+            "description": "[`Availability::KeyMissing`].",
+            "type": "string"
+          },
+          {
+            "const": "not_downloaded",
+            "description": "[`Availability::NotDownloaded`].",
+            "type": "string"
+          }
+        ]
+      },
       "InferenceCapability": {
         "description": "Provider/model capability facts.",
         "properties": {
+          "availability": {
+            "$ref": "#/$defs/AvailabilityKind",
+            "description": "Whether the model can be used right now, and if not, the one reason\nwhy - the same answer a refusal carries in its `details`, given here\nbefore anything is attempted (#3226). Capability *locates* the model:\na cloud model is `ready` from here even without its key (`status`\nreports keys), and a local model reports `not_downloaded` or\n`not_in_catalog` on the same basis a `pull` or a load would."
+          },
           "can_embed": {
-            "description": "Whether embedding is supported.",
+            "description": "Whether **this binary** can embed with this model right now.",
             "type": "boolean"
           },
           "can_generate": {
-            "description": "Whether generation is supported.",
+            "description": "Whether **this binary** can generate with this model right now.\n\nFalse when the provider's feature is compiled out, even for a model\nthat inherently generates - see `provider_feature_enabled` for why. The\nmodel's own task is in the catalog (`inference models list`); a GGUF\nfile named by path has no catalogued task and claims every local\nability this binary has - the load decides what the file can do.",
             "type": "boolean"
           },
           "can_rank": {
-            "description": "Whether ranking is supported.",
+            "description": "Whether **this binary** can rank with this model right now.",
             "type": "boolean"
           },
           "can_tokenize": {
-            "description": "Whether tokenization is supported.",
+            "description": "Whether **this binary** can tokenize with this model right now.",
             "type": "boolean"
           },
           "embedding_dim": {
@@ -14486,6 +14512,13 @@
             "description": "Whether this binary was compiled with the provider feature needed for execution.",
             "type": "boolean"
           },
+          "pull_spec": {
+            "description": "The spec `strata inference models pull` takes to fetch the model.\nPresent only when `availability` is `not_downloaded`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "requires_api_key": {
             "description": "Whether the provider requires an API key.",
             "type": "boolean"
@@ -14493,6 +14526,15 @@
           "requires_network": {
             "description": "Whether the operation requires network access.",
             "type": "boolean"
+          },
+          "size_bytes": {
+            "description": "The download size in bytes. Present only when `availability` is\n`not_downloaded`.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "supports_json_object": {
             "description": "Whether `response_format: json_object` is honored.",
@@ -14514,6 +14556,7 @@
         "required": [
           "provider",
           "model",
+          "availability",
           "can_generate",
           "can_tokenize",
           "can_embed",
@@ -15809,7 +15852,7 @@
             "type": "string"
           },
           "is_local": {
-            "description": "Whether the model artifact is present locally.",
+            "description": "Whether this variant's artifact is downloaded - a non-empty file at\n`local_path`, the same test resolution applies. An interrupted\ndownload's zero-length file is not downloaded.\n\nThis is about the *file*, not about whether it can be run: a released\nbinary reports `is_local: true` for models it cannot load. Check\n`runnable` for that (#3124).",
             "type": "boolean"
           },
           "local_path": {
@@ -15822,6 +15865,10 @@
           "name": {
             "description": "Stable model catalog name.",
             "type": "string"
+          },
+          "runnable": {
+            "description": "Whether **this binary** can execute this model.\n\nEvery model in this catalog runs through the local provider, so this is\nfalse in any build without the `local` feature - which is every released\nbinary. `strata inference install-local` adds that execution; a cloud\nmodel needs none.",
+            "type": "boolean"
           },
           "size_bytes": {
             "description": "Approximate model artifact size in bytes.",
@@ -15841,6 +15888,7 @@
           "default_quant",
           "embedding_dim",
           "is_local",
+          "runnable",
           "size_bytes",
           "hf_repo"
         ],
@@ -15949,7 +15997,7 @@
             "type": "string"
           },
           "is_local": {
-            "description": "Whether the model artifact is present locally.",
+            "description": "Whether this variant's artifact is downloaded - a non-empty file at\n`local_path`, the same test resolution applies. An interrupted\ndownload's zero-length file is not downloaded.\n\nThis is about the *file*, not about whether it can be run: a released\nbinary reports `is_local: true` for models it cannot load. Check\n`runnable` for that (#3124).",
             "type": "boolean"
           },
           "local_path": {
@@ -15962,6 +16010,10 @@
           "name": {
             "description": "Stable model catalog name.",
             "type": "string"
+          },
+          "runnable": {
+            "description": "Whether **this binary** can execute this model.\n\nEvery model in this catalog runs through the local provider, so this is\nfalse in any build without the `local` feature - which is every released\nbinary. `strata inference install-local` adds that execution; a cloud\nmodel needs none.",
+            "type": "boolean"
           },
           "size_bytes": {
             "description": "Approximate model artifact size in bytes.",
@@ -15981,6 +16033,7 @@
           "default_quant",
           "embedding_dim",
           "is_local",
+          "runnable",
           "size_bytes",
           "hf_repo"
         ],
@@ -16272,6 +16325,194 @@
       "type": "object"
     }
   },
+  "inference.status": {
+    "$defs": {
+      "InferenceStatus": {
+        "description": "What this binary can do before anything is attempted (D11).\n\n#3124: every part of this was knowable up front and reported nowhere, so a\nuser learned their build's limits by watching an operation fail.",
+        "properties": {
+          "local_execution": {
+            "description": "Whether this binary can execute local models.",
+            "type": "boolean"
+          },
+          "local_remedy": {
+            "description": "What to do when local execution is needed and absent. `None` when this\nbuild already has it.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "model_download": {
+            "description": "Whether this binary can download model artifacts.",
+            "type": "boolean"
+          },
+          "models_catalogued": {
+            "description": "Catalogued models in total.",
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "models_dir": {
+            "description": "The model directory, shared by every database on this machine.",
+            "type": "string"
+          },
+          "models_downloaded": {
+            "description": "Catalogued models with at least one variant downloaded - the models\n`models local` lists, judged the way resolution judges (a non-empty\nfile; an interrupted download's zero-length leftover does not count).",
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "providers": {
+            "description": "Every provider, in a stable order.",
+            "items": {
+              "$ref": "#/$defs/ProviderStatus"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "local_execution",
+          "model_download",
+          "providers",
+          "models_dir",
+          "models_downloaded",
+          "models_catalogued"
+        ],
+        "type": "object"
+      },
+      "ProviderKind": {
+        "description": "Which inference provider to use.",
+        "oneOf": [
+          {
+            "const": "local",
+            "description": "Local GGUF model provider.",
+            "type": "string"
+          },
+          {
+            "const": "anthropic",
+            "description": "Anthropic cloud provider.",
+            "type": "string"
+          },
+          {
+            "const": "openai",
+            "description": "OpenAI cloud provider.",
+            "type": "string"
+          },
+          {
+            "const": "google",
+            "description": "Google Gemini cloud provider.",
+            "type": "string"
+          }
+        ]
+      },
+      "ProviderStatus": {
+        "description": "Whether one provider can be used right now, and if not, why not.\n\nNever carries a key - only where one was found (#3124/D11).",
+        "properties": {
+          "base_url": {
+            "description": "Where a request to this provider would be sent: its public endpoint,\nor the base URL that overrides it (#3270). `None` for the local\nprovider, which is not reached over HTTP.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "base_url_env_var": {
+            "description": "The environment variable that overrides `base_url` for this provider,\nwhether or not one is set - the variable the provider's own SDK reads.\n`None` for the local provider.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "base_url_source": {
+            "description": "Where the override came from, when `base_url` is not the public\nendpoint: the environment variable, or the config file's path for a\nURL stored with `strata config set <provider>.base_url`. `None` when\nrequests go to the public endpoint.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "feature_enabled": {
+            "description": "Whether this binary was compiled with the provider.",
+            "type": "boolean"
+          },
+          "key_env_var": {
+            "description": "The environment variable this provider reads its key from, whether or\nnot one is set - so a caller can say what to do about a missing key.\n`None` for providers that need no key.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "key_present": {
+            "description": "Whether a key was found. Never the key itself.",
+            "type": "boolean"
+          },
+          "key_source": {
+            "description": "Where the key was found, when one was. Never a value. `None` when no\nkey is present.\n\nThe runtime's [`ProviderSettings`] names the place: the environment\nvariable, or the config file's path for a key stored with `strata\nconfig set <provider>.api_key` - so a caller is told the file, not a\nvariable it never exported.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "model_prefix": {
+            "description": "The model-spec prefix that selects this provider, e.g. `\"openai:\"`.\n\nA caller that finds a ready provider can use this directly: prefix any\nmodel name with it. That is the actionable form for a coding agent,\nwhich reads this over the human table.",
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/$defs/ProviderKind",
+            "description": "Which provider this row describes."
+          },
+          "ready": {
+            "description": "Whether a call could be attempted right now.",
+            "type": "boolean"
+          },
+          "requires_api_key": {
+            "description": "Whether this provider needs an API key at all.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider",
+          "feature_enabled",
+          "requires_api_key",
+          "key_present",
+          "ready",
+          "model_prefix"
+        ],
+        "type": "object"
+      }
+    },
+    "$id": "https://stratadb.org/idl/v1/schemas/inference.status.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "command": "inference.status",
+    "request": {
+      "additionalProperties": false,
+      "description": "Reports what this binary can do before anything is attempted.\n\n# Guaranteed semantics\n\n- **Answers before the attempt.** Which providers are compiled in,\n  which have a key and where it came from, whether local execution\n  exists in this build, and how many catalogued models are on disk -\n  all knowable without trying an operation and failing (#3124).\n- **Never returns a key.** `key_source` names where a key was read\n  from - the environment variable, or the config file `strata config\n  set` wrote; the value is never included. `base_url` is the endpoint\n  a provider's requests go to and `base_url_source` where that came\n  from (`null` for the provider's public endpoint).\n- **The model directory is shared** by every database on the machine, so\n  a model downloaded once is available to all of them.",
+      "properties": {
+        "type": {
+          "const": "inference_status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "What this binary can do before anything is attempted.",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/InferenceStatus"
+        },
+        "type": {
+          "const": "inference_status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "data"
+      ],
+      "type": "object"
+    }
+  },
   "inference.tokenize": {
     "$id": "https://stratadb.org/idl/v1/schemas/inference.tokenize.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16329,6 +16570,21 @@
     }
   },
   "inference.unload": {
+    "$defs": {
+      "InferenceUnloadResult": {
+        "description": "Result of evicting a model from the inference runtime cache.",
+        "properties": {
+          "unloaded": {
+            "description": "True when a cached entry was removed.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "unloaded"
+        ],
+        "type": "object"
+      }
+    },
     "$id": "https://stratadb.org/idl/v1/schemas/inference.unload.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "command": "inference.unload",
@@ -16357,16 +16613,7 @@
       "description": "Inference unload result.",
       "properties": {
         "data": {
-          "properties": {
-            "unloaded": {
-              "description": "True when a cached entry was removed.",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "unloaded"
-          ],
-          "type": "object"
+          "$ref": "#/$defs/InferenceUnloadResult"
         },
         "type": {
           "const": "inference_unload_result",
@@ -19146,20 +19393,6 @@
         ],
         "type": "object"
       },
-      "MaybeJsonValue": {
-        "description": "JSON point-read result that distinguishes absence from a stored JSON null.\n\nSerializes the same `{found, value}` wire shape as the shared\n[`Maybe`](super::Maybe) envelope, but carries a non-optional `value` so a\nstored JSON `null` (`found: true, value: null`) stays distinct from an\nabsent document (`found: false, value: null`). `Maybe<serde_json::Value>`\ncannot express that distinction because `Option<Value>` deserializes a JSON\n`null` back to absence - hence this dedicated type.",
-        "properties": {
-          "found": {
-            "type": "boolean"
-          },
-          "value": true
-        },
-        "required": [
-          "found",
-          "value"
-        ],
-        "type": "object"
-      },
       "MaybeJsonVersionedValue": {
         "description": "JSON versioned point-read result that distinguishes absence from a stored JSON null.",
         "properties": {
@@ -19259,43 +19492,7 @@
         "data"
       ],
       "type": "object"
-    },
-    "responses": [
-      {
-        "description": "Optional JSON value.",
-        "properties": {
-          "data": {
-            "$ref": "#/$defs/MaybeJsonValue"
-          },
-          "type": {
-            "const": "json_value",
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "data"
-        ],
-        "type": "object"
-      },
-      {
-        "description": "Optional JSON value with commit metadata.",
-        "properties": {
-          "data": {
-            "$ref": "#/$defs/MaybeJsonVersionedValue"
-          },
-          "type": {
-            "const": "json_versioned_value",
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "data"
-        ],
-        "type": "object"
-      }
-    ]
+    }
   },
   "json.history": {
     "$defs": {
@@ -20823,7 +21020,7 @@
     "command": "kv.batch_delete",
     "request": {
       "additionalProperties": false,
-      "description": "Deletes multiple KV entries in one engine commit.",
+      "description": "Deletes multiple KV entries in one engine commit.\n\n# Guaranteed semantics\n\n- **Atomic across the batch.** Whatever the batch removes, it removes\n  in one engine commit.\n- **Only what existed is committed.** Keys that were not there are\n  reported `false` and cost nothing. If none of the keys existed there\n  is nothing to commit, and the result carries no commit at all.\n- **Duplicate keys are refused** with\n  `invalid_argument.engine.kv_batch_duplicate_key`, and an empty batch\n  with `invalid_argument.engine.kv_batch`. In both cases nothing is\n  written.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -21409,7 +21606,7 @@
     "command": "kv.batch_exists",
     "request": {
       "additionalProperties": false,
-      "description": "Checks multiple keys for existence.",
+      "description": "Checks multiple keys for existence.\n\n# Guaranteed semantics\n\n- **Positional**, one answer per requested key in the order asked, with\n  repeats allowed - the same contract as `batch_get`.\n- **A deleted key does not exist**, even though its history remains\n  readable through `history` and through any read at an earlier point.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -22021,7 +22218,7 @@
     "command": "kv.batch_get",
     "request": {
       "additionalProperties": false,
-      "description": "Reads multiple KV entries.",
+      "description": "Reads multiple KV entries.\n\n# Guaranteed semantics\n\n- **Positional.** One result per requested key, in the order asked. A\n  key that is not there comes back absent rather than being skipped, so\n  result `i` always belongs to request `i`.\n- **Repeats are allowed**, unlike the write batches - a read batch is a\n  list of lookups, not a set of mutations.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -22619,7 +22816,7 @@
     "command": "kv.batch_put",
     "request": {
       "additionalProperties": false,
-      "description": "Writes multiple KV entries in one engine commit.",
+      "description": "Writes multiple KV entries in one engine commit.\n\n# Guaranteed semantics\n\n- **Atomic across the batch.** Every entry lands in one engine commit\n  and shares its version. There is no partial batch to detect or undo:\n  readers see all of it or none of it.\n- **Duplicate keys are refused.** Two entries with the same key fail the\n  whole batch with `invalid_argument.engine.kv_batch_duplicate_key`, and\n  nothing is written - including the entries that were not duplicated.\n  The batch is a set of keys, not a sequence of writes to replay.\n- **An empty batch is refused** with `invalid_argument.engine.kv_batch`.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -22684,7 +22881,7 @@
     "command": "kv.count",
     "request": {
       "additionalProperties": false,
-      "description": "Counts keys.",
+      "description": "Counts keys.\n\n# Guaranteed semantics\n\n- **Exact, over live keys only.** Deleted keys are not counted, and the\n  answer is not an estimate.\n- **A walk, not a counter.** There is no maintained total: counting\n  visits every live key under the prefix, so the cost grows with the\n  number of keys counted. Narrow it with a prefix when that matters.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
@@ -22900,7 +23097,7 @@
     "command": "kv.delete",
     "request": {
       "additionalProperties": false,
-      "description": "Deletes one KV entry.",
+      "description": "Deletes one KV entry.\n\n# Guaranteed semantics\n\n- **Deleting what is not there succeeds.** The result reports\n  `deleted: false` and **no commit is made** - the branch is untouched\n  and its version does not move. Callers that expect a version back\n  from every delete must handle its absence.\n- **History survives.** Delete writes a tombstone; it does not erase\n  past versions. `history`, and any read at an earlier point, still\n  return what the key held before.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -22987,7 +23184,7 @@
     "command": "kv.exists",
     "request": {
       "additionalProperties": false,
-      "description": "Checks one key for existence.",
+      "description": "Checks one key for existence.\n\n# Guaranteed semantics\n\n- **Existence is about the latest version.** A key that was deleted does\n  not exist here, even though `history` still returns what it held.\n- **A key holding an empty value exists.** Empty is a value, not\n  absence.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -23044,7 +23241,7 @@
         "type": "string"
       },
       "Maybe": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso a JSON read answers with\n[`MaybeJsonVersionedValue`](super::MaybeJsonVersionedValue), whose payload\ncarries a non-optional `value` to keep found-null distinct from absent.\nBoth envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -23096,7 +23293,7 @@
     "command": "kv.get",
     "request": {
       "additionalProperties": false,
-      "description": "Reads one KV entry.",
+      "description": "Reads one KV entry.\n\n# Guaranteed semantics\n\n- **Absent and empty are different.** A missing key returns no entry; a\n  key holding zero bytes returns an entry whose value is empty.\n- **Reads never block writers.** A read observes a consistent version of\n  the key and takes no lock a concurrent writer waits on.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
@@ -23236,7 +23433,7 @@
     "command": "kv.history",
     "request": {
       "additionalProperties": false,
-      "description": "Reads full version history for one key.",
+      "description": "Reads full version history for one key.\n\n# Guaranteed semantics\n\n- **Every version, including the deletes.** History reports each commit\n  that touched the key, so a key that reads as absent now still returns\n  the versions it held before.\n- **Scoped to one key.** The cost follows that key's own version count,\n  not the size of the database or of the space.\n- **Both clocks.** Each row carries the logical `version` and\n  `timestamp` of its commit and the wall-clock `committed_at` instant -\n  the values `as_of` and `as_of_time` respectively expect.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -23305,7 +23502,7 @@
     "command": "kv.list",
     "request": {
       "additionalProperties": false,
-      "description": "Lists KV keys.",
+      "description": "Lists KV keys.\n\n# Guaranteed semantics\n\n- **Ordered by key.** Pages come back in ascending byte order, and a\n  cursor resumes strictly after the last key of the previous page.\n- **Latest per page, not a snapshot.** Each page reads the branch as it\n  is when that page is fetched, so a write landing between two pages can\n  appear in the later one. For a listing that cannot shift underneath\n  you, pass `as_of` (or `as_of_time`) and keep it fixed across every\n  page: each page then reads the same point on the timeline.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
@@ -23566,7 +23763,7 @@
     "command": "kv.put",
     "request": {
       "additionalProperties": false,
-      "description": "Writes one KV entry.\n\n# Guaranteed semantics\n\n- **Atomic per key.** The write is a single engine commit: it either\n  applies fully (value plus a new commit version) or not at all. No\n  reader ever observes a partial or torn value.\n- **Read-after-write visibility.** Once the command returns success,\n  every subsequent read through any handle of the same database\n  observes this write (or a newer one) - including immediately, from\n  the handle that issued it. Acknowledged writes are never\n  transiently invisible.",
+      "description": "Writes one KV entry.\n\n# Guaranteed semantics\n\n- **Atomic per key.** The write is a single engine commit: it either\n  applies fully (value plus a new commit version) or not at all. No\n  reader ever observes a partial or torn value.\n- **Read-after-write visibility.** Once the command returns success,\n  every subsequent read through any handle of the same database\n  observes this write (or a newer one) - including immediately, from\n  the handle that issued it. Acknowledged writes are never\n  transiently invisible.\n- **Shapes.** A key is any non-empty byte string; a value is any byte\n  string, including empty - an empty value is a present entry, not an\n  absent one. Neither carries an engine length limit; the durable row\n  format caps each at 4 GiB. In practice the database's memory budget\n  is the binding limit long before that, and cache mode holds\n  everything resident.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -23680,7 +23877,7 @@
     "command": "kv.sample",
     "request": {
       "additionalProperties": false,
-      "description": "Samples keys and values.",
+      "description": "Samples keys and values.\n\n# Guaranteed semantics\n\n- **Deterministic, not random.** Rows are taken at even intervals\n  through the keys in order, so the same request over unchanged data\n  returns the same rows. This shows a spread of the data; it does not\n  draw a statistical sample.\n- **`total` is exact**, not an estimate - sampling walks the live keys\n  to produce it, so its cost matches `count`.\n- Asking for more rows than exist returns all of them.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -23820,7 +24017,7 @@
     "command": "kv.scan",
     "request": {
       "additionalProperties": false,
-      "description": "Scans KV rows.",
+      "description": "Scans KV rows.\n\n# Guaranteed semantics\n\n- **One call, one read.** A scan returns its rows from a single read of\n  the branch; it does not paginate across calls, so no write can land\n  part-way through the result. Use `list` when you need cursored pages.\n- **Ordered and half-open.** Rows come back in ascending key order over\n  `[start, end)` - the start key is included, the end key is not.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -26878,6 +27075,13 @@
             "minimum": 0,
             "type": "integer"
           },
+          "embedding_model": {
+            "description": "The model that produced this collection's vectors, when recorded (D9).\n\nAbsent for collections created before provenance existed, and for any\ncreated without one. Those accept vectors from any model, so nothing\ncan check that a query is comparable with what is stored.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "metric": {
             "$ref": "#/$defs/VectorDistanceMetric"
           },
@@ -26937,6 +27141,13 @@
           "format": "uint64",
           "minimum": 0,
           "type": "integer"
+        },
+        "embedding_model": {
+          "description": "The model that produces this collection's vectors (D9).\n\nWhat the record governs: `text` on `vector upsert` and\n`vector query` is embedded with this model and no other, so text\nwrites and searches cannot mix models - the failure dimension\ncannot catch, since two models at the same width return neighbours\nthat are ranked and meaningless. What it cannot govern: a `vector`\nsupplied directly carries no model, so Strata cannot check one\nagainst the record; supplying a vector is the caller's statement\nthat this model produced it.",
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "metric": {
           "$ref": "#/$defs/VectorDistanceMetric",
@@ -27073,6 +27284,13 @@
             "minimum": 0,
             "type": "integer"
           },
+          "embedding_model": {
+            "description": "The model that produced this collection's vectors, when recorded (D9).\n\nAbsent for collections created before provenance existed, and for any\ncreated without one. Those accept vectors from any model, so nothing\ncan check that a query is comparable with what is stored.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "metric": {
             "$ref": "#/$defs/VectorDistanceMetric"
           },
@@ -27181,6 +27399,146 @@
       "type": "object"
     }
   },
+  "vector.collection.set_embedding_model": {
+    "$defs": {
+      "VectorCollectionInfo": {
+        "description": "Vector collection facts.",
+        "properties": {
+          "count": {
+            "format": "uint64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "dimension": {
+            "format": "uint64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "embedding_model": {
+            "description": "The model that produced this collection's vectors, when recorded (D9).\n\nAbsent for collections created before provenance existed, and for any\ncreated without one. Those accept vectors from any model, so nothing\ncan check that a query is comparable with what is stored.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metric": {
+            "$ref": "#/$defs/VectorDistanceMetric"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "dimension",
+          "metric",
+          "count"
+        ],
+        "type": "object"
+      },
+      "VectorDistanceMetric": {
+        "description": "Vector distance metric exposed through the command boundary.",
+        "oneOf": [
+          {
+            "const": "cosine",
+            "description": "Cosine similarity.",
+            "type": "string"
+          },
+          {
+            "const": "euclidean",
+            "description": "Euclidean similarity.",
+            "type": "string"
+          },
+          {
+            "const": "dot_product",
+            "description": "Raw dot product.",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "$id": "https://stratadb.org/idl/v1/schemas/vector.collection.set_embedding_model.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "command": "vector.collection.set_embedding_model",
+    "request": {
+      "additionalProperties": false,
+      "description": "Declares which embedding model a collection's vectors come from (D9).\n\nFor collections created without `embedding_model` - every collection\nthat predates provenance. A declaration, not a verification: a stored\nvector carries no model, so this takes the caller's word for the\nvectors present, and from then on `text` is embedded with this model.\nA vector supplied directly is not checked against it - it cannot be -\nand remains the caller's word. One-time: re-declaring the recorded\nmodel is a no-op, and declaring a different one is refused with\n`failed_precondition.engine.embedding_model_mismatch`, because changing\nthe model under stored vectors is the mixing the record exists to\nprevent.",
+      "properties": {
+        "branch": {
+          "description": "Target branch. Defaults to the executor handle branch.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collection": {
+          "description": "Collection name.",
+          "type": "string"
+        },
+        "model": {
+          "description": "The model that produced, and will produce, this collection's\nvectors.",
+          "type": "string"
+        },
+        "space": {
+          "description": "Target product space. Defaults to `\"default\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "const": "vector_set_embedding_model",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "collection",
+        "model"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "Vector collection list.",
+      "properties": {
+        "data": {
+          "description": "Shared pagination continuation facts.",
+          "properties": {
+            "cursor": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "items": {
+              "description": "Collections in this page.",
+              "items": {
+                "$ref": "#/$defs/VectorCollectionInfo"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "items",
+            "has_more"
+          ],
+          "type": "object"
+        },
+        "type": {
+          "const": "vector_collection_list",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "data"
+      ],
+      "type": "object"
+    }
+  },
   "vector.collection.stats": {
     "$defs": {
       "VectorCollectionInfo": {
@@ -27195,6 +27553,13 @@
             "format": "uint64",
             "minimum": 0,
             "type": "integer"
+          },
+          "embedding_model": {
+            "description": "The model that produced this collection's vectors, when recorded (D9).\n\nAbsent for collections created before provenance existed, and for any\ncreated without one. Those accept vectors from any model, so nothing\ncan check that a query is comparable with what is stored.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "metric": {
             "$ref": "#/$defs/VectorDistanceMetric"
@@ -28207,7 +28572,7 @@
   "vector.get": {
     "$defs": {
       "Maybe2": {
-        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso JSON reads use the dedicated [`MaybeJsonValue`](super::MaybeJsonValue)\nenvelope, which carries a non-optional `value` to keep found-null distinct\nfrom absent. Both envelopes serialize the same `{found, value}` wire shape.",
+        "description": "Point-read envelope shared by every capability's single-record `get`.\n\n`found` is the authoritative presence flag; `value` carries the record only\nwhen it exists. A missing record serializes as `{found: false, value: null}`\nand a present one as `{found: true, value: <record>}`, so absence never\naliases a bare `null` payload and every primitive answers a point read the\nsame shape.\n\nThe payload is `Option<T>` because these primitives never store a JSON\n`null` as a record - struct payloads round-trip cleanly through\n`Option<T>`. JSON is the one exception: a stored JSON `null` is a real value\nthat `Option<serde_json::Value>` would collapse to absence on deserialize,\nso a JSON read answers with\n[`MaybeJsonVersionedValue`](super::MaybeJsonVersionedValue), whose payload\ncarries a non-optional `value` to keep found-null distinct from absent.\nBoth envelopes serialize the same `{found, value}` wire shape.",
         "properties": {
           "found": {
             "type": "boolean"
@@ -29505,7 +29870,8 @@
           "type": "integer"
         },
         "query": {
-          "description": "Query embedding. Accepted at wire (f64) precision and narrowed to the\nsearched f32; a value that underflows or overflows f32 is rejected.",
+          "default": [],
+          "description": "Query embedding. Accepted at wire (f64) precision and narrowed to the\nsearched f32; a value that underflows or overflows f32 is rejected.\n\nEmpty when `text` is supplied instead. A vector carries no model,\nso when the collection records an embedding model, Strata cannot\ncheck this query against it: supplying one is the caller's\nstatement that the recorded model produced it, and a query from\nanother model returns neighbours that are ranked and meaningless.\nOnly `text` is embedded under the record.",
           "items": {
             "format": "double",
             "type": "number"
@@ -29519,6 +29885,13 @@
             "null"
           ]
         },
+        "text": {
+          "description": "Text to embed with the collection's recorded model, instead of\nsupplying a query vector (D10).\n\nThis is the half that makes provenance worth recording: the query is\nembedded with the same model the collection was written with, so a\ncaller cannot accidentally compare vectors from two models.\n\nWith `as_of` or `as_of_time`, the model is the one the collection\nrecorded at that snapshot. A snapshot older than the model's\ndeclaration is refused with\n`failed_precondition.engine.embedding_model_missing`: the\ndeclaration vouched for the vectors present when it was made, not\nfor what the collection held before. Search such a snapshot with a\n`query` vector.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "type": {
           "const": "vector_query",
           "type": "string"
@@ -29527,7 +29900,6 @@
       "required": [
         "type",
         "collection",
-        "query",
         "k"
       ],
       "type": "object"
@@ -30012,12 +30384,20 @@
             "null"
           ]
         },
+        "text": {
+          "description": "Text to embed with the collection's recorded model, instead of\nsupplying a vector (D10). Exactly one of `vector` or `text`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "type": {
           "const": "vector_upsert",
           "type": "string"
         },
         "vector": {
-          "description": "Dense embedding. Accepted at wire (f64) precision and narrowed to the\nstored f32; a value that underflows or overflows f32 is rejected.",
+          "default": [],
+          "description": "Dense embedding. Accepted at wire (f64) precision and narrowed to the\nstored f32; a value that underflows or overflows f32 is rejected.\n\nEmpty when `text` is supplied instead. A vector carries no model,\nso when the collection records an embedding model, Strata cannot\ncheck this vector against it: supplying one is the caller's\nstatement that the recorded model produced it. Only `text` is\nembedded under the record.",
           "items": {
             "format": "double",
             "type": "number"
@@ -30028,8 +30408,7 @@
       "required": [
         "type",
         "collection",
-        "key",
-        "vector"
+        "key"
       ],
       "type": "object"
     },

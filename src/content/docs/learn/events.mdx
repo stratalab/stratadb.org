@@ -2,7 +2,7 @@
 title: 'Events'
 description: 'An append-only log with a hash chain: sequences, types, windows, and proving nothing was altered.'
 section: 'Learn'
-source: 'strata-core@v1.2.1'
+source: 'strata-core@v1.2.2'
 ---
 
 Events are an append-only log. You add entries to the end and you never change
@@ -20,12 +20,19 @@ the one before it.
 
 ## What an entry carries
 
+```
+SEQUENCE  EVENT_TYPE    TIMESTAMP                       PAYLOAD
+       0  user.created  2026-09-13 06:53:08.163748 UTC  {"who":"alice"}
+```
+
+The hash and the previous hash are carried too, and `--json` shows them:
+
 ```json
 {
   "event_type": "user.created",
   "payload": { "who": "alice" },
   "sequence": 0,
-  "timestamp": 1788707488353652,
+  "timestamp": 1789289588163748,
   "hash": "e731a80a961a3ea0011515e83abbaeff2d24dbfcfd1017ecc1aa434dbace4de4",
   "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000"
 }
@@ -48,8 +55,11 @@ than trusted:
 strata event verify-chain
 ```
 
-```json
-{ "error": null, "first_invalid": null, "length": 3, "valid": true }
+```
+valid          true
+length         3
+first_invalid  -
+error          -
 ```
 
 That checks both density, meaning no sequence numbers are missing, and linkage,
@@ -69,7 +79,10 @@ strata event range 2 --end-seq 5
 ```
 
 ```
-2, 3, 4
+SEQUENCE  EVENT_TYPE     TIMESTAMP                       PAYLOAD
+       2  order.shipped  2026-09-13 06:53:08.236040 UTC  {"id":7}
+       3  t              2026-09-13 06:53:08.278188 UTC  {"i":3}
+       4  t              2026-09-13 06:53:08.321101 UTC  {"i":4}
 ```
 
 `--direction reverse` returns **the same window**, newest first. It does not
@@ -80,7 +93,10 @@ strata event range 2 --end-seq 5 --direction reverse
 ```
 
 ```
-4, 3, 2
+SEQUENCE  EVENT_TYPE  TIMESTAMP                       PAYLOAD
+       4  t           2026-09-13 06:53:08.321101 UTC  {"i":4}
+       3  t           2026-09-13 06:53:08.278188 UTC  {"i":3}
+       2  order.ship  2026-09-13 06:53:08.236040 UTC  {"id":7}
 ```
 
 Leave the end off and the window runs to the end of the log, which makes reverse
@@ -91,7 +107,10 @@ strata event range 0 --direction reverse --limit 2
 ```
 
 ```
-5, 4
+SEQUENCE  EVENT_TYPE  TIMESTAMP                       PAYLOAD
+       5  t           2026-09-13 06:53:08.361674 UTC  {"i":5}
+       4  t           2026-09-13 06:53:08.321101 UTC  {"i":4}
+-- more: add --cursor 4 to the same command
 ```
 
 The binary's own `--help` still describes the older behaviour for these

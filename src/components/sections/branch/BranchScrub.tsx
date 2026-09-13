@@ -43,19 +43,22 @@ const HEAD = {
 
 // The accumulated session (left terminal). Lines flash in with their act,
 // then dim into history.
+// Output is what the binary prints, checked by scripts/verify-transcripts.mjs
+// against the real engine. 1.2.2 replaced the JSON dumps these lines used to
+// carry with receipts and tables (strata-core issue 3306), so they are lines now.
 const SESSION: { act: number; cmd?: string; out?: string; branch?: string }[] = [
   { act: 0, cmd: 'branch fork default risky', branch: 'default' },
-  { act: 0, out: '"name": "risky"' },
+  { act: 0, out: 'forked risky from default' },
   { act: 1, cmd: 'json set portfolio $.strategy "aggressive"', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.stocks 80', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.bonds 15', branch: 'risky' },
   { act: 1, cmd: 'json set portfolio $.cash 5', branch: 'risky' },
   { act: 2, cmd: 'branch diff default risky', branch: 'default' },
-  { act: 2, out: '"capability": "json"' },
+  { act: 2, out: 'default  json  modified  portfolio  7' },
   { act: 2, cmd: 'branch preview risky default', branch: 'default' },
-  { act: 2, out: '"conflicts": []' },
+  { act: 2, out: 'conflicts  -' },
   { act: 3, cmd: 'branch merge risky default', branch: 'default' },
-  { act: 3, out: '"target": "default"' },
+  { act: 3, out: 'merged risky into default: 1 applied, 0 deleted, 0 conflicts' },
 ];
 
 type Driver = MotionValue<number> | number;

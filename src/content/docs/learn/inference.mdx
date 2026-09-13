@@ -2,7 +2,7 @@
 title: 'Inference'
 description: 'Embeddings, generation and reranking, from a cloud provider or a local model, through the same commands.'
 section: 'Learn'
-source: 'strata-core@v1.2.1'
+source: 'strata-core@v1.2.2'
 ---
 
 Strata can call a model as well as store what comes back. Embeddings, text
@@ -79,12 +79,18 @@ anything:
 strata inference capability openai:gpt-4o-mini
 ```
 
-```json
-{
-  "can_embed": true, "can_generate": true, "can_rank": false,
-  "requires_api_key": true, "requires_network": true,
-  "supports_json_schema": true, "supports_tools": true, ...
-}
+```
+provider                  openai
+model                     gpt-4o-mini
+availability              ready
+can_generate              true
+can_embed                 true
+can_rank                  false
+requires_api_key          true
+requires_network          true
+provider_feature_enabled  true
+supports_tools            true
+supports_json_object      true
 ```
 
 That is worth using before you wire a model into anything. It will tell you that

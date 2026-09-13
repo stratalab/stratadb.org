@@ -154,6 +154,13 @@
     text-indent: -2.5ch;
   }
 
+  /* A CLI example is a transcript since 1.2.2: the lines the binary printed
+     back sit under the ones you type. Without a prompt to separate them the
+     only thing left is weight, so output steps back. */
+  .cmd-out {
+    color: var(--color-ink-low);
+  }
+
   /* Reveal recipe (03 §2) - applied via IntersectionObserver adding .is-revealed */
   .reveal {
     opacity: 0;

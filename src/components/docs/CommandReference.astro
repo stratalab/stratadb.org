@@ -16,7 +16,12 @@ import schemas from '../../data/command-schemas.json';
 import examples from '../../data/command-examples.json';
 import registry from '../../data/error-registry.json';
 import bindings from '../../data/python-bindings.json';
-import { cliExampleText, exampleHtml, pythonExampleText } from '../../lib/exampleText';
+import {
+  cliExampleText,
+  cliOutputMask,
+  exampleHtml,
+  pythonExampleText,
+} from '../../lib/exampleText';
 import { FAMILY_TITLES } from '../../lib/publishedCommands';
 
 interface Props {
@@ -136,6 +141,9 @@ const sample: Record<string, string> = {
   cli: cliExampleText(example?.cli),
   python: pythonExampleText(python?.example),
 };
+// Since 1.2.2 a CLI example is a transcript. The mask says which of its
+// lines the binary printed, so a reader can tell them from what they type.
+const cliMask = cliOutputMask(example?.cli);
 const hasExample = ifaces.some((iface) => sample[iface]);
 
 const cliInvocation = hasCli ? `strata ${command.cli!.path!.join(' ')}` : '';
@@ -267,7 +275,7 @@ const RETRY_TONE: Record<string, string> = {
                 class="p-5 font-mono text-mono-sm text-term-fg"
                 data-iface-panel={iface}
                 hidden={iface !== ifaces[0]}
-                set:html={exampleHtml(sample[iface])}
+                set:html={exampleHtml(sample[iface], iface === 'cli' ? cliMask : [])}
               />
             ) : (
               <p

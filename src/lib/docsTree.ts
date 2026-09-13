@@ -215,7 +215,7 @@ export const docsTree: TreeNode[] = [
       {
         label: 'CLI',
         children: [
-          { label: 'Global options' },
+          { label: 'Global options', href: '/docs/reference/global-options' },
           { label: 'init' },
           { label: 'doctor' },
           { label: 'agents' },

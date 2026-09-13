@@ -13,46 +13,46 @@ const RELEASE = JSON.parse(
 );
 
 // One session per scenario; expectations are substring matches per command.
-// These mirror src/lib/engine/heroScript.ts and the section transcripts -
+// These mirror what the homepage sections claim the binary prints -
 // keep in sync (single-source extraction is a noted follow-up).
 const SCENARIOS = [
   {
-    name: 'hero (homepage)',
+    // The homepage tiles run these against the engine compiled to wasm, and
+    // stream whatever comes back, so nothing here is a claim about output that
+    // could go stale. What can break is the script itself: a renamed verb or a
+    // changed flag would leave a tile printing an error on the front page. This
+    // runs the KV tile against the real binary and checks the two values that
+    // make its point, 10 on default and 5 on the fork.
+    name: 'hero KV tile (homepage)',
     exchanges: [
-      ['kv put portfolio.value 98400', 'created portfolio.value applied=true'],
-      ['branch fork default risky', '"name": "risky"'],
-      ['--branch risky kv put portfolio.value 111080', 'updated portfolio.value applied=true'],
-      ['--branch default kv get portfolio.value', '98400'],
-      ['branch diff default risky', '"branch_b": "risky"'],
-      ['branch preview risky default', '"conflicts": []'],
-      ['branch merge risky default', '"target": "default"'],
-      ['--branch default kv get portfolio.value', '111080'],
+      ['kv put portfolio.cash 10', 'created portfolio.cash'],
+      ['branch fork default risky', 'forked risky from default'],
+      ['--branch risky kv put portfolio.cash 5', 'updated portfolio.cash'],
+      ['kv get portfolio.cash', '10'],
+      ['--branch risky kv get portfolio.cash', '5'],
     ],
   },
   {
     name: 'branching (homepage section)',
     exchanges: [
-      ['json set portfolio $.strategy "balanced"', 'created portfolio applied=true'],
-      ['json set portfolio $.stocks 60', 'updated portfolio applied=true'],
-      ['json set portfolio $.bonds 30', 'updated portfolio applied=true'],
-      ['json set portfolio $.cash 10', 'updated portfolio applied=true'],
-      ['branch fork default risky', '"name": "risky"'],
-      [
-        '--branch risky json set portfolio $.strategy "aggressive"',
-        'updated portfolio applied=true',
-      ],
-      ['--branch risky json set portfolio $.stocks 80', 'updated portfolio applied=true'],
-      ['--branch risky json set portfolio $.bonds 15', 'updated portfolio applied=true'],
-      ['--branch risky json set portfolio $.cash 5', 'updated portfolio applied=true'],
-      ['branch diff default risky', '"branch_a": "default"'],
-      ['branch preview risky default', '"conflicts": []'],
-      ['branch merge risky default', '"target": "default"'],
+      ['json set portfolio $.strategy "balanced"', 'created portfolio'],
+      ['json set portfolio $.stocks 60', 'updated portfolio'],
+      ['json set portfolio $.bonds 30', 'updated portfolio'],
+      ['json set portfolio $.cash 10', 'updated portfolio'],
+      ['branch fork default risky', 'forked risky from default'],
+      ['--branch risky json set portfolio $.strategy "aggressive"', 'updated portfolio'],
+      ['--branch risky json set portfolio $.stocks 80', 'updated portfolio'],
+      ['--branch risky json set portfolio $.bonds 15', 'updated portfolio'],
+      ['--branch risky json set portfolio $.cash 5', 'updated portfolio'],
+      ['branch diff default risky', 'branch_a  default'],
+      ['branch preview risky default', 'conflicts                 -'],
+      ['branch merge risky default', 'merged risky into default'],
     ],
   },
   {
     name: 'install (first write)',
     exchanges: [
-      ['kv put hello world', 'created hello applied=true'],
+      ['kv put hello world', 'created hello'],
       ['kv get hello', 'world'],
       ['ping', 'pong'],
     ],

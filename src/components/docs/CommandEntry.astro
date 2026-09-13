@@ -15,7 +15,12 @@
 // all three differ per interface. Unlike dbutils, our interfaces do not share
 // a signature: the CLI spells it `strata kv batch-delete` and Python spells it
 // `db.kv.delete_many`.
-import { cliExampleText, exampleHtml, pythonExampleText } from '../../lib/exampleText';
+import {
+  cliExampleText,
+  cliOutputMask,
+  exampleHtml,
+  pythonExampleText,
+} from '../../lib/exampleText';
 
 interface Props {
   /** Anchor id, also the rail target. */
@@ -71,6 +76,9 @@ const sample: Record<string, string> = {
 // The bundle does not ship an example for every command in every interface.
 // Where none exists at all the section is dropped; where one interface has it
 // and another does not, the empty side says so rather than framing a hole.
+// Since 1.2.2 a CLI example is a transcript. The mask says which of its
+// lines the binary printed, so a reader can tell them from what they type.
+const cliMask = cliOutputMask(cliExample);
 const hasExample = ifaces.some((iface) => sample[iface]);
 ---
 
@@ -155,7 +163,7 @@ const hasExample = ifaces.some((iface) => sample[iface]);
                 class="px-5 py-4 font-mono text-mono-sm text-term-fg"
                 data-iface-panel={iface}
                 hidden={iface !== ifaces[0]}
-                set:html={exampleHtml(sample[iface])}
+                set:html={exampleHtml(sample[iface], iface === 'cli' ? cliMask : [])}
               />
             ) : (
               <p
