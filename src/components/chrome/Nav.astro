@@ -3,19 +3,20 @@
 import Button from '../foundation/Button.astro';
 import ResourcesMenu from './ResourcesMenu.astro';
 
+// Datasets sits with the other destinations rather than in the button group on
+// the right. It was a secondary CTA there, and a CTA is chrome: eyes scanning
+// for a place to go read straight past it. Ani watched himself miss it while
+// demoing the site, looking for the Hub in exactly this row.
+//
+// "Datasets" rather than "Hub" or "Find datasets": a nav link is a place, so it
+// reads as a noun beside Documentation and Playground, and it is the word
+// someone scans for when they want prepopulated databases.
 const navItems: { label: string; href: string }[] = [
   { label: 'Documentation', href: '/docs' },
+  { label: 'Datasets', href: '/hub' },
   { label: 'Playground', href: '/playground' },
 ];
 const currentPath = Astro.url.pathname;
-const datasetsButtonClass = [
-  'max-sm:hidden',
-  '!border-terracotta-500/60 !bg-terracotta-500/10 !text-terracotta-300',
-  'hover:!border-terracotta-400 hover:!bg-terracotta-500/15 hover:!text-terracotta-200',
-  currentPath.startsWith('/hub') ? '!bg-terracotta-500/15 !text-ink-hi' : '',
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
 <header class="sticky top-0 z-50 border-b border-line bg-void/85 backdrop-blur-xl">
@@ -58,7 +59,6 @@ const datasetsButtonClass = [
     </div>
 
     <div class="flex items-center gap-3">
-      <Button href="/hub" variant="quiet" class={datasetsButtonClass}>Find datasets</Button>
       <Button href="/#install" class="max-sm:hidden">Install Strata</Button>
       <button
         id="nav-toggle"
@@ -89,13 +89,6 @@ const datasetsButtonClass = [
         </a>
       ))
     }
-    <a
-      href="/hub"
-      class:list={[
-        'block py-3 text-small hover:text-ink-hi',
-        currentPath.startsWith('/hub') ? 'text-ink-hi' : 'text-terracotta-400',
-      ]}>Find datasets</a
-    >
     <a href="/#install" class="block py-3 text-small font-medium text-terracotta-500"
       >Install Strata</a
     >
