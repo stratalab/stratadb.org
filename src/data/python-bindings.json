@@ -302,7 +302,7 @@
       "_ = db.graphs.add_node(\"g\", \"c\")",
       "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
       "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
-      "db.graphs.analytics.bfs(\"g\", \"a\").visited"
+      "db.graphs.analytics.bfs(\"g\", \"a\", direction=\"outgoing\").visited"
     ]
   },
   "graph.analytics.cdlp": {
@@ -316,7 +316,7 @@
       "_ = db.graphs.add_node(\"g\", \"c\")",
       "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
       "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
-      "sorted(db.graphs.analytics.cdlp(\"g\").labels)"
+      "sorted(db.graphs.analytics.cdlp(\"g\", direction=\"both\").labels)"
     ]
   },
   "graph.analytics.lcc": {
@@ -358,7 +358,7 @@
       "_ = db.graphs.add_node(\"g\", \"c\")",
       "_ = db.graphs.add_edge(\"g\", \"a\", \"knows\", \"b\")",
       "_ = db.graphs.add_edge(\"g\", \"b\", \"knows\", \"c\")",
-      "sorted(db.graphs.analytics.sssp(\"g\", \"a\").distances)"
+      "sorted(db.graphs.analytics.sssp(\"g\", \"a\", direction=\"outgoing\").distances)"
     ]
   },
   "graph.analytics.wcc": {
@@ -755,6 +755,15 @@
     "summary": "Rerank ``passages`` by relevance to ``query``.",
     "example": []
   },
+  "inference.status": {
+    "call": "db.ai.status",
+    "signature": "() -> 'Any'",
+    "summary": "What this build can do before anything is attempted (engine 1.2.2+).",
+    "example": [
+      "{p[\"provider\"] for p in db.ai.status()[\"providers\"]} >= {\"openai\", \"anthropic\"}",
+      "isinstance(db.ai.status()[\"local_execution\"], bool)"
+    ]
+  },
   "inference.tokenize": {
     "call": "db.ai.tokenize",
     "signature": "(text: 'str', *, model: 'str', add_special: 'bool' = False) -> 'Any'",
@@ -1112,7 +1121,7 @@
   },
   "vector.collection.create": {
     "call": "db.vectors.create_collection",
-    "signature": "(name: 'str', dimension: 'int', *, metric: 'str' = 'cosine') -> 'Any'",
+    "signature": "(name: 'str', dimension: 'int', *, metric: 'str' = 'cosine', embedding_model: 'Optional[str]' = None) -> 'Any'",
     "summary": "Creates a collection of ``dimension``-d vectors under ``metric``.",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
@@ -1136,6 +1145,15 @@
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
       "[c.name for c in db.vectors.list_collections()]"
+    ]
+  },
+  "vector.collection.set_embedding_model": {
+    "call": "db.vectors.set_embedding_model",
+    "signature": "(collection: 'str', model: 'str') -> 'Any'",
+    "summary": "Declares the embedding model a collection's vectors come from.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "db.vectors.set_embedding_model(\"docs\", \"openai:text-embedding-3-small\").items[0].embedding_model"
     ]
   },
   "vector.collection.stats": {
@@ -1258,7 +1276,7 @@
   },
   "vector.query": {
     "call": "db.vectors.query",
-    "signature": "(collection: 'str', vector: 'Sequence[float]', *, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'list'",
+    "signature": "(collection: 'str', vector: 'Optional[Sequence[float]]' = None, *, text: 'Optional[str]' = None, k: 'int' = 10, filter: 'Any' = None, as_of: 'Optional[int]' = None, as_of_time: 'Optional[TimeLike]' = None) -> 'list'",
     "summary": "Returns the ``k`` nearest matches, optionally metadata-filtered.",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
@@ -1269,7 +1287,7 @@
   },
   "vector.upsert": {
     "call": "db.vectors.upsert",
-    "signature": "(collection: 'str', key: 'str', vector: 'Sequence[float]', *, metadata: 'Optional[dict]' = None) -> 'Any'",
+    "signature": "(collection: 'str', key: 'str', vector: 'Optional[Sequence[float]]' = None, *, text: 'Optional[str]' = None, metadata: 'Optional[dict]' = None) -> 'Any'",
     "summary": "Inserts or replaces a vector (with optional metadata).",
     "example": [
       "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",

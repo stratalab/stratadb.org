@@ -55,6 +55,72 @@ as nonsense at query time.
 `strata vector collection stats docs` reports the name, dimension, metric and
 current count.
 
+## Let the collection embed your text
+
+A collection can record the model that produces its vectors, and then take text
+instead of numbers.
+
+```console
+strata vector collection create docs 1536 --embedding-model openai:text-embedding-3-small
+```
+
+```
+created collection docs (1536 dimensions, cosine)
+```
+
+An existing collection can be told later:
+
+```console
+strata vector collection set-embedding-model plain miniLM
+```
+
+```
+updated collection plain: embedding model miniLM
+```
+
+With a model recorded, `--text` does the embedding on the way in and on the way
+out, so the same words are never embedded two different ways:
+
+```console
+strata vector upsert docs doc:1 --text "the cat sat on the mat"
+strata vector query docs --text "where did the cat sit"
+```
+
+That is the point of recording the model rather than passing it per call.
+Embedding the corpus with one model and the query with another returns
+neighbours that are ranked and meaningless, and nothing about the numbers
+themselves would tell you. `vector collection list` shows what each one records:
+
+```console
+strata vector collection list
+```
+
+```
+NAME   DIMENSION  METRIC  COUNT  EMBEDDING_MODEL
+docs        1536  cosine      0  openai:text-embedding-3-small
+plain          3  cosine      0  miniLM
+```
+
+Ask for text against a collection that records nothing and it says so rather
+than picking a model for you:
+
+```console
+strata vector upsert nomodel a --text "hello"
+```
+
+```
+failed_precondition.engine.embedding_model_missing: vector collection `nomodel`
+records no embedding model, so text cannot be embedded for it; declare one with
+`vector collection set-embedding-model nomodel <model>`, or pass a vector directly
+```
+
+A vector you pass yourself is never checked against the recorded model. Passing
+one is your statement that this model produced it.
+
+Text writes call the provider, so they need a key and they cost what that
+provider charges. [Inference](/docs/learn/inference) covers setting one up, and
+`strata inference status` says which are ready.
+
 ## Metadata and filtering
 
 A vector can carry metadata, and a query can filter on it:

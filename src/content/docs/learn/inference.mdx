@@ -14,36 +14,51 @@ strata inference embed openai:text-embedding-3-small "hello world"
 strata inference generate anthropic:claude-3-5-haiku-latest "write a haiku"
 ```
 
-## Two ways to run a model, and only one of them works out of the box
-
-This is the first thing to know, because the rest of the surface does not make
-it obvious.
+## Two ways to run a model
 
 **Cloud providers work with the released binary.** `openai`, `anthropic` and
 `google` are built in. They are HTTP clients, so they cost nothing to ship, and
-all they need is an API key.
+all they need is an API key. A cloud model is named with its provider:
+`openai:text-embedding-3-small`.
 
-**Local models need a binary built from source.** The releases are compiled
-without the local inference feature, because it vendors llama.cpp and cmake and
-would turn a twelve-megabyte download into something much larger. So on a
-released binary every local operation fails:
+**Local models need one extra step.** The release is compiled without local
+execution, because it vendors llama.cpp and would turn a twelve-megabyte
+download into something much larger. A bare model name means a local model, so
+on a fresh install:
 
 ```console
 strata inference embed miniLM "hello"
 ```
 
 ```
-inference.unsupported_operation: local embedding requires the local feature
+inference.unsupported_operation: not supported: `miniLM` is a local model, and
+this build has no local model execution: this build runs cloud models only, and
+a bare model name means a local model. Either name a cloud model instead, or run
+`strata inference install-local` to add local execution.
 ```
 
-Confusingly, the model catalog still lists local models, `inference models local`
-still lists the ones on your disk, and `capability` still reports `can_embed`
-for them. The field that tells the truth is `provider_feature_enabled`. This is
-strata-core issue 3124.
+`strata inference install-local` adds it to the installation you already have.
+There is no need to build from source.
 
-If you want local inference, build the CLI from source with the
-`inference-local` feature. If you want it to work today with the binary you
-installed, use a provider.
+Ask the binary what it can do rather than guessing:
+
+```console
+strata inference status
+```
+
+```
+build	cloud providers only
+
+providers
+  openai	ready -- key from ~/.config/strata/config.toml; use openai:<model>
+  anthropic	no key -- `strata config set anthropic.api_key <key>`
+  google	no key -- `strata config set google.api_key <key>`
+  local	not in this build
+```
+
+`capability` tells the truth per model, too: on a cloud-only build a local model
+reports `can_embed  false` and `availability  not_downloaded`, rather than
+advertising something it cannot do.
 
 ## Setting up a provider
 
