@@ -1,0 +1,97 @@
+---
+// CLI verb to Python method, for the commands where they differ.
+//
+// The SDK reshapes the wire surface into idiomatic Python rather than
+// transliterating it: nested namespaces flatten (graph.node.add becomes
+// add_node), three fork commands collapse into one method with keyword
+// arguments, event.count becomes len, arrow.import has to become import_
+// because import is a keyword. Those are improvements, and they are also the
+// reason someone reading CLI examples cannot guess the Python spelling.
+//
+// So this lists only the ones that differ. The comparison is against the CLI's
+// own verb, not the command id, because that is the question a reader has:
+// `strata graph add-edge` maps to `add_edge`, which agrees, even though the
+// command id leaf is `add`. Comparing against the id flagged 36 rows, more than
+// half of them noise.
+//
+// Everything here is derived from command-index.json and python-bindings.json,
+// the latter probed from the installed wheel, so it cannot drift from what
+// ships.
+import index from '../../data/command-index.json';
+import bindings from '../../data/python-bindings.json';
+
+type Binding = { call?: string };
+type Row = { id: string; call: string; cli: string | null };
+const py = bindings as Record<string, Binding>;
+const commands = new Map(index.commands.map((c) => [c.id, c]));
+
+const rows: Row[] = Object.entries(py)
+  .flatMap(([id, binding]): Row[] => {
+    const command = commands.get(id);
+    if (!command) return [];
+    const call = (binding.call ?? '').split('(')[0];
+    const method = call.split('.').pop() ?? '';
+    if (!method) return [];
+    const path = (command as { cli?: { path?: string[] } }).cli?.path ?? [];
+    if (!path.length) return [{ id, call, cli: null }];
+    // The CLI's own verb, hyphens normalised, is what a reader is comparing.
+    if (path[path.length - 1].replaceAll('-', '_') === method) return [];
+    return [{ id, call, cli: `strata ${path.join(' ')}` }];
+  })
+  .sort((a, b) => (a.cli ?? `~${a.id}`).localeCompare(b.cli ?? `~${b.id}`));
+
+const withCli = rows.filter((r) => r.cli);
+const withoutCli = rows.filter((r) => !r.cli);
+const total = Object.keys(py).length;
+---
+
+<p>
+  Of the {total} commands with a Python method, {withCli.length} spell it differently from the CLI verb.
+  Everything not listed here matches, so <code>strata kv put</code> is <code>db.kv.put</code>
+  and needs no table.
+</p>
+
+<table>
+  <thead>
+    <tr><th>CLI</th><th>Python</th></tr>
+  </thead>
+  <tbody>
+    {
+      withCli.map((r) => (
+        <tr>
+          <td>
+            <code>{r.cli}</code>
+          </td>
+          <td>
+            <code>{r.call}</code>
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+<p>
+  A further {withoutCli.length} have no CLI verb at all. They are reachable from Python, and from the
+  CLI only through <code>strata command run</code>:
+</p>
+
+<table>
+  <thead>
+    <tr><th>Command</th><th>Python</th></tr>
+  </thead>
+  <tbody>
+    {
+      withoutCli.map((r) => (
+        <tr>
+          <td>
+            <code>{r.id}</code>
+          </td>
+          <td>
+            <code>{r.call}</code>
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
