@@ -1,0 +1,112 @@
+---
+title: 'Should I use Strata?'
+description: 'What Strata is good at, what it is not for, and which limits are decisions rather than gaps.'
+section: 'Learn'
+source: 'strata-core@v1.2.2'
+---
+
+[Introduction to StrataDB](/docs/learn/introduction) explains what Strata is.
+This page is the other half: where it fits, where it does not, and which of the
+limits are deliberate rather than unfinished.
+
+A research preview that only told you what it was good at would not be worth
+trusting, so the second table is the longer one.
+
+## Where it fits
+
+| Requirement                                                    | Fit                            |
+| -------------------------------------------------------------- | ------------------------------ |
+| An embedded database inside your application                   | Excellent                      |
+| Branchable application or agent state                          | Excellent, and close to unique |
+| Key-value, documents, events, vectors and a graph in one place | Excellent                      |
+| Reading any past version of your data                          | Excellent                      |
+| Agent memory, per-run isolation, and replay                    | Excellent                      |
+| A local dataset you clone, fork and experiment on              | Excellent                      |
+| Single-process throughput                                      | Excellent                      |
+
+That last one measured: **66,000 writes and 152,000 reads per second**,
+single-process and in-process, on an ordinary laptop. There is no network hop,
+because there is no network.
+
+## Where it does not fit
+
+| Requirement                                | Fit               |
+| ------------------------------------------ | ----------------- |
+| A multi-user database server               | **No**, by design |
+| Hundreds of remote clients over a network  | **No**, by design |
+| Writes shared across machines              | **No**, by design |
+| SQL, or joins across models                | **No**, by design |
+| A petabyte analytical warehouse            | **No**            |
+| A hosted, managed database service         | **No**            |
+| Running fully in a browser                 | Partly, today     |
+| A high-churn workload with bounded storage | Not yet           |
+| An event log that must survive a merge     | Not yet           |
+| Reranking search results                   | Not yet           |
+
+## The ones that are decisions
+
+**There is no server.** Not a small one, not an optional one. `strata start`
+hosts a local socket so other processes on the same machine can attach; it takes
+no `--port` and no `--bind`. The MCP server speaks over stdio. Nothing in the
+binary listens on a network.
+
+That is the point rather than a gap. An embedded database that grew a network
+listener would be a different product with different failure modes. If you need
+many machines talking to one database, you need a database server, and Strata is
+not one.
+
+**There is no SQL and there are no joins.** Reads are per model. Combining two
+models is your code's job. A workload that is genuinely relational, with
+multi-table joins in the hot path, will fight this the whole way.
+
+**Concurrency is processes on one machine.** Several can share a database: the
+first to open it hosts, the rest broker to it.
+[Embedded databases](/docs/learn/embedded-databases) covers what that
+guarantees. It is not a substitute for a connection pool serving remote clients.
+
+## The ones that are current state
+
+These may change, and it is worth knowing which is which.
+
+**Running in a browser is partial.** The engine compiles to wasm and runs the
+[playground](/playground) and the demo on the homepage. But `hub` answers that
+it "needs a host environment and is not available in an embedded session", and
+`inference` is not a command in that build at all. The data models work; the
+network-shaped features do not.
+
+**History grows and there is no way to prune it.** Every version of every value
+is retained, which is the product working as intended, and it costs roughly 140
+bytes per version for a small value. There is no `vacuum`, no `compact` and no
+retention window in the CLI.
+[Databases and storage](/docs/learn/databases-and-storage) has the measurements.
+For a workload that rewrites the same keys in a tight loop, that is a real
+constraint today.
+
+**A merge does not carry events or graph data.** Key-value, JSON and vectors
+move; the other two do not, and the receipt reports success either way. If your
+design puts an event log on a branch that has to merge, the log does not arrive.
+
+**Reranking does not work.** The command exists and no shipping provider
+implements it.
+[Rerank search results](/docs/guides/ai/rerank-search-results) covers what to do
+instead.
+
+**Python is the only SDK.** Node.js and Rust are not shipping.
+[Compatibility and versioning](/docs/reference/compatibility) has the current
+set, generated from the release.
+
+## A shorter way to decide
+
+Strata is a good fit when the database lives **inside** one program, the state
+is worth versioning, and you would otherwise be running three or four systems to
+hold different shapes of the same thing.
+
+It is the wrong tool when the database is a **service** that many programs on
+many machines talk to. That is not a limitation to work around; it is a
+different category of software.
+
+## Where to look next
+
+[Introduction to StrataDB](/docs/learn/introduction) for what it is, and
+[Quickstart](/docs/get-started/quickstart) for the ten-minute version of whether
+you like working in it.
