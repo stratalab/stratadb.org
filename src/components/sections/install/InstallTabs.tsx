@@ -65,74 +65,6 @@ const PY: Script = [
   ],
 ];
 
-const JS: Script = [
-  [['c', '// Step 1 - install (run in your terminal):']],
-  [['c', '//   npm install @stratadb/core']],
-  [],
-  [['c', '// Step 2 - save as quickstart.mjs and run: node quickstart.mjs']],
-  [
-    ['k', 'import'],
-    [null, ' { Strata } '],
-    ['k', 'from'],
-    [null, ' '],
-    ['s', '"@stratadb/core"'],
-    [null, ';'],
-  ],
-  [],
-  [
-    ['k', 'const'],
-    [null, ' db = '],
-    ['k', 'await'],
-    [null, ' Strata.'],
-    ['i', 'open'],
-    [null, '('],
-    ['s', '"./quickstart.strata"'],
-    [null, ');  '],
-    ['c', '// one file'],
-  ],
-  [],
-  [
-    ['k', 'await'],
-    [null, ' db.kv.'],
-    ['i', 'put'],
-    [null, '('],
-    ['s', '"portfolio.value"'],
-    [null, ', 98400);'],
-  ],
-  [
-    ['k', 'await'],
-    [null, ' db.kv.'],
-    ['i', 'put'],
-    [null, '('],
-    ['s', '"portfolio.value"'],
-    [null, ', 111080);  '],
-    ['c', '// history kept'],
-  ],
-  [],
-  [
-    ['i', 'console.log'],
-    [null, '('],
-    ['k', 'await'],
-    [null, ' db.kv.'],
-    ['i', 'get'],
-    [null, '('],
-    ['s', '"portfolio.value"'],
-    [null, '));      '],
-    ['c', '// 111080'],
-  ],
-  [
-    ['i', 'console.log'],
-    [null, '('],
-    ['k', 'await'],
-    [null, ' db.kv.'],
-    ['i', 'history'],
-    [null, '('],
-    ['s', '"portfolio.value"'],
-    [null, '));  '],
-    ['c', '// v2 · v1'],
-  ],
-];
-
 const CLI_LINES = [
   { text: '$ curl -fsSL https://stratadb.org/install.sh | sh', cmd: true },
   { text: '# installs the strata CLI and adds it to your PATH' },
@@ -160,6 +92,16 @@ const VSCODE_LINES = [
   { text: 'Extensions: search "StrataDB for VS Code"' },
 ];
 
+// Python only. The homepage used to offer `npm install @stratadb/core` beside
+// it, as an equal choice with its own tab and a runnable script.
+//
+// That package is real, which is what makes it dangerous: @stratadb/core is
+// published, undeprecated, and sitting at 0.15.0 from 2026-03-16, while the
+// engine is at 1.2.2. Following the homepage got you a v0.x SDK against a 1.2
+// database, and the installation page said Node was not available yet, so the
+// site contradicted itself and the truth was the worse of the two.
+//
+// Node comes back here when a 1.x package is published, not before.
 const SDK_PACKAGES = [
   {
     lang: 'py',
@@ -167,13 +109,6 @@ const SDK_PACKAGES = [
     name: 'stratadb',
     install: 'pip install stratadb',
     importLine: 'from stratadb import Strata',
-  },
-  {
-    lang: 'js',
-    registry: 'npm',
-    name: '@stratadb/core',
-    install: 'npm install @stratadb/core',
-    importLine: 'import { Strata } from "@stratadb/core";',
   },
 ] as const;
 
@@ -306,11 +241,11 @@ function NumberedScript({ script }: { script: Script }) {
   );
 }
 
-function PackageStrip({ activeLang }: { activeLang: 'py' | 'js' }) {
+function PackageStrip() {
   return (
-    <div className="mb-5 grid gap-3 md:grid-cols-2">
+    <div className="mb-5 grid gap-3">
       {SDK_PACKAGES.map((pkg) => {
-        const active = pkg.lang === activeLang;
+        const active = true;
         return (
           <div
             key={pkg.name}
@@ -386,7 +321,6 @@ function VscodePanel() {
 
 export default function InstallTabs() {
   const [mode, setMode] = useState<ModeId>('library');
-  const [lang, setLang] = useState<'py' | 'js'>('py');
 
   useEffect(() => {
     const applyMode = (id: string | null | undefined) => {
@@ -394,8 +328,6 @@ export default function InstallTabs() {
     };
 
     applyMode(sessionStorage.getItem('install-mode'));
-    const l = sessionStorage.getItem('install-lang');
-    if (l === 'py' || l === 'js') setLang(l);
 
     const onInstallMode = (event: Event) => {
       const requested = (event as CustomEvent<{ mode?: string }>).detail?.mode;
@@ -410,18 +342,13 @@ export default function InstallTabs() {
     setMode(id);
     sessionStorage.setItem('install-mode', id);
   };
-  const selectLang = (l: 'py' | 'js') => {
-    setLang(l);
-    sessionStorage.setItem('install-lang', l);
-  };
-
   const onModeKeys = (e: KeyboardEvent) => {
     const i = MODES.findIndex((t) => t.id === mode);
     if (e.key === 'ArrowRight') selectMode(MODES[(i + 1) % MODES.length].id);
     if (e.key === 'ArrowLeft') selectMode(MODES[(i - 1 + MODES.length) % MODES.length].id);
   };
 
-  const script = lang === 'py' ? PY : JS;
+  const script = PY;
   const windowTitle =
     mode === 'library'
       ? 'sdk packages'
@@ -494,27 +421,6 @@ export default function InstallTabs() {
           </span>
           <span className="font-mono text-mono-sm text-ink-mid">{windowTitle}</span>
           <span className="ml-auto flex items-center gap-2">
-            {mode === 'library' && (
-              <span
-                role="tablist"
-                aria-label="Language"
-                className="flex gap-1 rounded-(--radius-control) border border-line bg-inset p-0.5"
-              >
-                {(['py', 'js'] as const).map((l) => (
-                  <button
-                    key={l}
-                    role="tab"
-                    aria-selected={lang === l}
-                    onClick={() => selectLang(l)}
-                    className={`rounded px-2.5 py-1 font-mono text-mono-sm transition-colors duration-200 ${
-                      lang === l ? 'bg-raised text-ink-hi' : 'text-ink-low hover:text-ink-mid'
-                    }`}
-                  >
-                    {l === 'py' ? 'Python' : 'Node.js'}
-                  </button>
-                ))}
-              </span>
-            )}
             {mode === 'library' && <CopyAllButton text={scriptText(script)} label="copy script" />}
             {mode === 'vscode' && <CopyAllButton text={VSCODE_COMMANDS} label="copy setup" />}
             {mode === 'agents' && <CopyAllButton text={MCP_JSON.join('\n')} label="copy config" />}
@@ -531,7 +437,7 @@ export default function InstallTabs() {
         >
           {mode === 'library' && (
             <>
-              <PackageStrip activeLang={lang} />
+              <PackageStrip />
               <NumberedScript script={script} />
             </>
           )}
