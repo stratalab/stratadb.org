@@ -1,0 +1,74 @@
+---
+title: 'Preview a merge'
+description: 'Find out whether a merge will land, and what it will not carry, before you run it.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Know what a merge will do before doing it. About a minute.
+
+**You need.** A branch with changes on it.
+
+## Dry-run it
+
+```console
+strata ./shop branch preview experiment default
+```
+
+```
+source                    experiment
+target                    default
+strategy                  strict
+branch_point              4
+spaces_covered            default
+capabilities_covered      kv json vector
+capabilities_unsupported  vector_collection event graph_metadata graph_node graph_edge graph_ontology
+conflicts                 -
+derived_state
+  CAPABILITY  DISPOSITION
+  json        rebuild_required
+```
+
+Source first, then target. Nothing is written.
+
+## The two lines that matter
+
+**`conflicts`.** A `-` means the merge will apply. Anything listed means it will
+be refused under the default strategy, and
+[Resolve merge conflicts](/docs/guides/branching/resolve-merge-conflicts) is
+the next page.
+
+**`capabilities_unsupported`.** Read this one before you rely on a merge.
+Key-value, JSON and vector data move. **Events and graph data do not.** If your
+branch's work was an event log or a graph, a clean preview does not mean your
+changes will arrive, it means there is nothing to carry.
+
+That is not a bug you can work around with a flag; it is what merge covers
+today. [Branches](/docs/learn/branches) explains why.
+
+## The other fields
+
+`branch_point` is the version the two branches diverged at.
+
+`derived_state` lists work the merge implies rather than data it moves:
+`rebuild_required` for JSON means an index will be rebuilt on the target after
+the merge. It is not a warning.
+
+## What just happened
+
+Nothing. `preview` runs the same comparison a merge does and reports the
+outcome without committing, so it is safe to run repeatedly and safe to run in
+CI as a gate.
+
+## Failure modes
+
+**`invalid_argument.engine.branch_point`.** The two branches have no common
+ancestor, which means the branch came from `branch create` rather than `branch
+fork`. There is no recovery: redo the work on a forked branch.
+
+**Preview is clean and the merge still refuses.** The target moved between the
+two calls. Preview describes the moment it ran.
+
+## Next
+
+[Merge changes](/docs/guides/branching/merge-changes).

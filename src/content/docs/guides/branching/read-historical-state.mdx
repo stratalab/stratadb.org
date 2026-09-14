@@ -1,0 +1,95 @@
+---
+title: 'Read historical state'
+description: 'Read a value as it was, without changing anything or restoring anything.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Find out what a value used to be. About a minute.
+
+**You need.** A key that has been written more than once.
+
+## See the versions
+
+```console
+strata ./shop kv history price
+```
+
+```
+VERSION  COMMITTED_AT                    VALUE
+      5  2026-09-14 17:29:28.241408 UTC  200
+      4  2026-09-14 17:29:28.218256 UTC  150
+      3  2026-09-14 17:29:28.195333 UTC  100
+```
+
+Newest first. Two independent ways to name a moment sit in that table, and they
+are not interchangeable.
+
+## Read at a version
+
+```console
+strata ./shop kv get price --as-of 3
+```
+
+```
+100
+```
+
+`--as-of` takes the number from the `VERSION` column: a position on the commit
+timeline, not a date.
+
+## Read at a time
+
+```console
+strata ./shop kv get price --as-of-time '2026-09-14 17:29:28.20Z'
+```
+
+```
+100
+```
+
+`--as-of-time` takes a real moment, and resolves to the commit at or before it.
+It accepts a date, a date and time, an offset-bearing timestamp, or raw epoch
+microseconds.
+
+Passing both fails rather than picking one:
+
+```
+invalid_argument.executor.as_of_conflict: as_of and as_of_time are mutually
+exclusive
+```
+
+## It works across the models
+
+The same two flags are on reads throughout, not just key-value:
+
+```console
+strata ./shop json get config '$.stocks' --as-of 9
+strata ./shop graph bfs social alice --as-of 9
+```
+
+For a listing that spans several pages, pass the same `--as-of` to every page.
+That is what makes an enumeration describe one instant rather than a moving
+target.
+
+## What just happened
+
+Nothing was restored and nothing moved. A historical read is a read: the current
+state is untouched, and no branch was created. That is the difference between
+this and [Fork from historical
+state](/docs/guides/branching/fork-from-historical-state), which is what you
+want if you intend to work from the past rather than look at it.
+
+## Failure modes
+
+**`history_unavailable.engine.persistence_history`.** The point you asked for is
+outside what the database retains, most often because a wall-clock instant was
+passed to `--as-of`, which wants a version. Take the number from the table.
+
+**A read returns nothing rather than erroring.** A `version` used where a
+`timestamp` belongs can land on a real but wrong position. In a fresh database
+the two numbers are equal so the mistake works; in a cloned one they differ.
+
+## Next
+
+[Fork from historical state](/docs/guides/branching/fork-from-historical-state).

@@ -1,0 +1,82 @@
+---
+title: 'Merge changes'
+description: 'Promote a branch into another one, and confirm what actually landed.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Move work from a branch into the branch everything reads. About a
+minute.
+
+**You need.** A branch, and a [clean
+preview](/docs/guides/branching/preview-a-merge).
+
+## Merge
+
+```console
+strata ./shop branch merge experiment default
+```
+
+```
+merged experiment into default: 1 applied, 0 deleted, 0 conflicts (version 11)
+```
+
+Source first, then target, the same order as `preview`. Reversing it is not an
+error, it is a merge in the other direction, so read the receipt.
+
+## Confirm
+
+```console
+strata ./shop json get config '$'
+```
+
+```
+{
+  "bonds": 20,
+  "stocks": 80,
+  "strategy": "balanced"
+}
+```
+
+## Clean up
+
+```console
+strata ./shop branch delete experiment
+```
+
+```
+deleted branch experiment
+```
+
+Optional. Branches cost nothing to keep, and keeping the branch keeps a record
+of what the work looked like before it landed.
+
+## What just happened
+
+The receipt is the summary: how many entities were applied, how many deleted,
+how many conflicted, and the version the target is at now. That version is the
+one to quote if you need to come back to this moment, and
+[Read historical state](/docs/guides/branching/read-historical-state) is how.
+
+Merging does not delete the source branch or move you onto the target. It
+copies state across and leaves both branches where they were.
+
+## Failure modes
+
+**`conflict.engine.promotion`.** Both branches changed the same thing. Nothing
+was written. See [Resolve merge
+conflicts](/docs/guides/branching/resolve-merge-conflicts).
+
+**It succeeded but your events or graph data are missing.** Merge does not carry
+them. `preview` says so in `capabilities_unsupported`, which is the reason to
+run it first.
+
+**You are reading merge output in a script.** For key-value entries
+`applied[].value` is the value written; for JSON it is currently an internal
+envelope rather than the document, tracked as strata-core issue 3202. Read the
+merged state back rather than parsing it.
+
+## Next
+
+[Resolve merge conflicts](/docs/guides/branching/resolve-merge-conflicts), for
+when this refuses.

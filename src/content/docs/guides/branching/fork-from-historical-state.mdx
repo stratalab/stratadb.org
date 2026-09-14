@@ -1,0 +1,83 @@
+---
+title: 'Fork from historical state'
+description: 'Start a branch from the past, to rebuild from a known-good point or inspect one in place.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get a working branch that starts where the database was earlier. About
+two minutes.
+
+**You need.** A version number from `history`. [Read historical
+state](/docs/guides/branching/read-historical-state) covers finding one.
+
+## Fork at a version
+
+```console
+strata ./shop branch fork default before-hike --version 3
+```
+
+```
+forked before-hike from default at version 3
+```
+
+The receipt names the version, which is worth keeping: it is the difference
+between this and an ordinary fork.
+
+## Confirm where it starts
+
+```console
+strata ./shop --branch before-hike kv get price
+strata ./shop kv get price
+```
+
+```
+100
+200
+```
+
+The branch is not a snapshot you can only read. It is an ordinary branch that
+happens to start earlier, so you can write to it, diff it and merge it like any
+other.
+
+## Or fork at a timestamp
+
+```console
+strata ./shop branch fork default before-hike --timestamp 3
+```
+
+`--timestamp` takes the commit-timeline value, the same number `--as-of` wants.
+It does **not** take a wall-clock reading: passing one raises
+`history_unavailable.engine.persistence_history`, because an epoch-microsecond
+number is far beyond anything the timeline holds. There is no `--as-of-time`
+equivalent for forking, so a fork is always addressed by position.
+
+## What this is for
+
+**Recovering from a bad change.** Fork before it, verify the branch holds what
+you expect, then merge it forward or keep working on it.
+
+**Reproducing a report.** Fork at the version a result was computed from, and
+the branch keeps answering the same way no matter what happens on `default`.
+
+**Testing a migration.** Fork at the version before it ran, apply a different
+one, and diff the two.
+
+## What just happened
+
+Forking from the past costs the same as forking from the tip: nothing is copied
+either way. The branch records where it started and diverges from there.
+
+## Failure modes
+
+**`history_unavailable.engine.persistence_history`.** The version is outside
+what is retained, or a wall-clock value was passed to `--timestamp`.
+
+**The fork is empty.** Check the version is one the source branch actually
+passed through. `history` on a key that existed then is the quickest
+confirmation.
+
+## Next
+
+[Merge changes](/docs/guides/branching/merge-changes) to bring the rebuilt
+branch forward.

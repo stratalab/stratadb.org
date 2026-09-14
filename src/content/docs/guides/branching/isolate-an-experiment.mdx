@@ -1,0 +1,90 @@
+---
+title: 'Isolate an experiment'
+description: 'Run risky changes on a branch so the database you depend on does not move.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Make changes you are not sure about without touching the state
+everything else reads. About two minutes.
+
+**You need.** The CLI, and a database. Any database.
+
+## Fork before you touch anything
+
+```console
+strata ./shop branch fork default experiment
+```
+
+```
+forked experiment from default
+```
+
+That copied nothing. A fork records the version it forked at and diverges from
+there, so it is the same cost on a database of ten keys or ten million.
+
+## Work on the fork
+
+Every command takes `--branch`:
+
+```console
+strata ./shop --branch experiment json set config '$.stocks' 80
+strata ./shop --branch experiment json set config '$.bonds' 20
+```
+
+```
+updated config
+updated config
+```
+
+## Check that default did not move
+
+This is the part worth confirming the first time, because it is the whole point:
+
+```console
+strata ./shop --branch experiment json get config '$.stocks'
+strata ./shop json get config '$.stocks'
+```
+
+```
+80
+60
+```
+
+Two answers, same key, same database. Anything still reading `default` is
+unaffected by what you are doing.
+
+## What just happened
+
+A branch covers the entire database, not one table or one model. The JSON
+document you changed, every key beside it, and every vector and graph in the
+same database all have an `experiment` version now, and all of them are still at
+their `default` version too.
+
+## Keeping or discarding
+
+If the experiment worked, [preview the merge](/docs/guides/branching/preview-a-merge).
+
+If it did not, delete the branch and nothing you did survives:
+
+```console
+strata ./shop branch delete experiment
+```
+
+```
+deleted branch experiment
+```
+
+Deleting a branch you were working on is not recoverable, so if you might want
+the result later, keep the branch rather than merging it. Branches are cheap.
+
+## If it goes wrong
+
+Reach for `branch fork`, not `branch create`. `create` makes an empty root
+branch with no parent, and writes to it succeed, so the mistake only appears
+later when a merge fails with `invalid_argument.engine.branch_point`.
+
+## Next
+
+[Compare two branches](/docs/guides/branching/compare-two-branches) to see what
+you changed.

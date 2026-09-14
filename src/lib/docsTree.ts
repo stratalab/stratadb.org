@@ -90,13 +90,22 @@ export const docsTree: TreeNode[] = [
       {
         label: 'Branching and history',
         children: [
-          { label: 'Isolate an experiment' },
-          { label: 'Compare two branches' },
-          { label: 'Preview a merge' },
-          { label: 'Merge changes' },
-          { label: 'Resolve merge conflicts' },
-          { label: 'Fork from historical state' },
-          { label: 'Read historical state' },
+          { label: 'Isolate an experiment', href: '/docs/guides/branching/isolate-an-experiment' },
+          { label: 'Compare two branches', href: '/docs/guides/branching/compare-two-branches' },
+          { label: 'Preview a merge', href: '/docs/guides/branching/preview-a-merge' },
+          { label: 'Merge changes', href: '/docs/guides/branching/merge-changes' },
+          {
+            label: 'Resolve merge conflicts',
+            href: '/docs/guides/branching/resolve-merge-conflicts',
+          },
+          {
+            label: 'Fork from historical state',
+            href: '/docs/guides/branching/fork-from-historical-state',
+          },
+          {
+            label: 'Read historical state',
+            href: '/docs/guides/branching/read-historical-state',
+          },
         ],
       },
       {

@@ -1,0 +1,65 @@
+---
+title: 'Compare two branches'
+description: 'See exactly what differs between two lines of the database before you act on it.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Find out what changed on a branch. About a minute.
+
+**You need.** Two branches. [Isolate an
+experiment](/docs/guides/branching/isolate-an-experiment) makes the second one.
+
+## Diff them
+
+```console
+strata ./shop branch diff default experiment
+```
+
+```
+branch_a  default
+branch_b  experiment
+
+SPACE    CAPABILITY  CHANGE    IDENTITY  VERSION
+default  json        modified  config          9
+```
+
+One row per changed thing. `CHANGE` is `added`, `modified` or `removed`,
+`CAPABILITY` says which data model it belongs to, and `IDENTITY` is the key,
+document, node or collection that moved.
+
+## What just happened
+
+`diff` compares state, not history. It does not care how many writes produced
+the difference or in what order; it reports where the two branches disagree
+right now. A key written five times on the branch and once back to its original
+value does not appear at all.
+
+The argument order is `branch_a` then `branch_b`, and the output labels them, so
+a diff read backwards is obvious rather than silently inverted.
+
+## Reading it in a script
+
+`--json` gives the same content as a structure, and `--raw` gives tab-separated
+rows with no header:
+
+```console
+strata ./shop --raw branch diff default experiment
+```
+
+That is the form to pipe into `awk` or `cut`.
+[Global options](/docs/reference/global-options) covers all three formats.
+
+## Failure modes
+
+**Nothing comes back but you expected changes.** Check you are diffing the right
+pair, and remember `diff` compares current state: a change that was undone
+leaves no trace here.
+
+**A branch name is not found.** `branch list` shows what exists, with each
+branch's parent.
+
+## Next
+
+[Preview a merge](/docs/guides/branching/preview-a-merge), which answers the
+different question of whether those changes can land.

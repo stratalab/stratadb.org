@@ -1,0 +1,106 @@
+---
+title: 'Resolve merge conflicts'
+description: 'What a refused merge tells you, and the two ways to get the change in.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Land a branch whose changes collide with the target. About five
+minutes.
+
+**You need.** Two branches that changed the same thing.
+
+## What a conflict looks like
+
+Two teams fork from the same point and both change one key. The first merge
+lands. The second does not:
+
+```console
+strata ./shop branch merge team-b default
+```
+
+```
+conflict.engine.promotion: promotion of `team-b` into `default` refused: 1 conflict(s)
+  hint: Reload current state and retry against the latest branch, space, or collection version.
+  ref: https://stratadb.org/e/conflict.engine.promotion
+```
+
+**Nothing was written.** The default strategy is all-or-nothing, so a refused
+merge leaves the target exactly as it was.
+
+## See what collided
+
+```console
+strata ./shop branch preview team-b default
+```
+
+```
+conflicts
+  CAPABILITY  IDENTITY     KIND              SOURCE_VALUE  SPACE    STRATEGY_RESULT  TARGET_VALUE
+  kv          config.mode  value_divergence  conservative  default  refused          aggressive
+```
+
+One row per collision, with both values side by side. `value_divergence` means
+both sides changed it to something different. `STRATEGY_RESULT` is what the
+current strategy did about it.
+
+## Option one: take the source side
+
+```console
+strata ./shop branch merge team-b default --strategy source-wins
+```
+
+```
+merged team-b into default: 1 applied, 0 deleted, 1 conflicts (version 17)
+```
+
+```console
+strata ./shop kv get config.mode
+```
+
+```
+conservative
+```
+
+Note the receipt still counts the conflict. It was resolved, not absent.
+
+`source-wins` applies the source's value **for every conflict in the merge**,
+not just the one you looked at. Read the full conflict list from `preview`
+before using it.
+
+## Option two: decide each one yourself
+
+There are only two strategies, `strict` and `source-wins`. There is no
+target-wins and no per-key resolution, so deciding case by case means editing
+the source branch until it holds the values you want, then merging cleanly:
+
+```console
+strata ./shop --branch team-b kv put config.mode balanced
+strata ./shop branch preview team-b default
+strata ./shop branch merge team-b default
+```
+
+The first command is the resolution. You are choosing the final value on the
+source side, where a normal write does the job, and the merge that follows has
+nothing left to disagree about.
+
+## What just happened
+
+A conflict is two branches changing the same identity to different values after
+they diverged. Strata does not merge values: it either refuses, or takes one
+side whole. For anything where the right answer is a combination of both, that
+combination has to be written by you, on the source branch.
+
+## Failure modes
+
+**`source-wins` overwrote something you wanted.** The target's previous value is
+still in history. `kv history` shows it and `--as-of` reads it back.
+
+**The conflict list is long.** That usually means the branch has been open a
+while. Merging the target into the branch first is not available; re-forking
+from the current target and reapplying is the way back to a short list.
+
+## Next
+
+[Read historical state](/docs/guides/branching/read-historical-state), which is
+how you recover a value a merge replaced.
