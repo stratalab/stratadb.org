@@ -4,6 +4,14 @@
 // A node with children is a collapsible group; a leaf is a link once its page
 // exists and plain text until then, so the sidebar can never invent a link.
 //
+// An unwritten leaf says so. It used to be dimmer text and nothing else, which
+// is a distinction carried entirely by colour and, as it turned out, invisible:
+// the sidebar read as finished documentation for a section that is 1 of 32
+// written. The marker is the honest signal, not a decoration.
+//
+// Only leaves are marked. A group without an href is a category, not a missing
+// page, so "How Strata works" is not waiting to be written.
+//
 // Depth reads structurally, not by indentation alone: every level of children
 // hangs off its own vertical rule, so opening Reference draws one rule and
 // opening Commands inside it draws a second. At four levels deep that is the
@@ -89,17 +97,38 @@ const shouldOpen = open || (hasChildren && node.children!.some(holdsCurrent));
   ) : (
     <span
       class:list={[
-        '-ml-px flex items-center gap-1.5 border-l-2 border-transparent py-1.5 pl-1 pr-2 text-ink-low',
+        '-ml-px flex items-center gap-1.5 border-l-2 border-dashed border-line py-1.5 pl-1 pr-2 text-ink-low',
         node.generated ? 'font-mono text-mono-body' : 'text-body',
       ]}
+      aria-label={`${node.label}, planned`}
     >
       <span class="w-3 shrink-0" aria-hidden="true" />
       <span class="min-w-0 flex-1 truncate">{node.label}</span>
+      <span class="tree-soon" aria-hidden="true">
+        soon
+      </span>
     </span>
   )
 }
 
 <style>
+  /* Two signals, so the difference survives a reader who cannot see the colour:
+     the label steps back, and the rule it hangs off becomes dashed. The word is
+     the third, for anyone scanning rather than reading. */
+  .tree-soon {
+    flex-shrink: 0;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.625rem;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-low);
+  }
+
+  /* A whole section can be unwritten, and 75 of these appear at once when it
+     is. The word carries the meaning; a ring around each one turns an honest
+     signal into visual noise at that density. No opacity on top of the token
+     either: it drops 10px text under AA, and the size already does the work. */
+
   /* Direct-child only: a nested node must not inherit its ancestor's state. */
   .tree-chev {
     display: inline-block;
