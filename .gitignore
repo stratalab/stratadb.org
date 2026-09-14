@@ -39,3 +39,6 @@ public/playground/pkg/
 
 # Local interpreter for the Python SDK probe (scripts/fetch-python-bindings.mjs).
 .venv/
+
+# Pinned Colonies engine, hash-verified by scripts/stage-colonies.mjs.
+public/demos/colonies/assets/pkg/

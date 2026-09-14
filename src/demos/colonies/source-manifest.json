@@ -1,0 +1,16 @@
+{
+  "source": "strata-apps/strata-colonies/web",
+  "files": {
+    "app.css": "09e5130aeb96517203f5d15284c33bac97a5f845dd18a48ff1aad407e09702e5",
+    "app.mjs": "a4a789575d83ef692e5212b9c7c25001fd0bcd257150444a30c6185a076e513b",
+    "branch-explorer.mjs": "2a5de3181488f7a1266f4e4c5340b8196e4105b89ecbaa578c34a76291625a5a",
+    "client.mjs": "fece87818910eddcabf9e132e714965e3e26b472872a54903cb625e8a0afe330",
+    "edit-draft.mjs": "063263855fe48fb0da0d49deaed243a1c8dca56067e817f0f3bf623ed2aef8c2",
+    "engine.mjs": "3f8f26a02aa1aae8ec2be53a515fbce9487935bad7b0fb6fc1745d52a5d397f2",
+    "life.mjs": "2512a162774c2d284a9465e8dae3f9c892d95bb766f2908a6edf3f36418cbab5",
+    "playful.css": "2b74dd5021a2b228c898e9501176ae6d0e00bf9d8bf10449b28d2dedd6b42211",
+    "tokens.css": "1a778ad01aefef2416f8adebfd230be5121c94e4f51f495ea25ac1cce34bce29",
+    "worker.mjs": "7f8ab189fe667cdc0114f6858c250700a30c93b6acd11a885b10c1677e15e140",
+    "index.html": "31f8f431b02eaca54c3bc62a86e530e1430d0a5e86a8efe2b93c9a7962a41282"
+  }
+}

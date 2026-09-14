@@ -1,0 +1,9 @@
+---
+// The game owns its fullscreen shell; no iframe or second site navigation.
+// Its assets are synced from strata-apps/strata-colonies by website:sync.
+import document from '../../demos/colonies/index.html?raw';
+import tokens from '../../styles/tokens.css?raw';
+const page = document.replace('</head>', `<style>${tokens}</style></head>`);
+---
+
+<Fragment set:html={page} />

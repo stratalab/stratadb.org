@@ -20,7 +20,7 @@
     "audit:runtime": "npm audit --omit=dev --audit-level=high",
     "setup:browsers": "playwright install chromium",
     "visual:smoke": "node scripts/visual-smoke.mjs",
-    "verify:source": "npm run verify:versions && npm run verify:commands && npm run verify:errors && npm run verify:demos && npm run verify:docs-copy && npm run verify:reference-ia && npm run verify:source-hygiene",
+    "verify:source": "npm run verify:versions && npm run verify:commands && npm run verify:errors && npm run verify:demos && npm run verify:docs-copy && npm run verify:reference-ia && npm run verify:source-hygiene && npm run verify:colonies",
     "verify:source-hygiene": "node scripts/verify-source-hygiene.mjs",
     "verify:versions": "node scripts/verify-versions.mjs",
     "verify:commands": "node scripts/verify-commands.mjs",
@@ -33,8 +33,10 @@
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-error-registry.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs",
-    "verify:redirects": "node scripts/verify-redirects.mjs"
+    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-error-registry.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs && node scripts/stage-colonies.mjs",
+    "verify:redirects": "node scripts/verify-redirects.mjs",
+    "predev": "node scripts/stage-colonies.mjs",
+    "verify:colonies": "node scripts/verify-colonies.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

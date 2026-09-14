@@ -11,6 +11,7 @@ export default tseslint.config(
       'dist/**',
       'node_modules/**',
       'public/playground/pkg/**',
+      'public/demos/colonies/assets/pkg/**',
       'src/content/docs/reference/**',
       'src/content-archive/**',
       'src/docs-ui-archive/**',

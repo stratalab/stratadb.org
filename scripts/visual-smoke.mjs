@@ -10,6 +10,8 @@ const EXTERNAL_BASE_URL = process.env.VISUAL_BASE_URL;
 const BASE_URL = EXTERNAL_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 const routes = [
+  { path: '/demos/colonies/', h1: /one cell.*different future/i },
+  { path: '/resources/demos/', h1: /demos/i },
   { path: '/', h1: /database for vibecoders/i },
   // Docs rebuild: /docs is the zero-state route. Restore the section rows
   // (reference, guides, ...) as their pages come back.
@@ -496,6 +498,18 @@ async function assertPage(browser, route, viewport) {
     }
     if (metrics.sampledVisibleElementCount === 0) {
       throw new Error(`${viewport.name} ${route.path}: viewport center samples are blank`);
+    }
+    if (route.path === '/demos/colonies/') {
+      await page.waitForFunction(
+        () =>
+          document.querySelector('#status')?.textContent.startsWith('6 colonies') &&
+          !document.querySelector('#play')?.disabled,
+      );
+      await page.locator('#play').click();
+      await page.waitForFunction(
+        () => Number(document.querySelector('#generation')?.textContent) >= 1,
+      );
+      await page.locator('#pause').click();
     }
     if (route.path === '/') {
       await assertHomepageSectionBreaks(page, viewport);
