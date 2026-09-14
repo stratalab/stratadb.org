@@ -1,0 +1,105 @@
+---
+title: 'Configure Strata'
+description: 'Two kinds of configuration: per-open flags, and the global file that holds provider keys.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Know where each setting lives and which layer wins. About three
+minutes.
+
+## Per-database settings are flags, not config
+
+Durability, sharing, read-only, and the default branch and space are chosen when
+you open the database, not stored in it:
+
+```console
+strata --durability always --read-only ./mydb kv get k
+```
+
+There is no config file for these, because two processes can legitimately open
+the same database with different ones.
+[Global options](/docs/reference/global-options) documents each.
+
+One caveat that catches people: when a process brokers to a host, **the host's
+durability governs the write**, not the client's. A client passing
+`--durability always` against a default host gets the host's mode and is not
+told. Read `durability` off the commit receipt rather than trusting the flag.
+[Durability](/docs/learn/durability) covers what that costs.
+
+## The global config is for credentials and the hub
+
+```console
+strata config path
+strata config get
+```
+
+The file holds inference provider keys and the hub URL, and nothing about any
+particular database:
+
+```console
+strata config set openai.api_key sk-...
+strata config get-key openai.api_key
+```
+
+Keys print redacted, and the file is written with owner-only permissions.
+
+```console
+strata config unset openai.api_key
+```
+
+## Environment wins
+
+A provider's own environment variable overrides the file:
+
+```console
+export OPENAI_API_KEY=sk-...
+```
+
+That is the order to remember: environment, then file. It is what makes CI work
+without writing a key to disk.
+
+`STRATA_DB` sets a default database path the same way, so a shell that exports
+it can drop the path argument entirely.
+
+## Checking what is in effect
+
+```console
+strata inference status
+```
+
+```
+build	cloud providers only
+
+providers
+  openai	ready -- key from ~/.config/strata/config.toml; use openai:<model>
+  anthropic	no key -- `strata config set anthropic.api_key <key>`
+  google	no key -- `strata config set google.api_key <key>`
+  local	not in this build
+```
+
+That names the layer each key came from, which is the question you have when a
+key is set and inference still fails.
+
+```console
+strata config show
+```
+
+Does the same for the hub configuration.
+
+## Failure modes
+
+**A key is set and inference still says it is missing.** An environment variable
+is overriding the file with an empty or stale value. `inference status` names
+the layer in use.
+
+**A config edit did nothing.** Check `strata config path`. There is one global
+file, not a per-project one.
+
+**Provider keys vanished.** A malformed config file can cause a stored key to be
+dropped silently. This is tracked as strata-core issue 3296, and `strata config
+get` is the way to confirm what survived.
+
+## Next
+
+[Inspect database health](/docs/guides/operations/inspect-database-health).

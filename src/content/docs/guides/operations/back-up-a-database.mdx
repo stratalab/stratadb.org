@@ -1,0 +1,106 @@
+---
+title: 'Back up a database'
+description: 'Copy a Strata database safely, and see what happens when you copy one that is open.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Take a backup you can actually restore from. About two minutes.
+
+**You need.** A database, and the ability to stop whatever is writing to it.
+
+## Stop, copy, start
+
+A Strata database is a directory, so the backup tool is the one you already use:
+
+```console
+strata ./mydb stop
+cp -r ./mydb ./mydb-backup
+```
+
+`tar`, `rsync`, a filesystem snapshot and a cloud sync all work the same way.
+There is no backup command because there is nothing a backup command would know
+that `cp` does not.
+
+## Verify the copy
+
+A copy is a real database, not a pointer at the original:
+
+```console
+strata ./mydb-backup kv get important
+strata ./mydb-backup kv put probe 1
+strata ./mydb --raw kv count
+strata ./mydb-backup --raw kv count
+```
+
+The two diverge from the moment you write to either. That makes a copy a
+reasonable way to fork an environment, not just to archive one.
+
+## What happens if you do not stop first
+
+This is the part worth seeing, because it fails quietly.
+
+A database hosted by a running process, copied while it runs:
+
+```console
+strata ./mydb start &
+strata ./mydb kv put b 2
+strata ./mydb --raw kv count
+```
+
+```
+2
+```
+
+```console
+cp -r ./mydb ./mydb-livecopy
+strata ./mydb-livecopy --raw kv count
+```
+
+```
+1
+```
+
+The original has two keys. The copy has one. **No error, no warning**: the copy
+opens cleanly and is simply missing a write.
+
+The reason is not exotic. Files in the directory are not written atomically with
+respect to each other, so a copy taken mid-flight captures a moment that never
+existed as a whole. Every embedded database has this property, and the fix is
+always the same: quiesce first.
+
+## If you cannot stop the writer
+
+Use a filesystem-level atomic snapshot, such as an LVM or ZFS snapshot or a
+cloud volume snapshot, and copy from that. Those capture the whole directory at
+one instant, which is the property `cp` lacks.
+
+Failing that, accept that the copy may be missing recent commits and treat it as
+a point-in-time approximation rather than a backup.
+
+## What a backup does not need
+
+No schema export, no dump format, no version-matched restore tool. The on-disk
+format is version 1 and every 1.x binary reads it, so a copy taken today opens
+on a later 1.x release without a migration step.
+[Compatibility and versioning](/docs/reference/compatibility) covers what that
+promise is worth.
+
+## Failure modes
+
+**The copy is missing recent writes.** It was taken while a process held the
+database. See above.
+
+**The copy will not open.** If the source was mid-write, the manifest can be
+inconsistent, and the open fails with `unavailable.engine.persistence` rather
+than returning wrong data. [Recover from
+errors](/docs/guides/operations/recover-from-errors) covers what to do.
+
+**You backed up an empty directory.** Check the path. A mistyped path creates a
+new empty database rather than failing, so a backup script pointed at one
+quietly archives nothing. [Troubleshoot
+failures](/docs/guides/operations/troubleshoot-failures) has that one.
+
+## Next
+
+[Inspect database health](/docs/guides/operations/inspect-database-health).

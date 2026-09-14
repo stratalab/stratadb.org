@@ -1,0 +1,129 @@
+---
+title: 'Troubleshoot failures'
+description: 'Start from the symptom you have, not the error code you were given.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+[Error codes](/docs/reference/errors) answers "what is
+`invalid_argument.cli.no_database`". This page answers the direction you
+usually arrive from: something is wrong and you do not have a code yet.
+
+Run `strata ./mydb doctor` first. Its `path`, `exists` and `open_ok` fields
+settle most of what follows.
+
+## My data is gone
+
+**Almost always: you are looking at a different database.**
+
+A path that does not exist is not an error. Strata creates a database there:
+
+```console
+strata ./reaI kv get important
+```
+
+```
+(nil)
+```
+
+That created `./reaI`, empty, and answered truthfully about it. One capital
+letter, and the database you meant is untouched somewhere else.
+
+```console
+strata ./mydb doctor
+```
+
+Compare the `path` it reports to the one you meant. Then check `STRATA_DB`,
+which silently supplies a path when the argument is omitted.
+
+**Or you are on a different branch.** `db.branch`, or `--branch` on the command,
+or a session default. `strata ./mydb branch list` shows what exists.
+
+**Or the data was on a branch that got merged, and it was events or graph
+data.** Merges do not carry those. The receipt says success regardless. See
+[Record tool activity](/docs/guides/agents/record-tool-activity).
+
+## The database will not open
+
+```console
+strata ./mydb doctor
+```
+
+`exists: false` means there is nothing there; see above.
+
+`exists: true` with `open_ok: false` means the directory is a database and
+something is wrong with it. The error names which:
+
+- **`unavailable.engine.persistence`** is the general "could not open the lower
+  layer" answer, and is what a corrupted manifest produces. The manifest carries
+  a checksum, so damage is caught at open rather than surfacing later as wrong
+  data.
+- **`invalid_argument.engine.persistence`** usually means the path is not a
+  Strata database at all, such as a plain file.
+- **A format error** means the database was written by a version whose format
+  this binary does not read.
+  [Compatibility and versioning](/docs/reference/compatibility) explains what is
+  refused and why.
+
+Restore from a backup. [Back up a
+database](/docs/guides/operations/back-up-a-database).
+
+## A write was rejected
+
+- **`access_denied.executor.read_only_session`.** The connection was opened
+  `--read-only`. Reads still work; reopen without it.
+- **`conflict.engine.promotion`.** A merge collided. Nothing was written.
+  [Resolve merge conflicts](/docs/guides/branching/resolve-merge-conflicts).
+- **`invalid_argument.engine.branch_point`.** The branch came from `branch
+create` rather than `branch fork` and has no common ancestor to merge along.
+- **`failed_precondition.engine.graph_edge_endpoint`.** Both nodes must exist
+  before the edge.
+
+## A write succeeded and then vanished
+
+The process was killed without closing. Under the default durability mode the
+engine syncs at close and at intervals, so acknowledged commits since the last
+sync point are lost on an unclean exit. Measured: ten acknowledged writes,
+`SIGKILL`, one survivor.
+
+[Durability](/docs/learn/durability) has the numbers and the fix, which is
+`--durability always` on the process that **hosts** the database.
+
+## A read returns nothing, or the wrong thing
+
+- **Reading the past with `--as-of` and getting nothing.** `--as-of` wants a
+  commit position from the `VERSION` column, not a date. A wall-clock value
+  raises `history_unavailable.engine.persistence_history`; a plausible-but-wrong
+  version quietly returns the wrong answer.
+  [Read historical state](/docs/guides/branching/read-historical-state).
+- **A JSON path returns nothing for a key you can see.** Keys containing a dot
+  cannot be addressed, and the path silently resolves to nothing. Keys with
+  spaces are rejected outright. Tracked as strata-core issue 2703.
+- **A key-value read looks like nonsense.** Values that are not valid UTF-8 come
+  back marked `base64:`. Use `--raw` for the bytes.
+
+## Inference fails
+
+```console
+strata inference status
+```
+
+That one command covers most of it: whether the build has local execution,
+which providers have keys, and which layer each key came from. A bare model name
+means a local model, and released binaries ship without local execution until
+you run `strata inference install-local`.
+
+## Two processes are involved
+
+- **Commands work but one of them fails oddly.** Run the same version on both
+  sides. Mixed versions are not refused, and one direction fails at the point of
+  use. Tracked as strata-core issue 3369.
+- **`strata ipc status`** reports who is hosting and how many clients are
+  attached.
+
+## When you do have a code
+
+Every code has a page at `/e/<code>` with its retry policy and, more usefully,
+its **commit outcome**: whether a failed operation applied. Two codes answer
+`maybe_committed`, and those are the only ones where a retry needs thought.
+[Error codes](/docs/reference/errors) is the contract.

@@ -1,0 +1,126 @@
+---
+title: 'Inspect database health'
+description: 'Five commands that answer different questions, and which one to reach for.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Find out whether a database is sound, and what it contains. About two
+minutes.
+
+**You need.** A database path.
+
+## The one to run when something is wrong
+
+```console
+strata ./mydb doctor
+```
+
+```
+binary     1.2.2
+database
+  exists   true
+  open_ok  true
+  path     ./mydb
+  info
+    branch_count    1
+    default_branch  default
+    durable         true
+    target          durable_local
+    version         1.2.2
+home       /home/anibjoshi/.strata
+inference
+  local_execution    false
+  models_catalogued  11
+```
+
+`doctor` checks the installation as well as the database, which is why it is the
+first thing to run when you do not yet know what is wrong. Three fields carry
+most of the diagnosis:
+
+- **`path`** is the path it actually resolved. Compare it to the one you meant.
+- **`exists`** says whether a database is there.
+- **`open_ok`** says whether it opened. `false` here with `exists: true` is the
+  signature of a damaged database.
+
+## The other four
+
+```console
+strata ./mydb describe
+```
+
+```
+StrataDB 1.2.2 · durable_local
+branch default · branches: default · spaces: default
+capabilities: arrow event graph_core inference json kv vector vector_index
+kv 0 · json 0 · events 0
+```
+
+One line each for what it is, where you are, what it can do, and what is in it.
+This is the orientation command.
+
+```console
+strata ./mydb info
+```
+
+Target, version, durability, branch and space counts, and the memory budget with
+where that budget came from.
+
+```console
+strata ./mydb health
+```
+
+```
+status          healthy
+identity        healthy
+registry        healthy
+branch_catalog  healthy
+space_catalog   healthy
+```
+
+One line per subsystem. This is the one to assert on in a monitoring check,
+because it names _which_ part is unhealthy rather than just failing.
+
+```console
+strata ./mydb metrics
+```
+
+Counters, for a dashboard.
+
+## In a script
+
+All five take `--json`:
+
+```console
+strata --json ./mydb health
+```
+
+That is the stable contract.
+[Global options](/docs/reference/global-options) covers the formats, and
+`--raw` if you want tab-separated fields instead.
+
+## What none of them tell you
+
+There is no command that reports the size of a database, how much history it is
+retaining, or whether that history is growing faster than the live data. Those
+are filesystem questions today:
+
+```console
+du -sh ./mydb
+```
+
+[Databases and storage](/docs/learn/databases-and-storage) has what history
+costs and why there is no way to prune it.
+
+## Failure modes
+
+**`exists: true`, `open_ok: false`.** The directory is there and the database
+will not open. [Recover from
+errors](/docs/guides/operations/recover-from-errors).
+
+**Everything reports healthy but your data is missing.** Check `path`. A
+mistyped path is a different, empty database, and it will report perfect health.
+
+## Next
+
+[Troubleshoot failures](/docs/guides/operations/troubleshoot-failures).

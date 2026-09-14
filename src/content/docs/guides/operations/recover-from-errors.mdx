@@ -1,0 +1,137 @@
+---
+title: 'Recover from errors'
+description: 'What survives a crash, what a damaged database does, and how to get back to a working state.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get a database back to a usable state, and know what you lost. About
+five minutes.
+
+## After an unclean shutdown
+
+A database whose process was killed reopens on its own. There is no repair step
+and no recovery mode to enter:
+
+```console
+strata ./mydb doctor
+```
+
+`open_ok: true` means it came back. What you need to establish is not whether it
+opened but **what it opened with**.
+
+Under the default durability mode, acknowledged commits since the last sync
+point are gone. Measured: ten acknowledged writes into a hosted database, then
+`SIGKILL`, then reopen. One survivor. With `--durability always`, ten.
+
+So after a crash, check the tail rather than the database:
+
+```console
+strata ./mydb kv history important
+```
+
+The most recent version tells you how far the writes actually got.
+[Durability](/docs/learn/durability) explains the window and how to close it.
+
+## When it will not open
+
+```console
+strata ./mydb doctor
+```
+
+```
+database
+  exists   true
+  open_ok  false
+  path     ./mydb
+```
+
+That pairing means the directory is a database and something in it is damaged.
+A corrupted manifest reports:
+
+```
+unavailable.engine.persistence: persistence lower layer is unavailable
+```
+
+There is no repair command. The manifest carries a checksum precisely so that
+damage stops the open rather than surfacing later as wrong answers, which is the
+behaviour you want, but it does mean the path forward is a backup.
+
+**Do not delete the directory.** Move it aside first. A damaged database is
+still evidence, and a later release may be able to read more of it than this one.
+
+```console
+mv ./mydb ./mydb-damaged
+cp -r ./mydb-backup ./mydb
+```
+
+[Back up a database](/docs/guides/operations/back-up-a-database) is the
+prerequisite for this working at all.
+
+## When the data is wrong rather than missing
+
+This is the better case, and it is what branches and history are for. A bad
+write is not destructive: the previous value is still there.
+
+```console
+strata ./mydb kv history config.mode
+```
+
+```
+VERSION  COMMITTED_AT                    VALUE
+      8  2026-09-14 17:29:28.241408 UTC  broken
+      3  2026-09-14 17:29:28.195333 UTC  working
+```
+
+Read the good value back:
+
+```console
+strata ./mydb kv get config.mode --as-of 3
+```
+
+```
+working
+```
+
+Or fork the whole database from before the damage, verify it, and merge it
+forward:
+
+```console
+strata ./mydb branch fork default rollback --version 3
+strata ./mydb --branch rollback kv get config.mode
+```
+
+[Fork from historical state](/docs/guides/branching/fork-from-historical-state)
+covers the pattern. This is the recovery path that does not need a backup, and
+it works for anything short of the database failing to open.
+
+## What a failed write did
+
+When a command fails, the question is whether it applied. Every error code
+carries the answer:
+
+```console
+strata agents errors --json
+```
+
+Most codes report `never` or `not_applicable`: your state is untouched and a
+retry is safe. Two report `maybe_committed`, and those are the only ones where
+you must check before retrying rather than looping.
+[Error codes](/docs/reference/errors) names them.
+
+## Failure modes
+
+**The backup is also broken.** It was probably taken while the database was
+open. A live copy can be silently incomplete. See [Back up a
+database](/docs/guides/operations/back-up-a-database).
+
+**History does not go back far enough.** `history_unavailable.engine.
+persistence_history` means the point you asked for is outside what is retained.
+
+**The rollback branch is empty.** The version predates the key existing. Check
+`history` for a version the key was actually present at.
+
+## Next
+
+[Troubleshoot failures](/docs/guides/operations/troubleshoot-failures) for
+symptoms without a code yet.

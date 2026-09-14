@@ -145,11 +145,17 @@ export const docsTree: TreeNode[] = [
       {
         label: 'Operations',
         children: [
-          { label: 'Configure Strata' },
-          { label: 'Inspect database health' },
-          { label: 'Back up a database' },
-          { label: 'Recover from errors' },
-          { label: 'Troubleshoot failures' },
+          { label: 'Configure Strata', href: '/docs/guides/operations/configure-strata' },
+          {
+            label: 'Inspect database health',
+            href: '/docs/guides/operations/inspect-database-health',
+          },
+          { label: 'Back up a database', href: '/docs/guides/operations/back-up-a-database' },
+          { label: 'Recover from errors', href: '/docs/guides/operations/recover-from-errors' },
+          {
+            label: 'Troubleshoot failures',
+            href: '/docs/guides/operations/troubleshoot-failures',
+          },
         ],
       },
       {
