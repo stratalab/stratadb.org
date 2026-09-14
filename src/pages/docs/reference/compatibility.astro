@@ -1,0 +1,222 @@
+---
+// Reference / Compatibility and versioning.
+//
+// Four version questions that are genuinely independent of each other, which is
+// why "what version is Strata" is not a useful question on its own. A reader
+// wants to know whether their binary opens their database, whether their SDK
+// matches their engine, and which interfaces are real.
+//
+// The matrix renders from the data the build already fetches: the engine
+// version and platform targets from release.json, the Python SDK version from
+// python-sdk.json, which fetch-python-bindings.mjs writes from the installed
+// wheel. Hand-typing either is how the homepage came to advertise 1.1.1 while
+// the docs said 1.2.2.
+//
+// The on-disk format facts are from the source rather than observation:
+// DATABASE_FORMAT_VERSION in crates/storage/src/format/mod.rs, and the refusal
+// arms in format/manifest.rs.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import release from '../../../data/release.json';
+import pythonSdk from '../../../data/python-sdk.json';
+import index from '../../../data/command-index.json';
+
+const engine = release.version;
+const sdk = pythonSdk.version;
+const sdkMatches = sdk === engine;
+const commandCount = index.commands.length;
+const platforms = [...new Set(release.targets.map((t) => t.target))].sort();
+
+const clients = [
+  {
+    name: 'CLI',
+    status: 'Supported',
+    version: engine,
+    note: 'Ships with the engine, so it is never a separate version.',
+  },
+  {
+    name: 'Python',
+    status: 'Supported',
+    version: sdk ?? 'unknown',
+    note: sdkMatches
+      ? 'Matches the engine today.'
+      : `Trails the engine (${engine}). Published separately, so the two can diverge for a few days after a release.`,
+  },
+  {
+    name: 'MCP',
+    status: 'Supported',
+    version: engine,
+    note: 'Built into the binary; no separate install.',
+  },
+  {
+    name: 'Node.js',
+    status: 'Not shipping',
+    version: '0.15.0 on npm',
+    note: 'That package predates 1.0 and is not maintained against the current engine. Do not install it.',
+  },
+  { name: 'Rust', status: 'Planned', version: '-', note: 'No published crate.' },
+];
+---
+
+<DocsLayout
+  title="Compatibility and versioning"
+  description="Which binary opens which database, which SDK matches which engine, which clients are real, and what a research preview does and does not promise."
+  section="Reference"
+>
+  <h1>Compatibility and versioning</h1>
+
+  <p>
+    There are four version questions here and they are independent of one another, which is why
+    "what version of Strata are you on" is rarely enough to answer a compatibility problem. The
+    binary, the on-disk format, the SDK and the interface each move on their own schedule.
+  </p>
+
+  <p>
+    Strata is a research preview. That makes this page more important rather than less: instability
+    is tolerable when you are told where it lives.
+  </p>
+
+  <h2>The current set</h2>
+
+  <table>
+    <thead>
+      <tr><th>Interface</th><th>Status</th><th>Version</th><th></th></tr>
+    </thead>
+    <tbody>
+      {
+        clients.map((c) => (
+          <tr>
+            <td>{c.name}</td>
+            <td>{c.status}</td>
+            <td>
+              <code>{c.version}</code>
+            </td>
+            <td>{c.note}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+
+  <p>
+    Engine and CLI are at <code>{engine}</code>, carrying {commandCount} commands, built for {
+      platforms.length
+    } platform targets. Those numbers come from the release this site was built against, not from a list
+    kept by hand.
+  </p>
+
+  <h2>Can this binary open this database?</h2>
+
+  <p>
+    The on-disk format has its own version, currently <strong>1</strong>, and it is not the same
+    number as the binary. Every 1.x release so far reads and writes format 1, so upgrading the
+    binary does not migrate anything.
+  </p>
+
+  <p>
+    A binary that meets a format it does not understand refuses it rather than guessing. A database
+    written by some future format is rejected as a future format, naming the highest version this
+    binary supports. A pre-1.0 development database is rejected as well, deliberately and by a
+    distinct path, so an old experiment cannot be silently half-read. The manifest carries a magic
+    marker and a CRC, so a truncated or corrupted one is caught at open rather than surfacing later
+    as wrong data.
+  </p>
+
+  <p>
+    That is the forward-compatibility answer, and it is the conservative one: <strong>
+      an older binary will not open a newer database, and will say so.
+    </strong> There is no partial read.
+  </p>
+
+  <h2>Does this SDK match this engine?</h2>
+
+  {
+    sdkMatches ? (
+      <p>
+        The Python SDK is at <code>{sdk}</code>, the same as the engine. Keep them together: the
+        wheel and the binary are published separately, and they can drift for a few days after a
+        release while one waits for the other.
+      </p>
+    ) : (
+      <p>
+        The Python SDK is at <code>{sdk}</code> and the engine is at <code>{engine}</code>. They are
+        published separately and this window happens after most releases. The SDK talks to the
+        engine it is loaded against, so the practical effect is that commands added in{' '}
+        <code>{engine}</code> may have no Python method yet.
+      </p>
+    )
+  }
+
+  <p>
+    {pythonSdk.commands_without_binding} of the {commandCount} commands have no Python method today. Every
+    command page in the <a href="/docs/reference">reference</a> shows the Python spelling when one exists
+    and says so when it does not, generated from the installed wheel rather than written down.
+  </p>
+
+  <h2>Two processes, two versions</h2>
+
+  <p>
+    One case is worth knowing before you hit it. When a process brokers to a host, the two negotiate
+    on a protocol revision, and <strong
+      >the pairing is not refused when their releases differ</strong
+    >
+    . Between 1.2.1 and 1.2.2 the revision is the same number on both sides, so the connection is accepted,
+    and one specific read fails at the point of use rather than at connect: a 1.2.2 client reading a historical
+    JSON value from a 1.2.1 host cannot decode the answer.
+  </p>
+
+  <p>
+    The reverse direction is fine. An older client reading from a newer host works, because the
+    shape it already knew is still there.
+  </p>
+
+  <p>
+    So: run the same version on both sides of a broker. This is tracked upstream as strata-core
+    issue 3369. A related one is worth pairing with it, strata-core issue 3395: a client that asks
+    for
+    <code>--durability always</code> against a host running the default gets the host's mode, and the
+    flag is accepted silently. <a href="/docs/learn/durability">Durability</a> covers what that costs.
+  </p>
+
+  <h2>What a research preview promises</h2>
+
+  <p>
+    Plainly: the command surface is still moving. Commands have been added and renamed between minor
+    releases, output formats changed shape in 1.2.2, and a capability enum was renamed in the same
+    release. None of that is finished.
+  </p>
+
+  <p>What is stable enough to build on:</p>
+
+  <ul>
+    <li>
+      <strong>The error codes.</strong> Stable identifiers with a retry policy and a commit outcome per
+      code, which is what a program should branch on. See <a href="/docs/reference/errors">
+        Error codes
+      </a>.
+    </li>
+    <li>
+      <strong>The <code>--json</code> envelope.</strong> It did not change when the human output was rewritten
+      in 1.2.2. It is the format to parse.
+    </li>
+    <li>
+      <strong>Format 1 on disk.</strong> Unchanged across every 1.x release so far.
+    </li>
+  </ul>
+
+  <p>What is not:</p>
+
+  <ul>
+    <li>The human output. It is for reading, and 1.2.2 rewrote it wholesale.</li>
+    <li>Command names and flags, which are still being added to.</li>
+    <li>Node.js and Rust, which do not ship.</li>
+  </ul>
+
+  <h2>Upgrading</h2>
+
+  <p>
+    <code>strata update</code> replaces the binary in place. Because every 1.x release reads format 1,
+    there is no migration step and no downgrade hazard within 1.x today. Back up first anyway if the data
+    matters: <a href="/docs/learn/databases-and-storage">Databases and storage</a> covers what is safe
+    to copy and when.
+  </p>
+</DocsLayout>

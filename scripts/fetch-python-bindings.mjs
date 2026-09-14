@@ -27,6 +27,11 @@ const exec = promisify(execFile);
 const ROOT = new URL('..', import.meta.url).pathname;
 const INDEX = join(ROOT, 'src/data/command-index.json');
 const OUT = join(ROOT, 'src/data/python-bindings.json');
+// The wheel's own version, recorded beside the bindings. Without it the site
+// could render 137 commands from a 1.2.2 core against bindings probed from a
+// 1.2.1 wheel and say nothing, which is exactly what happened for the several
+// days PyPI trailed the engine. Reference / Compatibility renders from this.
+const SDK_OUT = join(ROOT, 'src/data/python-sdk.json');
 
 async function main() {
   const venv = join(ROOT, '.venv/bin/python');
@@ -60,8 +65,34 @@ async function main() {
   // Same copy rule as every other staged artifact: no em dashes reach the repo.
   const normalized = JSON.stringify(bindings, null, 2).replaceAll('\u2014', '-');
   await writeFile(OUT, `${normalized}\n`);
+
+  let sdkVersion = null;
+  try {
+    const { stdout } = await exec(python, [
+      '-c',
+      'import stratadb, sys; sys.stdout.write(stratadb.__version__)',
+    ]);
+    sdkVersion = stdout.trim() || null;
+  } catch {
+    // The probe already succeeded, so this only fails if __version__ is gone.
+    sdkVersion = null;
+  }
+  await writeFile(
+    SDK_OUT,
+    `${JSON.stringify(
+      {
+        version: sdkVersion,
+        probed_at: new Date().toISOString().slice(0, 10),
+        bindings: Object.keys(bindings).length,
+        commands_without_binding: unmatched,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
   console.log(
-    `fetch-python-bindings: ${Object.keys(bindings).length} binding(s) written, ${unmatched} command(s) with no Python method`,
+    `fetch-python-bindings: ${Object.keys(bindings).length} binding(s) written from stratadb ${sdkVersion ?? 'unknown'}, ${unmatched} command(s) with no Python method`,
   );
 }
 

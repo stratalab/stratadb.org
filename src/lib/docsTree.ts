@@ -230,7 +230,7 @@ export const docsTree: TreeNode[] = [
       { label: 'Configuration' },
       { label: 'Error codes', href: '/docs/reference/errors' },
       { label: 'Data types' },
-      { label: 'Compatibility and versioning' },
+      { label: 'Compatibility and versioning', href: '/docs/reference/compatibility' },
     ],
   },
 ];
