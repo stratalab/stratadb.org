@@ -1,0 +1,144 @@
+---
+title: 'Opening databases'
+description: 'Handles and their lifetime, in-memory databases, scoped views, and the rules for threads and processes.'
+section: 'Develop'
+source: 'strata-python@v1.2.2'
+---
+
+`stratadb.open()` returns a handle onto a database. It is the only entry point,
+and the thing to understand about it is its lifetime.
+
+```python
+import stratadb
+
+with stratadb.open("./mydb") as db:
+    db.kv.put("a", "1")
+```
+
+The handle is a context manager, and the `with` block is the shape to default
+to. Leaving it closes the handle, and closing is what flushes: under the default
+durability mode the engine syncs at close, so a handle you never close is a
+handle whose most recent commits may not have reached the disk.
+[Durability](/docs/learn/durability) has the measurements.
+
+If a `with` block does not fit, close it yourself:
+
+```python
+db = stratadb.open("./mydb")
+try:
+    db.kv.put("a", "1")
+finally:
+    db.close()
+```
+
+A closed handle does not become a segfault. It raises, by name:
+
+```python
+db.close()
+db.kv.get("a")
+```
+
+```
+failed_precondition.sdk.handle_closed: the handle was closed
+  hint: open a new one with stratadb.open(...)
+```
+
+## Three kinds of database
+
+```python
+stratadb.open("./mydb")     # durable, on disk
+stratadb.open(cache=True)   # in memory, nothing on disk
+stratadb.from_env()         # path from STRATA_DB
+```
+
+`cache=True` creates no files anywhere. Use it in tests: it is the same engine,
+so the behaviour you assert is the behaviour you ship.
+
+`open()` also takes the options the CLI takes as flags, including `durability`,
+`ipc`, `branch` and `space`.
+[Global options](/docs/reference/global-options) covers what each one selects.
+
+## Scoped views
+
+`db.at()` returns another handle onto the same database with a different default
+branch or space:
+
+```python
+work = db.at(branch="work")
+
+work.kv.put("k", "on the fork")
+db.kv.get("k")        # the original, unchanged
+work.kv.get("k")
+```
+
+It is a view, not a second connection. There is nothing to close, and both
+handles see the same database. `db.branch` reports which branch a view resolves
+to, which is worth reading when the view came from somewhere else in your code.
+
+## Threads
+
+A handle is safe to share across threads. Eight threads writing and reading the
+same handle concurrently produce exactly the writes you asked for, with no
+locking on your side.
+
+```python
+import threading
+
+with stratadb.open(cache=True) as db:
+    def work(n):
+        for i in range(100):
+            db.kv.put(f"t{n}:{i}", str(i))
+
+    threads = [threading.Thread(target=work, args=(n,)) for n in range(8)]
+    for t in threads: t.start()
+    for t in threads: t.join()
+
+    db.kv.count()
+```
+
+```
+800
+```
+
+## Processes
+
+The rule is narrower than "avoid `fork`", and worth getting exactly right:
+**do not share a handle across a fork.** Open one inside each process instead.
+
+A forked child that touches an inherited handle is stopped rather than allowed
+to corrupt anything:
+
+```python
+pid = os.fork()
+if pid == 0:
+    db.kv.get("a")
+```
+
+```
+failed_precondition.sdk.fork_not_supported
+  hint: open a fresh Strata handle after os.fork(); a database handle must not be
+  shared across a fork()
+```
+
+The parent is unaffected. And with each worker opening its own handle, both
+`multiprocessing` start methods work:
+
+```python
+def worker(path, n):
+    with stratadb.open(path) as db:
+        db.kv.put(f"p{n}", str(n))
+
+with mp.get_context("spawn").Pool(3) as pool:
+    pool.starmap(worker, [(path, i) for i in range(3)])
+```
+
+Several processes on one durable database is a supported arrangement: the first
+to arrive hosts, and the rest broker to it.
+[Embedded databases](/docs/learn/embedded-databases) covers what that
+guarantees, and one caveat worth knowing is that the host's durability mode
+governs everyone's writes.
+
+## Where to look next
+
+[Error handling](/docs/develop/python/error-handling) is the other half of
+writing against this API.

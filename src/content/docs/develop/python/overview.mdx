@@ -1,0 +1,138 @@
+---
+title: 'Python overview'
+description: 'What the SDK is, what it is not, and the type mapping that surprises people first.'
+section: 'Develop'
+source: 'strata-python@v1.2.2'
+---
+
+The Python SDK is the embedded engine with a Python surface over it. There is no
+server, no connection string and no pool: `stratadb.open()` hands you a handle
+onto a directory, and the work happens in your process.
+
+```python
+import stratadb
+
+with stratadb.open("./mydb") as db:
+    db.kv.put("greeting", "hello")
+    print(db.kv.get("greeting"))
+```
+
+```
+b'hello'
+```
+
+If you have not seen the model yet,
+[Python quickstart](/docs/get-started/python-quickstart) is the ten-minute
+version. This section is the reference-grade detail underneath it.
+
+## The shape of the API
+
+One handle, then a namespace per thing:
+
+```python
+db.kv        db.json      db.events    db.vectors   db.graphs
+db.branches  db.spaces    db.ai        db.admin     db.arrow    db.hub
+```
+
+Plus three properties that describe the handle rather than doing work:
+`db.branch` and `db.space` report the branch and space this view resolves to,
+and `db.version` reports the engine it is running.
+
+## Bytes out of key-value, objects out of JSON
+
+This is the first thing that catches people, so it is worth stating before
+anything else.
+
+**Key-value stores bytes.** It accepts `str` or `bytes` and always hands back
+`bytes`:
+
+```python
+db.kv.put("a", "hello")      # str accepted
+db.kv.put("b", b"\x00\x01")  # bytes accepted
+db.kv.get("a")               # always bytes
+```
+
+```
+b'hello'
+```
+
+Anything else is refused rather than coerced. `db.kv.put("n", 42)` raises
+`InvalidArgumentError`, because guessing an encoding for you is how data gets
+corrupted quietly. Encode it yourself, or use JSON.
+
+**JSON stores values.** It round-trips the Python types you would expect, and
+gives them back as themselves:
+
+| you write  | you read |
+| ---------- | -------- |
+| `{"a": 1}` | `dict`   |
+| `[1, 2]`   | `list`   |
+| `"s"`      | `str`    |
+| `7`        | `int`    |
+| `1.5`      | `float`  |
+| `True`     | `bool`   |
+| `None`     | `None`   |
+
+```python
+db.json.set("doc", "$", {"name": "Ada", "age": 36})
+db.json.get("doc", "$.name")
+```
+
+```
+'Ada'
+```
+
+So the rule is: reach for `kv` when the value is opaque to the database, and
+`json` when its shape matters. [Working with data](/docs/learn/working-with-data)
+covers the choice across all five models.
+
+## Results are typed objects
+
+Reads that return more than a value return objects with attributes, not
+dictionaries, and enum fields rather than strings:
+
+```python
+preview = db.branches.preview("work", "default")
+preview.conflicts
+preview.branch_point
+[c.value for c in preview.capabilities_covered]
+```
+
+```
+[]
+4
+['kv', 'json', 'vector']
+```
+
+Note the `.value` on the last one. Capability fields are enums, so compare them
+to the enum or read `.value` for the string.
+
+## What the SDK does not do
+
+**There is no async support.** No coroutine methods, no `async with`. Calls are
+synchronous and block the calling thread. If you need them off the event loop,
+put them behind `asyncio.to_thread` or an executor.
+
+**`db.state` is gone.** The state-cell primitive was removed in V1. The
+attribute is deliberately still there and raises a `UnsupportedError` naming its
+replacement, so v0.x code fails with an explanation rather than an
+`AttributeError`:
+
+```python
+db.state
+```
+
+```
+unsupported.sdk.state_removed: the state-cell primitive (db.state) was removed in V1
+  hint: use db.kv for keyed values, or db.json for structured documents
+```
+
+**Node.js and Rust do not ship.** Python is the only SDK at 1.x.
+[Compatibility and versioning](/docs/reference/compatibility) has the current
+set.
+
+## Where to look next
+
+[Installation](/docs/develop/python/installation), then
+[Opening databases](/docs/develop/python/opening-databases) for the lifetime
+model, which is the part that differs most from a client library.

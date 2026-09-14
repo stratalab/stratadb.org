@@ -1,0 +1,92 @@
+---
+title: 'Time travel from Python'
+description: 'Two clocks, the flag that reads each, and what TimeLike accepts.'
+section: 'Develop'
+source: 'strata-python@v1.2.2'
+---
+
+Reads take an optional point in the past. There are two ways to name one and
+they are not interchangeable, which is the whole difficulty.
+
+```python
+db.kv.get("greeting", as_of=3)
+db.kv.get("greeting", as_of_time="2026-09-13 06:52:20Z")
+```
+
+`as_of` is a position on the commit timeline: a per-commit counter, not a date.
+`as_of_time` is a real moment. Passing both raises rather than guessing:
+
+```python
+db.kv.get("greeting", as_of=3, as_of_time=when)
+```
+
+```
+invalid_argument.executor.as_of_conflict: as_of and as_of_time are mutually
+exclusive: pass a commit timestamp or a wall-clock instant, not both
+```
+
+[Time travel](/docs/learn/time-travel) explains which clock to reach for.
+
+## Getting the numbers
+
+History gives you both, per version:
+
+```python
+for item in db.kv.history("greeting"):
+    print(item.version, item.committed_at, item.value)
+```
+
+```
+15 1789289584833015 b'goodbye'
+3  1789289571668049 b'hello'
+```
+
+`committed_at` is microseconds since the epoch. `to_datetime` converts it, and
+`to_micros` goes the other way:
+
+```python
+from stratadb import to_datetime
+
+first = list(db.kv.history("greeting"))[-1]
+when = to_datetime(first.committed_at)
+db.kv.get("greeting", as_of_time=when)
+```
+
+```
+b'hello'
+```
+
+Taking the instant from an entry rather than typing a literal is the habit
+worth forming. A literal that lands before the first commit does not return
+nothing; it raises `HistoryUnavailableError`.
+
+## What as_of_time accepts
+
+`TimeLike` is `int | datetime | date | str`, so all of these work:
+
+```python
+db.kv.get("k", as_of_time=datetime(2026, 9, 13, 6, 52, tzinfo=timezone.utc))
+db.kv.get("k", as_of_time="2026-09-13 06:52:20Z")
+db.kv.get("k", as_of_time=1789289584833015)
+```
+
+A `datetime` without a timezone is read as local time. Prefer aware ones.
+
+## It applies across the models
+
+The same two parameters appear on reads throughout the API, not just key-value:
+
+```python
+db.json.get("user:ada", "$.role", as_of=7)
+db.vectors.query("docs", [1, 0, 0], as_of=7)
+db.graphs.meta("social", as_of=7)
+```
+
+They also appear on counts and listings, which is what makes a consistent
+enumeration possible: pass the same `as_of` to every page and the pagination
+describes one instant rather than a moving target.
+
+## Where to look next
+
+[Time travel](/docs/learn/time-travel) for the conceptual half, and
+[Branches](/docs/develop/python/branches) for reading the past on a fork.

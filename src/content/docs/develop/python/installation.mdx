@@ -1,0 +1,85 @@
+---
+title: 'Installing the Python SDK'
+description: 'uv, pip, what the wheel contains, and how to tell the SDK and the engine apart.'
+section: 'Develop'
+source: 'strata-python@v1.2.2'
+---
+
+```console
+uv add stratadb
+```
+
+Or with pip, if that is your project's tooling:
+
+```console
+pip install stratadb
+```
+
+Python 3.9 or newer. The wheel is compiled, so there is no Rust toolchain to
+install and nothing to build.
+
+## The SDK contains the engine
+
+This is the part that differs from most database clients. `stratadb` is not a
+driver that talks to a server somewhere: the engine is compiled into the wheel,
+and installing it installs the database.
+
+Two consequences follow.
+
+You do not need the `strata` CLI to use Python. They are separate installs of
+the same engine, and either one can open a database the other made.
+
+And the version you get is the SDK's, which is published separately from the
+binary:
+
+```python
+import stratadb
+stratadb.__version__
+```
+
+```
+'1.2.2'
+```
+
+They usually match. They can drift for a few days after a release while one
+waits for the other, and when they do, the newer engine's most recent commands
+may have no Python method yet.
+[Compatibility and versioning](/docs/reference/compatibility) shows the current
+pairing and is generated from what is actually installed.
+
+## Checking it works
+
+```python
+import stratadb
+
+with stratadb.open(cache=True) as db:
+    db.kv.put("hello", "world")
+    print(db.kv.get("hello"), db.version)
+```
+
+```
+b'world' 1.2.2
+```
+
+`cache=True` opens an in-memory database, so this writes nothing to disk and
+leaves nothing behind. It is also the right mode for tests.
+
+## In a project
+
+Nothing about Strata needs configuring, because there is nothing to connect to.
+A dependency and a path is the whole setup:
+
+```toml
+# pyproject.toml
+dependencies = ["stratadb>=1.2.2"]
+```
+
+Pin the minor version if you are relying on something recent. The command
+surface is still moving during research preview, and
+[Compatibility and versioning](/docs/reference/compatibility) says what is and
+is not stable.
+
+## Where to look next
+
+[Opening databases](/docs/develop/python/opening-databases) is the next thing to
+read: handles, lifetime, and the rules about threads and processes.

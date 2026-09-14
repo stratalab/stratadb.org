@@ -1,0 +1,109 @@
+---
+title: 'Error handling'
+description: 'One exception tree, a stable code on every error, and the field that tells you whether a failed write applied.'
+section: 'Develop'
+source: 'strata-python@v1.2.2'
+---
+
+Every failure raises a subclass of `StrataError`, so you can catch a family or a
+specific kind:
+
+```python
+from stratadb.errors import NotFoundError, StrataError
+
+try:
+    db.branches.merge("nope", "default")
+except NotFoundError as err:
+    print(err.code)
+except StrataError:
+    raise
+```
+
+```
+not_found.engine.branch
+```
+
+There are sixteen subclasses, and they map to the classes in the shared error
+registry rather than being invented by the SDK:
+
+`AccessDeniedError`, `AlreadyExistsError`, `AmbiguousCommitError`,
+`ConflictError`, `CorruptionError`, `DataLossError`,
+`FailedPreconditionError`, `HistoryUnavailableError`, `InternalError`,
+`InvalidArgumentError`, `IoError`, `NotFoundError`, `ResourceExhaustedError`,
+`SerializationError`, `UnavailableError`, `UnsupportedError`.
+
+## Branch on the code, not the message
+
+Messages are written for people and change. `err.code` is a stable identifier
+and is the thing to compare:
+
+```python
+except StrataError as err:
+    if err.code == "not_found.engine.branch":
+        ...
+```
+
+Each error also carries `err.hint`, which is a sentence telling you what to do,
+and `err.ref`, a link to that code's page.
+
+One caveat on `ref`. Codes raised by the engine resolve; codes raised by the SDK
+itself, the ones with `.sdk.` in them, currently 404. `code` and `hint` are
+reliable in both cases. This is tracked as strata-python issue 87.
+
+## Did the write apply?
+
+This is the field that makes the tree worth using. When a write fails, the
+question is whether it took effect, and the answer is on the exception:
+
+```python
+except StrataError as err:
+    err.commit_outcome
+```
+
+Most codes answer `never` or `not_applicable`, which means your database is
+untouched and a retry is safe. A small number answer `maybe_committed`, and
+those are the only ones where retrying blindly can double-apply.
+
+[Error codes](/docs/reference/errors) names them and explains the handling
+contract. It is worth reading once before you write a retry loop.
+
+## Retrying
+
+`err.retry_policy` says whether a retry can work at all:
+
+- `never` means the same call will fail the same way. Fix the input.
+- `after_state_change` means it can work once something else changes, such as a
+  branch reaching a different status.
+- Others are safe to retry with backoff.
+
+So a retry loop that reads both fields rather than catching broadly:
+
+```python
+for attempt in range(3):
+    try:
+        db.branches.merge("work", "default")
+        break
+    except StrataError as err:
+        if err.retry_policy == "never" or err.commit_outcome == "maybe_committed":
+            raise
+        time.sleep(2**attempt)
+```
+
+## Errors that teach
+
+Two are worth knowing because they catch real mistakes rather than bad input.
+
+`db.state` raises `unsupported.sdk.state_removed`, because the state-cell
+primitive was removed in V1 and the attribute was kept as a signpost to
+`db.kv` and `db.json`.
+
+Using a handle after `close()`, or across an `os.fork()`, raises
+`failed_precondition.sdk.handle_closed` and
+`failed_precondition.sdk.fork_not_supported` respectively. Neither is undefined
+behaviour. [Opening databases](/docs/develop/python/opening-databases) covers
+the rules both are enforcing.
+
+## Where to look next
+
+[Error codes](/docs/reference/errors) is the full contract, and every `/e/` page
+carries the retry policy and commit outcome for one code.

@@ -1,0 +1,133 @@
+---
+title: 'Branches from Python'
+description: 'Forking, working on a view, comparing, and merging, with the two verbs that are not interchangeable.'
+section: 'Develop'
+source: 'strata-python@v1.2.2'
+---
+
+A branch covers the whole database, every model at once, and forking copies
+nothing.
+
+```python
+db.branches.fork("default", "work")
+```
+
+Use `fork`, not `create`. `db.branches.create(name)` makes an empty root branch
+with no parent, and because writing to one works, the mistake stays invisible
+until a merge fails with `invalid_argument.engine.branch_point` and the work has
+to be redone. This is tracked as strata-core issue 3203.
+
+## Working on the fork
+
+Point a view at it rather than passing a branch to every call:
+
+```python
+work = db.at(branch="work")
+work.json.set("user:ada", "$.role", "director")
+
+work.json.get("user:ada", "$.role")
+db.json.get("user:ada", "$.role")
+```
+
+```
+'director'
+'engineer'
+```
+
+Both handles are live at once, which is the ergonomic difference from the CLI's
+`--branch` flag. [Opening databases](/docs/develop/python/opening-databases)
+covers views.
+
+## Comparing
+
+```python
+diff = db.branches.diff("default", "work")
+
+for space in diff.spaces:
+    print(space.capability.value, [m.identity for m in space.modified])
+```
+
+```
+json [b'user:ada']
+```
+
+Identities come back as `bytes`, the same as key-value values do.
+
+## Previewing before merging
+
+`preview` is the dry run, and the field to read first is `conflicts`:
+
+```python
+preview = db.branches.preview("work", "default")
+
+preview.conflicts
+preview.branch_point
+[c.value for c in preview.capabilities_covered]
+[c.value for c in preview.capabilities_unsupported]
+```
+
+```
+[]
+4
+['kv', 'json', 'vector']
+['vector_collection', 'event', 'graph_metadata', 'graph_node', 'graph_edge', 'graph_ontology']
+```
+
+Read that last list before you rely on a merge. Key-value, JSON and vector data
+move; events and graph data do not. That is not a Python limitation,
+[Branches](/docs/learn/branches) covers why.
+
+## Merging
+
+```python
+result = db.branches.merge("work", "default")
+db.branches.delete("work")
+```
+
+`merge` takes source then target, in that order. Getting it backwards is not an
+error, it is a merge in the other direction.
+
+The result reports what landed, and for key-value entries `applied[].value` is
+the value that was written. For JSON entries it is currently the internal
+storage envelope rather than the document, which is tracked as strata-core issue
+3202, so read the merged state back rather than parsing it:
+
+```python
+db.json.get("user:ada", "$.role")
+```
+
+```
+'director'
+```
+
+## Forking from the past
+
+A fork can start from an earlier point rather than the tip:
+
+```python
+db.branches.fork("default", "audit", version=7)
+db.branches.fork("default", "audit-t", timestamp=7)
+```
+
+One or the other, not both, and omitting both forks from the current head.
+
+Note which number `timestamp` wants. It is the **commit-timeline** timestamp,
+the `timestamp` field on a history entry, not the wall-clock `committed_at`
+beside it. Passing `committed_at` raises `HistoryUnavailableError`, because a
+microsecond epoch reading is far beyond anything the timeline holds:
+
+```python
+first = list(db.kv.history("k"))[-1]
+
+db.branches.fork("default", "ok", timestamp=first.timestamp)      # works
+db.branches.fork("default", "bad", timestamp=first.committed_at)  # raises
+```
+
+There is no `as_of_time` equivalent for forking yet, so a fork is always
+addressed by position rather than by a real moment.
+[Time travel](/docs/develop/python/time-travel) covers the same two clocks on
+reads, where both are available.
+
+## Where to look next
+
+[Branches](/docs/learn/branches) for what a branch is and what a merge covers.
