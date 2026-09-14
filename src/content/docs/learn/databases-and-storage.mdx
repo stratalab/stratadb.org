@@ -1,0 +1,166 @@
+---
+title: 'Databases and storage'
+description: 'What a Strata database is on disk: the directory, what each part of it does, what is safe to copy, and what history costs you.'
+section: 'Learn'
+source: 'strata-core@v1.2.2'
+---
+
+A Strata database is a directory. Not a file with a directory beside it, and not
+a directory you should treat as opaque: an ordinary folder you can list, copy,
+archive and delete with the tools you already have.
+
+```console
+strata ./mydb kv put greeting hello
+ls ./mydb
+```
+
+```
+locks  manifest  meta  README.md  snapshots  wal
+```
+
+It also introduces itself. `README.md` inside the directory says what the
+directory is, so someone who finds it in a backup six months from now does not
+have to guess.
+
+## What each part is for
+
+**`snapshots/`** holds the committed state. This is the data.
+
+**`wal/`** is the write-ahead log. A commit lands here first, then becomes part
+of a snapshot. [Durability](/docs/learn/durability) is about the gap between
+those two moments.
+
+**`manifest/`** records which snapshot is current and what branches exist. It is
+how a reopened database knows where it left off.
+
+**`meta/`** holds bookkeeping, including how far the log has been consumed.
+
+**`locks/`** holds `writer.object@`, which is how a second process discovers
+that someone already has this database open.
+
+You do not edit any of these by hand. But knowing they exist changes what you
+can reason about: the database is a directory of ordinary files, so the
+questions you would ask about any directory of ordinary files have ordinary
+answers.
+
+## A database with no directory
+
+`--cache` gives you the same engine with nothing on disk:
+
+```console
+strata --cache kv put a 1
+strata --cache info
+```
+
+```
+target    cache
+durable   false
+```
+
+Nothing is created, anywhere. That is the mode to reach for in tests, in CI, and
+in the browser, where the same engine compiled to wasm runs the demo on the
+homepage.
+
+## Copying, moving and backing up
+
+A database that nothing has open is a directory, and copying it does what you
+would expect:
+
+```console
+cp -r ./mydb ./mydb-backup
+strata ./mydb-backup kv get greeting
+```
+
+```
+hello
+```
+
+The copy is a real database, not a reference to the original. Write to one and
+the other does not move. That makes `cp`, `rsync`, `tar` and a filesystem
+snapshot all valid ways to back up a Strata database, with one condition: do it
+while the database is closed.
+
+Copying a directory that a process is actively writing to copies a moment that
+may never have existed on its own, because the files are not written
+atomically with respect to each other. This is the same rule that applies to
+every embedded database, and the safe sequence is the same one: stop, copy,
+start.
+
+## Two processes, one database
+
+Opening a database that another process already has open does not fail:
+
+```console
+strata ./mydb start
+```
+
+In another terminal:
+
+```console
+strata ./mydb kv put c 3
+strata ./mydb ipc status
+```
+
+```
+created c
+hosting       true
+is_owner      false
+client_count  1
+```
+
+The second process did not take the lock. It found the owner and asked it to do
+the work. `--ipc off` opts out of that entirely, for a single process that wants
+no socket.
+
+[Embedded databases](/docs/learn/embedded-databases) covers the brokering model
+in more detail.
+
+## Asking a database about itself
+
+Four commands, in increasing depth:
+
+```console
+strata ./mydb describe
+strata ./mydb info
+strata ./mydb health
+strata ./mydb doctor
+```
+
+`describe` is a one-line summary. `info` reports the target, the version, the
+durability mode and the memory budget. `health` names each subsystem and whether
+it is healthy. `doctor` checks the installation as well as the database, which
+is the one to run when something is wrong and you do not yet know what.
+
+## What history costs
+
+Every version of every value is retained. That is the point of the database, and
+it is not free.
+
+A key rewritten a thousand times keeps a thousand versions, all readable with
+`--as-of`, and the directory grows to match. Measured on a single small key:
+
+| versions | on disk |
+| -------- | ------- |
+| 101      | 68 KB   |
+| 201      | 84 KB   |
+| 301      | 96 KB   |
+| 401      | 112 KB  |
+
+That is roughly 140 bytes per version for a short value, growing linearly. The
+write-ahead log and the snapshot count stayed at one file each throughout, so
+this is history accumulating rather than files proliferating.
+
+Two things follow. A workload that rewrites the same keys in a tight loop will
+grow faster than the size of its live data suggests, and there is **no CLI
+command to prune history**. There is no `vacuum`, no `compact`, no retention
+window you can set from the command line.
+
+If that matters for your workload, the ways to bound it today are to fork a
+branch and keep the short one, or to write a fresh database and copy forward
+what you need. Neither is a retention policy, and it is worth knowing that
+before you point a high-churn workload at a directory you expect to stay small.
+
+## Where to look next
+
+[Durability](/docs/learn/durability) is the other half of this: what a commit
+has promised you by the time it returns.

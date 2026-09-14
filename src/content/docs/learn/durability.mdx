@@ -1,0 +1,132 @@
+---
+title: 'Durability'
+description: 'What a commit has promised by the time it returns, what a crash can still take, and which of the two modes you want.'
+section: 'Learn'
+source: 'strata-core@v1.2.2'
+---
+
+A write returns and tells you it worked. This page is about what that sentence
+actually promises, because the answer depends on a flag and the difference is
+larger than it looks.
+
+## Two modes
+
+```console
+strata --durability standard ./mydb kv put a 1
+strata --durability always ./mydb kv put a 1
+```
+
+**`standard`** is the default. A commit is written to the log and acknowledged,
+and the log is synced to the disk at close, at a size threshold, and when it
+rotates. Between those points, acknowledged commits are in the operating
+system's hands rather than on the platter.
+
+**`always`** syncs every commit before acknowledging it. An acknowledged write
+has reached the disk.
+
+The commit receipt says which one you got:
+
+```console
+strata --json --durability always ./mydb kv put a 1
+```
+
+```json
+{"commit":{"durability":"always","version":3,"committed_at":1789362857601807}, ...}
+```
+
+That field is worth reading in a program. It is the database telling you what
+the acknowledgement it just gave you is worth.
+
+## What a crash actually takes
+
+This is the part to see rather than infer. Ten writes, each acknowledged, into a
+hosted database. Then the owning process is killed outright, the way a power cut
+or an OOM kill would take it. Then the database is reopened and counted.
+
+| mode       | acknowledged | survived |
+| ---------- | ------------ | -------- |
+| `standard` | 10           | 1        |
+| `always`   | 10           | 10       |
+
+Three trials each, same result every time.
+
+Under `standard`, nine acknowledged writes were gone. The survivor was the
+first one. This is not a bug and it is not a surprise to the engine: it is
+exactly the window the mode documents. But "a crash-loss window" reads like an
+edge, and the measurement reads like most of your recent work.
+
+Under `always`, nothing was lost.
+
+## When this does not apply to you
+
+If you are running one-shot CLI commands, each one opens the database, writes,
+and closes it. Closing syncs. So this holds:
+
+```console
+strata ./mydb kv put k:1 v1
+strata ./mydb kv put k:2 v2
+```
+
+Both survive anything that happens afterwards, because both were synced before
+the command returned. The same is true of a program that opens a database,
+writes, and closes it in a `with` block.
+
+The exposure is a **long-running process**: a host started with `strata start`,
+a server, an agent loop, anything that holds a database open across many commits
+and might be killed while holding it. A clean shutdown syncs; `strata stop` and
+a closed handle both survive. It is the unclean exit that costs you.
+
+## Choosing
+
+Take `always` when an acknowledgement is a promise you are making to someone
+else. A write your user was told succeeded, a payment, a state transition you
+cannot reconstruct. The cost is a sync per commit, which is the throughput you
+are trading away.
+
+Stay on `standard` when the work is reconstructible. An agent run you can replay,
+a cache, an import you would rerun anyway, a derived index. The engine still
+syncs regularly; you are accepting a window, not abandoning the disk.
+
+One caveat, and it is a sharp one. When a process brokers to an owner, **the
+owner's mode governs the write**, not the one the client asked for. A client
+that passes `--durability always` against a host running `standard` gets
+`standard`, and the receipt says so:
+
+```console
+strata ./mydb start                               # owner, standard by default
+strata --json --durability always ./mydb kv put a 1
+```
+
+```json
+{"commit":{"durability":"standard", ...}, ...}
+```
+
+The flag was accepted and had no effect. So the mode is a property of whoever
+opened the database, and if you want durable writes in a brokered setup, the
+host is what has to ask for them. Read `durability` off the receipt rather than
+trusting the flag you passed.
+
+## What a failed write tells you
+
+A crash is not the only way to be unsure. When a command fails, the question is
+whether it applied, and Strata answers that per error code rather than leaving
+you to guess:
+
+```console
+strata agents errors --json
+```
+
+Every code carries a `commit_outcome`. Most say `never` or `not_applicable`,
+which means your state is untouched. Two say `maybe_committed`, and those are
+the only two where a retry needs thought rather than a loop.
+
+[Error codes](/docs/reference/errors) covers the handling contract, and the two
+codes by name.
+
+## Where to look next
+
+[Databases and storage](/docs/learn/databases-and-storage) is where the log and
+the snapshots live, and what it is safe to copy.
+
+[Commits and versions](/docs/learn/commits-and-versions) is what a commit is
+before durability gets involved.

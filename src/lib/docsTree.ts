@@ -48,12 +48,12 @@ export const docsTree: TreeNode[] = [
         label: 'How Strata works',
         children: [
           { label: 'Embedded databases', href: '/docs/learn/embedded-databases' },
-          { label: 'Databases and storage' },
+          { label: 'Databases and storage', href: '/docs/learn/databases-and-storage' },
           { label: 'Branches', href: '/docs/learn/branches' },
           { label: 'Commits and versions', href: '/docs/learn/commits-and-versions' },
           { label: 'Time travel', href: '/docs/learn/time-travel' },
           { label: 'Spaces', href: '/docs/learn/spaces' },
-          { label: 'Durability' },
+          { label: 'Durability', href: '/docs/learn/durability' },
         ],
       },
       {
