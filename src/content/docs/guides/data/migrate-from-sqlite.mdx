@@ -1,0 +1,117 @@
+---
+title: 'Migrate from SQLite'
+description: 'Move tables out of SQLite and decide which Strata model each one should become.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get a SQLite database into Strata, in a shape that makes sense rather
+than a transliteration. About ten minutes.
+
+## First, decide what each table becomes
+
+There is no table in Strata, so this is a modelling decision, not a conversion.
+For each table, ask what you do with it:
+
+| the table is                                      | use       |
+| ------------------------------------------------- | --------- |
+| Looked up by primary key, value opaque            | key-value |
+| Rows with fields you query or update individually | JSON      |
+| Append-only, ordered, never updated               | events    |
+| Text you want to search by meaning                | vectors   |
+| Rows that are mostly foreign keys to each other   | graph     |
+
+A `users` table read by id is key-value if you only ever fetch the whole row,
+and JSON if you update one column at a time. An `audit_log` table is an event
+log, and it gains a hash chain by becoming one.
+
+## Export from SQLite
+
+Produce the shape `arrow import` wants. For key-value, that is a key, a value
+and their encodings:
+
+```python
+import sqlite3, csv
+
+con = sqlite3.connect("legacy.db")
+rows = con.execute("select id, name from users")
+
+with open("users.csv", "w", newline="") as f:
+    w = csv.writer(f)
+    w.writerow(["key", "key_encoding", "value", "value_encoding"])
+    for row in rows:
+        w.writerow([f"user:{row[0]}", "utf8", row[1], "utf8"])
+```
+
+For JSON, a key and the row as a document:
+
+```python
+import sqlite3, json
+
+con = sqlite3.connect("legacy.db")
+with open("users.jsonl", "w") as f:
+    for row in con.execute("select id, name, role from users"):
+        f.write(json.dumps({
+            "key": f"user:{row[0]}",
+            "document": json.dumps({"name": row[1], "role": row[2]}),
+        }) + "\n")
+```
+
+Note the key convention. A table name as a prefix (`user:1`) is what keeps two
+former tables from colliding in one database, and it is what `--prefix` scans
+on later.
+
+## Import onto a branch
+
+```console
+strata ./mydb branch fork default migration
+strata ./mydb --branch migration arrow import --target json ./users.jsonl
+```
+
+```
+imported 3 rows into json from ./users.jsonl (0 skipped)
+```
+
+```console
+strata ./mydb --branch migration json get user:1 '$.role'
+```
+
+```
+"engineer"
+```
+
+Check the branch before it touches anything. A migration is the case branches
+were made for: if the shape is wrong, delete the branch and try a different one.
+
+```console
+strata ./mydb branch merge migration default
+```
+
+## What you gain, and what you give up
+
+**Gained.** Every row now has history, so an overwritten value is still
+readable. The whole database branches at once, so a schema experiment is a fork.
+And five models live together, so the vector search you would have bolted on is
+in the same database and the same transaction boundary.
+
+**Given up.** There is no SQL, no joins across models, and no secondary indexes
+you can query: JSON indexes exist but nothing reads them yet, tracked as
+strata-core issue 2703. A workload that is genuinely relational, with
+multi-table joins in the hot path, is not what this is for.
+[Should I use Strata?](/docs/learn/introduction) is worth reading before a large
+migration.
+
+## Failure modes
+
+**Rows skipped on import.** The receipt counts them. Usually a missing key
+column.
+
+**Keys collide.** Two tables migrated without a prefix. Re-export with one.
+
+**A document field cannot be read back.** JSON paths cannot address keys
+containing a dot, and keys with spaces are rejected. Rename those columns during
+export.
+
+## Next
+
+[Combine data models](/docs/guides/data/combine-data-models).

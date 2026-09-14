@@ -1,0 +1,111 @@
+---
+title: 'Combine data models'
+description: 'Use key-value, JSON, vectors and graph together, on one branch, at one instant.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Model something that needs more than one shape, without running more
+than one database. About five minutes.
+
+## They are already in the same database
+
+There is nothing to enable. A database has all five models from the moment it
+exists:
+
+```console
+strata ./app kv put session:42 "active"
+strata ./app json set user:ada '$' '{"name":"Ada","role":"engineer"}'
+strata ./app vector collection create docs 3
+strata ./app graph create org
+```
+
+```console
+strata ./app describe
+```
+
+```
+StrataDB 1.2.2 · durable_local
+branch default · branches: default · spaces: default
+capabilities: arrow event graph_core inference json kv vector vector_index
+kv 1 · json 1 · events 0
+vector collections: docs (dim 3, cosine, 0 vectors)
+graphs: org (0 nodes, 0 edges)
+```
+
+## Why that matters more than it sounds
+
+The usual version of this application has Postgres for the documents, Redis for
+the sessions, a vector database for the embeddings and a graph store for the
+relationships. Four systems, four connection strings, four backup stories, and
+no moment at which they are all consistent with each other.
+
+Here they share three things:
+
+**One commit timeline.** A write to any model advances the same version counter,
+so `--as-of 7` means the same instant to all of them:
+
+```console
+strata ./app json get user:ada '$' --as-of 7
+strata ./app graph bfs org ada --as-of 7
+```
+
+That is a consistent snapshot across shapes, which is the thing four systems
+cannot give you.
+
+**One set of branches.** Forking forks everything:
+
+```console
+strata ./app branch fork default experiment
+```
+
+The documents, the sessions, the vectors and the graph all have an `experiment`
+version now. There is no coordination to write.
+
+**One directory.** One thing to copy, one thing to back up.
+
+## A worked shape
+
+An agent application might use all four:
+
+- **JSON** for the entities it reasons about, because it updates one field at a
+  time.
+- **Key-value** for opaque blobs and session state, where the value means
+  nothing to the database.
+- **Vectors** for the text it needs to search by meaning.
+- **Graph** for how the entities relate, when the question is "what depends on
+  this".
+- **Events** for the log of what it did, which
+  [Record tool activity](/docs/guides/agents/record-tool-activity) covers.
+
+Pick per question, not per entity. The same user can be a JSON document, a
+vector and a graph node at once.
+
+## The one thing that does not compose
+
+**Merging does not carry events or graph data.** Key-value, JSON and vectors
+move; the other two do not, and the merge receipt says success either way.
+
+```console
+strata ./app branch preview experiment default
+```
+
+The `capabilities_unsupported` line is the authoritative list. If your design
+puts graph writes on a branch that has to merge, change the design rather than
+discovering this later. [Branches](/docs/learn/branches) covers why.
+
+## Failure modes
+
+**A cross-model `--as-of` read returns nothing for one model.** That model had
+no data at that version yet. Versions are shared, so a model added later starts
+later.
+
+**Graph or event data missing after a merge.** See above.
+
+**You want a join.** There is not one. Reads are per model, and combining them
+is your code's job.
+
+## Next
+
+[Working with data](/docs/learn/working-with-data) for choosing between the
+models in the first place.

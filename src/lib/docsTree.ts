@@ -134,12 +134,12 @@ export const docsTree: TreeNode[] = [
       {
         label: 'Data',
         children: [
-          { label: 'Import data' },
-          { label: 'Export data' },
-          { label: 'Migrate from SQLite' },
-          { label: 'Combine data models' },
-          { label: 'Clone a dataset' },
-          { label: 'Organize with spaces' },
+          { label: 'Import data', href: '/docs/guides/data/import-data' },
+          { label: 'Export data', href: '/docs/guides/data/export-data' },
+          { label: 'Migrate from SQLite', href: '/docs/guides/data/migrate-from-sqlite' },
+          { label: 'Combine data models', href: '/docs/guides/data/combine-data-models' },
+          { label: 'Clone a dataset', href: '/docs/guides/data/clone-a-dataset' },
+          { label: 'Organize with spaces', href: '/docs/guides/data/organize-with-spaces' },
         ],
       },
       {

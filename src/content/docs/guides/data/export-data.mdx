@@ -1,0 +1,82 @@
+---
+title: 'Export data'
+description: 'Get data out of Strata as Parquet, CSV or JSONL, one model at a time.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Move data out, for analysis elsewhere or as a portable snapshot. About
+two minutes.
+
+## Export one model
+
+```console
+strata ./mydb arrow export --primitive kv --format csv ./out.csv
+```
+
+`--primitive` is which model to export: `kv`, `json`, `event`, `vector` or
+`graph`. One per file.
+
+`--format` is `parquet`, `csv` or `jsonl`. Note what is **not** there: despite
+the command being called `arrow`, there is no `.arrow` output. Asking for one
+fails with `invalid_argument.executor.arrow_format`.
+
+## What comes out
+
+CSV carries the value and the version facts, and says how each side is encoded:
+
+```
+key,key_encoding,value,value_encoding,version,timestamp
+k:1,utf8,v1,utf8,3,3
+k:2,utf8,v2,utf8,4,4
+```
+
+The `_encoding` columns are what make binary values survive the trip. A value
+that is not valid UTF-8 is marked rather than mangled.
+
+JSON exports carry the document as a string, with its own version:
+
+```console
+strata ./mydb arrow export --primitive json --format jsonl ./docs.jsonl
+```
+
+```
+{"key":"doc:1","document":"{\"age\":36,\"name\":\"Ada\"}","version":6,"timestamp":6,"document_version":1}
+```
+
+## Picking a format
+
+**Parquet** for anything going to a data tool. It is columnar, compressed and
+typed: the same three keys were 1920 bytes as Parquet against 119 as CSV, which
+inverts on real volumes.
+
+**CSV** for a spreadsheet or a quick look.
+
+**JSONL** when the values are documents and you want to keep them readable.
+
+## Exporting a branch or a space
+
+Export reads the branch and space you point it at, so a snapshot of one line of
+work is the ordinary flags:
+
+```console
+strata ./mydb --branch experiment arrow export --primitive kv --format parquet ./exp.parquet
+```
+
+## What export is not
+
+It is **not a backup**. It captures one model, at one branch, as of now: no
+history, no other models, no branch structure. A backup is a copy of the
+directory. [Back up a database](/docs/guides/operations/back-up-a-database).
+
+## Failure modes
+
+**`invalid_argument.executor.arrow_format`.** The file extension and `--format`
+have to agree, and `.arrow` is not a format.
+
+**A graph export produced two files.** Graphs write nodes and edges separately,
+and the path you give is used as a stem.
+
+## Next
+
+[Import data](/docs/guides/data/import-data).

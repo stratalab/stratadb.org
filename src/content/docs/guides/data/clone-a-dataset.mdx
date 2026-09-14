@@ -1,0 +1,106 @@
+---
+title: 'Clone a dataset'
+description: 'Start from a real dataset instead of an empty database, branches included.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get a populated database to work against in one command. About two
+minutes.
+
+## Find one
+
+```console
+strata hub list-datasets
+```
+
+```
+NAME                   BADGE  LICENSE   PRIMITIVES         SIZE      DOWNLOADS
+titanic                -      CC0-1.0   branches json kv   1.1 MB          231
+ab-test-results        -      CC0-1.0   branches json kv   52.6 kB           8
+world-bank-indicators  -      CC-BY-4.0 json kv            533.8 kB          6
+```
+
+The `PRIMITIVES` column says which models a dataset uses, and `branches` there
+means it ships with more than one.
+
+## Clone it
+
+```console
+strata clone titanic ./titanic
+```
+
+```
+cloned titanic@main into ./titanic (11 objects, 1.1 MB)
+```
+
+That is a complete local database. No server, no account, nothing running.
+
+## Look at what arrived
+
+```console
+strata ./titanic describe
+```
+
+```
+StrataDB 1.2.2 · durable_local
+branch default · branches: cleaned, default, raw, test, train · spaces: default
+capabilities: arrow event graph_core inference json kv vector vector_index
+kv 9 · json 1309 · events 0
+```
+
+**Five branches.** The dataset ships with `raw`, `cleaned`, `train` and `test`
+as branches of one database, not as four files you have to keep in step.
+
+```console
+strata ./titanic --branch raw --raw json count
+strata ./titanic --branch cleaned --raw json count
+```
+
+That is the pattern worth noticing: a train/test split is a fork, so the two
+share storage and their common ancestry is a fact the database knows rather than
+a naming convention.
+
+## Work on it without spoiling it
+
+```console
+strata ./titanic branch fork cleaned my-experiment
+strata ./titanic --branch my-experiment json set passenger:1 '$.fare' 100
+```
+
+The dataset's own branches stay as they were shipped. If you want to get back to
+exactly what you downloaded, delete your branch.
+
+## Where it came from
+
+```console
+strata ./titanic remote
+```
+
+```
+dataset  titanic
+branch   main
+```
+
+A clone remembers its origin, so a database you find later can say what it is.
+
+## What a clone is not
+
+It is a copy, not a subscription. Nothing syncs, nothing updates, and writing to
+it affects only your copy. Re-clone to get a newer version.
+
+## Failure modes
+
+**The clone fails or hangs.** The hub is a network service; check `strata hub
+list-datasets` first to see whether it is reachable at all.
+
+**The target directory exists.** Clone into a new path.
+
+**A dataset's licence matters.** The `LICENSE` column is there for a reason, and
+`CC-BY-4.0` has attribution requirements that `CC0-1.0` does not.
+
+## Next
+
+[Combine data models](/docs/guides/data/combine-data-models), or
+[Give each run a branch](/docs/guides/agents/give-each-run-a-branch) to
+experiment against what you just cloned.

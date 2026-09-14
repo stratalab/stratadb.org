@@ -1,0 +1,99 @@
+---
+title: 'Organize with spaces'
+description: 'Keep unrelated data apart inside one database, without prefixing every key.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Separate unrelated data in one database. About two minutes.
+
+## Create one
+
+```console
+strata ./mydb space create analytics
+```
+
+```
+created space analytics
+```
+
+```console
+strata ./mydb space list
+```
+
+```
+analytics
+default
+```
+
+## Write into it
+
+```console
+strata ./mydb --space analytics kv put metric 42
+strata ./mydb --space analytics kv get metric
+strata ./mydb kv get metric
+```
+
+```
+42
+```
+
+The last read returns nothing. Same database, same key name, different space,
+and they do not see each other.
+
+## What a space is for
+
+A space is a namespace, not a branch. The difference is what they are for:
+
+- A **branch** is the same data at a different point or on a different line of
+  work. Branches are compared and merged.
+- A **space** is different data that happens to live in the same database.
+  Spaces are not compared or merged.
+
+So `raw` and `cleaned` are branches of one dataset. `analytics` and `billing`
+are spaces.
+
+Use a space when you would otherwise prefix every key with a subsystem name.
+The prefix approach works until you want to count or scan one subsystem, at
+which point a space is the thing that makes `kv count` mean what you wanted.
+
+## They interact with branches
+
+Every space exists on every branch, so forking a branch forks all of them
+together:
+
+```console
+strata ./mydb branch fork default work
+strata ./mydb --branch work --space analytics kv put metric 99
+strata ./mydb --space analytics kv get metric
+```
+
+```
+42
+```
+
+A merge reports which spaces it covered, in `spaces_covered`.
+
+## Setting a default
+
+Passing `--space` on every command gets old. Set it once for the session:
+
+```console
+strata --space analytics ./mydb kv count
+```
+
+From Python, `stratadb.open(path, space="analytics")` or `db.at(space=...)` for
+a scoped view.
+
+## Failure modes
+
+**A read returns nothing and the key is definitely there.** You are in the wrong
+space. `db.space` and `strata ./mydb space list` are the checks.
+
+**A space will not delete.** It still holds data. That is deliberate, and unlike
+`graph delete`, which removes a populated graph without asking, tracked as
+strata-core issue 3122.
+
+## Next
+
+[Combine data models](/docs/guides/data/combine-data-models).

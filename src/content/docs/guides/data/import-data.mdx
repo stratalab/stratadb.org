@@ -1,0 +1,85 @@
+---
+title: 'Import data'
+description: 'Load Parquet, CSV or JSONL into a model, and what the file has to look like.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get existing data into Strata. About three minutes.
+
+## Import into one model
+
+```console
+strata ./mydb arrow import --target kv ./out.parquet
+```
+
+```
+imported 3 rows into kv from ./out.parquet (0 skipped)
+```
+
+`--target` is the model: `kv`, `json`, `event`, `vector` or `graph`. The receipt
+reports rows imported and rows skipped, and the skipped count is the one to
+check.
+
+## What the file needs
+
+The simplest source of a valid file is an export, so a round trip needs no
+schema work at all:
+
+```console
+strata ./source arrow export --primitive kv --format parquet ./data.parquet
+strata ./target arrow import --target kv ./data.parquet
+```
+
+```
+imported 3 rows into kv from ./data.parquet (0 skipped)
+```
+
+For a file you are producing yourself, key-value wants a key, a value, and how
+each is encoded:
+
+```
+key,key_encoding,value,value_encoding
+user:1,utf8,Ada,utf8
+user:2,utf8,Bob,utf8
+```
+
+JSON wants a key and the document as a string:
+
+```
+{"key": "user:1", "document": "{\"name\": \"Ada\", \"role\": \"engineer\"}"}
+```
+
+The `version` and `timestamp` columns an export includes are not required on
+import. Imported rows are new commits on the target, with the target's own
+versions.
+
+## Import into a branch first
+
+An import is a lot of writes at once, and doing it on a branch means you can
+look before it reaches anything that matters:
+
+```console
+strata ./mydb branch fork default import-run
+strata ./mydb --branch import-run arrow import --target kv ./data.parquet
+strata ./mydb --branch import-run kv count
+strata ./mydb branch merge import-run default
+```
+
+If the file was wrong, delete the branch instead of merging it. Nothing on
+`default` ever saw it.
+
+## Failure modes
+
+**Rows skipped.** The receipt counts them. Usually a row is missing a key or has
+an encoding the target does not accept.
+
+**`invalid_argument.executor.arrow_format`.** The extension and the content
+disagree, or the extension is unsupported. Use `.parquet`, `.csv` or `.jsonl`.
+
+**Everything imported but reads come back empty.** Check the branch and space you
+imported into against the one you are reading.
+
+## Next
+
+[Migrate from SQLite](/docs/guides/data/migrate-from-sqlite) puts this to work.
