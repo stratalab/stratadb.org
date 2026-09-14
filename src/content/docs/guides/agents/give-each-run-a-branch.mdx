@@ -1,0 +1,106 @@
+---
+title: 'Give each run a branch'
+description: 'Let several agent attempts work independently, compare the results, and keep the one that worked.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Run an agent several times without the attempts overwriting each
+other, then keep the best one. About five minutes.
+
+**You need.** The CLI and a database with whatever the agent starts from.
+
+## Fork per run
+
+```console
+strata ./agent branch fork default run-1
+strata ./agent --branch run-1 kv put result "answer-1"
+strata ./agent --branch run-1 kv put score 7
+```
+
+Each run gets its own branch and writes only there. Ten of them is not a
+problem: ten forks and twenty writes took **831ms** and left the database at
+**68KB**, because forking copies nothing.
+
+```console
+strata ./agent branch list
+```
+
+```
+NAME     PARENT   STATUS  GENERATION
+default  -        active           1
+run-1    default  active           1
+run-10   default  active           1
+```
+
+## Compare the attempts
+
+Read the same key from each branch:
+
+```console
+strata ./agent --branch run-1 --raw kv get score
+strata ./agent --branch run-4 --raw kv get score
+```
+
+```
+7
+8
+```
+
+Same key, ten answers, none of them interfering. That is the whole point of the
+pattern: the attempts are isolated by construction rather than by naming
+convention.
+
+## Keep one, discard the rest
+
+```console
+strata ./agent branch merge run-4 default
+```
+
+```
+merged run-4 into default: 2 applied, 0 deleted, 0 conflicts (version 55)
+```
+
+```console
+strata ./agent branch delete run-1
+```
+
+Deleting the losing branches is optional. They cost almost nothing to keep, and
+keeping them means you can still answer why the winner won.
+
+## The one thing that will bite you
+
+**A merge does not carry events or graph data.** If the run recorded its tool
+calls as events on its own branch, merging the winner leaves that log behind,
+and the receipt still says success:
+
+```
+merged run-1 into default: 1 applied, 0 deleted, 0 conflicts
+```
+
+Two events on the branch. Zero on `default` afterwards. Nothing warns you.
+
+So decide where the log lives before you start.
+[Record tool activity](/docs/guides/agents/record-tool-activity) covers writing
+it to `default` while the work happens on a branch, which is usually what you
+want.
+
+## What just happened
+
+A branch is the whole database, so a run branch isolates every model at once:
+the agent's key-value state, its JSON documents and its vectors all fork
+together. There is no per-run namespace to design and no key prefixing to get
+right.
+
+## Failure modes
+
+**The merge fails with `invalid_argument.engine.branch_point`.** The branch came
+from `branch create` rather than `branch fork`. Redo the run on a forked branch.
+
+**Two runs both merged and the second was refused.** They changed the same key.
+[Resolve merge conflicts](/docs/guides/branching/resolve-merge-conflicts).
+
+## Next
+
+[Persist agent memory](/docs/guides/agents/persist-agent-memory), for the state
+that should outlive a single run.

@@ -1,0 +1,102 @@
+---
+title: 'Persist agent memory'
+description: 'Keep what an agent learned across runs, without it becoming a single mutable blob.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Give an agent memory that survives the process and outlives a single
+run. About five minutes.
+
+**You need.** A database that lives somewhere durable, not `--cache`.
+
+## Memory is just data on default
+
+There is no memory API to learn. The agent's memory is whatever it writes to a
+durable database, and the choice that matters is which shape:
+
+```console
+strata ./agent kv put memory.goal "ship the feature"
+strata ./agent json set memory.user '$' '{"name":"Ada","prefers":"terse"}'
+```
+
+Key-value for opaque values you look up by name. JSON when the shape matters and
+you want to read or update one field:
+
+```console
+strata ./agent json set memory.user '$.prefers' '"verbose"'
+strata ./agent json get memory.user '$.prefers'
+```
+
+```
+updated memory.user
+"verbose"
+```
+
+For memory the agent should search rather than recall by key, use vectors.
+[Vectors](/docs/learn/vectors) covers that, including letting the collection
+embed text for you.
+
+## Keep memory on default, work on branches
+
+This is the pattern worth adopting early.
+
+Memory lives on `default`, where it accumulates. A run forks, does its work in
+isolation, and merges back only what it learned:
+
+```console
+strata ./agent branch fork default run-1
+strata ./agent --branch run-1 kv put memory.result "done"
+strata ./agent branch merge run-1 default
+```
+
+```
+merged run-1 into default: 1 applied, 0 deleted, 0 conflicts
+```
+
+A run that goes badly is deleted rather than unwound, and memory never saw it.
+
+## Nothing is ever overwritten
+
+Updating memory does not lose the previous value:
+
+```console
+strata ./agent kv history memory.goal
+```
+
+Every version is retained and readable with `--as-of`, so "what did it believe
+last Tuesday" is a read rather than an archaeology project. That is also the
+cost: [Databases and storage](/docs/learn/databases-and-storage) has the numbers,
+roughly 140 bytes per version for a small value, with no command to prune.
+
+An agent that rewrites the same memory key in a tight loop will grow the
+database. Write when something changes, not on every tick.
+
+## Close the handle
+
+Memory that was acknowledged is not necessarily memory that reached the disk.
+Under the default durability mode the engine syncs at close, so a long-running
+agent that is killed can lose recent writes.
+
+```python
+with stratadb.open("./agent") as db:
+    db.kv.put("memory.goal", "ship the feature")
+```
+
+For memory you cannot reconstruct, open with `durability="always"`.
+[Durability](/docs/learn/durability) has the measurements, including how much a
+kill actually costs.
+
+## Failure modes
+
+**Memory vanished after a crash.** The process died without closing. See above.
+
+**Memory vanished after a merge.** Events and graph data do not merge. If memory
+was an event log on a run branch, it did not come across.
+
+**The database keeps growing.** Every version is kept. Write less often, or fork
+a branch and keep the shorter one.
+
+## Next
+
+[Give each run a branch](/docs/guides/agents/give-each-run-a-branch).

@@ -1,0 +1,106 @@
+---
+title: 'Replay an agent run'
+description: 'Reconstruct exactly what the agent could see at each step it took.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Answer "what did it know when it did that?" for any step of a past
+run. About five minutes.
+
+**You need.** A run that recorded its tool calls as events and its state as
+data. [Record tool activity](/docs/guides/agents/record-tool-activity) sets that
+up.
+
+## The join
+
+Every event carries the commit version it was appended at, and every read takes
+`--as-of`. Those two facts together are the whole technique: **the log tells you
+when, and `--as-of` tells you what.**
+
+```console
+strata ./agent --json event list
+```
+
+```
+seq 0  version 3  run.start  {"goal": "fix the bug"}
+seq 1  version 5  tool.call  {"path": "app.py", "tool": "read"}
+seq 2  version 7  tool.call  {"path": "app.py", "tool": "edit"}
+seq 3  version 9  run.end    {"status": "ok"}
+```
+
+## Step through it
+
+Read the state as of each event's version:
+
+```console
+strata ./agent kv get state.step --as-of 5
+strata ./agent kv get state.step --as-of 7
+strata ./agent kv get state.step --as-of 9
+```
+
+```
+1
+2
+3
+```
+
+That is the run reconstructed. At the moment it called `read`, the state was 1.
+By the time it called `edit`, 2. Nothing was restored and nothing moved: these
+are reads.
+
+Before the first write, a key simply does not exist yet, which is why `--as-of
+3` returns nothing rather than an error.
+
+## Why this is not just logging
+
+A log tells you what the agent did. This tells you **what it was looking at when
+it decided to**, which is the question you actually have when a run goes wrong.
+Reproducing that from a log alone means replaying every write in order and
+hoping nothing was missed.
+
+It also holds for every model at once, because the commit timeline is shared:
+
+```console
+strata ./agent json get plan '$' --as-of 7
+strata ./agent graph bfs deps app.py --as-of 7
+```
+
+Same instant, three different shapes of data.
+
+## Fork the moment to work in it
+
+Reading the past does not let you try a different continuation. For that, branch
+from it:
+
+```console
+strata ./agent branch fork default what-if --version 7
+```
+
+Now `what-if` starts exactly where the agent was before its second tool call,
+and you can run a different attempt from there.
+[Fork from historical state](/docs/guides/branching/fork-from-historical-state)
+covers the details.
+
+## What just happened
+
+Nothing was written. Time travel is a read, so replaying a run has no effect on
+the run, the database, or anything reading it concurrently.
+
+## Failure modes
+
+**`history_unavailable.engine.persistence_history`.** The version is outside
+what the database retains, or a wall-clock value was passed to `--as-of`, which
+wants a commit position. Take the number from the event's `version` field, not
+its `timestamp`, which is the occurrence clock.
+
+**The events are gone.** They were on a run branch that got merged. See
+[Record tool activity](/docs/guides/agents/record-tool-activity).
+
+**State reads return nothing at every version.** Check the key existed on the
+branch you are reading. `kv history` on that branch is the fastest check.
+
+## Next
+
+[Time travel](/docs/learn/time-travel) for the two clocks, and
+[Events](/docs/learn/events) for what the log guarantees.

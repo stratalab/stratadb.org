@@ -1,0 +1,120 @@
+---
+title: 'Record tool activity'
+description: 'Keep an ordered, tamper-evident log of what an agent did, and put it somewhere a merge will not eat.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Record every tool call an agent makes, in order, so you can audit the
+run afterwards. About five minutes.
+
+**You need.** A database. Read [Give each run a
+branch](/docs/guides/agents/give-each-run-a-branch) first if runs are isolated.
+
+## Append as it happens
+
+```console
+strata ./agent event append run.start '{"goal":"fix the bug"}'
+strata ./agent event append tool.call '{"tool":"read","path":"app.py"}'
+strata ./agent event append tool.call '{"tool":"edit","path":"app.py"}'
+strata ./agent event append run.end '{"status":"ok"}'
+```
+
+```
+appended run.start #0
+appended tool.call #1
+appended tool.call #2
+appended run.end #3
+```
+
+The number is the sequence. It starts at zero and increases by one, so the log
+is ordered by construction rather than by a timestamp you have to trust.
+
+## Read it back
+
+```console
+strata ./agent event list
+```
+
+```
+SEQUENCE  EVENT_TYPE  TIMESTAMP                       PAYLOAD
+       0  run.start   2026-09-14 19:19:13.665223 UTC  {"goal":"fix the bug"}
+       1  tool.call   2026-09-14 19:19:13.714141 UTC  {"path":"app.py","tool":"read"}
+       2  tool.call   2026-09-14 19:19:13.762151 UTC  {"path":"app.py","tool":"edit"}
+       3  run.end     2026-09-14 19:19:13.808714 UTC  {"status":"ok"}
+```
+
+Narrow it by type when the log gets long:
+
+```console
+strata ./agent event list --event-type tool.call
+```
+
+## Prove nothing was altered
+
+Each entry carries a hash of itself and the one before it, so the log can be
+checked rather than trusted:
+
+```console
+strata ./agent event verify-chain
+```
+
+```
+valid          true
+length         4
+first_invalid  -
+error          -
+```
+
+That is what makes this worth choosing over a table you only ever insert into.
+Append-only is a convention; a hash chain is evidence.
+
+## Where to write it
+
+**This is the decision that matters, and it is easy to get wrong.**
+
+A merge does not carry events. Write the log on a run branch and merging that
+run leaves the log behind, with a receipt that says success:
+
+```console
+strata ./agent --branch run-1 event append tool.call '{"tool":"search"}'
+strata ./agent branch merge run-1 default
+strata ./agent --raw event count
+```
+
+```
+merged run-1 into default: 1 applied, 0 deleted, 0 conflicts
+0
+```
+
+Two events on the branch, none on `default`, nothing said.
+
+So write the log to `default` even while the run works on a branch:
+
+```console
+strata ./agent --branch run-1 kv put result "answer-1"
+strata ./agent event append tool.call '{"run":"run-1","tool":"search"}'
+```
+
+The run's _state_ is isolated on its branch; the run's _record_ accumulates on
+`default` where it survives the merge. Put the run id in the payload so the log
+can still be filtered per run.
+
+If you would rather the log live and die with its branch, that works too. Just
+choose it deliberately.
+
+## Failure modes
+
+**`key must be a string at line 1 column 2`.** The payload lost its quotes to
+the shell. Wrap JSON in single quotes: `'{"tool":"search"}'`.
+
+**Events are missing after a merge.** They were never carried. See above.
+
+**`event range --direction reverse` returns the window backwards, not a walk
+backwards from the start.** The binary's own `--help` describes the older
+behaviour, tracked as strata-core issue 3119.
+
+## Next
+
+[Replay an agent run](/docs/guides/agents/replay-an-agent-run), which joins this
+log to the state it produced.

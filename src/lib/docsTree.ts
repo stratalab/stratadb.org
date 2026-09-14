@@ -122,10 +122,13 @@ export const docsTree: TreeNode[] = [
       {
         label: 'Agent applications',
         children: [
-          { label: 'Give each run a branch' },
-          { label: 'Persist agent memory' },
-          { label: 'Record tool activity' },
-          { label: 'Replay an agent run' },
+          {
+            label: 'Give each run a branch',
+            href: '/docs/guides/agents/give-each-run-a-branch',
+          },
+          { label: 'Persist agent memory', href: '/docs/guides/agents/persist-agent-memory' },
+          { label: 'Record tool activity', href: '/docs/guides/agents/record-tool-activity' },
+          { label: 'Replay an agent run', href: '/docs/guides/agents/replay-an-agent-run' },
         ],
       },
       {
