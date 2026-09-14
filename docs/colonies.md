@@ -54,17 +54,28 @@ not certify every assistive technology or physical device.
 
 ## Engine artifacts
 
-`stage-colonies.mjs` stages the pinned engine from the committed
-`wasm-manifest.json`. It checks exact sizes and SHA-256 digests before accepting
-any bundle. It tries the existing Colonies cache, the website playground bundle,
-and then the pinned GitHub release. `COLONIES_WASM_DIR` selects an explicit local
-bundle and fails if it does not match. A missing or altered bundle fails the
-build; it never silently upgrades Colonies to the latest playground engine.
+Colonies runs the same engine as the rest of the site. `fetch-wasm.mjs` stages
+the release named in `src/data/release.json` into `public/playground/pkg`, and
+`stage-colonies.mjs` copies it to `assets/pkg/` where the game's worker expects
+it. One version, one fetch, one thing to upgrade.
 
-The generated `assets/pkg/` directory is ignored by Git. The build fetches it
-from the release, so the website checkout does not need the app checkout or
-committed WASM binaries. Review the game's engine version, tests, and manifest
-together when upgrading.
+This replaced an independent pin: a `wasm-manifest.json` naming an exact version
+with byte counts and SHA-256 digests, plus its own download path to that
+release. The intent was to stop the demo drifting onto an untested engine, but
+the cost was two engines on two upgrade schedules, and they were byte-identical
+in practice. If `website:sync` still ships a `wasm-manifest.json`, it is no
+longer read and can stop being copied.
+
+What replaces the pin is a stronger check. `visual-smoke.mjs` loads
+`/demos/colonies/`, waits for the worker to report six colonies, presses play,
+and requires a generation to actually advance, on three viewports, failing on
+any console error. A bad engine fails the build by breaking the game rather than
+by mismatching a digest. So when the site's engine moves, run `npm run check`
+and the demo is either fine or loudly not.
+
+The generated `assets/pkg/` directory is ignored by Git. The game's own source
+files remain hash-guarded by `verify-colonies.mjs` against
+`source-manifest.json`; that contract is unchanged.
 
 ## Publishing
 

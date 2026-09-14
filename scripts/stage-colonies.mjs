@@ -1,63 +1,55 @@
-// Colonies pins the engine it was verified against independently of the site's
-// latest playground release. Missing or altered artifacts must fail the build.
-import { readFile, writeFile, mkdir, mkdtemp, rm } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+// Colonies runs the same engine as the rest of the site.
+//
+// It used to pin its own: a wasm-manifest.json naming an exact version with
+// byte counts and SHA-256 digests, and its own download path to that release.
+// The intent was good, to stop the demo drifting onto an engine it had not been
+// tested against, but the cost is that the site then ships two engines and
+// upgrades them on two schedules. They were byte-identical anyway.
+//
+// So the engine now comes from one place: scripts/fetch-wasm.mjs stages the
+// release named in src/data/release.json into public/playground/pkg, and this
+// copies it where the game's worker expects it. One version, one fetch, one
+// thing to upgrade.
+//
+// What replaces the pin is a better check than a hash. scripts/visual-smoke.mjs
+// loads /demos/colonies/, waits for the worker to report six colonies, presses
+// play, and requires a generation to actually advance, on three viewports, with
+// any console error failing the run. A bad engine fails the build by breaking
+// the game rather than by mismatching a digest.
+//
+// The game's own files are still hash-guarded by verify-colonies.mjs against
+// source-manifest.json. That contract is unchanged.
+import { copyFile, mkdir, readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const manifest = JSON.parse(
-  await readFile(join(root, 'src/demos/colonies/wasm-manifest.json'), 'utf8'),
-);
+const source = join(root, 'public/playground/pkg');
 const destination = join(root, 'public/demos/colonies/assets/pkg');
-async function verified(dir) {
-  const files = new Map();
-  for (const [name, expected] of Object.entries(manifest.files)) {
-    let data = await readFile(join(dir, name));
-    if (name.endsWith('.js')) data = Buffer.from(data.toString('utf8').replaceAll('\u2014', '-'));
-    if (
-      data.length !== expected.bytes ||
-      createHash('sha256').update(data).digest('hex') !== expected.sha256
-    )
-      throw new Error(`${name} does not match the verified Colonies bundle`);
-    files.set(name, data);
-  }
-  return files;
-}
-async function stage(files) {
-  await mkdir(destination, { recursive: true });
-  for (const [name, data] of files) await writeFile(join(destination, name), data);
-}
-let files;
-if (process.env.COLONIES_WASM_DIR) {
-  files = await verified(process.env.COLONIES_WASM_DIR);
-} else {
-  for (const dir of [destination, join(root, 'public/playground/pkg')]) {
-    try {
-      files = await verified(dir);
-      break;
-    } catch {
-      /* Try the next verified source. */
-    }
-  }
-}
-if (!files) {
-  const staging = await mkdtemp(join(tmpdir(), 'strata-colonies-'));
+const FILES = ['strata_wasm.js', 'strata_wasm_bg.wasm'];
+
+const release = JSON.parse(await readFile(join(root, 'src/data/release.json'), 'utf8'));
+
+for (const name of FILES) {
   try {
-    const url = `https://github.com/stratalab/strata-core/releases/download/v${manifest.expectedVersion}/strata-wasm-web.tar.gz`;
-    const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
-    if (!response.ok) throw new Error(`Could not fetch Colonies engine: HTTP ${response.status}`);
-    const archive = join(staging, 'bundle.tar.gz');
-    await writeFile(archive, Buffer.from(await response.arrayBuffer()));
-    execFileSync('tar', ['xzf', archive, '-C', staging]);
-    files = await verified(staging);
-  } finally {
-    await rm(staging, { recursive: true, force: true });
+    await stat(join(source, name));
+  } catch {
+    throw new Error(
+      `stage-colonies: ${join('public/playground/pkg', name)} is missing. ` +
+        'It is staged by scripts/fetch-wasm.mjs, which runs before this in prebuild. ' +
+        'Colonies cannot run without the engine.',
+    );
   }
 }
-await stage(files);
+
+await mkdir(destination, { recursive: true });
+let bytes = 0;
+for (const name of FILES) {
+  await copyFile(join(source, name), join(destination, name));
+  bytes += (await stat(join(destination, name))).size;
+}
+
 console.log(
-  `stage-colonies: verified Strata ${manifest.expectedVersion} staged for /demos/colonies/`,
+  `stage-colonies: Strata ${release.version} staged for /demos/colonies/ ` +
+    `from the playground bundle (${(bytes / 1024 / 1024).toFixed(1)} MB)`,
 );
