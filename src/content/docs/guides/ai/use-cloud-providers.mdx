@@ -1,0 +1,127 @@
+---
+title: 'Use cloud providers'
+description: 'Set up a key, check it is really working, and know what each call costs you.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get embeddings and generation working against a hosted model. About
+three minutes.
+
+## Three providers are built in
+
+`openai`, `anthropic` and `google`. They are HTTP clients, so they need nothing
+installed, only a key. A cloud model is always named with its provider:
+
+```
+openai:text-embedding-3-small
+openai:gpt-4o-mini
+anthropic:claude-3-5-haiku-latest
+```
+
+A **bare** name means a local model, which is a different thing entirely. See
+[Use local models](/docs/guides/ai/use-local-models).
+
+## Set a key
+
+```console
+strata config set openai.api_key sk-...
+```
+
+The file is written owner-only, and `strata config get-key openai.api_key`
+prints it redacted. The environment overrides it:
+
+```console
+export OPENAI_API_KEY=sk-...
+```
+
+That order, environment then file, is what lets CI run without writing a key to
+disk.
+
+## Check it
+
+```console
+strata inference status
+```
+
+```
+build	cloud providers only
+
+providers
+  openai	ready -- key from ~/.config/strata/config.toml; use openai:<model>
+  anthropic	no key -- `strata config set anthropic.api_key <key>`
+  google	no key -- `strata config set google.api_key <key>`
+  local	not in this build
+```
+
+**`ready` means a key is present, not that it works.** A revoked or mistyped key
+still reports ready, and the failure arrives at the first real call:
+
+```
+inference.provider_auth_failed: provider error: OpenAI: Incorrect API key
+provided (HTTP 401)
+```
+
+So the actual check is a call:
+
+```console
+strata --cache inference embed openai:text-embedding-3-small "test"
+```
+
+```
+1 embeddings · dim 1536
+```
+
+`--cache` keeps it out of any database you care about.
+
+## Ask what a model can do
+
+```console
+strata --cache inference capability openai:gpt-4o-mini
+```
+
+```
+provider                  openai
+model                     gpt-4o-mini
+availability              ready
+can_generate              true
+can_embed                 true
+can_rank                  false
+requires_api_key          true
+requires_network          true
+supports_tools            true
+```
+
+Worth doing before wiring a model in. `can_rank` is `false` for every cloud
+model today, which is why
+[Rerank search results](/docs/guides/ai/rerank-search-results) is a page about
+not being able to.
+
+## What it costs
+
+Every `--text` upsert, every `--text` query and every generation is a provider
+round trip, billed by the provider. Generation reports its usage:
+
+```
+-- stop: stop · prompt 50 tok · completion 22 tok
+```
+
+Two consequences worth designing around. Embedding at ingest is cheap and
+one-off; embedding per query is a cost per request. And a RAG answer costs an
+embedding plus a generation every time unless you cache it.
+
+## Failure modes
+
+**`inference.provider_auth_failed`.** The key is wrong, revoked, or an empty
+environment variable is shadowing a good one in the file. `inference status`
+names the layer in use.
+
+**`inference.missing_api_key`.** No key at all. The message names the exact
+command to fix it.
+
+**A dimension mismatch when storing.** The collection's dimension must match the
+model's output. `text-embedding-3-small` is 1536.
+
+## Next
+
+[Embed and store documents](/docs/guides/ai/embed-and-store-documents).

@@ -1,0 +1,96 @@
+---
+title: 'Build semantic search'
+description: 'Query a collection by meaning, filter by metadata, and read the scores.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Search a corpus by what text means rather than what words it contains.
+About five minutes.
+
+**You need.** A collection with documents in it. [Embed and store
+documents](/docs/guides/ai/embed-and-store-documents).
+
+## Query with text
+
+```console
+strata ./docs vector query docs --text "is my data safe if the process dies"
+```
+
+```
+KEY  SCORE     METADATA
+d2   0.420094  {"page":"durability"}
+d4   0.387862  {"page":"events"}
+d1   0.254913  {"page":"branches"}
+```
+
+The query is embedded with the collection's recorded model, so it lands in the
+same space as the documents. Results are ranked, closest first.
+
+Nothing in that query appeared in the winning document. `d2` is "Durability
+decides whether an acknowledged write reached the disk", which shares no
+significant word with the question. That is the difference from a keyword index.
+
+## Limit the results
+
+```console
+strata ./docs vector query docs --text "keeping data after a crash" -k 2
+```
+
+`-k` defaults to 10.
+
+## Filter by metadata
+
+The filter is JSON, and its shape is not guessable, so here it is:
+
+```console
+strata ./docs vector query docs --text "audit log" \
+  --filter '{"conditions":[{"field":"page","op":"eq","value":{"type":"string","value":"events"}}]}'
+```
+
+```
+KEY  SCORE     METADATA
+d4   0.524128  {"page":"events"}
+```
+
+Each condition is a `field`, an `op` and a `value`, and the value is tagged with
+its type: `string`, `number`, `bool` or `null`. The only operator today is `eq`.
+
+`--filter-file` reads the same JSON from a file, which is easier to live with in
+a script.
+
+## Reading the scores
+
+Scores are similarity under the collection's metric, `cosine` by default, so
+higher is closer. They are comparable **within one query** and not across
+queries: 0.42 as a top hit does not mean the same thing for a different
+question.
+
+So a relevance cutoff is something to calibrate against your own corpus rather
+than a number to copy from documentation.
+
+## It is an ordinary read
+
+```console
+strata ./docs --branch experiment vector query docs --text "..."
+strata ./docs vector query docs --text "..." --as-of 12
+```
+
+Vector search takes `--branch` and `--as-of` like everything else, so you can
+search a fork, or search the corpus as it was.
+
+## Failure modes
+
+**`missing field conditions`.** The filter is not the flat object it looks like
+it should be. Use the shape above.
+
+**Results look random.** The corpus and the query were embedded by different
+models. If the collection records one, this cannot happen; if vectors were
+supplied directly, it can.
+
+**Every score is low.** Often correct. A corpus with nothing relevant still
+returns its closest documents, ranked, and it is your job to reject them.
+
+## Next
+
+[Build RAG](/docs/guides/ai/build-rag).

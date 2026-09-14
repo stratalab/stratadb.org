@@ -1,0 +1,122 @@
+---
+title: 'Use local models'
+description: 'Add local execution to the binary you already installed, and run inference with no key and no network.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Run embeddings or generation without a provider, a key or a network.
+About ten minutes, most of it downloading.
+
+## Released binaries cannot do it yet
+
+The release ships without local execution, because it vendors llama.cpp and
+would turn a twelve-megabyte download into something much larger. A bare model
+name means a local model, so on a fresh install:
+
+```console
+strata --cache inference embed miniLM "hello"
+```
+
+```
+inference.unsupported_operation: not supported: `miniLM` is a local model, and
+this build has no local model execution: this build runs cloud models only, and
+a bare model name means a local model. Either name a cloud model instead, or run
+`strata inference install-local` to add local execution.
+```
+
+## Add it
+
+```console
+strata inference install-local
+```
+
+This adds local execution to the installation you already have. There is no
+build from source and no toolchain to install.
+
+```console
+strata inference status
+```
+
+The `build` line and the `local` provider row are what change.
+
+## Pick a model
+
+```console
+strata --cache inference models list
+```
+
+```
+miniLM        embed     bert          f16     unavailable   45 MB
+nomic-embed   embed     nomic-bert    q8_0    unavailable   260 MB
+bge-m3        embed     xlm-roberta   q8_0    unavailable   1.2 GB
+gpt2          generate  gpt2          q8_0    unavailable   178 MB
+tinyllama     generate  llama         q4_k_m  unavailable   670 MB
+qwen3:8b      generate  qwen3         q4_k_m  unavailable   4.7 GB
+```
+
+`unavailable` means not downloaded yet. Sizes range from 45 MB to 4.7 GB, so
+choose deliberately: `miniLM` for embeddings is 45 MB and enough for most
+retrieval, while an 8B generator is a different commitment.
+
+```console
+strata --cache inference models local
+```
+
+Lists what is actually on disk.
+
+## Check before you commit to one
+
+```console
+strata --cache inference capability miniLM
+```
+
+```
+availability              not_downloaded
+can_embed                 false
+provider_feature_enabled  false
+```
+
+On a cloud-only build those read `false`, which is the truth rather than an
+advertisement. After `install-local` they change. `embedding_dim` is reported
+for local models, which is the number your collection's dimension has to match.
+
+## Why bother
+
+**No key, no network, no bill.** Embedding a large corpus locally costs time
+rather than money, and works offline.
+
+**Nothing leaves the machine.** For data you cannot send to a provider, this is
+the only option.
+
+**Reproducibility.** A local model at a pinned quantisation answers the same way
+next year. A hosted model behind a moving name does not.
+
+The trade is quality and speed. A 45 MB embedding model is not
+`text-embedding-3-large`, and generation on CPU is slow.
+
+## Models are cached in memory
+
+```console
+strata --cache inference cache-status
+strata --cache inference unload
+```
+
+Loaded models stay resident between calls, which matters more than it sounds
+when the model is several gigabytes. `unload` with no argument clears everything.
+
+## Failure modes
+
+**`inference.unsupported_operation`.** The build has no local execution. Run
+`install-local`.
+
+**A model is `not_downloaded`.** It is fetched on first use, so the first call
+is slow and needs a network even though later ones do not.
+
+**Dimension mismatch.** `capability <model>` reports `embedding_dim`; the
+collection has to be created with that number.
+
+## Next
+
+[Use cloud providers](/docs/guides/ai/use-cloud-providers) for the hosted path,
+or [Embed and store documents](/docs/guides/ai/embed-and-store-documents).

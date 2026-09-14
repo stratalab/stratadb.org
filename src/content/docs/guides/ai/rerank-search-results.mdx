@@ -1,0 +1,72 @@
+---
+title: 'Rerank search results'
+description: 'The command exists, no shipping provider supports it, and what to do until one does.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Short version: you cannot rerank with Strata today.** The command exists and
+no available provider implements it. This page says so plainly so you do not
+spend an afternoon finding out.
+
+## What happens if you try
+
+```console
+strata ./docs inference rank openai:gpt-4o-mini "query" "passage one" "passage two"
+```
+
+```
+inference.unsupported_operation: not supported: `openai:gpt-4o-mini` is served by
+openai, which cannot rank.
+  hint: Use an inference operation supported by the selected provider and model.
+```
+
+Check before calling rather than catching the error:
+
+```console
+strata ./docs inference capability openai:gpt-4o-mini
+```
+
+```
+can_generate  true
+can_embed     true
+can_rank      false
+```
+
+`can_rank` is `false` for both built-in cloud models, and no model in the local
+catalogue is a rank model. `openai`, `anthropic` and `google` are the three
+providers, and none of them offers a reranking endpoint through Strata.
+
+## What to do instead
+
+**Retrieve more and cut.** Ask for more neighbours than you need and apply your
+own relevance rule. Scores are comparable within one query, so a cutoff works
+even though it needs calibrating to your corpus.
+
+```console
+strata ./docs vector query docs --text "..." -k 20
+```
+
+**Filter rather than rerank.** Metadata filtering runs before scoring, so
+narrowing by document type or recency often does what reranking was going to do,
+at no extra cost. [Build semantic
+search](/docs/guides/ai/build-semantic-search) has the filter shape.
+
+**Let the generator judge.** Pass the top handful into `inference generate` and
+ask it to pick, which costs one call and is usually good enough for small
+candidate sets.
+
+**Rerank outside Strata.** A cross-encoder in your own process, with Strata as
+the retrieval layer.
+
+## When this changes
+
+The surface is already there, so this becomes a one-line change when a provider
+supports it: `inference rank` takes a query and passages and returns them
+scored. `capability` is the thing to check, and it reports per model, so a
+future model that can rank will say so without this page needing to be right.
+
+## Next
+
+[Build semantic search](/docs/guides/ai/build-semantic-search) for the retrieval
+half, or [Build RAG](/docs/guides/ai/build-rag) for the generation half.

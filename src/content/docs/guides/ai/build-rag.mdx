@@ -1,0 +1,112 @@
+---
+title: 'Build RAG'
+description: 'Retrieve from your own data, then generate an answer grounded in it, without a second system.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Answer a question using your own documents. About ten minutes.
+
+**You need.** A collection with documents, and a provider key. [Build semantic
+search](/docs/guides/ai/build-semantic-search) is the first half of this.
+
+## The loop
+
+Retrieval and generation are both commands, so the whole thing is two calls and
+whatever glue you like:
+
+```console
+strata ./docs vector query docs --text "is my data safe if the process dies" -k 2
+```
+
+```
+KEY  SCORE     METADATA
+d2   0.420906  {"page":"durability"}
+d3   0.282176  {"page":"hub"}
+```
+
+```console
+strata ./docs inference generate openai:gpt-4o-mini \
+  "Answer in one sentence using only this context. Context: Durability decides whether an acknowledged write reached the disk. Question: is my data safe if the process dies"
+```
+
+```
+Your data is safe if it has been acknowledged and the write has reached the disk,
+as durability ensures this.
+-- stop: stop · prompt 50 tok · completion 22 tok
+```
+
+The trailing line reports the finish reason and token counts, which is what you
+bill against.
+
+## What makes this different from bolting a vector database on
+
+The documents, their embeddings, their metadata and whatever else your
+application stores are **in the same database**, so:
+
+**A snapshot is consistent.** `--as-of 12` means the same instant to the corpus
+and to everything else. Retrieval that has to agree with application state can.
+
+**An index experiment is a branch.** Re-chunk, re-embed with a different model,
+evaluate, and keep it or throw it away:
+
+```console
+strata ./docs branch fork default rechunk
+strata ./docs --branch rechunk vector collection set-embedding-model docs openai:text-embedding-3-large
+```
+
+The live corpus is untouched while you evaluate. That is difficult when the
+vectors live in one system and the documents in another.
+
+**One thing to back up.**
+
+## In Python
+
+```python
+import stratadb
+
+with stratadb.open("./docs") as db:
+    hits = db.vectors.query("docs", text=question, k=3)
+    context = "\n".join(db.vectors.get("docs", h.key).metadata["text"] for h in hits)
+    answer = db.ai.chat(
+        f"Context: {context}\n\nQuestion: {question}",
+        model="openai:gpt-4o-mini",
+    )
+    print(answer.text)
+```
+
+```
+[('d2', 0.3576), ('d3', 0.2822)]
+```
+
+Two things about that call. The Python method is `chat`, not `generate`, which
+is the CLI's verb for the same operation. And `model` is keyword-only, so the
+first positional argument is the prompt. It returns a `ChatCompletion`, not a
+string.
+
+Store the source text in metadata if you want to retrieve it alongside the
+vector. The collection stores what you embedded, not the passage it came from.
+
+## Cost and latency
+
+Each `--text` query is a provider round trip before the database does anything,
+and each generation is another. Two network calls per question is the floor, and
+it dominates the local search time entirely.
+
+Cache aggressively: the same question asked twice costs twice unless you store
+the answer, and a key-value entry is a reasonable cache.
+
+## Failure modes
+
+**Answers ignore the context.** The model was not told to use only the context.
+Say so in the prompt, as above.
+
+**Retrieval returns nothing relevant.** Check the corpus actually contains the
+answer, then whether the chunks are too large. Embedding a whole page dilutes it.
+
+**`inference.provider_auth_failed`.** The key is present but rejected.
+
+## Next
+
+[Rerank search results](/docs/guides/ai/rerank-search-results), and
+[Use cloud providers](/docs/guides/ai/use-cloud-providers) for keys and costs.

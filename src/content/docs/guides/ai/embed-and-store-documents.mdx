@@ -1,0 +1,87 @@
+---
+title: 'Embed and store documents'
+description: 'Let the collection embed your text, so the corpus and the query are never embedded two different ways.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Get text into a vector collection without managing embeddings
+yourself. About five minutes.
+
+**You need.** A provider key. [Use cloud
+providers](/docs/guides/ai/use-cloud-providers) sets one up, and `strata
+inference status` confirms it.
+
+## Record the model on the collection
+
+```console
+strata ./docs vector collection create docs 1536 --embedding-model openai:text-embedding-3-small
+```
+
+```
+created collection docs (1536 dimensions, cosine)
+```
+
+The dimension has to match what the model produces. `text-embedding-3-small`
+produces 1536.
+
+Recording the model on the collection rather than passing it per call is the
+whole point. Embedding a corpus with one model and a query with another returns
+neighbours that are ranked and meaningless, and nothing in the numbers would
+tell you. With the model on the collection, that cannot happen.
+
+## Store text, not vectors
+
+```console
+strata ./docs vector upsert docs d1 --text "Branches let you fork the whole database instantly"
+strata ./docs vector upsert docs d2 --text "Durability decides whether an acknowledged write reached the disk"
+```
+
+```
+created d1 in docs
+created d2 in docs
+```
+
+Each `--text` write calls the provider once. That is a network round trip and it
+costs what the provider charges, so batch your ingest rather than embedding one
+document per user request.
+
+## Add metadata you can filter on
+
+```console
+strata ./docs vector update-metadata docs d1 '{"page":"branches"}'
+```
+
+`update-metadata` merges, so it does not disturb the embedding. This matters
+because **a plain `upsert` replaces the whole record**: re-upserting a vector
+without `--metadata` silently drops the metadata it had. Tracked as strata-core
+issue 3120.
+
+## If you already have vectors
+
+Pass them directly and skip the provider entirely:
+
+```console
+strata ./docs vector upsert docs d1 '[0.1,0.2,0.3]'
+```
+
+A vector you supply is never checked against the collection's recorded model.
+Passing one is your statement that this model produced it.
+
+## Failure modes
+
+**`failed_precondition.engine.embedding_model_missing`.** The collection records
+no model, so `--text` has nothing to call. Set one with `vector collection
+set-embedding-model`.
+
+**`invalid_argument.engine.vector_dimension`.** The collection's dimension and
+the model's output disagree. `inference capability <model>` reports
+`embedding_dim` for local models; for cloud models, check the provider's docs.
+
+**`inference.provider_auth_failed`.** The key is present but rejected.
+`inference status` reports a provider as `ready` when a key _exists_, not when
+it works.
+
+## Next
+
+[Build semantic search](/docs/guides/ai/build-semantic-search).

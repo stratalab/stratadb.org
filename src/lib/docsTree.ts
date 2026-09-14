@@ -111,12 +111,15 @@ export const docsTree: TreeNode[] = [
       {
         label: 'AI and retrieval',
         children: [
-          { label: 'Build semantic search' },
-          { label: 'Build RAG' },
-          { label: 'Embed and store documents' },
-          { label: 'Rerank search results' },
-          { label: 'Use local models' },
-          { label: 'Use cloud providers' },
+          { label: 'Build semantic search', href: '/docs/guides/ai/build-semantic-search' },
+          { label: 'Build RAG', href: '/docs/guides/ai/build-rag' },
+          {
+            label: 'Embed and store documents',
+            href: '/docs/guides/ai/embed-and-store-documents',
+          },
+          { label: 'Rerank search results', href: '/docs/guides/ai/rerank-search-results' },
+          { label: 'Use local models', href: '/docs/guides/ai/use-local-models' },
+          { label: 'Use cloud providers', href: '/docs/guides/ai/use-cloud-providers' },
         ],
       },
       {
