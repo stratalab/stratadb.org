@@ -4,6 +4,7 @@
 // judged before any page is ported back.
 import BaseLayout from './BaseLayout.astro';
 import DocsSidebar from '../components/chrome/DocsSidebar.astro';
+import { searchAliases } from '../lib/searchAliases';
 import DocsSearch from '../components/chrome/DocsSearch.astro';
 
 interface Heading {
@@ -56,6 +57,16 @@ const groupWidth = bare
     : showToc
       ? 'max-w-[66rem]'
       : 'max-w-[50rem]';
+
+// Words a reader might search for that this page answers in different words.
+// Indexed, not displayed: Pagefind matches text inside the body it indexes, and
+// someone searching "transaction" or "state cell" should reach the page that
+// explains what replaced it rather than an empty result. See lib/searchAliases.
+//
+// Weighted, because the generated reference is a hundred and fifty pages that
+// all match "vector" strongly, and a concept page loses to `vector exists`
+// without help. The weight applies to these words on this page only.
+const aliases = searchAliases[Astro.url.pathname.replace(/\/$/, '')] ?? [];
 ---
 
 <BaseLayout title={`${title} | StrataDB Docs`} description={description}>
@@ -115,6 +126,18 @@ const groupWidth = bare
               </button>
 
               <article class="min-w-0" data-pagefind-body data-pagefind-meta={`title:${title}`}>
+                {
+                  aliases.length > 0 && (
+                    <span
+                      class="sr-only"
+                      aria-hidden="true"
+                      data-search-aliases
+                      data-pagefind-weight="8"
+                    >
+                      {aliases.join(', ')}
+                    </span>
+                  )
+                }
                 {
                   bare ? (
                     <slot />
