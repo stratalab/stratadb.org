@@ -81,6 +81,13 @@ check_dependencies() {
     fi
 }
 
+# Name this machine's target triple. Naming a triple is not a claim that a
+# build exists for it: the release's own checksums-sha256.txt decides that, in
+# require_build_for_target below. Keeping the two apart is the point. This
+# script used to carry its own list of six targets while the release shipped
+# three, and a user on one of the other three was told "Download failed"
+# (strata-core issue 3060). Now there is one list, it belongs to the release,
+# and a target starts installing the day its asset ships.
 detect_platform() {
     OS="$(uname -s)"
     ARCH="$(uname -m)"
@@ -137,17 +144,20 @@ parse_version() {
 }
 
 download_and_install() {
-    if [ "$OS_TARGET" = "pc-windows-msvc" ]; then
-        ARCHIVE_EXT="zip"
-    else
-        ARCHIVE_EXT="tar.gz"
-    fi
-
-    ARCHIVE_NAME="${BINARY_NAME}-v${VERSION}-${TARGET}.${ARCHIVE_EXT}"
+    # Every release asset is a gzipped tar. The release job globs
+    # `strata-v*.tar.gz` when it uploads, so no other extension can reach a
+    # release; an installer that asked for a .zip would name an archive that
+    # cannot exist and report its absence as a missing platform.
+    ARCHIVE_NAME="${BINARY_NAME}-v${VERSION}-${TARGET}.tar.gz"
     DOWNLOAD_URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ARCHIVE_NAME}"
 
     TMPDIR=$(mktemp -d)
     trap 'rm -rf "$TMPDIR"' EXIT
+
+    # Both before the download, so a platform with no build is told so instead
+    # of being handed a 404 as a network error.
+    fetch_release_manifest
+    require_build_for_target
 
     if [ "$DOWNLOAD" = "curl" ]; then
         curl -fsSL "$DOWNLOAD_URL" -o "${TMPDIR}/${ARCHIVE_NAME}" 2>/dev/null
@@ -155,6 +165,8 @@ download_and_install() {
         wget -q "$DOWNLOAD_URL" -O "${TMPDIR}/${ARCHIVE_NAME}" 2>/dev/null
     fi
 
+    # The manifest has already confirmed this asset exists, so a failure here
+    # is the network or the mirror, which is what this message now means.
     if [ ! -f "${TMPDIR}/${ARCHIVE_NAME}" ]; then
         err "Download failed. URL: ${DOWNLOAD_URL}"
     fi
@@ -165,19 +177,13 @@ download_and_install() {
 
     mkdir -p "$INSTALL_DIR"
 
-    if [ "$ARCHIVE_EXT" = "tar.gz" ]; then
-        tar xzf "${TMPDIR}/${ARCHIVE_NAME}" -C "$TMPDIR"
-    else
-        unzip -o "${TMPDIR}/${ARCHIVE_NAME}" -d "$TMPDIR" >/dev/null
-    fi
+    tar xzf "${TMPDIR}/${ARCHIVE_NAME}" -C "$TMPDIR"
 
     # Release tarballs package the binary under bin/
     if [ -f "${TMPDIR}/bin/${BINARY_NAME}" ]; then
         mv "${TMPDIR}/bin/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
     elif [ -f "${TMPDIR}/${BINARY_NAME}" ]; then
         mv "${TMPDIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-    elif [ -f "${TMPDIR}/${BINARY_NAME}.exe" ]; then
-        mv "${TMPDIR}/${BINARY_NAME}.exe" "${INSTALL_DIR}/${BINARY_NAME}.exe"
     else
         err "Could not find ${BINARY_NAME} binary in archive."
     fi
@@ -187,19 +193,46 @@ download_and_install() {
     step "Installed to ${BOLD}${INSTALL_DIR}/${BINARY_NAME}${RESET}"
 }
 
-verify_checksum() {
+# checksums-sha256.txt lists every asset the release published, so it is both
+# the integrity manifest and the authoritative answer to "is there a build for
+# me". Fetched once, used for both.
+fetch_release_manifest() {
+    MANIFEST="${TMPDIR}/checksums-sha256.txt"
     CHECKSUMS_URL="https://github.com/${REPO}/releases/download/v${VERSION}/checksums-sha256.txt"
 
     if [ "$DOWNLOAD" = "curl" ]; then
-        curl -fsSL "$CHECKSUMS_URL" -o "${TMPDIR}/checksums-sha256.txt" 2>/dev/null || true
+        curl -fsSL "$CHECKSUMS_URL" -o "$MANIFEST" 2>/dev/null || true
     else
-        wget -q "$CHECKSUMS_URL" -O "${TMPDIR}/checksums-sha256.txt" 2>/dev/null || true
+        wget -q "$CHECKSUMS_URL" -O "$MANIFEST" 2>/dev/null || true
     fi
 
-    if [ ! -s "${TMPDIR}/checksums-sha256.txt" ]; then
+    if [ ! -s "$MANIFEST" ]; then
         err "Could not download checksums for v${VERSION}; refusing to install unverified binaries."
     fi
+}
 
+# The default binary for each target the release published, one per line. The
+# `-local` variants bundle a local inference runtime and are not what this
+# script installs, so they are not offered as alternatives.
+available_targets() {
+    sed -n "s/^[0-9a-f]*  *${BINARY_NAME}-v${VERSION}-\\(.*\\)\\.tar\\.gz\$/\\1/p" "$MANIFEST" \
+        | grep -v -- '-local$' \
+        | sort
+}
+
+require_build_for_target() {
+    if grep -q "  ${ARCHIVE_NAME}\$" "$MANIFEST"; then
+        return
+    fi
+
+    AVAILABLE=$(available_targets | tr '\n' ' ')
+    if [ -z "$AVAILABLE" ]; then
+        err "Release v${VERSION} published no installable binaries."
+    fi
+    err "No build for ${BOLD}${TARGET}${RESET} in v${VERSION}.\n    Available: ${AVAILABLE% }\n    Ask for one at https://github.com/${REPO}/issues"
+}
+
+verify_checksum() {
     if command -v sha256sum >/dev/null 2>&1; then
         ACTUAL=$(sha256sum "${TMPDIR}/${ARCHIVE_NAME}" | awk '{print $1}')
     elif command -v shasum >/dev/null 2>&1; then
@@ -208,7 +241,7 @@ verify_checksum() {
         err "Neither sha256sum nor shasum is available; cannot verify the download."
     fi
 
-    EXPECTED=$(grep "${ARCHIVE_NAME}\$" "${TMPDIR}/checksums-sha256.txt" | awk '{print $1}')
+    EXPECTED=$(grep "  ${ARCHIVE_NAME}\$" "$MANIFEST" | awk '{print $1}')
     if [ -z "$EXPECTED" ]; then
         err "No checksum entry for ${ARCHIVE_NAME} in the release manifest."
     fi
@@ -318,4 +351,10 @@ print_success() {
     printf '%b\n' ""
 }
 
-main
+# Installing is what running this script does. Setting STRATA_INSTALL_SH_NO_MAIN
+# lets scripts/verify-installer.mjs source the file and call one function
+# against a fixture manifest, which is how the platform refusal is tested
+# without a network or a release.
+if [ -z "${STRATA_INSTALL_SH_NO_MAIN:-}" ]; then
+    main
+fi
