@@ -1,0 +1,164 @@
+---
+title: 'Build an agent with rewindable state'
+description: 'Run three attempts at a task, keep the one that worked, and reconstruct what any of them saw at any point.'
+section: 'Get Started'
+source: 'strata-python@v1.2.2'
+---
+
+The quickstarts showed you the commands. This shows you what they are for.
+
+You are going to build the state layer an agent needs: several attempts that
+cannot tread on each other, a record of what each one did, and the ability to
+ask afterwards what an attempt was looking at when it made a particular call.
+About twenty minutes, and it runs with no API key.
+
+There is no model in it. The policy is a stub you can swap for a real call
+later, because the part worth learning here is the state, not the prompt.
+[Build RAG](/docs/guides/ai/build-rag) covers the model half.
+
+## What you need
+
+```console
+uv add stratadb
+```
+
+## One attempt per branch
+
+Forking copies nothing, so a run can have the whole database to itself:
+
+```python
+def run_attempt(db, run_id, strategy):
+    work = db.at(branch=run_id)
+
+    work.events.append("tool.call", {"tool": "read", "key": "portfolio"})
+    portfolio = work.json.get("portfolio")
+
+    proposal, score = policy(strategy, portfolio)
+    work.events.append("tool.call", {"tool": "write", "value": proposal})
+    work.json.set("portfolio", "$", proposal)
+    work.kv.put("score", str(score))
+
+    work.events.append("run.end", {"score": score})
+    return score
+```
+
+`db.at(branch=run_id)` is a view onto the same database, so the attempt reads
+and writes its own line of state. Nothing it does is visible to the others or to
+`default`.
+
+Note that the tool log goes to `work`, the run's own branch, not to `db`. That
+matters and the next section explains why.
+
+## The whole program
+
+```python
+import stratadb
+
+TASK = "reduce the portfolio's risk"
+ATTEMPTS = ["conservative", "balanced", "aggressive"]
+
+
+def policy(strategy, portfolio):
+    """Stand-in for a model call. Returns a proposed change and a score."""
+    stocks = {"conservative": 20, "balanced": 50, "aggressive": 85}[strategy]
+    risk = abs(stocks - 30)
+    return {"stocks": stocks, "bonds": 100 - stocks}, 100 - risk
+
+
+with stratadb.open("./agent") as db:
+    db.kv.put("task", TASK)
+    db.json.set("portfolio", "$", {"stocks": 60, "bonds": 40})
+
+    scores = {}
+    for i, strategy in enumerate(ATTEMPTS, start=1):
+        run_id = f"run-{i}"
+        db.branches.fork("default", run_id)
+        scores[run_id] = run_attempt(db, run_id, strategy)
+
+    winner = max(scores, key=scores.get)
+    db.branches.merge(winner, "default")
+
+    print("scores:", scores)
+    print("winner:", winner)
+    print("portfolio now:", db.json.get("portfolio"))
+    print("branches left:", [b.name for b in db.branches.list()])
+```
+
+```
+scores: {'run-1': 90, 'run-2': 80, 'run-3': 45}
+winner: run-1
+portfolio now: {'bonds': 80, 'stocks': 20}
+branches left: ['default', 'run-1', 'run-2', 'run-3']
+```
+
+Three attempts ran against the same starting state, none of them saw each
+other's work, the best one was promoted, and **all three are still there**.
+
+## Now rewind
+
+This is the part that is hard to get any other way. Every event carries the
+version it was appended at, and every read takes `as_of`, so the log says _when_
+and `as_of` says _what_:
+
+```python
+with stratadb.open("./agent") as db:
+    run = db.at(branch="run-2")
+    for item in run.events.list():
+        e = item.event
+        state = run.json.get("portfolio", as_of=item.version)
+        print(f"seq {e.sequence}  {e.event_type:10}  portfolio was {state}")
+```
+
+```
+seq 0  tool.call   portfolio was {'bonds': 40, 'stocks': 60}
+seq 1  tool.call   portfolio was {'bonds': 40, 'stocks': 60}
+seq 2  run.end     portfolio was {'bonds': 50, 'stocks': 50}
+```
+
+That is run-2 reconstructed: what it could see when it read, what it could still
+see when it decided to write, and what it had left behind by the time it
+finished. Note it is `run-2`, the attempt that **did not win**. Its reasoning is
+as recoverable as the winner's.
+
+Nothing was restored to do that. Time travel is a read.
+
+## Two things that make this work
+
+**Log on the branch that did the work.** Versions are per branch once branches
+diverge, so an event appended to `default` and a read taken on `run-2` are
+counting different clocks, and joining them raises
+`HistoryUnavailableError`. Keep a run's log and a run's state on the same
+branch and the join is sound.
+
+If you also want one log across all runs, append a summary to `default` as well.
+Just do not expect either copy to survive a merge: **merging does not carry
+events**, and the receipt reports success regardless.
+
+**Keep the losing branches.** Deleting them is tempting and nearly always wrong.
+The log alone tells you what an attempt _did_; the branch is what lets you see
+what it _saw_. Delete the branch and a replay raises
+`not_found.engine.branch` while the log sits there implying the answer is
+still available.
+
+Branches cost almost nothing: ten forks and twenty writes measured at 831ms and
+left the database at 68KB, because forking copies nothing.
+
+## What you actually built
+
+An agent that can be asked _why_. Not "what did it do", which a log file gives
+you, but "what was true when it decided", which normally means replaying every
+write in order and hoping you missed nothing.
+
+You also got it without a second system. The task, the portfolio, the per-run
+state and the tool log are one database, one directory, one thing to copy.
+
+## Where to go next
+
+[Give each run a branch](/docs/guides/agents/give-each-run-a-branch) and
+[Replay an agent run](/docs/guides/agents/replay-an-agent-run) go deeper on the
+pattern.
+
+[Branches](/docs/learn/branches) explains what a merge covers, which is the
+constraint that shaped the design above.
+
+[Build RAG](/docs/guides/ai/build-rag) adds the model.

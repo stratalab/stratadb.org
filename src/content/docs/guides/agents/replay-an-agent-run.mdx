@@ -52,6 +52,31 @@ are reads.
 Before the first write, a key simply does not exist yet, which is why `--as-of
 3` returns nothing rather than an error.
 
+## The log and the state must be on the same branch
+
+The join works because the events and the reads above are on one branch.
+Versions are per branch once branches diverge, so an event appended to `default`
+and a read taken on a run branch are counting different clocks, and asking for
+one against the other raises `HistoryUnavailableError`:
+
+```console
+strata ./agent --branch run-2 kv get state.step --as-of 12
+```
+
+```
+history_unavailable.engine.persistence_history: requested persistence history is
+unavailable
+```
+
+So if runs happen on branches, keep each run's log on its own branch, where its
+state is. [Build an agent with rewindable
+state](/docs/get-started/agent-tutorial) works through that shape.
+
+That sits in tension with writing the log to `default` so a merge cannot eat it,
+and the resolution is to pick per purpose: a log you will replay against state
+goes on the branch, and a cross-run index goes on `default`. Neither survives a
+merge, so the branch is what you keep.
+
 ## Why this is not just logging
 
 A log tells you what the agent did. This tells you **what it was looking at when

@@ -100,8 +100,14 @@ The run's _state_ is isolated on its branch; the run's _record_ accumulates on
 `default` where it survives the merge. Put the run id in the payload so the log
 can still be filtered per run.
 
-If you would rather the log live and die with its branch, that works too. Just
-choose it deliberately.
+If you would rather the log live and die with its branch, that works too, and
+there is one case where it is the better choice: a log you intend to **replay
+against state** has to be on the same branch as that state, because versions are
+per branch once branches diverge. [Replay an agent
+run](/docs/guides/agents/replay-an-agent-run) covers the constraint.
+
+So pick per purpose. A cross-run index goes on `default`. A log you will rewind
+through goes on the run's branch, and you keep the branch.
 
 ## Failure modes
 
