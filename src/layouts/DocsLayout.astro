@@ -27,8 +27,24 @@ interface Props {
   headings?: Heading[];
   /** Explicit rail entries, for pages that build their own headings. */
   toc?: Heading[];
+  /**
+   * What this page was checked against, from its `source` frontmatter. Shown at
+   * the foot so a reader can judge a page rather than assume it is current.
+   *
+   * Prose pages in the content collection have one and `verify-versions` fails
+   * the build when it goes stale, so the claim is backed. Hand-written .astro
+   * pages have no such field and are not given one here: rendering the current
+   * release for them would assert that somebody checked this page against it,
+   * which nothing would have made true. They get the edit and report links and
+   * no verification claim.
+   */
+  source?: string;
+  /** Repo-relative path of the file behind this page, for the edit link. */
+  editPath?: string;
 }
 const {
+  source,
+  editPath,
   title,
   description,
   section,
@@ -149,6 +165,43 @@ const aliases = searchAliases[Astro.url.pathname.replace(/\/$/, '')] ?? [];
                 }
               </article>
 
+              {
+                /* Provenance. Code examples rot, and this site's rot faster
+                   than most because the product moves: adopting 1.2.2 rewrote
+                   output on seven pages and changed two documented claims
+                   outright. A reader who can see what a page was checked
+                   against can judge it; one who cannot has to assume it is
+                   current, and sometimes it will not be. The version is never
+                   typed here, it comes from the page's own frontmatter, which
+                   verify-versions already fails the build over. */
+                (source || editPath) && (
+                  <p class="mt-10 max-w-[46rem] border-t border-line pt-6 text-small text-ink-low">
+                    {source && (
+                      <>
+                        Verified against <code class="font-mono">{source}</code>
+                      </>
+                    )}
+                    {source && editPath && ' · '}
+                    {editPath && (
+                      <>
+                        <a
+                          class="transition-colors duration-200 hover:text-ink-hi"
+                          href={`https://github.com/stratalab/stratadb.org/edit/main/${editPath}`}
+                        >
+                          Edit this page
+                        </a>
+                        {' · '}
+                        <a
+                          class="transition-colors duration-200 hover:text-ink-hi"
+                          href={`https://github.com/stratalab/stratadb.org/issues/new?title=${encodeURIComponent(`Docs: ${title}`)}`}
+                        >
+                          Report an issue
+                        </a>
+                      </>
+                    )}
+                  </p>
+                )
+              }
               {
                 mdHref && (
                   <p class="mt-12 max-w-[46rem] border-t border-line pt-6 font-mono text-mono-sm text-ink-low">

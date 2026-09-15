@@ -31,6 +31,8 @@ const slug = entry.id.replace(/\/index$/, '');
   description={entry.data.description}
   section={entry.data.section}
   mdHref={`/docs/${slug}.md`}
+  source={entry.data.source}
+  editPath={`src/content/docs/${entry.id}${entry.id.endsWith('index') ? '' : ''}.mdx`}
   toc={headings.filter((h) => h.depth === 2 || h.depth === 3)}
 >
   {
