@@ -1,0 +1,127 @@
+---
+title: 'Run in the browser'
+description: 'The engine compiled to wasm: what works, what is missing, and what it costs to load.'
+section: 'Guides'
+source: 'strata-core@v1.2.2'
+---
+
+**Goal.** Run a real Strata database in a web page, with no server behind it.
+About ten minutes.
+
+## It is the same engine
+
+```js
+const mod = await import('/pkg/strata_wasm.js');
+await mod.default();
+
+const db = new mod.StrataSession();
+db.executeCli('kv put greeting hello');
+db.executeCli('kv get greeting');
+```
+
+```
+hello
+```
+
+Not a reimplementation and not a mock. The wasm bundle is built from the same
+release as the CLI, so `mod.engineVersion()` answers `1.2.2` and the commands
+are the commands.
+
+Two pages on this site run it: the [playground](/playground), and
+[Colonies](/demos/colonies/), which is Conway's Game of Life where tapping a
+cell forks the database.
+
+## What works
+
+Key-value, JSON, events, vectors, graph, branches, spaces and time travel all
+behave as they do anywhere else:
+
+```js
+db.executeCli('branch fork default risky');
+db.executeCli('--branch risky kv put greeting goodbye');
+db.executeCli('kv get greeting'); // hello
+db.executeCli('--branch risky kv get greeting'); // goodbye
+```
+
+## What does not
+
+Two surfaces are not in the build, and both fail clearly rather than silently:
+
+**`hub`** answers that it "needs a host environment and is not available in an
+embedded session". Cloning a dataset is a network operation with a filesystem
+destination, and neither exists here.
+
+**`inference`** is not a command at all. Embeddings and generation need a
+provider key or a local model, so a page that wants them calls the provider
+itself and passes vectors in directly.
+[Embed and store documents](/docs/guides/ai/embed-and-store-documents) covers
+supplying your own vectors.
+
+## It is in memory
+
+A `StrataSession` is the browser equivalent of `--cache`: nothing is persisted,
+and a refresh starts over. Each tab has its own.
+
+If a page needs state to survive a reload, that is the page's job. Export what
+matters and put it in IndexedDB or on a server, then replay it into a fresh
+session on load.
+
+## What it costs
+
+The bundle is about **8.8 MB**. That is the whole database engine, so it is
+reasonable for what it is and far too much to load on a page that might not use
+it.
+
+Load it on interaction rather than on arrival:
+
+```js
+let engine;
+button.addEventListener('click', async () => {
+  engine ??= await import('/pkg/strata_wasm.js').then(async (m) => {
+    await m.default();
+    return m;
+  });
+  // ...
+});
+```
+
+That is what the homepage demo does: the engine is fetched when someone presses
+a data model, not when the page loads.
+
+## Quoting
+
+The embedded command parser splits arguments like a shell but strips double
+quotes, so JSON literals need single quotes:
+
+```js
+db.executeCli(`event append order.placed '{"id":7}'`); // works
+db.executeCli(`event append order.placed {"id":7}`); // fails to parse
+```
+
+## Getting the bundle
+
+The engine ships as `strata-wasm-web.tar.gz` on each strata-core release. Fetch
+it at build time and pin it to the same version as everything else you use. A
+page running one engine while your server runs another is a debugging session
+nobody enjoys, and pinning both to one release avoids it.
+
+This site does exactly that: `fetch-wasm.mjs` stages the release named in its
+own release data, and the Colonies demo copies that same bundle rather than
+fetching its own.
+
+## Failure modes
+
+**`hub` or `inference` commands fail.** They are not in this build. See above.
+
+**JSON arguments fail to parse.** Quoting, as above.
+
+**State vanished on refresh.** Sessions are in memory. See above.
+
+**The page is slow to become interactive.** The bundle is being fetched on load.
+Move it behind an interaction.
+
+## Next
+
+[Databases and storage](/docs/learn/databases-and-storage) for what `--cache`
+means elsewhere, and [Should I use Strata?](/docs/learn/should-i-use-strata) for
+where the browser sits in the wider picture.

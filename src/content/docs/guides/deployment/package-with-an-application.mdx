@@ -1,0 +1,111 @@
+---
+title: 'Package with an application'
+description: 'Ship Strata inside your app, including a prepopulated database, and the read-only trap that catches people.'
+section: 'Guides'
+source: 'strata-python@v1.2.2'
+---
+
+**Goal.** Distribute an application with Strata inside it. About ten minutes.
+
+## Add a dependency, not an install step
+
+```toml
+dependencies = ["stratadb>=1.2.2"]
+```
+
+The wheel is compiled and contains the engine, so your users install nothing
+else. No service to provision, no CLI to fetch, no migration on first boot.
+
+## The wheel reaches further than the CLI
+
+Worth knowing before you promise a platform. The Python wheels cover more than
+the CLI's release targets do:
+
+| Platform              | Python wheel | CLI binary |
+| --------------------- | ------------ | ---------- |
+| Linux x86_64 (glibc)  | yes          | yes        |
+| Linux aarch64 (glibc) | yes          | yes        |
+| Linux musl (Alpine)   | yes          | **no**     |
+| macOS arm64           | yes          | yes        |
+| macOS x86_64 (Intel)  | yes          | **no**     |
+| Windows x86_64        | yes          | **no**     |
+
+So an application can run on Alpine, Intel Mac and Windows even though
+`install.sh` has nothing to give those platforms. The wheels are `abi3`, so one
+build covers Python 3.9 and up.
+
+If your Dockerfile is `python:3.12-alpine`, the dependency works. If your image
+build also runs the `strata` CLI, that will not.
+[Compatibility and versioning](/docs/reference/compatibility) has the current
+set.
+
+## Shipping a prepopulated database
+
+Build the database, then ship the directory as package data:
+
+```console
+strata ./seed json set catalog '$' '{"items":3}'
+du -sh ./seed
+```
+
+```
+48K
+```
+
+**Copy it to a writable location on first run.** This is the part that catches
+people:
+
+```python
+import shutil, stratadb
+from pathlib import Path
+
+def open_seeded(seed: Path, target: Path):
+    if not target.exists():
+        shutil.copytree(seed, target)
+    return stratadb.open(target)
+```
+
+## Why the copy is not optional
+
+A database needs its files to be writable **even when you only read it**:
+
+| permissions                                | `--read-only` open |
+| ------------------------------------------ | ------------------ |
+| fully writable                             | works              |
+| files read-only, directories writable      | **fails**          |
+| everything read-only                       | **fails**          |
+| top directory read-only, contents writable | works              |
+
+```
+unavailable.engine.persistence: persistence lower layer is unavailable
+```
+
+The engine takes a lock, and a lock is a file. So a database inside a read-only
+mount, a container layer, a signed app bundle or a `site-packages` directory the
+user cannot write will not open at all, and the error names persistence rather
+than permissions.
+
+Copy first, then open. The copy is cheap and the trap is not obvious from the
+error.
+
+## Freezing into a single binary
+
+PyInstaller and similar tools bundle the compiled extension like any other. The
+database is separate: keep the seed as data and copy it out on first run, as
+above. Do not point the application at a path inside the frozen bundle.
+
+## Failure modes
+
+**`unavailable.engine.persistence` on first run.** The database is somewhere
+read-only. See above.
+
+**Works on your machine, not on Alpine.** Check whether the failing piece is the
+wheel or the CLI. The wheel supports musl; the CLI does not.
+
+**The seed grows in the package.** Every version is retained, so build the seed
+in one pass rather than rewriting keys.
+[Databases and storage](/docs/learn/databases-and-storage) has the numbers.
+
+## Next
+
+[Run in the browser](/docs/guides/deployment/run-in-the-browser).

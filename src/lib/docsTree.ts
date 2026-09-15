@@ -169,9 +169,15 @@ export const docsTree: TreeNode[] = [
       {
         label: 'Deployment',
         children: [
-          { label: 'Embed in an application' },
-          { label: 'Package with an application' },
-          { label: 'Run in the browser' },
+          {
+            label: 'Embed in an application',
+            href: '/docs/guides/deployment/embed-in-an-application',
+          },
+          {
+            label: 'Package with an application',
+            href: '/docs/guides/deployment/package-with-an-application',
+          },
+          { label: 'Run in the browser', href: '/docs/guides/deployment/run-in-the-browser' },
         ],
       },
     ],

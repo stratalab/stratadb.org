@@ -1,0 +1,101 @@
+---
+title: 'Embed in an application'
+description: 'Put a database inside your program: where it lives, when it opens, and what to set.'
+section: 'Guides'
+source: 'strata-python@v1.2.2'
+---
+
+**Goal.** Run Strata inside an application rather than beside it. About five
+minutes.
+
+## There is nothing to connect to
+
+```python
+import stratadb
+
+with stratadb.open("./data") as db:
+    db.kv.put("hello", "world")
+```
+
+That is the whole integration. No server, no connection string, no pool, no
+health check on a socket. The engine is in your process and the database is a
+directory you chose.
+
+## Where to put the directory
+
+The one decision worth making deliberately. A database is ordinary files, so put
+it where your platform says application data goes rather than beside the code:
+
+```python
+from pathlib import Path
+import os, stratadb
+
+def data_dir() -> Path:
+    base = os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share"
+    path = Path(base) / "myapp"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+db = stratadb.open(data_dir() / "db")
+```
+
+Not next to the executable, which is often read-only, and not in the current
+working directory, which moves.
+
+## Open once, not per request
+
+The handle is safe to share across threads, so an application opens one and
+keeps it:
+
+```python
+class App:
+    def __init__(self, path):
+        self._db = stratadb.open(path)
+
+    def close(self):
+        self._db.close()
+```
+
+Closing matters more than it looks. Under the default durability mode the engine
+syncs at close, so a process that exits without closing can lose recent commits.
+[Durability](/docs/learn/durability) has the measurements.
+
+Do not share a handle across `os.fork()`. Each process opens its own.
+[Opening databases](/docs/develop/python/opening-databases) covers the rules.
+
+## Settings worth choosing
+
+```python
+stratadb.open(path, durability="always")  # acknowledged means on disk
+stratadb.open(path, ipc="off")            # single process, no socket
+stratadb.open(path, read_only=True)       # reject every write
+```
+
+`durability="always"` for state you cannot reconstruct. `ipc="off"` when only
+your process will ever open this database, which skips hosting a socket
+entirely. [Global options](/docs/reference/global-options) documents each.
+
+## Testing
+
+```python
+with stratadb.open(cache=True) as db:
+    ...
+```
+
+`cache=True` is the same engine with nothing on disk, so tests assert against
+the behaviour you ship rather than a mock.
+
+## Failure modes
+
+**The database appears empty on a colleague's machine.** The path resolved
+differently. A mistyped or relative path creates a new empty database rather
+than failing.
+
+**Recent writes are missing after a crash.** The process did not close. See
+above.
+
+**`failed_precondition.sdk.fork_not_supported`.** A handle crossed a fork.
+
+## Next
+
+[Package with an application](/docs/guides/deployment/package-with-an-application).
