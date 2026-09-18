@@ -10,14 +10,39 @@ const pause = () => {
   timer = undefined;
 };
 
+// The host stages the engine: the website copies in whatever strata-core
+// release is current, so pinning an exact version here turns every upstream
+// release into a demo that will not load. What this game actually needs is the
+// command surface it calls, stable since 1.2.2, so require that as a floor and
+// let newer engines through.
+const MINIMUM_ENGINE = "1.2.2";
+const parseVersion = (version) =>
+  /^(\d+)\.(\d+)\.(\d+)/
+    .exec(version)
+    ?.slice(1, 4)
+    .map(Number);
+
+function belowMinimum(version) {
+  const found = parseVersion(version);
+  // An unrecognized version string is not a reason to refuse to start. A real
+  // incompatibility surfaces on the first command, naming the operation.
+  if (!found) return false;
+  const floor = parseVersion(MINIMUM_ENGINE);
+  for (let i = 0; i < 3; i += 1)
+    if (found[i] !== floor[i]) return found[i] < floor[i];
+  return false;
+}
+
 async function dispatch(type, args = {}) {
   if (type === "init") {
     pause();
     engine?.dispose();
     engine = undefined;
     wasm ??= await init();
-    if (engineVersion() !== "1.2.2")
-      throw new Error(`Expected Strata 1.2.2, received ${engineVersion()}.`);
+    if (belowMinimum(engineVersion()))
+      throw new Error(
+        `Strata ${MINIMUM_ENGINE} or newer is required; this build reports ${engineVersion()}.`,
+      );
     engine = new ColoniesEngine(() => new StrataSession(), args);
     return {
       ...engine.initialize(),
