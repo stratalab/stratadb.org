@@ -500,15 +500,38 @@ async function assertPage(browser, route, viewport) {
       throw new Error(`${viewport.name} ${route.path}: viewport center samples are blank`);
     }
     if (route.path === '/demos/colonies/') {
-      await page.waitForFunction(
-        () =>
-          document.querySelector('#status')?.textContent.startsWith('6 colonies') &&
-          !document.querySelector('#play')?.disabled,
-      );
+      // The demo runs the engine in a worker, so a failure in there reaches
+      // neither `console` nor `pageerror` and the wait just times out with
+      // nothing to go on. 1.2.3 cost a CI round trip exactly this way. The
+      // demo does put the reason in its own banner, so read that and report it
+      // rather than the bare timeout.
+      const reason = async () => {
+        const text =
+          (await page
+            .locator('#error')
+            .textContent()
+            .catch(() => '')) ?? '';
+        return text.trim() ? ` The demo reported: "${text.trim()}"` : '';
+      };
+      await page
+        .waitForFunction(
+          () =>
+            document.querySelector('#status')?.textContent.startsWith('6 colonies') &&
+            !document.querySelector('#play')?.disabled,
+        )
+        .catch(async () => {
+          throw new Error(
+            `${viewport.name} ${route.path}: colonies never finished loading.${await reason()}`,
+          );
+        });
       await page.locator('#play').click();
-      await page.waitForFunction(
-        () => Number(document.querySelector('#generation')?.textContent) >= 1,
-      );
+      await page
+        .waitForFunction(() => Number(document.querySelector('#generation')?.textContent) >= 1)
+        .catch(async () => {
+          throw new Error(
+            `${viewport.name} ${route.path}: playback did not advance a generation.${await reason()}`,
+          );
+        });
       await page.locator('#pause').click();
     }
     if (route.path === '/') {

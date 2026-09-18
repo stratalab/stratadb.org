@@ -16327,9 +16327,63 @@
   },
   "inference.status": {
     "$defs": {
+      "ConfigFileState": {
+        "description": "What state the configuration file a settings source reads is in.\n\nEvery settings read folds a failure into \"no value\", so a key the user did\nstore reads back exactly like one they never set: `key_present: false`,\n`key_source: null`, and a remedy that says to set a key already there\n(#3423). This is the fact that tells the two apart.\n\nDeliberately exhaustive, where Rule 28 makes public *error* enums\n`#[non_exhaustive]`, and for the same reason as its counterpart in\n`strata-hub`: a `_` arm would let a state added later default to \"nothing\nis wrong\". The two enums are held to one spelling by a test in the\nexecutor, which is the crate that maps between them.",
+        "oneOf": [
+          {
+            "const": "absent",
+            "description": "No file at that path. The default install, and not a fault.",
+            "type": "string"
+          },
+          {
+            "const": "readable",
+            "description": "Present, readable, and valid. It may still store nothing.",
+            "type": "string"
+          },
+          {
+            "const": "unreadable",
+            "description": "Present but its bytes could not be read: permissions, or a directory\nwhere a file belongs. Anything stored in it is unreachable.",
+            "type": "string"
+          },
+          {
+            "const": "malformed",
+            "description": "Read, but not valid. Anything stored in it is unreachable.",
+            "type": "string"
+          }
+        ]
+      },
+      "ConfigFileStatus": {
+        "description": "The configuration file a settings source reads, and what state it is in.\n\nNever its contents - this says where the file is and whether it can be\nused, so a caller that sees no key can tell \"none was set\" from \"one was\nset and cannot be reached\".",
+        "properties": {
+          "path": {
+            "description": "Where the file is, whether or not one is there.",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/$defs/ConfigFileState",
+            "description": "Whether it can be used."
+          }
+        },
+        "required": [
+          "path",
+          "state"
+        ],
+        "type": "object"
+      },
       "InferenceStatus": {
         "description": "What this binary can do before anything is attempted (D11).\n\n#3124: every part of this was knowable up front and reported nowhere, so a\nuser learned their build's limits by watching an operation fail.",
         "properties": {
+          "config_file": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ConfigFileStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The configuration file provider settings are read from, and whether it\ncan be used. `None` when this runtime reads no file at all.\n\nWithout it a provider whose stored key is unreachable - the file is\nmalformed, or cannot be read - reports identically to one that was\nnever configured: `key_present: false`, `key_source: null`. The\nremedy a caller would then offer is the wrong one, because a key is\nalready set (#3423)."
+          },
           "local_execution": {
             "description": "Whether this binary can execute local models.",
             "type": "boolean"
@@ -16483,7 +16537,7 @@
     "command": "inference.status",
     "request": {
       "additionalProperties": false,
-      "description": "Reports what this binary can do before anything is attempted.\n\n# Guaranteed semantics\n\n- **Answers before the attempt.** Which providers are compiled in,\n  which have a key and where it came from, whether local execution\n  exists in this build, and how many catalogued models are on disk -\n  all knowable without trying an operation and failing (#3124).\n- **Never returns a key.** `key_source` names where a key was read\n  from - the environment variable, or the config file `strata config\n  set` wrote; the value is never included. `base_url` is the endpoint\n  a provider's requests go to and `base_url_source` where that came\n  from (`null` for the provider's public endpoint).\n- **The model directory is shared** by every database on the machine, so\n  a model downloaded once is available to all of them.",
+      "description": "Reports what this binary can do before anything is attempted.\n\n# Guaranteed semantics\n\n- **Answers before the attempt.** Which providers are compiled in,\n  which have a key and where it came from, whether local execution\n  exists in this build, and how many catalogued models are on disk -\n  all knowable without trying an operation and failing (#3124).\n- **Never returns a key.** `key_source` names where a key was read\n  from - the environment variable, or the config file `strata config\n  set` wrote; the value is never included. `base_url` is the endpoint\n  a provider's requests go to and `base_url_source` where that came\n  from (`null` for the provider's public endpoint).\n- **Names the config file's state, not only its keys.** `config_file`\n  carries the path provider settings are read from and whether it can\n  be used (`absent` / `readable` / `unreadable` / `malformed`), so a\n  provider with no key can be told apart from one whose stored key is\n  unreachable - which report identically otherwise, and need opposite\n  remedies (#3423). `null` when this runtime reads no file at all,\n  which is not the same as a path with no file at it. The four words\n  are the ones `strata doctor` prints for the same file.\n- **The model directory is shared** by every database on the machine, so\n  a model downloaded once is available to all of them.",
       "properties": {
         "type": {
           "const": "inference_status",
@@ -17170,7 +17224,7 @@
     "command": "json.batch_delete",
     "request": {
       "additionalProperties": false,
-      "description": "Deletes multiple JSON documents or paths.",
+      "description": "Deletes multiple JSON documents or paths.\n\n# Guaranteed semantics\n\n- **One commit.** Every deletion applies together or none does.\n- **Limits.** Each entry bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`)\n  and a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -17747,7 +17801,7 @@
     "command": "json.batch_exists",
     "request": {
       "additionalProperties": false,
-      "description": "Batch-checks JSON document existence.",
+      "description": "Batch-checks JSON document existence.\n\n# Guaranteed semantics\n\n- **Positional.** Results are returned in request order, one per key, so\n  a caller can zip them against the keys it sent.\n- **Limits.** Each key bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -18366,7 +18420,7 @@
     "command": "json.batch_get",
     "request": {
       "additionalProperties": false,
-      "description": "Reads multiple JSON values.",
+      "description": "Reads multiple JSON values.\n\n# Guaranteed semantics\n\n- **Positional.** Results are returned in request order, one per entry,\n  each reporting whether it was found.\n- **One snapshot.** Every entry is read from the same consistent\n  version, so a batch cannot straddle a concurrent write.\n- **Limits.** Each entry bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`)\n  and a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -18963,7 +19017,7 @@
     "command": "json.batch_set",
     "request": {
       "additionalProperties": false,
-      "description": "Sets multiple JSON values in one engine commit.",
+      "description": "Sets multiple JSON values in one engine commit.\n\n# Guaranteed semantics\n\n- **One commit.** Every entry applies together or none does; a reader\n  never observes part of a batch.\n- **Limits.** Each entry bears the single-document limits:\n  a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`),\n  a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`), and\n  a document at most **16 MiB** serialized\n  (`invalid_argument.engine.json_document_too_large`), nested at most **100**\n  levels (`invalid_argument.engine.json_document_too_deep`), with any single\n  array at most **1,000,000** elements\n  (`invalid_argument.engine.json_array_too_large`).\n  One refused entry refuses the batch, and nothing is written.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -19021,7 +19075,7 @@
     "command": "json.count",
     "request": {
       "additionalProperties": false,
-      "description": "Counts JSON documents.",
+      "description": "Counts JSON documents.\n\n# Guaranteed semantics\n\n- **Counts documents, not paths.** The result is the number of documents\n  matching the prefix, whatever each one contains.\n- **One snapshot.** The count is taken at one consistent version.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
@@ -19228,7 +19282,7 @@
     "command": "json.delete",
     "request": {
       "additionalProperties": false,
-      "description": "Deletes a whole JSON document or one JSON path.",
+      "description": "Deletes a whole JSON document or one JSON path.\n\n# Guaranteed semantics\n\n- **Atomic per document.** Removing a path is a single commit, and\n  removing the root removes the document.\n- **Absent is not an error.** Deleting a document or path that is not\n  there succeeds and reports that nothing was applied.\n- **Limits.** This command bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`)\n  and a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -19313,7 +19367,7 @@
     "command": "json.exists",
     "request": {
       "additionalProperties": false,
-      "description": "Checks whether a JSON document exists.",
+      "description": "Checks whether a JSON document exists.\n\n# Guaranteed semantics\n\n- **Existence only.** Reports whether the document is present without\n  reading or transferring its value.\n- **Limits.** This command bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -19422,7 +19476,7 @@
     "command": "json.get",
     "request": {
       "additionalProperties": false,
-      "description": "Reads a JSON value at a document path.",
+      "description": "Reads a JSON value at a document path.\n\n# Guaranteed semantics\n\n- **Absent and null are different.** A missing document or path returns\n  no value; a path holding JSON `null` returns that null.\n- **Reads never block writers.** A read observes one consistent version\n  of the document; a concurrent write is never half-visible.\n- **Limits.** This command bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`)\n  and a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. To read as of a real time, use `as_of_time` instead.",
@@ -19546,7 +19600,7 @@
     "command": "json.history",
     "request": {
       "additionalProperties": false,
-      "description": "Reads full JSON document version history.",
+      "description": "Reads full JSON document version history.\n\n# Guaranteed semantics\n\n- **Newest first.** Versions are returned in descending commit order,\n  each with the version that produced it.\n- **Deletes are versions.** A removal appears as a version with no\n  value, distinct from a document that never existed.\n- **Limits.** This command bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -19665,7 +19719,7 @@
     "command": "json.index.create",
     "request": {
       "additionalProperties": false,
-      "description": "Creates a JSON secondary index.",
+      "description": "Creates a JSON secondary index.\n\n# Guaranteed semantics\n\n- **Idempotent success.** Creating an index that already exists with the\n  same definition is not an error.\n- **Limits.** This command bears an index name at most **256 bytes**\n  (`invalid_argument.engine.json_index_name`),\n  and the indexed field path bears a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -19730,7 +19784,7 @@
     "command": "json.index.drop",
     "request": {
       "additionalProperties": false,
-      "description": "Drops a JSON secondary index.",
+      "description": "Drops a JSON secondary index.\n\n# Guaranteed semantics\n\n- **Absent is not an error.** Dropping an index that is not there\n  succeeds and reports that nothing was applied.\n- **Limits.** This command bears an index name at most **256 bytes**\n  (`invalid_argument.engine.json_index_name`).",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -19843,7 +19897,7 @@
     "command": "json.index.list",
     "request": {
       "additionalProperties": false,
-      "description": "Lists JSON secondary indexes.",
+      "description": "Lists JSON secondary indexes.\n\n# Guaranteed semantics\n\n- **Definitions, not statistics.** Each entry reports the index as it was\n  declared; it carries no size or freshness measurement.\n- **One snapshot.** The listing is taken at one consistent version.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -20064,7 +20118,7 @@
     "command": "json.sample",
     "request": {
       "additionalProperties": false,
-      "description": "Samples JSON documents.",
+      "description": "Samples JSON documents.\n\n# Guaranteed semantics\n\n- **A sample is not a page.** Rows are drawn from the matching set with\n  no ordering or cursor guarantee, and repeating the call may return\n  different rows.\n- **Bounded by what exists.** Asking for more rows than match returns\n  every match, not an error.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -20194,7 +20248,7 @@
     "command": "json.scan",
     "request": {
       "additionalProperties": false,
-      "description": "Scans JSON documents.",
+      "description": "Scans JSON documents.\n\n# Guaranteed semantics\n\n- **Ordering.** Rows are returned in ascending byte-lexicographic key\n  order, stable across calls for unchanged data.\n- **One snapshot.** A page is read from one consistent version; a\n  concurrent write never splits a row across two pages.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -20413,7 +20467,7 @@
     "command": "json.set",
     "request": {
       "additionalProperties": false,
-      "description": "Sets a JSON value at a document path, creating the document when missing.",
+      "description": "Sets a JSON value at a document path, creating the document when missing.\n\n# Guaranteed semantics\n\n- **Atomic per document.** The write is a single engine commit: the\n  document and its new version apply together or not at all. A reader\n  never observes a partially applied path update.\n- **Creates on demand.** Setting a path in a document that does not\n  exist creates the document; setting the root replaces it whole.\n- **Limits.** This command bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`),\n  a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`), and\n  a document at most **16 MiB** serialized\n  (`invalid_argument.engine.json_document_too_large`), nested at most **100**\n  levels (`invalid_argument.engine.json_document_too_deep`), with any single\n  array at most **1,000,000** elements\n  (`invalid_argument.engine.json_array_too_large`).\n  Each is refused before anything is written.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",

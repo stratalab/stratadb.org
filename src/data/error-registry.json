@@ -1,5 +1,5 @@
 {
-  "count": 229,
+  "count": 231,
   "errors": [
     {
       "class": "access_denied",
@@ -80,7 +80,7 @@
       "hint": "Reload current state and retry against the latest branch, space, or collection version.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/conflict.engine.artifact_import",
-      "retry_policy": "never"
+      "retry_policy": "after_state_change"
     },
     {
       "class": "conflict",
@@ -107,7 +107,7 @@
       "hint": "Reload current state and retry against the latest branch, space, or collection version.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/conflict.engine.promotion",
-      "retry_policy": "never"
+      "retry_policy": "after_state_change"
     },
     {
       "class": "corruption",
@@ -176,7 +176,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.event_index_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_index_key",
       "retry_policy": "never"
@@ -185,7 +185,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.event_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_key",
       "retry_policy": "never"
@@ -194,7 +194,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.event_metadata",
       "commit_outcome": "not_applicable",
-      "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_metadata",
       "retry_policy": "never"
@@ -203,7 +203,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.event_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_record",
       "retry_policy": "never"
@@ -212,7 +212,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_binding_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_binding_key",
       "retry_policy": "never"
@@ -221,7 +221,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_binding_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_binding_record",
       "retry_policy": "never"
@@ -230,7 +230,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_edge_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_edge_key",
       "retry_policy": "never"
@@ -239,7 +239,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_edge_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_edge_record",
       "retry_policy": "never"
@@ -248,7 +248,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_index",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_index",
       "retry_policy": "never"
@@ -257,7 +257,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_key",
       "retry_policy": "never"
@@ -266,7 +266,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_metadata",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_metadata",
       "retry_policy": "never"
@@ -275,7 +275,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_node_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_node_key",
       "retry_policy": "never"
@@ -284,7 +284,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_node_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_node_record",
       "retry_policy": "never"
@@ -293,7 +293,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_ontology_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_ontology_record",
       "retry_policy": "never"
@@ -302,7 +302,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_reverse_edge_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_reverse_edge_key",
       "retry_policy": "never"
@@ -311,7 +311,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_type_index_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_type_index_key",
       "retry_policy": "never"
@@ -320,7 +320,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.graph_type_index_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_type_index_record",
       "retry_policy": "never"
@@ -329,7 +329,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.json_document",
       "commit_outcome": "not_applicable",
-      "hint": "Use a valid JSON document id and a JSON value within the configured size and depth limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_document",
       "retry_policy": "never"
@@ -338,7 +338,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.json_index",
       "commit_outcome": "not_applicable",
-      "hint": "Use a non-reserved JSON index name and definition compatible with the indexed field.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_index",
       "retry_policy": "never"
@@ -347,7 +347,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.json_index_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use a non-reserved JSON index name and definition compatible with the indexed field.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_index_key",
       "retry_policy": "never"
@@ -365,7 +365,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.kv_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use non-empty KV keys and keep batch structure within the documented limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The KV request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.kv_key",
       "retry_policy": "never"
@@ -374,7 +374,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.kv_value",
       "commit_outcome": "not_applicable",
-      "hint": "Use non-empty KV keys and keep batch structure within the documented limits.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The KV request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.kv_value",
       "retry_policy": "never"
@@ -383,7 +383,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.space_catalog",
       "commit_outcome": "not_applicable",
-      "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/data_loss.engine.space_catalog",
       "retry_policy": "never"
@@ -392,7 +392,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_artifact",
       "commit_outcome": "not_applicable",
-      "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_artifact",
       "retry_policy": "never"
@@ -401,7 +401,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_artifacts",
       "commit_outcome": "not_applicable",
-      "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_artifacts",
       "retry_policy": "never"
@@ -410,7 +410,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_collection",
       "commit_outcome": "not_applicable",
-      "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_collection",
       "retry_policy": "never"
@@ -419,7 +419,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_collection_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_collection_key",
       "retry_policy": "never"
@@ -428,7 +428,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_index_manifest",
       "commit_outcome": "not_applicable",
-      "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_index_manifest",
       "retry_policy": "never"
@@ -437,7 +437,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_index_manifest_key",
       "commit_outcome": "not_applicable",
-      "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_index_manifest_key",
       "retry_policy": "never"
@@ -446,7 +446,7 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_key",
       "commit_outcome": "not_applicable",
-      "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_key",
       "retry_policy": "never"
@@ -455,9 +455,18 @@
       "class": "data_loss",
       "code": "data_loss.engine.vector_record",
       "commit_outcome": "not_applicable",
-      "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
+      "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_record",
+      "retry_policy": "never"
+    },
+    {
+      "class": "failed_precondition",
+      "code": "failed_precondition.engine.branch_has_children",
+      "commit_outcome": "not_started",
+      "hint": "Delete the child branches forked from this one (or materialize them) before deleting the source.",
+      "message": "The request conflicts with current state.",
+      "ref": "https://stratadb.org/e/failed_precondition.engine.branch_has_children",
       "retry_policy": "never"
     },
     {
@@ -651,6 +660,15 @@
     },
     {
       "class": "failed_precondition",
+      "code": "failed_precondition.engine.writer_lock",
+      "commit_outcome": "not_applicable",
+      "hint": "Another process holds this database's writer lock. Connect to the running owner, or close it before opening the database for writing.",
+      "message": "The required engine capability is unavailable.",
+      "ref": "https://stratadb.org/e/failed_precondition.engine.writer_lock",
+      "retry_policy": "after_state_change"
+    },
+    {
+      "class": "failed_precondition",
       "code": "failed_precondition.executor.hub_clone",
       "commit_outcome": "not_started",
       "hint": "Check the destination is empty and the bundle's engine requirement matches this Strata version.",
@@ -710,7 +728,7 @@
       "hint": "Inspect local model-cache filesystem permissions and retry.",
       "message": "The local inference runtime hit an I/O failure.",
       "ref": "https://stratadb.org/e/inference.io_failure",
-      "retry_policy": "unknown"
+      "retry_policy": "after_state_change"
     },
     {
       "class": "unavailable",
@@ -719,7 +737,7 @@
       "hint": "Check the local inference runtime and model compatibility before retrying.",
       "message": "The local inference runtime failed.",
       "ref": "https://stratadb.org/e/inference.local_runtime_failed",
-      "retry_policy": "unknown"
+      "retry_policy": "after_state_change"
     },
     {
       "class": "failed_precondition",
@@ -764,7 +782,7 @@
       "hint": "Retry or switch providers if the provider response remains invalid.",
       "message": "The provider returned a malformed response.",
       "ref": "https://stratadb.org/e/inference.provider_malformed_response",
-      "retry_policy": "unknown"
+      "retry_policy": "same_request"
     },
     {
       "class": "not_found",
@@ -1940,7 +1958,7 @@
       "class": "resource_exhausted",
       "code": "resource_exhausted.engine.graph_analytics_budget",
       "commit_outcome": "not_applicable",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "hint": "Lower the graph analytics workload (fewer nodes, lower iteration count) or raise the configured analytics budget.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/resource_exhausted.engine.graph_analytics_budget",
       "retry_policy": "after_state_change"
@@ -2024,7 +2042,7 @@
       "hint": "Reopen the database (the owner may have exited or restarted) and, for a write, confirm whether it applied before retrying.",
       "message": "The IPC connection to the store owner failed while a command was in flight.",
       "ref": "https://stratadb.org/e/unavailable.executor.ipc_transport",
-      "retry_policy": "unknown"
+      "retry_policy": "idempotent_only"
     },
     {
       "class": "unsupported",
@@ -2033,7 +2051,7 @@
       "hint": "Bind graph relationships to targets on the node's own branch; cross-branch bindings are not supported in V1.",
       "message": "Cross-branch graph relationship bindings are not supported.",
       "ref": "https://stratadb.org/e/unsupported.engine.graph_binding_cross_branch",
-      "retry_policy": "after_state_change"
+      "retry_policy": "never"
     },
     {
       "class": "unsupported",
