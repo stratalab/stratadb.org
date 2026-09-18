@@ -46,5 +46,51 @@ jobs:
       url: ${{ github.event.deployment.payload.web_url }}
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/deploy-pages@v4
+        id: deployment
+
+  # The deploy runs `npm run build`, which does not include visual:smoke. That
+  # gap shipped a broken Colonies demo once: `fetch-release` picks up a new
+  # strata-core at build time, so an engine upgrade reaches production without
+  # any push, and the check that exercises the demo only ran on pull requests.
+  #
+  # So the deployed site is smoke-tested here, against the real URL. It cannot
+  # roll back, but it turns a silent breakage into a failed run.
+  smoke:
+    name: Smoke-test the deployed site
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Wait for the edge to serve this commit
+        env:
+          BASE_URL: ${{ needs.deploy.outputs.page_url || 'https://stratadb.org/' }}
+        run: |
+          # Pages is a CDN: deploy-pages succeeding does not mean the edge has
+          # caught up. Without this, the smoke test could pass against the
+          # previous build and report health for something it never loaded.
+          for attempt in $(seq 1 30); do
+            served=$(curl -fsSL "${BASE_URL%/}/build.json" | node -p \
+              "JSON.parse(require('fs').readFileSync(0,'utf8')).commit" 2>/dev/null || echo '')
+            if [ "$served" = "$GITHUB_SHA" ]; then
+              echo "edge is serving $served after ${attempt} attempt(s)"
+              exit 0
+            fi
+            echo "attempt ${attempt}: edge has '${served:-nothing}', want $GITHUB_SHA"
+            sleep 10
+          done
+          echo "::error::the deployed site never reported commit $GITHUB_SHA"
+          exit 1
+      - name: Smoke-test what is actually live
+        env:
+          VISUAL_BASE_URL: ${{ needs.deploy.outputs.page_url || 'https://stratadb.org/' }}
+        run: npm run visual:smoke
