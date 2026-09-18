@@ -1,24 +1,131 @@
 ---
 // 404 (04 §9). The most personality anywhere on the site, kept by decision.
+//
+// It has a second job. Every structured error the SDKs raise carries
+// `https://stratadb.org/e/<code>`, and `/e/` is generated from the ENGINE's
+// catalog only. Client-raised codes - the Python SDK ships thirteen, twelve
+// under `.sdk.` and one under `.cli.` - have no page, so a reader following a
+// link printed by their own traceback lands here and learns nothing.
+//
+// The site cannot publish those codes: nothing hands it a catalog of them, and
+// they are not reliably extractable from the wheel (see stratadb.org#23). What
+// it can do is stop pretending the address is meaningless. A well-formed code
+// gets a page that reads the code back, explains the
+// <class>.<area>.<detail> contract, and says which side raised it.
+//
+// Deliberately not a stub error page: it documents the SHAPE, never the code.
+// Inventing a description for a code the site has no source for would be worse
+// than a 404, because it would look authoritative.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Heading from '../components/foundation/Heading.astro';
 ---
 
 <BaseLayout title="404 | StrataDB" noindex>
+  <script is:inline>
+    // Before paint, so a reader who followed an error link never sees the
+    // generic copy flash first.
+    (function () {
+      const m = location.pathname.match(/^\/e\/([a-z_]+)\.([a-z_]+)\.([a-z0-9_]+)\/?$/);
+      if (!m) return;
+      document.documentElement.setAttribute('data-error-code', '');
+      addEventListener('DOMContentLoaded', function () {
+        const set = function (id, text) {
+          const el = document.getElementById(id);
+          if (el) el.textContent = text;
+        };
+        set('e404-eyebrow', 'error code \u00b7 not in the published catalog');
+        const title = document.querySelector('h1');
+        if (title) title.textContent = 'This code is real. The page is not.';
+        set('ec-code', m[1] + '.' + m[2] + '.' + m[3]);
+        set('ec-class', m[1]);
+        set('ec-area', m[2]);
+        set('ec-detail', m[3]);
+        const areas = {
+          engine: 'the database engine',
+          sdk: 'the client library you called, not the engine',
+          cli: 'the command-line interface',
+        };
+        set('ec-origin', areas[m[2]] || 'a component that is not the engine');
+      });
+    })();
+  </script>
+
   <div
-    class="mx-auto flex min-h-[60vh] w-full max-w-[42rem] flex-col items-start justify-center px-6"
+    class="mx-auto flex min-h-[60vh] w-full max-w-[46rem] flex-col items-start justify-center px-6"
   >
-    <p class="mb-4 font-mono text-mono-sm text-ink-low">404</p>
+    <p class="mb-4 font-mono text-mono-sm text-ink-low" id="e404-eyebrow">404</p>
     <Heading level={1} size="display">This layer doesn't exist.</Heading>
-    <p class="mt-6 text-body-lg text-ink-mid">
-      Nothing was deposited at this address. Try the docs, or send your agent to llms.txt.
-    </p>
-    <div class="mt-8 flex gap-6 font-mono text-mono-sm">
-      <a href="/docs" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Docs</a>
-      <a href="/" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Home</a>
-      <a href="/llms.txt" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
-        >llms.txt</a
-      >
+
+    <div id="generic-404">
+      <p class="mt-6 text-body-lg text-ink-mid">
+        Nothing was deposited at this address. Try the docs, or send your agent to llms.txt.
+      </p>
+      <div class="mt-8 flex gap-6 font-mono text-mono-sm">
+        <a href="/docs" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+          >Docs</a
+        >
+        <a href="/" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi">Home</a>
+        <a href="/llms.txt" class="text-ink-mid transition-colors duration-200 hover:text-ink-hi"
+          >llms.txt</a
+        >
+      </div>
+    </div>
+
+    <div id="unlisted-error">
+      <p class="mt-6 font-mono text-mono-body text-ink-hi" id="ec-code"></p>
+      <p class="mt-6 text-body-lg text-ink-mid">
+        Error codes read <code class="font-mono">&lt;class&gt;.&lt;area&gt;.&lt;detail&gt;</code>.
+        This one was raised by <span id="ec-origin">a component that is not the engine</span>, and
+        this site generates a page per code from the engine's published catalog, so there is nothing
+        here to show you.
+      </p>
+
+      <dl class="mt-8 w-full border-t border-line font-mono text-mono-sm">
+        <div class="flex gap-6 border-b border-line py-3">
+          <dt class="w-24 shrink-0 text-ink-low">class</dt>
+          <dd class="text-ink-hi" id="ec-class"></dd>
+        </div>
+        <div class="flex gap-6 border-b border-line py-3">
+          <dt class="w-24 shrink-0 text-ink-low">area</dt>
+          <dd class="text-ink-hi" id="ec-area"></dd>
+        </div>
+        <div class="flex gap-6 border-b border-line py-3">
+          <dt class="w-24 shrink-0 text-ink-low">detail</dt>
+          <dd class="text-ink-hi" id="ec-detail"></dd>
+        </div>
+      </dl>
+
+      <p class="mt-8 text-body-lg text-ink-mid">
+        The exception that sent you here carries what this page would have said. Its <code
+          class="font-mono">code</code
+        > and <code class="font-mono">hint</code> are the reliable parts, and the hint is written to name
+        the fix.
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-6 font-mono text-mono-sm">
+        <a href="/docs/reference/errors" class="text-ink-mid transition-colors hover:text-ink-hi"
+          >Error codes</a
+        >
+        <a href="/e/" class="text-ink-mid transition-colors hover:text-ink-hi">Published catalog</a>
+        <a
+          href="https://github.com/stratalab/stratadb.org/issues/23"
+          class="text-ink-mid transition-colors hover:text-ink-hi">Why this page is missing</a
+        >
+      </div>
     </div>
   </div>
+
+  <style>
+    /* The explainer replaces the generic 404 only for a well-formed /e/ code.
+       Driven by an attribute set before paint, so neither block flashes. */
+    #unlisted-error {
+      display: none;
+    }
+    :root[data-error-code] #generic-404 {
+      display: none;
+    }
+    :root[data-error-code] #unlisted-error {
+      display: flex;
+    }
+  </style>
 </BaseLayout>
