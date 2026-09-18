@@ -89,4 +89,39 @@ export const searchAliases: Record<string, string[]> = {
     'multiprocessing',
     'asyncio',
   ],
+  // The binary's own surface. Nobody searches for "strata start"; they search
+  // for the thing they are trying to do, and most of these are words from
+  // other databases where the answer here has a different name.
+  '/docs/reference/start-and-stop': [
+    'daemon',
+    'server mode',
+    'background process',
+    'shared database',
+    'multiple processes',
+    'broker',
+  ],
+  '/docs/reference/doctor': [
+    'diagnose',
+    'health check',
+    'which version am i running',
+    'not on path',
+    'installation problem',
+  ],
+  '/docs/reference/update-and-uninstall': [
+    'self update',
+    'pin a version',
+    'roll back the binary',
+    'remove strata',
+  ],
+  '/docs/reference/command': [
+    'raw command',
+    'escape hatch',
+    'serialized command',
+    'executor',
+    'base64 key',
+  ],
+  '/docs/reference/mcp': ['model context protocol', 'claude desktop', 'cursor', 'agent tools'],
+  '/docs/reference/agents': ['agents.md', 'claude.md', 'agent skill', 'onboard an agent'],
+  '/docs/reference/changelog': ['release notes', 'what changed', 'what is new'],
+  '/docs/reference/init': ['first run', 'strata home', 'setup'],
 };
