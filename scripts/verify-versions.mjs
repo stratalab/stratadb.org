@@ -5,6 +5,7 @@ import { extname, join, relative, sep } from 'node:path';
 const ROOT = new URL('..', import.meta.url).pathname;
 const DOCS_DIR = join(ROOT, 'src/content/docs');
 const RELEASE_JSON = join(ROOT, 'src/data/release.json');
+const PYTHON_SDK_JSON = join(ROOT, 'src/data/python-sdk.json');
 const SOURCE_VERSION = /^(strata-(?:core|python))@v?(\d+\.\d+\.\d+)$/;
 
 function toPosix(path) {
@@ -44,6 +45,19 @@ if (!/^\d+\.\d+\.\d+$/.test(expected)) {
   process.exit(1);
 }
 
+// The Python SDK is a SEPARATE release train: it vendors a pinned strata-core
+// and ships to PyPI after the core tag, so at any moment its latest published
+// version may lag. Holding a `strata-python@` stamp against release.json makes
+// a page claim it was verified against an SDK version `pip install` cannot
+// get. `python-sdk.json` is the probe of what actually shipped, so each stamp
+// is checked against its own train.
+const pythonSdk = JSON.parse(await readFile(PYTHON_SDK_JSON, 'utf8'));
+const expectedFor = { 'strata-core': expected, 'strata-python': pythonSdk.version };
+if (!/^\d+\.\d+\.\d+$/.test(pythonSdk.version)) {
+  console.error(`verify-versions: python-sdk.json has invalid version '${pythonSdk.version}'`);
+  process.exit(1);
+}
+
 const failures = [];
 for (const file of await walk(DOCS_DIR)) {
   const rel = toPosix(relative(ROOT, file));
@@ -55,8 +69,10 @@ for (const file of await walk(DOCS_DIR)) {
 
   const match = source.match(SOURCE_VERSION);
   if (!match) continue;
-  if (match[2] !== expected) {
-    failures.push(`${rel}: ${source} does not match release.json ${expected}`);
+  const want = expectedFor[match[1]];
+  if (match[2] !== want) {
+    const authority = match[1] === 'strata-python' ? 'python-sdk.json' : 'release.json';
+    failures.push(`${rel}: ${source} does not match ${authority} ${want}`);
   }
 }
 
@@ -67,4 +83,7 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`verify-versions: docs source frontmatter matches ${expected}`);
+console.log(
+  `verify-versions: docs source frontmatter matches strata-core ${expected}, ` +
+    `strata-python ${pythonSdk.version}`,
+);
