@@ -245,17 +245,26 @@ export const docsTree: TreeNode[] = [
       // reader after `strata kv put` would otherwise take.
       commandsNode(),
       {
+        // The binary's own surface: the subcommands that are not operations on
+        // a database and so are not in the generated catalog. `ipc` and
+        // `remote` used to be planned here and are not, because they ARE
+        // catalog commands - ipc.status, ipc.stop and remote have generated
+        // pages under the admin family, and a second hand-written page would
+        // be a second answer to the same question.
         label: 'CLI',
         children: [
           { label: 'Global options', href: '/docs/reference/global-options' },
-          { label: 'init' },
-          { label: 'doctor' },
-          { label: 'agents' },
-          { label: 'mcp' },
-          { label: 'start and stop' },
-          { label: 'ipc' },
-          { label: 'remote' },
-          { label: 'command' },
+          { label: 'init', href: '/docs/reference/init' },
+          { label: 'doctor', href: '/docs/reference/doctor' },
+          { label: 'agents', href: '/docs/reference/agents' },
+          { label: 'mcp', href: '/docs/reference/mcp' },
+          { label: 'start and stop', href: '/docs/reference/start-and-stop' },
+          { label: 'command', href: '/docs/reference/command' },
+          { label: 'changelog', href: '/docs/reference/changelog' },
+          {
+            label: 'update and uninstall',
+            href: '/docs/reference/update-and-uninstall',
+          },
         ],
       },
       { label: 'MCP tools', generated: true },

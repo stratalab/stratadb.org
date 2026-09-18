@@ -151,7 +151,6 @@ export const redirects = {
   '/docs/getting-started/for-agents': '/docs/get-started/agents',
   '/docs/reference/json/create': '/docs/reference/json',
   '/docs/reference/json/drop': '/docs/reference/json',
-  '/docs/reference/mcp': '/docs/get-started/agents',
   '/docs/reference/node-sdk': '/docs/get-started/installation',
   '/docs/reference/python-sdk': '/docs/get-started/python-quickstart',
   '/pitch': '/internals',

@@ -4,7 +4,9 @@
 // In CI: cargo install strata-cli at src/data/release.json's version. To build
 // without a CLI intentionally, set STRATA_TRANSCRIPTS_OFFLINE=1.
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const BIN = process.env.STRATA_BIN || 'strata';
 const OFFLINE = process.env.STRATA_TRANSCRIPTS_OFFLINE === '1';
@@ -59,6 +61,56 @@ const SCENARIOS = [
   },
 ];
 
+// The CLI's own surface - init, doctor, agents, the raw command escape hatch -
+// cannot be checked by the sessions above. Those pipe lines into one
+// `strata --cache` shell, and these commands are not shell lines: `command
+// print` is handled before a database is opened and refuses inside a session,
+// and the shell's tokenizer mangles a JSON argument. So they run as their own
+// processes, with argv passed through untouched.
+//
+// `home` is redirected per scenario so nothing here touches the real one, and
+// nothing that changes the installation is run: `update` only with --check,
+// `uninstall` never.
+const ARGV_SCENARIOS = [
+  {
+    name: 'init (CLI reference)',
+    freshHome: true,
+    exchanges: [
+      [['init'], 'next steps'],
+      [['init'], 'already initialized'],
+    ],
+  },
+  {
+    name: 'doctor (CLI reference)',
+    exchanges: [[['doctor'], 'binary']],
+  },
+  {
+    name: 'agents (CLI reference)',
+    exchanges: [
+      [['agents', 'guide'], 'agent usage guide'],
+      [['agents', 'skill'], 'name: strata'],
+    ],
+  },
+  {
+    name: 'update --check (CLI reference)',
+    // --check reports; it must never install during a build.
+    exchanges: [[['update', '--check'], 'strata']],
+  },
+  {
+    // The trap the page exists to warn about: the raw surface takes base64 KV
+    // keys, so a plain key made only of base64 characters is decoded to other
+    // bytes and silently addresses the wrong record rather than failing.
+    name: 'command print (CLI reference)',
+    exchanges: [
+      [['command', 'print', '--command-json', '{"type":"kv_get","key":"Z3JlZXRpbmc="}'], 'kv_get'],
+      [
+        ['command', 'print', '--command-json', '{"type":"kv.get","key":"Z3JlZXRpbmc="}'],
+        'unknown variant',
+      ],
+    ],
+  },
+];
+
 const probe = spawnSync(BIN, ['--version'], { encoding: 'utf8' });
 if (probe.error) {
   if (OFFLINE) {
@@ -97,6 +149,29 @@ for (const scenario of SCENARIOS) {
     }
   }
 }
+
+const argvHome = mkdtempSync(join(tmpdir(), 'strata-transcripts-'));
+for (const scenario of ARGV_SCENARIOS) {
+  // A fresh home makes "initialized" vs "already initialized" reproducible
+  // rather than a function of whatever ran before.
+  const home = scenario.freshHome ? join(argvHome, scenario.name.replace(/\W+/g, '-')) : argvHome;
+  for (const [argv, expected] of scenario.exchanges) {
+    const run = spawnSync(BIN, argv, {
+      encoding: 'utf8',
+      timeout: 60_000,
+      env: { ...process.env, STRATA_HOME: home },
+    });
+    const out = (run.stdout || '') + (run.stderr || '');
+    const shown = `strata ${argv.join(' ')}`;
+    if (expected && !out.includes(expected)) {
+      console.error(`✗ [${scenario.name}] '${shown}' - expected output containing '${expected}'`);
+      failures++;
+    } else {
+      console.log(`✓ [${scenario.name}] ${shown}`);
+    }
+  }
+}
+rmSync(argvHome, { recursive: true, force: true });
 
 if (failures) {
   console.error(`\n${failures} transcript assertion(s) failed - a demo is lying.`);

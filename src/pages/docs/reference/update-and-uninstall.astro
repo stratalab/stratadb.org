@@ -1,0 +1,72 @@
+---
+// Reference / CLI / update and uninstall.
+//
+// Written rather than generated: the binary's own surface. Paired because
+// they are the two commands that change the installation itself, and someone
+// reaching for one should see what the other does.
+//
+// Only `update --check` is exercised by verify-transcripts. A build must never
+// install or remove anything.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/update-and-uninstall.astro"
+  title="update and uninstall"
+  description="Move the binary to another release, pin it, roll it back, or remove the installation."
+  section="Reference"
+>
+  <h1>update and uninstall</h1>
+  <p>
+    These two change the installation rather than a database. Everything else in the CLI leaves the
+    binary alone.
+  </p>
+
+  <h2>update</h2>
+  <p>Replace the binary with the latest release:</p>
+  <CliBlock>strata update</CliBlock>
+  <p>Ask first, without installing anything:</p>
+  <CliBlock>strata update --check</CliBlock>
+  <CliBlock variant="output">strata is up to date (1.2.3)</CliBlock>
+  <p>
+    <code>--check</code> is the form to use anywhere that should not change underneath you: a CI job,
+    a container build, a shell prompt. It reports and exits.
+  </p>
+
+  <h3>Pinning and rolling back</h3>
+  <p>
+    <code>--version</code> installs a specific release instead of the latest, which is how you roll back
+    a bad upgrade and how you hold a machine at a known version:
+  </p>
+  <CliBlock>strata update --version 1.2.2</CliBlock>
+  <p>
+    It moves in either direction. There is no separate downgrade command, and going backwards is not
+    treated as unusual.
+  </p>
+  <p>
+    A database written by a newer engine is the thing to think about before rolling back, rather
+    than the binary swap itself. <a href="/docs/reference/compatibility"
+      >Compatibility and versioning</a
+    > covers what is safe.
+  </p>
+
+  <h2>uninstall</h2>
+  <p>Remove the Strata installation from the machine:</p>
+  <CliBlock>strata uninstall</CliBlock>
+  <p>
+    It prompts before doing anything. <code>--yes</code> skips the prompt, which is what an automated
+    teardown wants and what you should think twice about typing by hand.
+  </p>
+  <CliBlock>strata uninstall --yes</CliBlock>
+
+  <h3>What it does not remove</h3>
+  <p>
+    Your databases. They are ordinary paths you chose, and nothing here goes looking for them, so
+    uninstalling does not put data at risk. Removing a database is deleting the directory yourself.
+  </p>
+  <p>
+    Use <a href="/docs/reference/doctor">doctor</a> before uninstalling if you want to see what the installation
+    actually consists of, including the home directory and the resolved configuration path.
+  </p>
+</DocsLayout>

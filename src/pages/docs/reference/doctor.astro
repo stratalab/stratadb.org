@@ -1,0 +1,90 @@
+---
+// Reference / CLI / doctor.
+//
+// Written rather than generated: the binary's own surface, not a catalog
+// command. See init.astro for why these live under src/pages.
+//
+// The field list is deliberately described rather than pasted in full: the
+// inference block reports what this machine has, so a paste would be a claim
+// about the reader's laptop.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/doctor.astro"
+  title="doctor"
+  description="Check the installation, and the health of a database when you name one. The first thing to run when something is not behaving."
+  section="Reference"
+>
+  <h1>doctor</h1>
+  <p>
+    <code>strata doctor</code> reports what this machine has: which binary is on the path, where the home
+    directory resolved to, whether inference can run, and anything it considers an issue.
+  </p>
+  <CliBlock>strata doctor</CliBlock>
+  <CliBlock variant="output"
+    >binary 1.2.3 database - home /home/you/.strata inference local_execution false
+    models_catalogued 11 models_dir /home/you/.strata/models models_downloaded 0 ready_providers
+    openai issues - path_ok true platform linux-x86_64 user_config path
+    /home/you/.config/strata/config.toml state readable</CliBlock
+  >
+
+  <h2>Reading it</h2>
+  <p>
+    <code>database</code> is <code>-</code> because no database was named. Name one and it reports that
+    database's health alongside the installation:
+  </p>
+  <CliBlock>strata ./my-db doctor</CliBlock>
+  <CliBlock variant="output"
+    >database exists true info branch_count 1 created false default_branch default durable true
+    memory_budget source derived_from_host total_bytes 6846744576 usable_host_bytes 27386978304 open
+    true space_count 1 target durable_local version 1.2.3 open_ok true path /home/you/my-db</CliBlock
+  >
+  <p>
+    <code>open_ok</code> is the one to read when a database will not open: it separates "the path is not
+    there" from "the path is there and something is wrong with it". <code>version</code> is the engine
+    that wrote the database, which is not necessarily the binary you are holding.
+  </p>
+  <p>
+    <code>path_ok</code> answers the question behind most installation problems: is the binary you just
+    ran the one on your <code>PATH</code>. A false here usually means a second copy earlier in the
+    path.
+  </p>
+  <p>
+    <code>issues</code> is the field to read first. When it is <code>-</code> there is nothing to report;
+    anything listed there is what to fix.
+  </p>
+
+  <h2>The inference block</h2>
+  <p>
+    This is the part that answers "why can I not generate anything". <code>local_execution</code> says
+    whether this build can run a model on the machine at all, which depends on how the binary was built,
+    not on what is installed. <code>models_downloaded</code> is how many local models are actually present,
+    as distinct from <code>models_catalogued</code>, which is how many the build knows how to fetch.
+  </p>
+  <p>
+    <code>ready_providers</code> lists cloud providers considered usable. Read it as <em
+      >a key is present</em
+    >, not as <em>a key works</em>: a provider appears here on the strength of configuration alone,
+    and a key that is expired or wrong still shows as ready. Tracked as strata-core issue 3408.
+  </p>
+
+  <h2>Configuration</h2>
+  <p>
+    <code>user_config</code> reports the file's path and its state, so a configuration that is not being
+    picked up can be diagnosed without guessing where the file should have been. <code>state</code> distinguishes
+    a file that is readable from one that is missing or unreadable.
+  </p>
+
+  <h2>Scripting it</h2>
+  <p>
+    <code>--json</code> returns the same facts as one document, which is the form to check in a setup
+    script or a container build. The fields are the same; nesting matches the blocks above.
+  </p>
+  <CliBlock>strata --json doctor</CliBlock>
+  <p>
+    <code>doctor</code> reports. It does not repair anything, and it does not change the installation,
+    so it is safe to run anywhere, including against a database another process is hosting.
+  </p>
+</DocsLayout>

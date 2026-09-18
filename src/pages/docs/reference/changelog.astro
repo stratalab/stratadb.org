@@ -1,0 +1,52 @@
+---
+// Reference / CLI / changelog.
+//
+// Written rather than generated: the binary's own surface.
+//
+// No release contents are quoted here. The command's whole point is that the
+// binary carries its own notes, so a page that transcribed them would be the
+// one copy able to go stale.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/changelog.astro"
+  title="changelog"
+  description="What shipped, according to the binary you are holding, offline."
+  section="Reference"
+>
+  <h1>changelog</h1>
+  <p>
+    <code>strata changelog</code> prints the release notes carried inside the binary. No network, and
+    no chance of reading notes for a different version than the one installed.
+  </p>
+  <CliBlock>strata changelog</CliBlock>
+  <p>One release at a time, when you know which one you care about:</p>
+  <CliBlock>strata changelog --version 1.2.0</CliBlock>
+
+  <h2>Why this is a command and not a link</h2>
+  <p>
+    The question it answers is usually "what changed between the version I had and the version I
+    have now", and that is asked on a machine where the answer is already installed. Reading notes
+    from a website adds a way to get it wrong: the page describes the newest release, which is not
+    necessarily yours.
+  </p>
+  <p>
+    Pair it with <a href="/docs/reference/doctor">doctor</a>, which tells you which version you are
+    actually running, and with <a href="/docs/reference/update-and-uninstall">update --check</a>,
+    which tells you whether there is a newer one.
+  </p>
+
+  <h2>Scripting it</h2>
+  <p>
+    <code>--json</code> returns the same content as a document, which is what to use when something else
+    has to decide whether an upgrade is worth taking.
+  </p>
+  <CliBlock>strata --json changelog --version 1.2.0</CliBlock>
+  <p>
+    An unknown version is an error rather than empty output, so a typo in a script fails rather than
+    quietly reporting that nothing changed. The error names every version this build documents,
+    which is also the quickest way to see how far back its notes go.
+  </p>
+</DocsLayout>

@@ -1,0 +1,82 @@
+---
+// Reference / CLI / init.
+//
+// Written rather than generated: `init` is the binary's own surface, not a
+// command in the catalog, so nothing in the release tarball describes it.
+//
+// It lives here rather than in src/content/docs/reference/, because the
+// presence of that directory switches generated-reference staging on in
+// scripts/fetch-docs.mjs, and one file there stages pages that collide with
+// the routes under src/pages/docs/reference/.
+//
+// The output claims are gated by the argv scenarios in verify-transcripts.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/init.astro"
+  title="init"
+  description="Prepare the Strata home directory and print the first commands worth running. Optional: every other command works without it."
+  section="Reference"
+>
+  <h1>init</h1>
+  <p>
+    <code>strata init</code> creates the Strata home directory and prints the commands worth running first.
+  </p>
+  <CliBlock>strata init</CliBlock>
+  <CliBlock variant="output"
+    >initialized /home/you/.strata next steps strata ./my-db kv put greeting hello strata ./my-db kv
+    get greeting strata --cache strata agents guide</CliBlock
+  >
+  <p>
+    Run it again and it says <code>already initialized</code>, followed by the same next steps. It
+    does not fail, and it does not overwrite anything.
+  </p>
+
+  <h2>You do not have to run it</h2>
+  <p>
+    This is the part worth knowing. <code>init</code> is a convenience, not a prerequisite: creating a
+    database with <code>strata ./my-db kv put greeting hello</code> works on a machine where <code
+      >init</code
+    > has never been run. Nothing gates on it.
+  </p>
+  <p>
+    What it gives you is a home directory in place before anything needs it, and a printed starting
+    point.
+  </p>
+
+  <h2>What it actually creates</h2>
+  <p>
+    The home directory, and nothing inside it. There is no configuration file, no database and no
+    state: a freshly initialized home is an empty directory. What you find in a home that has been
+    used is put there by something else - the installer writes <code>bin/</code>, and <a
+      href="/docs/reference/doctor">doctor</a
+    > reports a models path that only exists once a local model has been pulled.
+  </p>
+  <p>
+    <code>STRATA_HOME</code> moves it. That is how you keep a throwaway home for a test without touching
+    the real one.
+  </p>
+  <CliBlock>STRATA_HOME=/tmp/throwaway strata init</CliBlock>
+
+  <h2>Where the home sits, and what else knows about it</h2>
+  <p>
+    <a href="/docs/reference/doctor">doctor</a> prints the resolved home, which is the quickest way to
+    find out which one a shell is using:
+  </p>
+  <CliBlock>strata doctor</CliBlock>
+  <p>
+    The user configuration file is separate and is not created by <code>init</code>. <code
+      >doctor</code
+    > reports its path and whether it is readable.
+  </p>
+
+  <h2>Options</h2>
+  <p>
+    <code>init</code> takes no options of its own beyond the <a
+      href="/docs/reference/global-options">global ones</a
+    >. <code>--json</code> returns the resolved home, whether this call created it, and the next steps
+    as an array, which is the form to use if you are scripting a first-run check.
+  </p>
+</DocsLayout>

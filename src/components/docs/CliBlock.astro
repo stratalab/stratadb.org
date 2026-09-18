@@ -1,0 +1,39 @@
+---
+// Console and output blocks for the hand-written CLI reference pages.
+//
+// The generated command pages get their transcripts from CommandReference.
+// The CLI pages are written by hand, and before this each one carried its own
+// copy of the same two style rules. One component, so how a transcript looks
+// is decided in one place.
+interface Props {
+  /** `console` is what you type; `output` is what came back. */
+  variant?: 'console' | 'output';
+}
+
+const { variant = 'console' } = Astro.props;
+---
+
+<pre class:list={['not-prose', 'cli-block', variant]}><code><slot /></code></pre>
+
+<style>
+  .cli-block {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--text-mono-body, 0.9375rem);
+    line-height: 1.7;
+  }
+
+  .console {
+    background: var(--color-inset);
+    color: var(--color-ink-hi);
+  }
+
+  .output {
+    background: var(--color-panel);
+    color: var(--color-ink-mid);
+  }
+</style>

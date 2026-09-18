@@ -1,0 +1,89 @@
+---
+// Reference / CLI / agents.
+//
+// Written rather than generated: the binary's own surface. This is also the
+// command that produces the data the generated reference is built from, so it
+// is worth saying plainly that the catalog here and the catalog on this site
+// come from the same place.
+//
+// Counts are deliberately absent: verify-reference-ia rejects a hand-written
+// command or error total, because the whole point is that nothing here is
+// transcribed.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/agents.astro"
+  title="agents"
+  description="What the binary can tell a coding agent about itself: an offline guide, the command catalog, the error registry, and repo onboarding files."
+  section="Reference"
+>
+  <h1>agents</h1>
+  <p>
+    <code>strata agents</code> is how the binary describes itself. Everything it prints is matched to
+    the build you are holding and needs no network, which is the point: an agent working against Strata
+    can ask the installed binary what exists instead of guessing from training data.
+  </p>
+
+  <h2>guide</h2>
+  <CliBlock>strata agents guide</CliBlock>
+  <p>
+    A complete usage guide in markdown, written for an agent rather than a reader: what the database
+    is, which primitive to reach for, how branches and as-of reads work, and how errors are shaped.
+    It is version-matched, so the guide a 1.2.3 binary prints describes 1.2.3.
+  </p>
+
+  <h2>commands and errors</h2>
+  <CliBlock>strata agents commands strata agents errors</CliBlock>
+  <p>
+    The machine-readable command catalog, and the public error-code registry. These are the same two
+    sources the reference on this site is generated from, which is why the <a href="/docs/reference"
+      >command reference</a
+    > and <a href="/docs/reference/errors">error codes</a> cannot disagree with your binary for long:
+    both sides come from the release.
+  </p>
+  <p>
+    If a page here and your installed binary ever do disagree, the binary is right. It is the thing
+    answering your calls.
+  </p>
+
+  <h2>skill</h2>
+  <p>
+    Prints an agent skill: a short, structured description of when to use Strata and how, in the
+    format coding agents load. Printing it is the default; <code>--write</code> installs it.
+  </p>
+  <CliBlock
+    >strata agents skill strata agents skill --write strata agents skill --write --for cursor strata
+    agents skill --write --for all</CliBlock
+  >
+  <p>
+    <code>--for</code> chooses the target and is repeatable: <code>claude</code> writes
+    <code>.claude/skills/strata/SKILL.md</code>, <code>cursor</code> writes
+    <code>.cursor/rules/strata.mdc</code>, and <code>codex</code> writes a marker-delimited section into
+    <code>AGENTS.md</code>. It defaults to <code>claude</code>. An existing file whose content
+    differs is left alone unless you pass <code>--force</code>.
+  </p>
+
+  <h2>init</h2>
+  <CliBlock>strata agents init</CliBlock>
+  <CliBlock variant="output">wrote 1 file ./.strata/AGENTS.md</CliBlock>
+  <p>
+    Writes repo onboarding into <code>.strata/AGENTS.md</code>. On its own it only creates that file
+    and tells you what it wrote. <code>--apply</code> goes further and appends a pointer block to the
+    repository's existing <code>AGENTS.md</code> or <code>CLAUDE.md</code>, so an agent that already
+    reads one of those is sent to the Strata notes without you editing anything by hand.
+  </p>
+  <p>
+    Note that <code>strata agents init</code> and <a href="/docs/reference/init">strata init</a> are unrelated:
+    one writes files into the repository you are standing in, the other prepares the home directory.
+  </p>
+
+  <h2>Which of these to reach for</h2>
+  <p>
+    For a human reading along, <code>guide</code>. For a program deciding what it may call,
+    <code>commands</code> and <code>errors</code>, in <code>--json</code>. For setting a repository
+    up once so every agent that opens it starts informed, <code>init --apply</code> and
+    <code>skill --write</code>.
+  </p>
+</DocsLayout>

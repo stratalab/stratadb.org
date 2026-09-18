@@ -1,0 +1,87 @@
+---
+// Reference / CLI / start and stop.
+//
+// Written rather than generated: the binary's own surface. `ipc status` and
+// `ipc stop` ARE catalog commands and have generated pages, so this page links
+// to them rather than restating them.
+//
+// The lifecycle shown here was exercised against 1.2.3: start, a write from a
+// second process, stop, and the owner exiting.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/start-and-stop.astro"
+  title="start and stop"
+  description="Host a durable database so other processes can use it, and stop hosting. The pair behind multi-process access."
+  section="Reference"
+>
+  <h1>start and stop</h1>
+  <p>
+    A durable database is a file, and a file can only be opened for writing by one process at a
+    time. <code>strata start</code> makes one process the owner and has it serve a socket, so other processes
+    can work through it instead of being locked out.
+  </p>
+  <CliBlock>strata ./my-db start</CliBlock>
+  <CliBlock variant="output"
+    >client_count 0 hosting true is_owner true owner_pid 41207 socket_path
+    /run/user/1000/strata/310b3d753f3bc2d5.sock</CliBlock
+  >
+  <p>
+    <strong>It blocks.</strong> The command prints that and then stays in the foreground until it is stopped:
+    it is the host, not a request to start one. Run it in its own terminal, or under whatever supervises
+    your services.
+  </p>
+
+  <h2>While it is hosting</h2>
+  <p>
+    Other processes just use the database. There is no attach step and no different command; they
+    open the same path and are brokered to the owner.
+  </p>
+  <CliBlock>strata ./my-db kv put from-client yes strata ./my-db kv get greeting</CliBlock>
+  <p>
+    From one of those processes, <a href="/docs/reference/admin/ipc_status">ipc status</a> reports
+    <code>is_owner false</code> and a <code>client_count</code> that includes it. From the owner it reports
+    <code>is_owner true</code>. That difference is the quickest way to tell which side you are on.
+  </p>
+
+  <h2>Stopping</h2>
+  <CliBlock>strata ./my-db stop</CliBlock>
+  <CliBlock variant="output">stopped true</CliBlock>
+  <p>
+    <code>stop</code> is run from anywhere, not from the blocked terminal. The owner process exits on
+    its own once stopped, so there is nothing left to kill.
+  </p>
+  <p>
+    <a href="/docs/reference/admin/ipc_stop">ipc stop</a> does the same thing through the command catalog,
+    and is what an SDK calls.
+  </p>
+
+  <h2>When you need this, and when you do not</h2>
+  <p>
+    You need it when more than one process must write to the same durable database and you want to
+    decide which one is the owner, rather than letting whichever starts first take the lock.
+  </p>
+  <p>
+    You do not need it for a single process, and you do not need it to read. The default <code
+      >--ipc host</code
+    > already lets the first process host a socket on its own, so a second process is brokered without
+    anyone running <code>start</code>. What <code>start</code> adds is an owner that is not doing anything
+    else and does not exit when a piece of work finishes.
+  </p>
+  <p>
+    <a href="/docs/reference/global-options">--ipc</a> chooses the behaviour: <code>client</code> brokers
+    without ever hosting, and <code>off</code> opts out of the socket entirely.
+  </p>
+
+  <h2>Durability is the owner's, not yours</h2>
+  <p>
+    This is the sharp edge. When a process is brokered to an owner, the owner's durability mode is
+    what applies. Passing <code>--durability always</code> to the client is accepted and has no effect:
+    it does not raise the owner's setting, and nothing warns you. Set the mode on the process that runs
+    <code>start</code>. Tracked as strata-core issue 3395.
+  </p>
+  <CliBlock>strata ./my-db --durability always start</CliBlock>
+  <p><a href="/docs/learn/durability">Durability</a> covers what the two modes actually promise.</p>
+</DocsLayout>

@@ -1,0 +1,93 @@
+---
+// Reference / CLI / mcp.
+//
+// Written rather than generated: the binary's own surface. The MCP tool list
+// itself is generated and lives elsewhere, so this page covers the server and
+// how to attach a client to it, and does not restate the tools.
+//
+// No tool count here on purpose: verify-reference-ia rejects a hand-written
+// one, because a number typed into prose is a number that goes stale.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+
+const claudeConfig = `{
+  "mcpServers": {
+    "strata": {
+      "command": "strata",
+      "args": ["/path/to/my-db", "mcp", "serve"]
+    }
+  }
+}`;
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/mcp.astro"
+  title="mcp"
+  description="Serve Strata over the Model Context Protocol, so an agent can use a database as tools rather than by shelling out."
+  section="Reference"
+>
+  <h1>mcp</h1>
+  <p>
+    <code>strata mcp serve</code> exposes a database over the Model Context Protocol, so an MCP client
+    can read and write it as tools instead of composing shell commands.
+  </p>
+  <CliBlock>strata ./my-db mcp serve</CliBlock>
+  <p>
+    It speaks newline-delimited JSON-RPC on stdin and stdout, and puts its logs on stderr. There is
+    no port and no URL: the client starts the process and talks to it over the pipe, which is why
+    the command looks like it does nothing when you run it in a terminal. That is correct. It is
+    waiting for a client.
+  </p>
+
+  <h2>Naming the database</h2>
+  <p>
+    The database comes from the usual <a href="/docs/reference/global-options">global options</a>,
+    before the subcommand. Both of these serve the same database:
+  </p>
+  <CliBlock>strata ./my-db mcp serve strata --db ./my-db mcp serve</CliBlock>
+  <p>
+    <code>--branch</code> and <code>--space</code> work here too, so a server can be pinned to one branch
+    for the whole session.
+  </p>
+  <CliBlock>strata ./my-db --branch review mcp serve</CliBlock>
+
+  <h2>Attaching a client</h2>
+  <p>
+    Configuration lives with the client, not with Strata. A stdio MCP server is normally declared as
+    a command and its arguments:
+  </p>
+  <CliBlock variant="output">{claudeConfig}</CliBlock>
+  <p>
+    Use an absolute path for the database. The client decides the working directory it launches the
+    process in, and a relative path will be resolved against a directory you did not choose.
+  </p>
+
+  <h2>What it exposes</h2>
+  <p>
+    Every command in the catalog, as its own tool. Each carries a tool name and a description
+    written for a model deciding whether to call it, so <code>admin.config</code> arrives as
+    <code>strata_admin_config</code> with a sentence about when to reach for it.
+  </p>
+  <p>
+    The list is generated from the release rather than written here, so it matches the binary you
+    have installed. Ask the binary with <code>strata agents commands</code>, or read the <a
+      href="/docs/reference">command reference</a
+    >.
+  </p>
+
+  <h2>Sharing the database with your shell</h2>
+  <p>
+    An MCP server holds the database open for as long as the client keeps it running, which raises
+    the obvious question of what happens when you also want a terminal on it.
+  </p>
+  <p>
+    Nothing special: the default <code>--ipc host</code> means the first process to open a durable database
+    hosts a socket, and the next one is brokered to it rather than refused. A shell opened against the
+    same path while the server is running just works.
+  </p>
+  <p>
+    What <a href="/docs/reference/start-and-stop">start</a> adds is deciding <em>which</em> process is
+    the owner, instead of it being whichever opened the database first. That matters here, because the
+    owner's durability mode is the one that applies to everyone brokered to it.
+  </p>
+</DocsLayout>

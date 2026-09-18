@@ -1,0 +1,107 @@
+---
+// Reference / CLI / command.
+//
+// Written rather than generated: the binary's own surface. The escape hatch
+// for commands with no CLI verb.
+//
+// The base64 section is the reason this page matters. It was found by running
+// the thing: a plaintext key made only of base64-alphabet characters is
+// decoded rather than rejected, so it addresses a different record silently.
+// verify-transcripts gates the two `command print` claims.
+//
+// Transcripts go through template literals because a bare `{` opens an
+// expression in an Astro template, and every one of these is JSON.
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import CliBlock from '../../../components/docs/CliBlock.astro';
+
+const runGet = `strata ./my-db command run --command-json '{"type":"kv_get","key":"Z3JlZXRpbmc="}'`;
+const printGet = `strata command print --command-json '{"type":"kv_get","key":"Z3JlZXRpbmc="}'`;
+const printOut = `{"key":"greeting","type":"kv_get"}`;
+const nestedForm = `{"type":"kv_get","data":{"key":"..."}}`;
+const putPlain = `strata ./my-db command run --command-json '{"type":"kv_put","key":"user","value":"YWxpY2U="}'`;
+const putEncoded = `KEY=$(printf 'user' | base64)
+strata ./my-db command run --command-json "{\\"type\\":\\"kv_put\\",\\"key\\":\\"$KEY\\",\\"value\\":\\"YWxpY2U=\\"}"`;
+---
+
+<DocsLayout
+  editPath="src/pages/docs/reference/command.astro"
+  title="command"
+  description="Run a serialized executor command directly. The escape hatch for operations the CLI has no verb for, and the one surface that takes base64 keys."
+  section="Reference"
+>
+  <h1>command</h1>
+  <p>
+    <code>strata command</code> takes a serialized executor command as JSON and runs it. It is the escape
+    hatch: every operation the engine has, including the ones with no CLI verb of their own, is reachable
+    through it.
+  </p>
+  <CliBlock>{runGet}</CliBlock>
+  <CliBlock variant="output">hello</CliBlock>
+  <p>
+    The JSON goes in <code>--command-json</code>, or in a file named by <code>--file</code>. There
+    is no positional form.
+  </p>
+
+  <h2>print, before you run</h2>
+  <p>
+    <code>print</code> validates a command and echoes it back normalized, without opening a database:
+  </p>
+  <CliBlock>{printGet}</CliBlock>
+  <CliBlock variant="output">{printOut}</CliBlock>
+  <p>
+    Because it never opens anything, it takes no database and is the cheapest way to check a
+    generated command before letting it near data. It is handled before the database is opened, so
+    unlike <code>run</code> it is not available inside an interactive session.
+  </p>
+
+  <h2>The shape is flat, and the name uses underscores</h2>
+  <p>Two things differ from what the rest of the documentation might lead you to write.</p>
+  <p>
+    The <code>type</code> is the operation with an underscore, <code>kv_get</code>, not the catalog
+    identifier
+    <code>kv.get</code>. A dotted name is rejected, and the error lists every accepted variant on
+    one line.
+  </p>
+  <p>
+    Parameters sit at the top level, not under a <code>data</code> object. <code>{nestedForm}</code> fails
+    with <code>unknown field `data`</code>.
+  </p>
+  <p>
+    <code>strata agents commands</code> is the list of what exists; <code>print</code> is how you check
+    a particular one.
+  </p>
+
+  <h2>Keys and values are base64</h2>
+  <p>
+    This surface takes KV keys and values as base64, where the CLI verbs take them as text. That is
+    the single thing most likely to cost you an afternoon, because <strong
+      >it fails silently when your key happens to be valid base64</strong
+    >.
+  </p>
+  <CliBlock>{putPlain}</CliBlock>
+  <CliBlock variant="output">created base64:user</CliBlock>
+  <p>
+    That did not create <code>user</code>. <code>user</code> is itself valid base64, so it was decoded
+    to three bytes that are not text, and the record created has those bytes as its key. The CLI prints
+    such a key back with a <code>base64:</code> prefix, which is the tell.
+  </p>
+  <p>Encode the key, and it behaves:</p>
+  <CliBlock>{putEncoded}</CliBlock>
+  <p>
+    A key containing a character outside the base64 alphabet fails loudly instead, with <code
+      >invalid base64 bytes</code
+    >. So the dangerous keys are the ordinary-looking ones: <code>user</code>, <code>data</code>,
+    <code>config</code>.
+  </p>
+
+  <h2>When to use it</h2>
+  <p>
+    Reach for it when an operation has no CLI verb, when you are driving Strata from a language with
+    no SDK and would rather shell out than reimplement a protocol, or when you have a command as
+    data already, from <code>agents commands</code> or a generator.
+  </p>
+  <p>
+    For anything with a verb, use the verb. It takes text, has flags, and prints output meant for a
+    person.
+  </p>
+</DocsLayout>
