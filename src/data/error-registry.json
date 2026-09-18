@@ -8,7 +8,8 @@
       "hint": "Reopen the connection with read-write access, or use a read-class command.",
       "message": "The session is read-only and the command is classified as a write.",
       "ref": "https://stratadb.org/e/access_denied.executor.read_only_session",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "already_exists",
@@ -17,7 +18,8 @@
       "hint": "Choose a different branch name or delete the existing branch first.",
       "message": "A branch with this name already exists.",
       "ref": "https://stratadb.org/e/already_exists.engine.branch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "already_exists",
@@ -26,7 +28,8 @@
       "hint": "Choose a different graph name or delete the existing graph first.",
       "message": "A graph with this name already exists.",
       "ref": "https://stratadb.org/e/already_exists.engine.graph",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "already_exists",
@@ -35,7 +38,8 @@
       "hint": "Update the existing document, or use a different document id.",
       "message": "A JSON document already exists at this id.",
       "ref": "https://stratadb.org/e/already_exists.engine.json_document",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "already_exists",
@@ -44,7 +48,8 @@
       "hint": "Drop the existing index or choose a different index name.",
       "message": "A JSON index with this name already exists.",
       "ref": "https://stratadb.org/e/already_exists.engine.json_index",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "already_exists",
@@ -53,7 +58,8 @@
       "hint": "Use the existing branch or choose a different branch name.",
       "message": "The resource already exists.",
       "ref": "https://stratadb.org/e/already_exists.engine.persistence",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "already_exists",
@@ -62,7 +68,8 @@
       "hint": "Use the existing collection, or choose a different collection name.",
       "message": "A vector collection with this name already exists.",
       "ref": "https://stratadb.org/e/already_exists.engine.vector_collection",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "ambiguous_commit",
@@ -71,7 +78,8 @@
       "hint": "Re-open or inspect database state before assuming whether the write committed.",
       "message": "The commit outcome could not be proven.",
       "ref": "https://stratadb.org/e/ambiguous_commit.engine.persistence",
-      "retry_policy": "unknown"
+      "retry_policy": "unknown",
+      "origin": "engine"
     },
     {
       "class": "conflict",
@@ -80,7 +88,8 @@
       "hint": "Reload current state and retry against the latest branch, space, or collection version.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/conflict.engine.artifact_import",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "conflict",
@@ -89,7 +98,8 @@
       "hint": "Reload current state and retry against the latest branch, space, or collection version.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/conflict.engine.branch_generation",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "conflict",
@@ -98,7 +108,8 @@
       "hint": "Reload current state and retry against the latest branch, space, or collection version.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/conflict.engine.persistence",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "conflict",
@@ -107,7 +118,8 @@
       "hint": "Reload current state and retry against the latest branch, space, or collection version.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/conflict.engine.promotion",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "corruption",
@@ -116,7 +128,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/corruption.engine.artifact_payload",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "corruption",
@@ -125,7 +138,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/corruption.engine.persistence_recovery",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -134,7 +148,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/data_loss.engine.branch_catalog",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -143,7 +158,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/data_loss.engine.branch_id",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -152,7 +168,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/data_loss.engine.control_name",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -161,7 +178,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/data_loss.engine.control_plane",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -170,7 +188,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/data_loss.engine.control_plane_missing",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -179,7 +198,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_index_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -188,7 +208,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -197,7 +218,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_metadata",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -206,7 +228,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.event_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -215,7 +238,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_binding_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -224,7 +248,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_binding_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -233,7 +258,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_edge_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -242,7 +268,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_edge_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -251,7 +278,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_index",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -260,7 +288,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -269,7 +298,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_metadata",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -278,7 +308,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_node_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -287,7 +318,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_node_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -296,7 +328,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_ontology_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -305,7 +338,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_reverse_edge_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -314,7 +348,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_type_index_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -323,7 +358,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.graph_type_index_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -332,7 +368,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_document",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -341,7 +378,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_index",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -350,7 +388,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_index_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -359,7 +398,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "Stored data failed validation.",
       "ref": "https://stratadb.org/e/data_loss.engine.json_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -368,7 +408,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The KV request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.kv_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -377,7 +418,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The KV request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.kv_value",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -386,7 +428,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/data_loss.engine.space_catalog",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -395,7 +438,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_artifact",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -404,7 +448,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_artifacts",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -413,7 +458,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_collection",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -422,7 +468,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_collection_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -431,7 +478,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_index_manifest",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -440,7 +488,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_index_manifest_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -449,7 +498,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "data_loss",
@@ -458,7 +508,8 @@
       "hint": "Stop writing to the database and inspect recovery diagnostics before continuing.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/data_loss.engine.vector_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -467,7 +518,8 @@
       "hint": "Delete the child branches forked from this one (or materialize them) before deleting the source.",
       "message": "The request conflicts with current state.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.branch_has_children",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -476,7 +528,8 @@
       "hint": "Open the database with a compatible Strata version or run the required migration.",
       "message": "The stored layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.branch_status",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -485,7 +538,8 @@
       "hint": "Open the database with a compatible Strata version or run the required migration.",
       "message": "The database layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.capability_registry",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -494,7 +548,8 @@
       "hint": "Open the database with a compatible Strata version or run the required migration.",
       "message": "The database layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.control_payload_version",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -503,7 +558,8 @@
       "hint": "Open the database with a compatible Strata version or run the required migration.",
       "message": "The stored layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.default_branch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -512,7 +568,8 @@
       "hint": "Embed with the model the collection records (see `vector collection stats`), or create a separate collection for the other model.",
       "message": "The embedding model does not match the one this vector collection records.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.embedding_model_mismatch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -521,7 +578,8 @@
       "hint": "Declare the collection's model with `vector collection set-embedding-model <collection> <model>`, or pass a vector instead of text.",
       "message": "This vector collection records no embedding model, so text cannot be embedded for it.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.embedding_model_missing",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -530,7 +588,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_negative_weight",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -539,7 +598,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_ontology_edge_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -548,7 +608,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_ontology_endpoint_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -557,7 +618,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_ontology_freeze",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -566,7 +628,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_ontology_frozen",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -575,7 +638,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_ontology_node_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -584,7 +648,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.graph_ontology_required_property",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -593,7 +658,8 @@
       "hint": "Point Strata at an empty directory or an existing V1 database; pre-V1 databases are not migrated.",
       "message": "The database layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.layout_version",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -602,7 +668,8 @@
       "hint": "Open the database with a compatible Strata version or run the required migration.",
       "message": "The database layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.migration_registry",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -611,7 +678,8 @@
       "hint": "Retry after the required backend, control plane, or persistence capability is available.",
       "message": "The required engine capability is unavailable.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.persistence",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -620,7 +688,8 @@
       "hint": "Open a new database handle before issuing more commands.",
       "message": "The runtime is closed.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.runtime_closed",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -629,7 +698,8 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.space_not_empty",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -638,7 +708,8 @@
       "hint": "Open the database with a compatible Strata version or run the required migration.",
       "message": "The database layout is incompatible with this runtime.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.storage_registry",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -647,7 +718,8 @@
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.vector_artifact",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -656,7 +728,8 @@
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.vector_index_manifest",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -665,7 +738,8 @@
       "hint": "Another process holds this database's writer lock. Connect to the running owner, or close it before opening the database for writing.",
       "message": "The required engine capability is unavailable.",
       "ref": "https://stratadb.org/e/failed_precondition.engine.writer_lock",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -674,7 +748,8 @@
       "hint": "Check the destination is empty and the bundle's engine requirement matches this Strata version.",
       "message": "The clone cannot proceed against this bundle or destination.",
       "ref": "https://stratadb.org/e/failed_precondition.executor.hub_clone",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "history_unavailable",
@@ -683,7 +758,8 @@
       "hint": "Request history inside the retained window.",
       "message": "The requested resource was not found.",
       "ref": "https://stratadb.org/e/history_unavailable.engine.persistence_history",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -692,7 +768,8 @@
       "hint": "Enable model downloads or install the model manually.",
       "message": "Model downloads are disabled.",
       "ref": "https://stratadb.org/e/inference.download_disabled",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -701,7 +778,8 @@
       "hint": "Retry the model download when network access is available.",
       "message": "The model download failed.",
       "ref": "https://stratadb.org/e/inference.download_failed",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "corruption",
@@ -710,7 +788,8 @@
       "hint": "Delete the corrupted model artifact and download it again.",
       "message": "The downloaded model failed verification.",
       "ref": "https://stratadb.org/e/inference.download_verification_failed",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -719,7 +798,8 @@
       "hint": "Correct the inference request options for the selected provider or model.",
       "message": "The inference request is invalid.",
       "ref": "https://stratadb.org/e/inference.invalid_request",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "io",
@@ -728,7 +808,8 @@
       "hint": "Inspect local model-cache filesystem permissions and retry.",
       "message": "The local inference runtime hit an I/O failure.",
       "ref": "https://stratadb.org/e/inference.io_failure",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -737,7 +818,8 @@
       "hint": "Check the local inference runtime and model compatibility before retrying.",
       "message": "The local inference runtime failed.",
       "ref": "https://stratadb.org/e/inference.local_runtime_failed",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -746,7 +828,8 @@
       "hint": "Set the provider API key and retry.",
       "message": "The provider API key is missing.",
       "ref": "https://stratadb.org/e/inference.missing_api_key",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -755,7 +838,8 @@
       "hint": "Run `strata inference models pull <model>`, then retry.",
       "message": "The requested model is in the catalog but is not downloaded.",
       "ref": "https://stratadb.org/e/inference.missing_model",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -764,7 +848,8 @@
       "hint": "Verify the local model path and format, then load a compatible model.",
       "message": "The model could not be loaded.",
       "ref": "https://stratadb.org/e/inference.model_load_failed",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "access_denied",
@@ -773,7 +858,8 @@
       "hint": "Check provider credentials, permissions, and account access.",
       "message": "The provider rejected authentication.",
       "ref": "https://stratadb.org/e/inference.provider_auth_failed",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "serialization",
@@ -782,7 +868,8 @@
       "hint": "Retry or switch providers if the provider response remains invalid.",
       "message": "The provider returned a malformed response.",
       "ref": "https://stratadb.org/e/inference.provider_malformed_response",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -791,7 +878,8 @@
       "hint": "Check the model name against the provider's current model list, then retry.",
       "message": "The provider does not serve the requested model.",
       "ref": "https://stratadb.org/e/inference.provider_model_not_found",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "failed_precondition",
@@ -800,7 +888,8 @@
       "hint": "Add credits or raise the quota on the provider account, then retry.",
       "message": "The provider account has no credits or quota left.",
       "ref": "https://stratadb.org/e/inference.provider_quota_exhausted",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -809,7 +898,8 @@
       "hint": "Wait for provider rate limits to reset or use a different provider key.",
       "message": "The provider rate limit was reached.",
       "ref": "https://stratadb.org/e/inference.provider_rate_limited",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -818,7 +908,8 @@
       "hint": "Retry the request when the provider endpoint is responsive.",
       "message": "The provider request timed out.",
       "ref": "https://stratadb.org/e/inference.provider_timeout",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -827,7 +918,8 @@
       "hint": "Retry when the provider service is available.",
       "message": "The provider is unavailable.",
       "ref": "https://stratadb.org/e/inference.provider_unavailable",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "corruption",
@@ -836,7 +928,8 @@
       "hint": "Repair or recreate the local model registry before retrying.",
       "message": "The local inference registry is corrupt.",
       "ref": "https://stratadb.org/e/inference.registry_corrupt",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -845,7 +938,8 @@
       "hint": "Check the model name against `strata inference models list`, or pass the path of a GGUF file.",
       "message": "The requested model is not in the catalog.",
       "ref": "https://stratadb.org/e/inference.unknown_model",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "unsupported",
@@ -854,7 +948,8 @@
       "hint": "Use an inference operation supported by the selected provider and model.",
       "message": "The inference operation is unsupported.",
       "ref": "https://stratadb.org/e/inference.unsupported_operation",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -863,7 +958,8 @@
       "hint": "Remove or change parameters unsupported by the selected provider.",
       "message": "The inference parameter is unsupported.",
       "ref": "https://stratadb.org/e/inference.unsupported_parameter",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "unsupported",
@@ -872,7 +968,8 @@
       "hint": "Use a provider configured in this build and runtime.",
       "message": "The inference provider is unsupported.",
       "ref": "https://stratadb.org/e/inference.unsupported_provider",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "internal",
@@ -881,7 +978,8 @@
       "hint": "Capture the reference id and report this as a Strata internal error.",
       "message": "An internal engine error occurred.",
       "ref": "https://stratadb.org/e/internal.engine.persistence",
-      "retry_policy": "unknown"
+      "retry_policy": "unknown",
+      "origin": "engine"
     },
     {
       "class": "internal",
@@ -890,7 +988,8 @@
       "hint": "Capture the reference id and report the Arrow boundary failure.",
       "message": "An internal Arrow boundary error occurred.",
       "ref": "https://stratadb.org/e/internal.executor.arrow",
-      "retry_policy": "unknown"
+      "retry_policy": "unknown",
+      "origin": "engine"
     },
     {
       "class": "internal",
@@ -899,7 +998,8 @@
       "hint": "Capture the reference id and report the unregistered executor error code.",
       "message": "An unregistered executor error code was rendered.",
       "ref": "https://stratadb.org/e/internal.executor.unregistered_code",
-      "retry_policy": "unknown"
+      "retry_policy": "unknown",
+      "origin": "engine"
     },
     {
       "class": "internal",
@@ -908,7 +1008,8 @@
       "hint": "Capture the reference id and report the IPC wire response serialization failure.",
       "message": "An IPC command result could not be serialized into a wire response.",
       "ref": "https://stratadb.org/e/internal.executor.wire_response",
-      "retry_policy": "unknown"
+      "retry_policy": "unknown",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -917,7 +1018,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.branch_catalog",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -926,7 +1028,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.branch_delete",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -935,7 +1038,8 @@
       "hint": "Use a non-empty branch name that does not use reserved prefixes or invalid characters.",
       "message": "The branch name is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.branch_name",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -944,7 +1048,8 @@
       "hint": "Use a non-empty branch name that does not use reserved prefixes or invalid characters.",
       "message": "The branch name is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.branch_name_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -953,7 +1058,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.branch_point",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -962,7 +1068,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.config_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -971,7 +1078,8 @@
       "hint": "Use a non-empty model id such as `openai:text-embedding-3-small` or `miniLM`.",
       "message": "The embedding model id is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.embedding_model",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -980,7 +1088,8 @@
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.event_batch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -989,7 +1098,8 @@
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.event_metadata",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -998,7 +1108,8 @@
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.event_payload",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1007,7 +1118,8 @@
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.event_payload_too_large",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1016,7 +1128,8 @@
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.event_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1025,7 +1138,8 @@
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
       "message": "The event request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.event_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1034,7 +1148,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_batch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1043,7 +1158,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_binding",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1052,7 +1168,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_binding_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1061,7 +1178,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_endpoint",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1070,7 +1188,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1079,7 +1198,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1088,7 +1208,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_type_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1097,7 +1218,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_weight",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1106,7 +1228,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_metadata",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1115,7 +1238,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_name",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1124,7 +1248,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_name_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1133,7 +1258,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_node_id",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1142,7 +1268,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_node_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1151,7 +1278,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_ontology_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1160,7 +1288,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_pagerank_options",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1169,7 +1298,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_personalization",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1178,7 +1308,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_properties",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1187,7 +1318,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_properties_too_large",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1196,7 +1328,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_property_name",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1205,7 +1338,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_type_hint",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1214,7 +1348,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_type_index_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1223,7 +1358,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_type_name",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1232,7 +1368,8 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_type_name_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1241,7 +1378,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_array_too_large",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1250,7 +1388,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_batch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1259,7 +1398,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_batch_duplicate_document",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1268,7 +1408,8 @@
       "hint": "Use a valid JSON document id and a JSON value within the configured size and depth limits.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_document",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1277,7 +1418,8 @@
       "hint": "Use a valid JSON document id and a JSON value within the configured size and depth limits.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_document_id",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1286,7 +1428,8 @@
       "hint": "Use a valid JSON document id and a JSON value within the configured size and depth limits.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_document_too_deep",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1295,7 +1438,8 @@
       "hint": "Use a valid JSON document id and a JSON value within the configured size and depth limits.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_document_too_large",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1304,7 +1448,8 @@
       "hint": "Use a non-reserved JSON index name and definition compatible with the indexed field.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_index",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1313,7 +1458,8 @@
       "hint": "Use a non-reserved JSON index name and definition compatible with the indexed field.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_index_name",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1322,7 +1468,8 @@
       "hint": "Use a non-reserved JSON index name and definition compatible with the indexed field.",
       "message": "The JSON index request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_index_name_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1331,7 +1478,8 @@
       "hint": "Use a valid JSON path that points to an existing value of the expected type.",
       "message": "The JSON path is invalid or cannot be applied to the selected value.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_path",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1340,7 +1488,8 @@
       "hint": "Use a valid JSON path that points to an existing value of the expected type.",
       "message": "The JSON path is invalid or cannot be applied to the selected value.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_path_not_found",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1349,7 +1498,8 @@
       "hint": "Use a valid JSON path that points to an existing value of the expected type.",
       "message": "The JSON path is invalid or cannot be applied to the selected value.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_path_too_long",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1358,7 +1508,8 @@
       "hint": "Use a valid JSON path that points to an existing value of the expected type.",
       "message": "The JSON path is invalid or cannot be applied to the selected value.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_path_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1367,7 +1518,8 @@
       "hint": "Use a valid JSON document id and a JSON value within the configured size and depth limits.",
       "message": "The JSON document request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.json_value",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1376,7 +1528,8 @@
       "hint": "Use non-empty KV keys and keep batch structure within the documented limits.",
       "message": "The KV request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.kv_batch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1385,7 +1538,8 @@
       "hint": "Remove duplicate keys from the batch so each key appears once.",
       "message": "The KV batch contains duplicate keys.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.kv_batch_duplicate_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1394,7 +1548,8 @@
       "hint": "Use non-empty KV keys and keep batch structure within the documented limits.",
       "message": "The KV request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.kv_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1403,7 +1558,8 @@
       "hint": "Correct the invalid field named by the error message and retry the operation.",
       "message": "The request contains invalid input.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.persistence",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1412,7 +1568,8 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.product_space",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1421,7 +1578,8 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.product_space_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1430,7 +1588,8 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.space_catalog",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1439,7 +1598,8 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.space_delete_default",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1448,7 +1608,8 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.space_delete_too_large",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1457,7 +1618,8 @@
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_artifact",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1466,7 +1628,8 @@
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_artifact_budget",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1475,7 +1638,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_batch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1484,7 +1648,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_collection",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1493,7 +1658,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_collection_reserved",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1502,7 +1668,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_dimension",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1511,7 +1678,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_embedding",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1520,7 +1688,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_filter",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1529,7 +1698,8 @@
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_index_manifest",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1538,7 +1708,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1547,7 +1718,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_metadata",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1556,7 +1728,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_metadata_field",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1565,7 +1738,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_metadata_patch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1574,7 +1748,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_metadata_too_large",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1583,7 +1758,8 @@
       "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
       "message": "The vector request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.vector_record",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1592,7 +1768,8 @@
       "hint": "Provide valid base64-encoded Arrow bytes or use a file path import.",
       "message": "The Arrow base64 input is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_base64",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1601,7 +1778,8 @@
       "hint": "Provide exactly one Arrow collection target compatible with the selected primitive.",
       "message": "The Arrow collection target is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_collection",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1610,7 +1788,8 @@
       "hint": "Use a fixed-size list, list, or JSON array of numeric values for vector embeddings.",
       "message": "The Arrow embedding column type is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_embedding_type",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1619,7 +1798,8 @@
       "hint": "Export at least one record or choose a source that contains data.",
       "message": "The Arrow export source is empty.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_empty_export",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1628,7 +1808,8 @@
       "hint": "Declare a 'utf8' or 'base64' key_encoding/value_encoding, or omit the encoding column.",
       "message": "The Arrow key/value cell encoding is not supported.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_encoding",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1637,7 +1818,8 @@
       "hint": "Import an event Arrow file with `event_type` and JSON `payload` columns.",
       "message": "The Arrow event import file is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_event",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1646,7 +1828,8 @@
       "hint": "Use a supported Arrow file format such as IPC or Parquet.",
       "message": "The Arrow file format is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_format",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1655,7 +1838,8 @@
       "hint": "Provide a graph name and graph-compatible Arrow columns for graph export.",
       "message": "The Arrow graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_graph",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1664,7 +1848,8 @@
       "hint": "Provide Arrow input bytes or an Arrow input path.",
       "message": "Arrow input is missing.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_input_missing",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1673,7 +1858,8 @@
       "hint": "Include a non-null string or binary document key column for JSON import.",
       "message": "The Arrow JSON key column is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_json_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1682,7 +1868,8 @@
       "hint": "Include a non-null string or binary key column in the Arrow input.",
       "message": "The Arrow key column is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_key_column",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1691,7 +1878,8 @@
       "hint": "Replace or drop the NaN/infinity float values before importing to a JSON target.",
       "message": "A float column holds a non-finite value (NaN or infinity) that JSON cannot represent.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_non_finite_float",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1700,7 +1888,8 @@
       "hint": "Include a value column with a type supported by the selected Arrow import target.",
       "message": "The Arrow value column is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_value_column",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1709,7 +1898,8 @@
       "hint": "Use embeddings whose length matches the target vector collection dimension.",
       "message": "The Arrow vector dimension is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_vector_dimension",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1718,7 +1908,8 @@
       "hint": "Include a non-null string or binary vector key column for vector import.",
       "message": "The Arrow vector key column is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.arrow_vector_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1727,7 +1918,8 @@
       "hint": "Pass a commit timestamp (as_of) or a wall-clock instant (as_of_time), not both.",
       "message": "Both as_of and as_of_time were supplied.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.as_of_conflict",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1736,7 +1928,8 @@
       "hint": "Correct the batch item input and retry.",
       "message": "A batch item is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.batch_item",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1745,7 +1938,8 @@
       "hint": "Use a graph analytics budget that fits the platform's addressable range.",
       "message": "A graph analytics budget value is out of range for this platform.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.graph_analytics_budget",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1754,7 +1948,8 @@
       "hint": "Use a branch name listed by the dataset's refs.",
       "message": "The branch name is not valid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.hub_branch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1763,7 +1958,8 @@
       "hint": "Use the dataset's slug as shown on the hub.",
       "message": "The dataset name is not valid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.hub_dataset",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1772,7 +1968,8 @@
       "hint": "Use StrataHub V1 filter names and keep list limits in the range 1..=200.",
       "message": "The hub browse filter or pagination request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.hub_filter",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1781,7 +1978,8 @@
       "hint": "Pass --since as an RFC 3339 timestamp such as 2026-09-02T00:00:00Z.",
       "message": "The hub yanked-list timestamp is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.hub_since",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1790,7 +1988,8 @@
       "hint": "Provide a valid URL via --hub, STRATA_HUB_URL, or hub.url in a project or global strata config.",
       "message": "The hub URL supplied for this invocation is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.hub_url",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1799,7 +1998,8 @@
       "hint": "Send a well-formed hello for protocol revision 2; the refusal message names the revision this owner speaks.",
       "message": "The IPC hello frame was malformed or requested an unsupported protocol revision.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.ipc_hello",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1808,7 +2008,8 @@
       "hint": "Remove duplicates so each JSON batch item targets a unique document and path.",
       "message": "The JSON batch contains duplicate document targets.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.json_batch_duplicate_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1817,7 +2018,8 @@
       "hint": "Use an integer within the i64/u64 range, or encode the value as a string.",
       "message": "A JSON integer is outside the supported i64/u64 range and would lose precision.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.json_number",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1826,7 +2028,8 @@
       "hint": "Remove duplicate keys so each KV batch item targets a unique key.",
       "message": "The KV batch contains duplicate keys.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.kv_batch_duplicate_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1835,7 +2038,8 @@
       "hint": "Use a positive limit within the documented maximum.",
       "message": "The requested limit is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.limit",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1844,7 +2048,8 @@
       "hint": "Remove duplicate keys so each vector batch item targets a unique key.",
       "message": "The vector batch contains duplicate keys.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.vector_batch_duplicate_key",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1853,7 +2058,8 @@
       "hint": "Use embeddings whose length matches the vector collection dimension.",
       "message": "The vector dimension is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.vector_dimension",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1862,7 +2068,8 @@
       "hint": "Pass exactly one: an explicit vector, or a text to embed with the collection's recorded model.",
       "message": "A vector write or query supplied neither a vector nor a text, or both.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.vector_input",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1871,7 +2078,8 @@
       "hint": "Use a positive vector query limit within the documented maximum.",
       "message": "The vector query limit is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.vector_limit",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "invalid_argument",
@@ -1880,7 +2088,8 @@
       "hint": "Send a well-formed command object (a `type` tag and the fields that command requires).",
       "message": "A command request received over the IPC socket was not a valid wire command.",
       "ref": "https://stratadb.org/e/invalid_argument.executor.wire_request",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1889,7 +2098,8 @@
       "hint": "List branches or use the default branch, then retry with an existing branch name.",
       "message": "The requested branch was not found.",
       "ref": "https://stratadb.org/e/not_found.engine.branch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1898,7 +2108,8 @@
       "hint": "List graphs, then retry with an existing graph name.",
       "message": "The requested graph was not found.",
       "ref": "https://stratadb.org/e/not_found.engine.graph",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1907,7 +2118,8 @@
       "hint": "List the graph's nodes, then retry with an existing node id.",
       "message": "The requested graph node was not found.",
       "ref": "https://stratadb.org/e/not_found.engine.graph_node",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1916,7 +2128,8 @@
       "hint": "List documents or create the document before reading it.",
       "message": "The requested JSON document was not found.",
       "ref": "https://stratadb.org/e/not_found.engine.json_document",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1925,7 +2138,8 @@
       "hint": "List the requested resource type, then retry with an existing resource id.",
       "message": "The requested resource was not found.",
       "ref": "https://stratadb.org/e/not_found.engine.persistence",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1934,7 +2148,8 @@
       "hint": "List vector collections or create the collection before issuing vector operations.",
       "message": "The requested vector collection was not found.",
       "ref": "https://stratadb.org/e/not_found.engine.vector_collection",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1943,7 +2158,8 @@
       "hint": "Check spelling or list datasets from the selected hub.",
       "message": "The hub dataset does not exist.",
       "ref": "https://stratadb.org/e/not_found.executor.hub_dataset",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "not_found",
@@ -1952,7 +2168,8 @@
       "hint": "Check the hub URL and requested StrataHub V1 endpoint.",
       "message": "The hub resource does not exist.",
       "ref": "https://stratadb.org/e/not_found.executor.hub_resource",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "resource_exhausted",
@@ -1961,7 +2178,8 @@
       "hint": "Lower the graph analytics workload (fewer nodes, lower iteration count) or raise the configured analytics budget.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/resource_exhausted.engine.graph_analytics_budget",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "resource_exhausted",
@@ -1970,7 +2188,8 @@
       "hint": "Reduce memory or disk pressure, lower the workload size, or raise the configured resource budget.",
       "message": "The operation exceeded a configured persistence resource budget.",
       "ref": "https://stratadb.org/e/resource_exhausted.engine.persistence_budget",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "resource_exhausted",
@@ -1979,7 +2198,8 @@
       "hint": "Retry after another client disconnects, or reduce the number of processes holding connections to this database.",
       "message": "The store owner is at its IPC connection capacity.",
       "ref": "https://stratadb.org/e/resource_exhausted.executor.ipc_connections",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -1988,7 +2208,8 @@
       "hint": "Retry after the required backend, control plane, or persistence capability is available.",
       "message": "The required engine capability is unavailable.",
       "ref": "https://stratadb.org/e/unavailable.engine.control_plane",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -1997,7 +2218,8 @@
       "hint": "Retry after the required backend, control plane, or persistence capability is available.",
       "message": "The required engine capability is unavailable.",
       "ref": "https://stratadb.org/e/unavailable.engine.persistence",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -2006,7 +2228,8 @@
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
       "message": "The vector index artifact or manifest cannot be used.",
       "ref": "https://stratadb.org/e/unavailable.engine.vector_artifacts",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -2015,7 +2238,8 @@
       "hint": "Retry after the Arrow input or output path is readable and writable.",
       "message": "The Arrow input or output path is unavailable.",
       "ref": "https://stratadb.org/e/unavailable.executor.arrow_io",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -2024,7 +2248,8 @@
       "hint": "Check connectivity and the hub URL, then retry.",
       "message": "The hub could not be reached or returned an error.",
       "ref": "https://stratadb.org/e/unavailable.executor.hub_transport",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -2033,7 +2258,8 @@
       "hint": "Retry with a larger deadline_ms, or when the database owner is less busy.",
       "message": "The request's deadline expired while it waited for the execution lane.",
       "ref": "https://stratadb.org/e/unavailable.executor.ipc_deadline",
-      "retry_policy": "same_request"
+      "retry_policy": "same_request",
+      "origin": "engine"
     },
     {
       "class": "unavailable",
@@ -2042,7 +2268,8 @@
       "hint": "Reopen the database (the owner may have exited or restarted) and, for a write, confirm whether it applied before retrying.",
       "message": "The IPC connection to the store owner failed while a command was in flight.",
       "ref": "https://stratadb.org/e/unavailable.executor.ipc_transport",
-      "retry_policy": "idempotent_only"
+      "retry_policy": "idempotent_only",
+      "origin": "engine"
     },
     {
       "class": "unsupported",
@@ -2051,7 +2278,8 @@
       "hint": "Bind graph relationships to targets on the node's own branch; cross-branch bindings are not supported in V1.",
       "message": "Cross-branch graph relationship bindings are not supported.",
       "ref": "https://stratadb.org/e/unsupported.engine.graph_binding_cross_branch",
-      "retry_policy": "never"
+      "retry_policy": "never",
+      "origin": "engine"
     },
     {
       "class": "unsupported",
@@ -2060,7 +2288,8 @@
       "hint": "Open the database with a backend that supports the requested persistence capability.",
       "message": "The selected persistence backend does not support the requested capability.",
       "ref": "https://stratadb.org/e/unsupported.engine.persistence_capability",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unsupported",
@@ -2069,7 +2298,8 @@
       "hint": "Run a build with the Arrow feature enabled before using Arrow import or export.",
       "message": "Arrow support is not enabled in this build.",
       "ref": "https://stratadb.org/e/unsupported.executor.arrow_feature_disabled",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     },
     {
       "class": "unsupported",
@@ -2078,7 +2308,8 @@
       "hint": "Run a build with the hub feature enabled before using hub clone.",
       "message": "Hub support is not enabled in this build.",
       "ref": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled",
-      "retry_policy": "after_state_change"
+      "retry_policy": "after_state_change",
+      "origin": "engine"
     }
   ],
   "source": "strata agents errors"

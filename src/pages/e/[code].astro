@@ -17,6 +17,11 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 
+// Entries carry `origin` once fetch-error-registry has merged the SDK's
+// catalog. Older committed registries have engine rows only and no field, so
+// treat a missing one as the engine rather than rendering a claim either way.
+const origin = (entry as { origin?: string }).origin ?? 'engine';
+
 const RETRY_MEANING: Record<string, string> = {
   never: 'Do not retry the same request; fix the request or the referenced state first.',
   same_request: 'Safe to retry the same request unchanged (transient condition).',
@@ -43,10 +48,28 @@ const COMMIT_MEANING: Record<string, string> = {
     <p class="mt-6 text-body-lg text-ink-hi">{entry.message}</p>
     <p class="mt-4 text-body text-ink-mid">{entry.hint}</p>
 
+    {
+      /* Which side raised it. For an SDK code this is the first thing a reader
+         needs: the engine never saw the call, so nothing in the database is
+         wrong and no amount of looking at it will help. */
+      origin === 'sdk' && (
+        <p class="mt-6 border-l-2 border-line py-1 pl-4 text-small text-ink-mid">
+          Raised by the client library, not the database engine. The call was rejected before it
+          reached the engine, so the database was not touched.
+        </p>
+      )
+    }
+
     <dl class="mt-10 space-y-4 border-t border-line pt-6">
       <div>
         <dt class="font-mono text-mono-sm uppercase text-ink-low">class</dt>
         <dd class="mt-1 font-mono text-mono-sm text-ink-hi">{entry.class}</dd>
+      </div>
+      <div>
+        <dt class="font-mono text-mono-sm uppercase text-ink-low">raised by</dt>
+        <dd class="mt-1 font-mono text-mono-sm text-ink-hi">
+          {origin === 'sdk' ? 'client library' : 'database engine'}
+        </dd>
       </div>
       <div>
         <dt class="font-mono text-mono-sm uppercase text-ink-low">retry</dt>

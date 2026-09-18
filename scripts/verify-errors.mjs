@@ -30,13 +30,34 @@ if (registry.count !== errors.length) {
   failures.push(`registry count ${registry.count} does not match errors length ${errors.length}`);
 }
 
+const ORIGINS = new Set(['engine', 'sdk']);
 const codes = new Set();
+let sdkCount = 0;
 for (const entry of errors) {
   if (codes.has(entry.code)) failures.push(`duplicate error code ${entry.code}`);
   codes.add(entry.code);
   if (entry.ref !== `https://stratadb.org/e/${entry.code}`) {
     failures.push(`${entry.code}: invalid ref ${entry.ref}`);
   }
+  // `origin` arrives with the SDK merge. A registry predating it has engine
+  // rows and no field at all, which stays valid; a row carrying anything other
+  // than the two known origins does not, because the page renders a claim
+  // about which side raised the error from it.
+  if (entry.origin !== undefined) {
+    if (!ORIGINS.has(entry.origin)) {
+      failures.push(`${entry.code}: unknown origin '${entry.origin}'`);
+    }
+    if (entry.origin === 'sdk') sdkCount += 1;
+  }
+}
+
+// The registry must say where the SDK rows came from, and must not claim a
+// second source it has no rows for. Either way round is a merge that half ran.
+if (sdkCount > 0 && !registry.sdk_source) {
+  failures.push(`${sdkCount} sdk code(s) present but the registry names no sdk_source`);
+}
+if (sdkCount === 0 && registry.sdk_source) {
+  failures.push(`registry names sdk_source '${registry.sdk_source}' but carries no sdk code(s)`);
 }
 
 for (const root of SCAN_ROOTS) {
@@ -58,4 +79,7 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`verify-errors: ${errors.length} error code(s) verified`);
+console.log(
+  `verify-errors: ${errors.length} error code(s) verified` +
+    (sdkCount ? ` (${errors.length - sdkCount} engine, ${sdkCount} sdk)` : ''),
+);

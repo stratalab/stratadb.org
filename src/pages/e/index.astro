@@ -12,6 +12,9 @@ for (const entry of registry.errors) {
   byClass.set(entry.class, list);
 }
 const classes = [...byClass.keys()].sort();
+const fromSdk = registry.errors.filter(
+  (entry) => (entry as { origin?: string }).origin === 'sdk',
+).length;
 ---
 
 <BaseLayout
@@ -19,7 +22,9 @@ const classes = [...byClass.keys()].sort();
   description="Every public StrataDB error code, grouped by class."
 >
   <div class="mx-auto w-full max-w-[46rem] px-6 py-16">
-    <p class="mb-4 font-mono text-mono-sm text-ink-low">{registry.count} codes</p>
+    <p class="mb-4 font-mono text-mono-sm text-ink-low">
+      {registry.count} codes{fromSdk ? `, ${fromSdk} raised by the client library` : ''}
+    </p>
     <Heading level={1} size="title">Error code registry</Heading>
     <p class="mt-6 text-body text-ink-mid">
       Every structured error carries a <code class="font-mono">class.area.detail</code> code and links
