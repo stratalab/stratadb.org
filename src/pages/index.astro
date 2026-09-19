@@ -13,11 +13,12 @@ import release from '../data/release.json';
 // Platforms come from the release assets, never from a literal: this line read
 // 'macOS, Linux, Windows' while the release shipped no Windows binary.
 import { operatingSystems } from '../lib/platforms';
+import { softwareApplication, ORG_ATTRIBUTION } from '../lib/organization';
 ---
 
 <BaseLayout
-  title="StrataDB: the embedded database for the AI era"
-  description="StrataDB is the embedded database for the AI era: zero-copy branches, merge preview, versioned reads, five data primitives, built-in inference, and one-command dataset clones from Strata Hub."
+  title="StrataDB: an embedded database with git semantics"
+  description={`StrataDB is an embedded database with git-style semantics: zero-copy branches, merge preview, versioned reads, five data models, built-in inference, and one-command dataset clones from Strata Hub. ${ORG_ATTRIBUTION}`}
 >
   <Hero />
   <Branching />
@@ -31,17 +32,15 @@ import { operatingSystems } from '../lib/platforms';
     is:inline
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'StrataDB',
-      description:
-        'The embedded database for the AI era: five data primitives, branch diff, merge preview, time-travel reads, built-in inference, and prepared dataset clones through Strata Hub.',
-      applicationCategory: 'DeveloperApplication',
-      operatingSystem: operatingSystems()
-        .map((os) => os.label)
-        .join(', '),
-      license: 'https://www.apache.org/licenses/LICENSE-2.0',
-      softwareVersion: release.version,
-      url: 'https://stratadb.org',
+      ...softwareApplication({
+        description:
+          'An embedded database with git-style semantics: five data models, branch diff, merge preview, time-travel reads, built-in inference, and prepared dataset clones through Strata Hub.',
+        operatingSystem: operatingSystems()
+          .map((os) => os.label)
+          .join(', '),
+        license: 'https://www.apache.org/licenses/LICENSE-2.0',
+        softwareVersion: release.version,
+      }),
     })}
   />
 </BaseLayout>

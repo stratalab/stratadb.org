@@ -11,6 +11,15 @@ const TARGETS = [
   'src/pages/llms.txt.ts',
   'src/pages/llms-full.txt.ts',
   'src/pages/specimen.astro',
+  // The homepage was outside this list, and so its <title>, meta description
+  // and SoftwareApplication JSON-LD all still said "the AI era" long after the
+  // phrase was retired everywhere the check actually looked - in the three
+  // places a crawler weighs most. A rule that does not cover the front page is
+  // not covering the site.
+  'src/pages/index.astro',
+  // The entity the structured data points at. Same reasoning.
+  'src/lib/organization.ts',
+  'src/pages/labs.astro',
 ];
 const EXTENSIONS = new Set(['.astro', '.md', '.mdx', '.ts']);
 

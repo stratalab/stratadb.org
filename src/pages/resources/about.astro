@@ -1,5 +1,6 @@
 ---
 import ResourcesLayout from '../../layouts/ResourcesLayout.astro';
+import { ORG_ATTRIBUTION, ORG_GITHUB } from '../../lib/organization';
 
 const facts = [
   {
@@ -43,9 +44,21 @@ const links = [
 
 <ResourcesLayout
   title="About"
-  description="StrataDB is an embedded database for branchable, versioned application state."
+  description="StrataDB is an embedded database for branchable, versioned application state, developed and maintained by Strata Labs."
   activeSlug="about"
 >
+  <section class="resource-section" aria-labelledby="about-who">
+    <h2 id="about-who">Who develops StrataDB</h2>
+    <p>
+      {ORG_ATTRIBUTION} Strata Labs maintains the engine, the SDKs, the developer tools, the documentation
+      and the benchmarks. Read more <a href="/labs">about Strata Labs</a>, or browse the source on <a
+        href={ORG_GITHUB}
+        target="_blank"
+        rel="noopener noreferrer">GitHub</a
+      >.
+    </p>
+  </section>
+
   <section class="resource-section" aria-labelledby="about-facts">
     <h2 id="about-facts">What matters</h2>
     <div class="resource-grid">

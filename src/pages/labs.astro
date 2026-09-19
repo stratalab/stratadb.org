@@ -1,0 +1,94 @@
+---
+// The canonical page for the Strata Labs entity.
+//
+// One page, not two. A /labs and an /about/project competing for the same
+// entity query split the signal they exist to concentrate, so this is the
+// canonical one and everything else links here.
+//
+// Every claim on it comes from src/lib/organization.ts, the same constants the
+// sitewide JSON-LD is built from, so the prose a reader sees and the entity a
+// crawler reads cannot describe different organizations.
+//
+// It calls Strata Labs an open-source project organization, which is what it
+// is. Not a company, not a startup, not a foundation - none of those are true,
+// and an entity is only worth establishing if it is accurate.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Heading from '../components/foundation/Heading.astro';
+import { ORG_NAME, ORG_SUMMARY, ORG_ATTRIBUTION, ORG_GITHUB } from '../lib/organization';
+
+const maintains = [
+  {
+    title: 'The StrataDB engine',
+    copy: 'The embedded database itself: five data models over one storage substrate, with branches, commits and time travel.',
+    href: '/docs/learn/introduction',
+  },
+  {
+    title: 'SDKs and the CLI',
+    copy: 'The command-line binary and the language bindings that speak to the same engine.',
+    href: '/docs/reference',
+  },
+  {
+    title: 'Documentation',
+    copy: 'This site, generated from the shipped release rather than written alongside it.',
+    href: '/docs',
+  },
+  {
+    title: 'Developer tools',
+    copy: 'The browser playground, Strata Hub, the agent skills, and the editor extension.',
+    href: '/playground',
+  },
+  {
+    title: 'Demos and applications',
+    copy: 'Programs built on StrataDB to find out where it holds up and where it does not.',
+    href: '/resources/demos',
+  },
+];
+---
+
+<BaseLayout
+  title={`${ORG_NAME}: the organization behind StrataDB`}
+  description={`${ORG_SUMMARY} ${ORG_ATTRIBUTION}`}
+>
+  <div class="mx-auto w-full max-w-[46rem] px-6 py-20">
+    <p class="mb-4 font-mono text-mono-sm text-ink-low">Organization</p>
+    <Heading level={1} size="display">{ORG_NAME}</Heading>
+
+    <p class="mt-8 text-body-lg text-ink-hi">{ORG_SUMMARY}</p>
+    <p class="mt-4 text-body-lg text-ink-mid">
+      StrataDB is our embedded database for branchable, versioned application state. It opens a
+      local directory in-process, with no server to deploy.
+    </p>
+
+    <h2 class="mt-14 font-mono text-mono-sm uppercase text-ink-low">What Strata Labs maintains</h2>
+    <ul class="mt-4 border-t border-line">
+      {
+        maintains.map((item) => (
+          <li class="border-b border-line py-4">
+            <a href={item.href} class="group block">
+              <h3 class="text-body-lg text-ink-hi transition-colors group-hover:text-terracotta-500">
+                {item.title}
+              </h3>
+              <p class="mt-1 text-body text-ink-mid">{item.copy}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2 class="mt-14 font-mono text-mono-sm uppercase text-ink-low">Open source</h2>
+    <p class="mt-4 text-body text-ink-mid">
+      The engine is Apache-2.0. Development happens in the open on GitHub, where the commit history
+      is the record of who contributed what.
+    </p>
+
+    <div class="mt-10 flex flex-wrap gap-6 font-mono text-mono-sm">
+      <a href={ORG_GITHUB} class="text-ink-mid transition-colors hover:text-ink-hi" rel="me">
+        github.com/stratalab
+      </a>
+      <a href="/docs" class="text-ink-mid transition-colors hover:text-ink-hi">Documentation</a>
+      <a href="/resources/about" class="text-ink-mid transition-colors hover:text-ink-hi">
+        About StrataDB
+      </a>
+    </div>
+  </div>
+</BaseLayout>

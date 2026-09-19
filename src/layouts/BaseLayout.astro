@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/chrome/Nav.astro';
 import Footer from '../components/chrome/Footer.astro';
+import { organization } from '../lib/organization';
 
 interface Props {
   title?: string;
@@ -53,6 +54,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:image" content={new URL('/og/default.png', Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={new URL('/og/default.png', Astro.site)} />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify({ '@context': 'https://schema.org', ...organization })}
+    />
 
     <script is:inline>
       // Reduced-motion source of truth, set pre-paint (03 §6).
