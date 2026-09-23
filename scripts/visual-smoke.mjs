@@ -563,11 +563,17 @@ async function assertPage(browser, route, viewport) {
             `${viewport.name} ${route.path}: the engine never loaded.${await reason()}`,
           );
         });
-      await page.locator('#btn-reset').click();
+      // The loop is build then launch, so the check is that Launch takes you
+      // to the flight screen and that something actually climbs.
+      await page.locator('#btn-launch').click();
       await page
-        .waitForFunction(() => (globalThis.kspState?.launches ?? []).some((l) => l.t > 0.5), null, {
-          timeout: 20_000,
-        })
+        .waitForFunction(
+          () =>
+            document.body.dataset.screen === 'flight' &&
+            (globalThis.kspState?.launches ?? []).some((l) => l.t > 0.5),
+          null,
+          { timeout: 20_000 },
+        )
         .catch(async () => {
           throw new Error(`${viewport.name} ${route.path}: nothing left the pad.${await reason()}`);
         });
@@ -576,7 +582,7 @@ async function assertPage(browser, route, viewport) {
       if (branches < 1) {
         throw new Error(`${viewport.name} ${route.path}: no branches; the engine is not running`);
       }
-      await page.locator('#btn-pause').click();
+      await page.locator('#btn-hangar').click();
     }
     if (route.path === '/') {
       await assertHomepageSectionBreaks(page, viewport);
