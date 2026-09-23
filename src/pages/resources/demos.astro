@@ -10,6 +10,12 @@ const live = [
   },
   {
     type: 'Interactive',
+    title: 'Strata KSP',
+    copy: 'Fork a launch while the engine is lit, add a tank to the copy, and watch the two timelines come apart. Then promote the design back: Strict refuses and changes nothing, SourceWins rebuilds the hangar.',
+    href: '/demos/ksp/',
+  },
+  {
+    type: 'Interactive',
     title: 'Browser playground',
     copy: 'Use StrataDB in the browser and run the branch workflow immediately.',
     href: '/playground',
@@ -28,17 +34,12 @@ const live = [
   },
 ];
 
-// Apps you clone and run. They drive the engine from a Rust process rather
-// than compiling it to WebAssembly, so they cannot be hosted here the way
-// Colonies is - the source is the demo. Tracked as strata-core issue 3536,
-// which is what would let a Rust app on the typed API reach the browser.
+// Apps you clone and run, because they need something a page cannot give
+// them. KSP used to be here: strata-core issue 3536 was what stopped a Rust
+// app on the typed API reaching the browser, and 1.2.4 fixed it, so KSP now
+// compiles to WebAssembly and is listed above. Island stays because it is
+// pre-populated with a dataset rather than blocked on the engine.
 const source = [
-  {
-    type: 'Rust app',
-    title: 'Strata KSP',
-    copy: 'Assemble a rocket, fork the launch at a staging event, and watch the other timeline stay in orbit. The promotion demo: Strict refuses and changes nothing, SourceWins applies and rebuilds the graph.',
-    href: 'https://github.com/stratalab/strata-apps/tree/main/strata-ksp',
-  },
   {
     type: 'Rust app',
     title: 'Strata Island',
@@ -89,9 +90,9 @@ const videos = [
   <section class="resource-section" aria-labelledby="demos-source">
     <h2 id="demos-source">Run it yourself</h2>
     <p>
-      These drive a real database from a Rust process and serve their own interface, so you clone
-      and run them rather than opening a page. Each builds against the published engine tag with
-      nothing else on disk.
+      This one drives a real database from a Rust process and serves its own interface, so you clone
+      and run it rather than opening a page. It builds against the published engine tag with nothing
+      else on disk.
     </p>
     <div class="resource-list">
       {

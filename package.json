@@ -34,7 +34,7 @@
     "postbuild": "pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-error-registry.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-hub-catalog.mjs && node scripts/stage-colonies.mjs",
+    "prebuild": "node scripts/fetch-release.mjs && node scripts/fetch-docs.mjs && node scripts/fetch-error-registry.mjs && node scripts/fetch-python-bindings.mjs && node scripts/fetch-wasm.mjs && node scripts/fetch-ksp.mjs && node scripts/fetch-hub-catalog.mjs && node scripts/stage-colonies.mjs",
     "verify:redirects": "node scripts/verify-redirects.mjs",
     "predev": "node scripts/stage-colonies.mjs",
     "verify:colonies": "node scripts/verify-colonies.mjs"

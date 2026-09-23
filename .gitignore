@@ -42,3 +42,7 @@ public/playground/pkg/
 
 # Pinned Colonies engine, hash-verified by scripts/stage-colonies.mjs.
 public/demos/colonies/assets/pkg/
+
+# The KSP browser build: a release artifact of strata-apps, staged by
+# scripts/fetch-ksp.mjs. Never committed.
+public/demos/ksp/

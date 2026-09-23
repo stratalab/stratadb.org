@@ -12,6 +12,9 @@ export default tseslint.config(
       'node_modules/**',
       'public/playground/pkg/**',
       'public/demos/colonies/assets/pkg/**',
+      // The KSP browser build, staged from a release by scripts/fetch-ksp.mjs.
+      // Its app.js is linted in strata-apps, where it is source.
+      'public/demos/ksp/**',
       'src/content/docs/reference/**',
       'src/content-archive/**',
       'src/docs-ui-archive/**',

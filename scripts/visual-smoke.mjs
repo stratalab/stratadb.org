@@ -11,6 +11,8 @@ const BASE_URL = EXTERNAL_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 const routes = [
   { path: '/demos/colonies/', h1: /one cell.*different future/i },
+  // KSP has no <h1>: it is an instrument panel, and its heading is the plot.
+  { path: '/demos/ksp/', h1: null },
   { path: '/resources/demos/', h1: /demos/i },
   { path: '/', h1: /database for vibecoders/i },
   // Docs rebuild: /docs is the zero-state route. Restore the section rows
@@ -460,14 +462,19 @@ async function assertPage(browser, route, viewport) {
     await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});
     await page.waitForTimeout(250);
 
-    let h1 = '';
-    try {
-      h1 = (await page.locator('h1').first().textContent({ timeout: 5_000 }))?.trim() ?? '';
-    } catch (err) {
-      throw new Error(`${viewport.name} ${route.path}: h1 not found: ${err.message}`);
-    }
-    if (!route.h1.test(h1)) {
-      throw new Error(`${viewport.name} ${route.path}: unexpected h1 "${h1}"`);
+    // A route with `h1: null` has no heading by design - an instrument panel
+    // whose subject is the plot, not a title - and is checked by what it does
+    // instead, further down.
+    if (route.h1) {
+      let h1 = '';
+      try {
+        h1 = (await page.locator('h1').first().textContent({ timeout: 5_000 }))?.trim() ?? '';
+      } catch (err) {
+        throw new Error(`${viewport.name} ${route.path}: h1 not found: ${err.message}`);
+      }
+      if (!route.h1.test(h1)) {
+        throw new Error(`${viewport.name} ${route.path}: unexpected h1 "${h1}"`);
+      }
     }
 
     const metrics = await page.evaluate(() => {
@@ -533,6 +540,40 @@ async function assertPage(browser, route, viewport) {
           );
         });
       await page.locator('#pause').click();
+    }
+    if (route.path === '/demos/ksp/') {
+      // The whole app is wasm: the engine, the simulation and the database are
+      // one bundle, and a bad one fails by never handing the page a transport
+      // rather than by mismatching a digest. So the check is that it flies.
+      const reason = async () => {
+        const text =
+          (await page
+            .locator('#boot')
+            .textContent()
+            .catch(() => '')) ?? '';
+        return text.trim() ? ` The page reported: "${text.trim()}"` : '';
+      };
+      await page
+        .waitForFunction(() => !!globalThis.KSP_LOCAL, null, { timeout: 45_000 })
+        .catch(async () => {
+          throw new Error(
+            `${viewport.name} ${route.path}: the engine never loaded.${await reason()}`,
+          );
+        });
+      await page.locator('#btn-reset').click();
+      await page
+        .waitForFunction(() => (globalThis.kspState?.launches ?? []).some((l) => l.t > 0.5), null, {
+          timeout: 20_000,
+        })
+        .catch(async () => {
+          throw new Error(`${viewport.name} ${route.path}: nothing left the pad.${await reason()}`);
+        });
+      // And that it is a real database underneath, not a drawing of one.
+      const branches = await page.evaluate(() => globalThis.kspState?.branch_count ?? 0);
+      if (branches < 1) {
+        throw new Error(`${viewport.name} ${route.path}: no branches; the engine is not running`);
+      }
+      await page.locator('#btn-pause').click();
     }
     if (route.path === '/') {
       await assertHomepageSectionBreaks(page, viewport);
