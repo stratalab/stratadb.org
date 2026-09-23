@@ -553,8 +553,11 @@ async function assertPage(browser, route, viewport) {
             .catch(() => '')) ?? '';
         return text.trim() ? ` The page reported: "${text.trim()}"` : '';
       };
+      // KSP_READY, not KSP_LOCAL: the transport is installed before app.js is
+      // imported, so KSP_LOCAL appearing means the engine is up and says
+      // nothing about whether any button is wired yet.
       await page
-        .waitForFunction(() => !!globalThis.KSP_LOCAL, null, { timeout: 45_000 })
+        .waitForFunction(() => globalThis.KSP_READY === true, null, { timeout: 45_000 })
         .catch(async () => {
           throw new Error(
             `${viewport.name} ${route.path}: the engine never loaded.${await reason()}`,
