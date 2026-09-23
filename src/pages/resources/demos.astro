@@ -28,6 +28,25 @@ const live = [
   },
 ];
 
+// Apps you clone and run. They drive the engine from a Rust process rather
+// than compiling it to WebAssembly, so they cannot be hosted here the way
+// Colonies is - the source is the demo. Tracked as strata-core issue 3536,
+// which is what would let a Rust app on the typed API reach the browser.
+const source = [
+  {
+    type: 'Rust app',
+    title: 'Strata KSP',
+    copy: 'Assemble a rocket, fork the launch at a staging event, and watch the other timeline stay in orbit. The promotion demo: Strict refuses and changes nothing, SourceWins applies and rebuilds the graph.',
+    href: 'https://github.com/stratalab/strata-apps/tree/main/strata-ksp',
+  },
+  {
+    type: 'Rust app',
+    title: 'Strata Island',
+    copy: 'A Manhattan drive map. Close a street on a branch, then compare the route the city still takes against the one you forced.',
+    href: 'https://github.com/stratalab/strata-apps/tree/main/strata-island',
+  },
+];
+
 const videos = [
   {
     title: 'Branching a database',
@@ -55,6 +74,29 @@ const videos = [
       {
         live.map((item) => (
           <a href={item.href} class="resource-row">
+            <span class="resource-type">{item.type}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </div>
+            <strong aria-hidden="true">&rarr;</strong>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="resource-section" aria-labelledby="demos-source">
+    <h2 id="demos-source">Run it yourself</h2>
+    <p>
+      These drive a real database from a Rust process and serve their own interface, so you clone
+      and run them rather than opening a page. Each builds against the published engine tag with
+      nothing else on disk.
+    </p>
+    <div class="resource-list">
+      {
+        source.map((item) => (
+          <a href={item.href} class="resource-row" target="_blank" rel="noopener noreferrer">
             <span class="resource-type">{item.type}</span>
             <div>
               <h3>{item.title}</h3>
