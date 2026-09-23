@@ -94,7 +94,20 @@ const ARGV_SCENARIOS = [
   {
     name: 'update --check (CLI reference)',
     // --check reports; it must never install during a build.
-    exchanges: [[['update', '--check'], 'strata']],
+    //
+    // It also asks GitHub what the latest release is, so its output depends
+    // on the runner reaching the release API. Both answers below are correct
+    // behaviour of the command; which one you get is a fact about the network,
+    // not about whether this site is telling the truth. Asserting only the
+    // happy one made the build fail whenever the API was unreachable or
+    // throttled, which it did on 2026-09-23 with:
+    //   error: could not reach the release API to resolve the latest version
+    exchanges: [
+      [
+        ['update', '--check'],
+        ['strata', 'could not reach the release API'],
+      ],
+    ],
   },
   {
     // The trap the page exists to warn about: the raw surface takes base64 KV
@@ -163,8 +176,15 @@ for (const scenario of ARGV_SCENARIOS) {
     });
     const out = (run.stdout || '') + (run.stderr || '');
     const shown = `strata ${argv.join(' ')}`;
-    if (expected && !out.includes(expected)) {
-      console.error(`✗ [${scenario.name}] '${shown}' - expected output containing '${expected}'`);
+    // An expectation can be a list when more than one answer is correct and
+    // which one you get is not the site's business - see `update --check`.
+    const wanted = expected == null ? [] : [expected].flat();
+    if (wanted.length && !wanted.some((w) => out.includes(w))) {
+      console.error(
+        `✗ [${scenario.name}] '${shown}' - expected output containing ${wanted
+          .map((w) => `'${w}'`)
+          .join(' or ')}`,
+      );
       failures++;
     } else {
       console.log(`✓ [${scenario.name}] ${shown}`);
