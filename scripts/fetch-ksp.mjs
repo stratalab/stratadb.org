@@ -29,7 +29,7 @@ const ASSET = 'strata-ksp-web.tar.gz';
 const REPO = 'https://github.com/stratalab/strata-apps';
 // Pinned, not "latest": the demo the site ships is one somebody ran, and a
 // floating tag would change what is deployed without a commit here.
-const TAG = 'strata-ksp-v0.4.0';
+const TAG = 'strata-ksp-v0.4.1';
 const FILES = [
   'index.html',
   'app.js',
