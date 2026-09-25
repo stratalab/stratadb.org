@@ -181,7 +181,7 @@
   },
   "graph.analytics.sssp": {
     "intro": "Single-source shortest paths from a source node.",
-    "cli": "$ strata graph create g\ncreated graph g\n$ strata graph add-node g a\ncreated node a in g\n$ strata graph add-node g b\ncreated node b in g\n$ strata graph add-node g c\ncreated node c in g\n$ strata graph add-edge g a knows b\ncreated edge a -[knows]-> b in g\n$ strata graph add-edge g b knows c\ncreated edge b -[knows]-> c in g\n$ strata graph sssp g a --direction outgoing\nNODE  DISTANCE\na          0.0\nb          1.0\nc          2.0",
+    "cli": "$ strata graph create g\ncreated graph g\n$ strata graph add-node g a\ncreated node a in g\n$ strata graph add-node g b\ncreated node b in g\n$ strata graph add-node g c\ncreated node c in g\n$ strata graph add-edge g a knows b\ncreated edge a -[knows]-> b in g\n$ strata graph add-edge g b knows c\ncreated edge b -[knows]-> c in g\n$ strata graph sssp g a --direction outgoing\nNODE  DISTANCE  VIA\na          0.0  -\nb          1.0  a\nc          2.0  b",
     "wire": "{\"graph\":\"g\",\"type\":\"graph_create\"}\n{\"graph\":\"g\",\"node_id\":\"a\",\"type\":\"graph_add_node\"}\n{\"graph\":\"g\",\"node_id\":\"b\",\"type\":\"graph_add_node\"}\n{\"graph\":\"g\",\"node_id\":\"c\",\"type\":\"graph_add_node\"}\n{\"dst\":\"b\",\"edge_type\":\"knows\",\"graph\":\"g\",\"src\":\"a\",\"type\":\"graph_add_edge\"}\n{\"dst\":\"c\",\"edge_type\":\"knows\",\"graph\":\"g\",\"src\":\"b\",\"type\":\"graph_add_edge\"}\n{\"direction\":\"outgoing\",\"graph\":\"g\",\"source\":\"a\",\"type\":\"graph_sssp\"}"
   },
   "graph.analytics.wcc": {
@@ -196,7 +196,7 @@
   },
   "graph.batch_write": {
     "intro": "Apply several node and edge mutations in one atomic commit.",
-    "cli": "$ strata graph create g\ncreated graph g\n$ strata command run --command-json '{\"graph\":\"g\",\"operations\":[{\"data\":{\"object_type\":\"person\"},\"node_id\":\"a\",\"type\":\"upsert_node\"},{\"data\":{\"object_type\":\"person\"},\"node_id\":\"b\",\"type\":\"upsert_node\"},{\"data\":{},\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\",\"type\":\"upsert_edge\"}],\"type\":\"graph_batch_write\"}'  # All operations land in one engine commit, or none do.\n#  STATUS  EFFECT   OPERATION    CREATED\n0  ok      created  upsert_node  true\n1  ok      created  upsert_node  true\n2  ok      created  upsert_edge  true\n$ strata graph meta g\ngraph            g\nnode_count       2\nedge_count       1\ncreated_version  3\nupdated_version  4",
+    "cli": "$ strata graph create g\ncreated graph g\n$ strata command run --command-json '{\"graph\":\"g\",\"operations\":[{\"data\":{\"object_type\":\"person\"},\"node_id\":\"a\",\"type\":\"upsert_node\"},{\"data\":{\"object_type\":\"person\"},\"node_id\":\"b\",\"type\":\"upsert_node\"},{\"data\":{},\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\",\"type\":\"upsert_edge\"}],\"type\":\"graph_batch_write\"}'  # All operations land in one engine commit, or none do.\n#  STATUS  EFFECT   OPERATION    CREATED\n0  ok      created  upsert_node  true\n1  ok      created  upsert_node  true\n2  ok      created  upsert_edge  true\n$ strata graph meta g\ngraph            g\nnode_count       2\nedge_count       1\ncreated_version  3\nupdated_version  4\nimport_pending   false",
     "wire": "{\"graph\":\"g\",\"type\":\"graph_create\"}\n{\"graph\":\"g\",\"operations\":[{\"data\":{\"object_type\":\"person\"},\"node_id\":\"a\",\"type\":\"upsert_node\"},{\"data\":{\"object_type\":\"person\"},\"node_id\":\"b\",\"type\":\"upsert_node\"},{\"data\":{},\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\",\"type\":\"upsert_edge\"}],\"type\":\"graph_batch_write\"}\n{\"graph\":\"g\",\"type\":\"graph_get_meta\"}"
   },
   "graph.bindings": {
@@ -206,7 +206,7 @@
   },
   "graph.bulk_insert": {
     "intro": "Insert many nodes and edges in one commit.",
-    "cli": "$ strata graph create g\ncreated graph g\n$ strata command run --command-json '{\"edges\":[{\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\"}],\"graph\":\"g\",\"nodes\":[{\"node_id\":\"a\",\"object_type\":\"person\"},{\"node_id\":\"b\",\"object_type\":\"person\"}],\"type\":\"graph_bulk_insert\"}'\ninserted 2 nodes, 1 edge into g\n$ strata graph meta g\ngraph            g\nnode_count       2\nedge_count       1\ncreated_version  3\nupdated_version  5",
+    "cli": "$ strata graph create g\ncreated graph g\n$ strata command run --command-json '{\"edges\":[{\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\"}],\"graph\":\"g\",\"nodes\":[{\"node_id\":\"a\",\"object_type\":\"person\"},{\"node_id\":\"b\",\"object_type\":\"person\"}],\"type\":\"graph_bulk_insert\"}'\ninserted 2 nodes, 1 edge into g\n$ strata graph meta g\ngraph            g\nnode_count       2\nedge_count       1\ncreated_version  3\nupdated_version  5\nimport_pending   false",
     "wire": "{\"graph\":\"g\",\"type\":\"graph_create\"}\n{\"edges\":[{\"dst\":\"b\",\"edge_type\":\"knows\",\"src\":\"a\"}],\"graph\":\"g\",\"nodes\":[{\"node_id\":\"a\",\"object_type\":\"person\"},{\"node_id\":\"b\",\"object_type\":\"person\"}],\"type\":\"graph_bulk_insert\"}\n{\"graph\":\"g\",\"type\":\"graph_get_meta\"}"
   },
   "graph.create": {
@@ -241,7 +241,7 @@
   },
   "graph.meta": {
     "intro": "Read a graph's node and edge counts.",
-    "cli": "$ strata graph create social\ncreated graph social\n$ strata graph add-node social alice\ncreated node alice in social\n$ strata graph add-node social bob\ncreated node bob in social\n$ strata graph meta social\ngraph            social\nnode_count       2\nedge_count       0\ncreated_version  3\nupdated_version  5",
+    "cli": "$ strata graph create social\ncreated graph social\n$ strata graph add-node social alice\ncreated node alice in social\n$ strata graph add-node social bob\ncreated node bob in social\n$ strata graph meta social\ngraph            social\nnode_count       2\nedge_count       0\ncreated_version  3\nupdated_version  5\nimport_pending   false",
     "wire": "{\"graph\":\"social\",\"type\":\"graph_create\"}\n{\"graph\":\"social\",\"node_id\":\"alice\",\"type\":\"graph_add_node\"}\n{\"graph\":\"social\",\"node_id\":\"bob\",\"type\":\"graph_add_node\"}\n{\"graph\":\"social\",\"type\":\"graph_get_meta\"}"
   },
   "graph.neighbors": {

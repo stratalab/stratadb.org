@@ -2027,7 +2027,7 @@
     "command": "branch.create",
     "request": {
       "additionalProperties": false,
-      "description": "Creates an empty root branch.",
+      "description": "Creates an empty root branch.\n\n# Guaranteed semantics\n\n- **Limits.** A branch name is at most **255 bytes**\n  (`invalid_argument.engine.branch_name`), refused before the branch is\n  created.",
       "properties": {
         "branch": {
           "description": "Branch name.",
@@ -6902,6 +6902,13 @@
           "graph": {
             "type": "string"
           },
+          "predecessors": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The node each reachable node's cheapest walk arrived from; the source\nhas no entry. Following it back to the source unpacks the path.",
+            "type": "object"
+          },
           "source": {
             "type": "string"
           }
@@ -6910,7 +6917,8 @@
           "graph",
           "source",
           "direction",
-          "distances"
+          "distances",
+          "predecessors"
         ],
         "type": "object"
       }
@@ -6920,7 +6928,7 @@
     "command": "graph.analytics.sssp",
     "request": {
       "additionalProperties": false,
-      "description": "Computes shortest-path distances from a source node.",
+      "description": "Computes shortest-path distances and predecessors from a source node.\n\n# Guaranteed semantics\n\n- **Cheapest walk, not a route.** Distances are Dijkstra over edge\n  weights on one consistent snapshot; `predecessors` gives, for every\n  reachable node but the source, the node its cheapest walk arrived\n  from, so a path unpacks by following it back to the source. Under\n  `both`, a step may run against an edge's stored direction; the result\n  is a node sequence, not a legal drive (turn restrictions are not\n  modelled).\n- **Ties are deterministic.** Two equal-cost walks resolve to the one\n  discovered first: the frontier pops by (distance, node id order),\n  edges relax in (edge type, neighbor) order, and an equal-cost\n  alternative never replaces a recorded predecessor - the same\n  snapshot always yields the same predecessors.\n- **Edge-type filter.** `edge_types` restricts every relaxation to the\n  listed types; absent, every type is walked. A type the graph does\n  not contain restricts to nothing rather than failing - the same rule\n  as `bfs`.\n- **Negative weights refuse for the edges the walk may use.** A\n  negative edge of a selected type - any type, when unrestricted -\n  refuses with `failed_precondition.engine.graph_negative_weight`\n  before any work; a negative edge of an excluded type does not.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
@@ -6968,6 +6976,16 @@
             }
           ],
           "description": "Optional traversal direction. Defaults to outgoing."
+        },
+        "edge_types": {
+          "description": "Optional edge-type restriction applied at every relaxation.",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "graph": {
           "description": "Graph name.",
@@ -8692,7 +8710,7 @@
     "command": "graph.bulk_insert",
     "request": {
       "additionalProperties": false,
-      "description": "Ingests nodes and edges in chunked commits.",
+      "description": "Ingests nodes and edges in chunked commits.\n\n# Guaranteed semantics\n\n- **Limits.** Each node id is at most **1,024 bytes**\n  (`invalid_argument.engine.graph_node_id`), refused before anything is\n  written. The items-per-chunk size defaults to 512 and clamps to\n  **800** so one chunk fits one storage commit - a larger request is\n  reduced, not refused.\n- **Each chunk is a commit; an interruption keeps what landed.** An\n  import spanning more than one commit sets the graph's\n  `import_pending` watermark (`graph_get_meta`) with its first commit\n  and clears it with its last. The watermark says a multi-commit\n  import is in progress, not which payload: whichever bulk insert's\n  last chunk lands next clears it, and ordinary writes leave it as it\n  is. Every row is an upsert, so finishing an interrupted import is\n  re-running its own payload; the graph stays readable and writable\n  meanwhile.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -8900,6 +8918,10 @@
           "graph": {
             "type": "string"
           },
+          "import_pending": {
+            "description": "Whether a `graph_bulk_insert` spanning more than one commit began\nand has not finished: its first commit sets this, its last clears\nit, so an interrupted import leaves it set until the same payload\nis run again (#3464).",
+            "type": "boolean"
+          },
           "node_count": {
             "format": "uint64",
             "minimum": 0,
@@ -8923,7 +8945,8 @@
           "created_version",
           "created_timestamp",
           "updated_version",
-          "updated_timestamp"
+          "updated_timestamp",
+          "import_pending"
         ],
         "type": "object"
       },
@@ -9193,7 +9216,7 @@
     "command": "graph.delete",
     "request": {
       "additionalProperties": false,
-      "description": "Deletes a graph and its visible graph rows.",
+      "description": "Deletes a graph and its visible graph rows, whatever its size. A\ngraph too large for one commit disappears at the first commit and\nhas its rows swept in later ones; an interrupted sweep is finished\nby the next delete or create of the same name.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -9201,6 +9224,10 @@
             "string",
             "null"
           ]
+        },
+        "force": {
+          "description": "Delete the graph's nodes and edges before dropping it. A populated\ngraph is refused without this.",
+          "type": "boolean"
         },
         "graph": {
           "description": "Graph name.",
@@ -9471,7 +9498,7 @@
           "type": "string"
         },
         "weight": {
-          "description": "Optional edge weight. Defaults to 1.0.",
+          "description": "Optional edge weight. Defaults to 1.0. A finite number; a whole\nnumber up to 2^53 − 1 (9007199254740991) is stored exactly, and\nshortest-path distances summed from such weights stay exact up\nto the same bound, so a graph weighted in meters or seconds\nneeds no parallel property.",
           "format": "double",
           "type": [
             "number",
@@ -10077,6 +10104,10 @@
           "graph": {
             "type": "string"
           },
+          "import_pending": {
+            "description": "Whether a `graph_bulk_insert` spanning more than one commit began\nand has not finished: its first commit sets this, its last clears\nit, so an interrupted import leaves it set until the same payload\nis run again (#3464).",
+            "type": "boolean"
+          },
           "node_count": {
             "format": "uint64",
             "minimum": 0,
@@ -10100,7 +10131,8 @@
           "created_version",
           "created_timestamp",
           "updated_version",
-          "updated_timestamp"
+          "updated_timestamp",
+          "import_pending"
         ],
         "type": "object"
       }
@@ -10110,7 +10142,7 @@
     "command": "graph.meta",
     "request": {
       "additionalProperties": false,
-      "description": "Reads graph metadata.",
+      "description": "Reads graph metadata: live node and edge counts and the create and\nlast-update commits. One row read, not a scan - every commit that\nchanges a node or edge rewrites the graph's metadata row, so\n`updated_version` is a per-graph revision token (ontology changes do\nnot move it).",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
@@ -10414,7 +10446,7 @@
     "command": "graph.neighbors",
     "request": {
       "additionalProperties": false,
-      "description": "Lists neighboring graph nodes.",
+      "description": "Lists neighboring graph nodes.\n\n# Guaranteed semantics\n\n- **Ordering.** Incoming hits precede outgoing ones; within a\n  direction, hits order by edge type, then neighbor id (string order).\n  `edge_type` narrows to one type.\n- **Cursor.** `cursor` is the cursor of the previous page, exclusive -\n  a position this listing produced, not an offset, identical at any\n  `as_of`. A cursor this listing never produced is refused with\n  `invalid_argument.engine.graph_cursor`.\n- **Bounded work.** A page seeks the adjacency from its cursor, reads\n  only its own edge rows plus one lookahead, and hydrates only its own\n  neighbors - page-sized work on a hub of any degree.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
@@ -10741,7 +10773,7 @@
     "command": "graph.node.add",
     "request": {
       "additionalProperties": false,
-      "description": "Adds or replaces a graph node.",
+      "description": "Adds or replaces a graph node.\n\n# Guaranteed semantics\n\n- **Limits.** A node id is at most **1,024 bytes**\n  (`invalid_argument.engine.graph_node_id`), refused before anything is\n  written.",
       "properties": {
         "binding": {
           "anyOf": [
@@ -11176,7 +11208,7 @@
     "command": "graph.node.list",
     "request": {
       "additionalProperties": false,
-      "description": "Lists graph nodes.",
+      "description": "Lists graph nodes.\n\n# Guaranteed semantics\n\n- **Ordering.** Nodes are returned in node-id order - byte-wise string\n  order, not spatial or insertion order; `prefix` narrows to ids that\n  start with it.\n- **Cursor.** `cursor` is the last node id of the previous page,\n  exclusive - a position, not an offset, so writes before it can\n  neither skip nor repeat a node across pages, and the same cursor\n  names the same position at any `as_of`. `has_more` speaks for the\n  prefix: rows beyond it never make the last matching page claim more.\n- **Bounded work.** A page reads only its own rows plus one lookahead\n  from storage and decodes only those - page-sized work wherever the\n  page sits, never a scan of the whole graph.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
@@ -11653,7 +11685,7 @@
     "command": "graph.nodes_by_type",
     "request": {
       "additionalProperties": false,
-      "description": "Lists nodes declaring an object type (node-id ordered).",
+      "description": "Lists nodes declaring an object type.\n\n# Guaranteed semantics\n\n- **Ordering.** Nodes are returned in node-id order - byte-wise string\n  order.\n- **Cursor.** `cursor` is the last node id of the previous page,\n  exclusive - a position, not an offset, stable across writes and\n  identical at any `as_of`.\n- **Bounded work.** A page seeks the type index from its cursor, reads\n  only its own index rows plus one lookahead, and hydrates only the\n  page - never the whole type.",
       "properties": {
         "as_of": {
           "description": "Read as of a position on the logical commit timeline - the\n`timestamp` from `history` output, not the `version`, and never a\ncalendar date. Reads the graph state visible at that timeline\nposition. To read as of a real time, use `as_of_time` instead.",
@@ -11916,7 +11948,7 @@
     "command": "graph.ontology.define_link_type",
     "request": {
       "additionalProperties": false,
-      "description": "Defines (or, while the ontology is draft, redefines) a link type.",
+      "description": "Defines (or, while the ontology is draft, redefines) a link type.\n\n# Guaranteed semantics\n\n- **Limits.** A type name is at most **256 bytes**\n  (`invalid_argument.engine.graph_type_name`), and each property name is\n  at most **256 bytes** (`invalid_argument.engine.graph_property_name`).\n  Each is refused before the definition is recorded.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -12175,7 +12207,7 @@
     "command": "graph.ontology.define_object_type",
     "request": {
       "additionalProperties": false,
-      "description": "Defines (or, while the ontology is draft, redefines) an object type.",
+      "description": "Defines (or, while the ontology is draft, redefines) an object type.\n\n# Guaranteed semantics\n\n- **Limits.** A type name is at most **256 bytes**\n  (`invalid_argument.engine.graph_type_name`), and each property name is\n  at most **256 bytes** (`invalid_argument.engine.graph_property_name`).\n  Each is refused before the definition is recorded.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -18427,8 +18459,26 @@
     "command": "json.batch_get",
     "request": {
       "additionalProperties": false,
-      "description": "Reads multiple JSON values.\n\n# Guaranteed semantics\n\n- **Positional.** Results are returned in request order, one per entry,\n  each reporting whether it was found.\n- **One snapshot.** Every entry is read from the same consistent\n  version, so a batch cannot straddle a concurrent write.\n- **Limits.** Each entry bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`)\n  and a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
+      "description": "Reads multiple JSON values.\n\n# Guaranteed semantics\n\n- **Positional.** Results are returned in request order, one per entry,\n  each reporting whether it was found.\n- **One snapshot.** Every entry is read from the same consistent\n  version, so a batch cannot straddle a concurrent write.\n- **One pinned version.** With `as_of` or `as_of_time`, every entry is\n  read as of that one position, so a batch can hydrate the documents\n  a version-pinned read named without mixing in later state. An\n  instant outside the branch's history fails the whole batch rather\n  than answering from the latest state.\n- **Limits.** Each entry bears a document id at most **65,535 bytes**\n  (`invalid_argument.engine.json_document_id`)\n  and a path at most **256 segments**\n  (`invalid_argument.engine.json_path_too_long`).",
       "properties": {
+        "as_of": {
+          "description": "Read every entry as of a position on the logical commit timeline\n- the `timestamp` from `history` output, not the `version`, and\nnever a calendar date. To read as of a real time, use\n`as_of_time` instead.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "as_of_time": {
+          "description": "Read every entry as of a real time: a wall-clock instant in\nmicroseconds since the Unix epoch (UTC), as reported by\n`committed_at` on a write ack or on any `history` row. Resolves to\nthe commit at or before that instant, and fails rather than\nguessing if the instant falls outside the branch's recorded\nhistory. Mutually exclusive with `as_of`.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
           "type": [
@@ -24305,7 +24355,7 @@
     "command": "space.create",
     "request": {
       "additionalProperties": false,
-      "description": "Creates a product space for a branch.\n\n# Guaranteed semantics\n\n- **Idempotent success.** Creating a space that already exists is not\n  an error: the command succeeds with `created: false` and no mutation\n  effect. `created: true` is reported only by the call that first\n  materialized the space.\n- **Immediate visibility.** Once the command returns success, the\n  space is visible to every subsequent command on any handle of the\n  same database - `SpaceExists` reports `true` and data commands\n  targeting the space are accepted.",
+      "description": "Creates a product space for a branch.\n\n# Guaranteed semantics\n\n- **Idempotent success.** Creating a space that already exists is not\n  an error: the command succeeds with `created: false` and no mutation\n  effect. `created: true` is reported only by the call that first\n  materialized the space.\n- **Immediate visibility.** Once the command returns success, the\n  space is visible to every subsequent command on any handle of the\n  same database - `SpaceExists` reports `true` and data commands\n  targeting the space are accepted.\n- **Limits.** A product space name is at most **65,535 bytes**\n  (`invalid_argument.engine.product_space`), refused before the space is\n  created.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -27184,7 +27234,7 @@
     "command": "vector.collection.create",
     "request": {
       "additionalProperties": false,
-      "description": "Creates a vector collection.",
+      "description": "Creates a vector collection.\n\n# Guaranteed semantics\n\n- **Limits.** A collection name is at most **256 bytes**\n  (`invalid_argument.engine.vector_collection`), and the embedding\n  dimension is between 1 and **32,768**\n  (`invalid_argument.engine.vector_dimension`). Each is refused before\n  the collection is created.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",
@@ -27293,6 +27343,10 @@
         "collection": {
           "description": "Collection name.",
           "type": "string"
+        },
+        "force": {
+          "description": "Delete the collection's vectors before dropping it. A populated\ncollection is refused without this.",
+          "type": "boolean"
         },
         "space": {
           "description": "Target product space. Defaults to `\"default\"`.",
@@ -30663,7 +30717,7 @@
     "command": "vector.upsert",
     "request": {
       "additionalProperties": false,
-      "description": "Upserts one vector.",
+      "description": "Upserts one vector.\n\n# Guaranteed semantics\n\n- **Limits.** A vector key is at most **1,024 bytes**\n  (`invalid_argument.engine.vector_key`), and metadata is at most\n  **16 MiB** serialized\n  (`invalid_argument.engine.vector_metadata_too_large`). Each is refused\n  before anything is written.",
       "properties": {
         "branch": {
           "description": "Target branch. Defaults to the executor handle branch.",

@@ -1,5 +1,5 @@
 {
-  "count": 231,
+  "count": 241,
   "errors": [
     {
       "class": "access_denied",
@@ -593,6 +593,16 @@
     },
     {
       "class": "failed_precondition",
+      "code": "failed_precondition.engine.graph_not_empty",
+      "commit_outcome": "not_started",
+      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
+      "message": "The graph request is invalid.",
+      "ref": "https://stratadb.org/e/failed_precondition.engine.graph_not_empty",
+      "retry_policy": "never",
+      "origin": "engine"
+    },
+    {
+      "class": "failed_precondition",
       "code": "failed_precondition.engine.graph_ontology_edge_type",
       "commit_outcome": "not_started",
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
@@ -723,6 +733,16 @@
     },
     {
       "class": "failed_precondition",
+      "code": "failed_precondition.engine.vector_collection_not_empty",
+      "commit_outcome": "not_started",
+      "hint": "Use the collection dimension, valid vector keys, and metadata/filter values supported by the collection.",
+      "message": "The vector request is invalid.",
+      "ref": "https://stratadb.org/e/failed_precondition.engine.vector_collection_not_empty",
+      "retry_policy": "never",
+      "origin": "engine"
+    },
+    {
+      "class": "failed_precondition",
       "code": "failed_precondition.engine.vector_index_manifest",
       "commit_outcome": "not_applicable",
       "hint": "Rebuild vector index artifacts or fall back to exact search before retrying indexed queries.",
@@ -750,6 +770,39 @@
       "ref": "https://stratadb.org/e/failed_precondition.executor.hub_clone",
       "retry_policy": "never",
       "origin": "engine"
+    },
+    {
+      "area": "sdk",
+      "class": "failed_precondition",
+      "code": "failed_precondition.sdk.durability_brokered",
+      "commit_outcome": "not_started",
+      "hint": "Open without durability= to join the running owner, or start the owner with the mode you want.",
+      "message": "The durability mode cannot be set on a brokered connection.",
+      "ref": "https://stratadb.org/e/failed_precondition.sdk.durability_brokered",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "failed_precondition",
+      "code": "failed_precondition.sdk.fork_not_supported",
+      "commit_outcome": "not_started",
+      "hint": "Open a fresh handle in the child process; a handle cannot cross os.fork().",
+      "message": "The handle was inherited across a fork and cannot be used.",
+      "ref": "https://stratadb.org/e/failed_precondition.sdk.fork_not_supported",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "failed_precondition",
+      "code": "failed_precondition.sdk.handle_closed",
+      "commit_outcome": "not_started",
+      "hint": "Open a new handle; close() is final for the one you have (and idempotent).",
+      "message": "The database handle is closed.",
+      "ref": "https://stratadb.org/e/failed_precondition.sdk.handle_closed",
+      "retry_policy": "never",
+      "origin": "sdk"
     },
     {
       "class": "history_unavailable",
@@ -1012,6 +1065,17 @@
       "origin": "engine"
     },
     {
+      "area": "cli",
+      "class": "invalid_argument",
+      "code": "invalid_argument.cli.no_database",
+      "commit_outcome": "not_started",
+      "hint": "Pass a path to stratadb.open(), set STRATA_DB for stratadb.from_env(), or use cache=True for an in-memory database.",
+      "message": "No database was specified.",
+      "ref": "https://stratadb.org/e/invalid_argument.cli.no_database",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
       "class": "invalid_argument",
       "code": "invalid_argument.engine.branch_catalog",
       "commit_outcome": "not_started",
@@ -1143,16 +1207,6 @@
     },
     {
       "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_batch",
-      "commit_outcome": "not_started",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
-      "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_batch",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
       "code": "invalid_argument.engine.graph_binding",
       "commit_outcome": "not_started",
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
@@ -1163,11 +1217,11 @@
     },
     {
       "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_binding_record",
+      "code": "invalid_argument.engine.graph_cursor",
       "commit_outcome": "not_started",
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_binding_record",
+      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_cursor",
       "retry_policy": "never",
       "origin": "engine"
     },
@@ -1178,16 +1232,6 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_endpoint",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_edge_record",
-      "commit_outcome": "not_started",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
-      "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_edge_record",
       "retry_policy": "never",
       "origin": "engine"
     },
@@ -1223,16 +1267,6 @@
     },
     {
       "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_metadata",
-      "commit_outcome": "not_started",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
-      "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_metadata",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
       "code": "invalid_argument.engine.graph_name",
       "commit_outcome": "not_started",
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
@@ -1258,26 +1292,6 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_node_id",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_node_record",
-      "commit_outcome": "not_started",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
-      "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_node_record",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_ontology_record",
-      "commit_outcome": "not_started",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
-      "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_ontology_record",
       "retry_policy": "never",
       "origin": "engine"
     },
@@ -1338,16 +1352,6 @@
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
       "message": "The graph request is invalid.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.graph_type_hint",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
-      "code": "invalid_argument.engine.graph_type_index_record",
-      "commit_outcome": "not_started",
-      "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
-      "message": "The graph request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.graph_type_index_record",
       "retry_policy": "never",
       "origin": "engine"
     },
@@ -2092,6 +2096,105 @@
       "origin": "engine"
     },
     {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.as_of_kind",
+      "commit_outcome": "not_started",
+      "hint": "as_of takes a position on the commit timeline (an int); pass as_of_time for a wall-clock instant.",
+      "message": "The as_of argument is not a commit timestamp.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.as_of_kind",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.as_of_time",
+      "commit_outcome": "not_started",
+      "hint": "Pass epoch microseconds, a datetime, a date, or an ISO 8601 string (e.g. \"2026-09-05T15:00:00Z\").",
+      "message": "The as_of_time argument is not a wall-clock instant.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.as_of_time",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.command",
+      "commit_outcome": "not_started",
+      "hint": "Correct the argument the message names and retry.",
+      "message": "The request contains invalid input.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.command",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.committed_at",
+      "commit_outcome": "not_applicable",
+      "hint": "Pass a committed_at value (epoch microseconds), or None.",
+      "message": "The value is not a commit instant.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.committed_at",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.entry",
+      "commit_outcome": "not_started",
+      "hint": "Pass each entry as a dict (or tuple) carrying the required fields.",
+      "message": "A batch entry is missing a required field.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.entry",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.fork_ambiguous",
+      "commit_outcome": "not_started",
+      "hint": "Fork at a version or at a timestamp, not both.",
+      "message": "A fork anchor was given twice.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.fork_ambiguous",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.limit",
+      "commit_outcome": "not_started",
+      "hint": "Omit limit to page through everything, or pass a value >= 1.",
+      "message": "The limit is not a positive integer.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.limit",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.vector_metadata",
+      "commit_outcome": "not_started",
+      "hint": "Pass metadata as a dict of scalar values, or omit it.",
+      "message": "The vector metadata is not a mapping.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.vector_metadata",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
+      "area": "sdk",
+      "class": "invalid_argument",
+      "code": "invalid_argument.sdk.vector_metric",
+      "commit_outcome": "not_started",
+      "hint": "Use \"cosine\", \"euclidean\", or \"dot\".",
+      "message": "The distance metric is not one this collection supports.",
+      "ref": "https://stratadb.org/e/invalid_argument.sdk.vector_metric",
+      "retry_policy": "never",
+      "origin": "sdk"
+    },
+    {
       "class": "not_found",
       "code": "not_found.engine.branch",
       "commit_outcome": "not_applicable",
@@ -2310,7 +2413,19 @@
       "ref": "https://stratadb.org/e/unsupported.executor.hub_feature_disabled",
       "retry_policy": "after_state_change",
       "origin": "engine"
+    },
+    {
+      "area": "sdk",
+      "class": "unsupported",
+      "code": "unsupported.sdk.state_removed",
+      "commit_outcome": "not_applicable",
+      "hint": "Use db.kv for keyed values, or db.json for structured documents.",
+      "message": "The state-cell primitive was removed in V1.",
+      "ref": "https://stratadb.org/e/unsupported.sdk.state_removed",
+      "retry_policy": "never",
+      "origin": "sdk"
     }
   ],
-  "source": "strata agents errors"
+  "source": "strata agents errors",
+  "sdk_source": "stratadb wheel _data/sdk-errors.json"
 }

@@ -17,7 +17,7 @@
   },
   "admin.describe": {
     "call": "db.admin.describe",
-    "signature": "() -> 'Any'",
+    "signature": "(*, space: 'Optional[str]' = None) -> 'Any'",
     "summary": "A structured description of the database's capabilities and layout.",
     "example": [
       "db.admin.describe().default_branch"
@@ -761,7 +761,8 @@
     "summary": "What this build can do before anything is attempted (engine 1.2.2+).",
     "example": [
       "{p[\"provider\"] for p in db.ai.status()[\"providers\"]} >= {\"openai\", \"anthropic\"}",
-      "isinstance(db.ai.status()[\"local_execution\"], bool)"
+      "isinstance(db.ai.status()[\"local_execution\"], bool)",
+      "(db.ai.status()[\"config_file\"] or {\"state\": \"absent\"})[\"state\"] in ("
     ]
   },
   "inference.tokenize": {
@@ -916,7 +917,7 @@
   },
   "json.set": {
     "call": "db.json.set",
-    "signature": "(key: 'str', path: 'str', value: 'Any') -> 'Any'",
+    "signature": "(key: 'str', path: 'Any' = <object object at 0x71e3704c0ed0>, value: 'Any' = <object object at 0x71e3704c0ed0>) -> 'Any'",
     "summary": "Sets ``value`` at ``path`` in document ``key``. Returns a write result.",
     "example": [
       "_ = db.json.set(\"user\", \"$\", {\"name\": \"alice\", \"age\": 30})",
@@ -1208,6 +1209,17 @@
       "_ = db.vectors.upsert(\"docs\", \"b\", [0.0, 1.0, 0.0], metadata={\"tag\": \"drop\"})",
       "_ = db.vectors.delete_by_filter(\"docs\", stratadb.filters.eq(\"tag\", \"drop\"))",
       "db.vectors.count(\"docs\")"
+    ]
+  },
+  "vector.embedding.update": {
+    "call": "db.vectors.update_embedding",
+    "signature": "(collection: 'str', key: 'str', vector: 'Optional[Sequence[float]]' = None, *, text: 'Optional[str]' = None) -> 'Any'",
+    "summary": "Replaces the embedding of an existing vector, keeping its metadata.",
+    "example": [
+      "_ = db.vectors.create_collection(\"docs\", 3, metric=\"cosine\")",
+      "_ = db.vectors.upsert(\"docs\", \"a\", [1.0, 0.0, 0.0], metadata={\"tag\": \"x\"})",
+      "_ = db.vectors.update_embedding(\"docs\", \"a\", [0.0, 1.0, 0.0])",
+      "db.vectors.get(\"docs\", \"a\").data.metadata"
     ]
   },
   "vector.exists": {
