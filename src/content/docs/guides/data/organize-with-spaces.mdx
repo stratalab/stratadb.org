@@ -90,9 +90,9 @@ a scoped view.
 **A read returns nothing and the key is definitely there.** You are in the wrong
 space. `db.space` and `strata ./mydb space list` are the checks.
 
-**A space will not delete.** It still holds data. That is deliberate, and unlike
-`graph delete`, which removes a populated graph without asking, tracked as
-strata-core issue 3122.
+**A space will not delete.** It still holds data. That is deliberate, and
+`graph delete` behaves the same way: both refuse while there is something
+inside, and both take `--force` when you mean it.
 
 ## Next
 

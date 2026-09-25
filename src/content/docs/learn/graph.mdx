@@ -167,10 +167,12 @@ command escape hatch, but `strata graph bindings` is not a command. Their
 reference pages show the Python spelling and the wire type rather than an
 invocation that would not run.
 
-**Deleting a graph takes its contents with it, without asking.**
-`strata graph delete social` on a populated graph succeeds immediately. Compare
-`space delete`, which refuses when a space still holds data and makes you pass
-`--force`. Tracked as strata-core issue 3122.
+**Deleting a populated graph is refused until you say so.**
+`strata graph delete social` on a graph that still holds nodes or edges fails
+with `failed_precondition.engine.graph_not_empty` and deletes nothing; pass
+`--force` to drop its contents along with it. This matches `space delete`,
+which has always refused while a space holds data. Graph delete asked for
+nothing before 1.2.5.
 
 ## Where to look next
 
