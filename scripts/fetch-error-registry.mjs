@@ -95,7 +95,29 @@ try {
   }
 
   const current = JSON.parse(await readFile(FILE, 'utf8'));
-  const next = normalize(payload, await sdkErrors());
+
+  // The committed SDK rows are the floor, and that has to be enforced rather
+  // than assumed. CI installs the CLI but not the wheel, so sdkErrors() comes
+  // back empty there - and writing that empty list deleted all fourteen codes
+  // from every deployed build. #23 looked fixed locally and 404'd in
+  // production for exactly this reason. No wheel means keep what is
+  // committed; it never means the SDK stopped raising errors.
+  const probed = await sdkErrors();
+  const committedSdk = (current.errors ?? [])
+    .filter((e) => e.origin === 'sdk')
+    .map((e) => {
+      // normalize() stamps origin back on, so it must not be carried in.
+      const row = { ...e };
+      delete row.origin;
+      return row;
+    });
+  const sdk = probed.length ? probed : committedSdk;
+  if (!probed.length && committedSdk.length) {
+    console.log(
+      `error-registry.json: no stratadb wheel here; keeping the ${committedSdk.length} committed SDK code(s)`,
+    );
+  }
+  const next = normalize(payload, sdk);
   const before = new Set(current.errors.map((e) => e.code));
   const after = new Set(next.errors.map((e) => e.code));
   const added = [...after].filter((c) => !before.has(c));
