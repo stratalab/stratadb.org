@@ -98,7 +98,20 @@ const dataModel = [
 ];
 ---
 
-<section id="hero" class="relative overflow-hidden">
+<!-- Fills the first screen, the way every section below it fills one.
+     The hero was the only one without a height floor, so its box was
+     whatever its content happened to measure - 1057px at every
+     viewport - and on any display taller than that it stopped short
+     while the sections after it ran the full height.
+
+     100svh minus the nav rather than a bare 100svh: the header is
+     sticky and in flow, so it sits above the hero rather than over it
+     the way it does for the others. 4rem is the offset the rest of the
+     page already uses for it (scroll-mt-16). -->
+<section
+  id="hero"
+  class="relative flex min-h-[calc(100svh-4rem)] flex-col justify-center overflow-hidden"
+>
   <!-- The living backdrop (2026-06-12): three light fields breathing on the
        neutral stage. Transform-only, GPU-composited, 22–36s periods -
        sanctioned infinite animation #2 (03 §5 amendment). -->
