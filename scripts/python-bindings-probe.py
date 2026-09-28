@@ -28,6 +28,56 @@ import re
 
 import stratadb
 
+class _Named:
+    """A default that renders as the name it was written under.
+
+    `inspect.signature` renders a default through `repr()`, and the SDK marks
+    optional arguments with a module-level sentinel - `_UNSET: Any = object()`
+    in stratadb/json.py. That reprs as `<object object at 0x7f...>`, a heap
+    address that differs every process, so `json.set`'s recorded signature
+    never settled and this file re-diffed on every build.
+
+    The source says `path: Any = _UNSET`, so that is what gets recorded.
+    """
+
+    __slots__ = ("name",)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return self.name
+
+
+def render_signature(attr):
+    """The signature as source, with sentinel defaults named rather than addressed."""
+    try:
+        sig = inspect.signature(attr)
+    except (TypeError, ValueError):
+        return "()"
+
+    # Sentinels are found by identity in the module that defines the function,
+    # so renaming one upstream follows through here instead of going stale.
+    module = inspect.getmodule(attr)
+    names = {}
+    if module is not None:
+        for name, value in vars(module).items():
+            names.setdefault(id(value), name)
+
+    params = []
+    for param in sig.parameters.values():
+        default = param.default
+        if default is not inspect.Parameter.empty and ADDRESS.search(repr(default)):
+            # A name if one exists; `...` if the object is genuinely anonymous,
+            # which still beats recording an address that means nothing to a
+            # reader and changes on every run.
+            params.append(param.replace(default=_Named(names.get(id(default), "..."))))
+        else:
+            params.append(param)
+    return str(sig.replace(parameters=params))
+
+
+ADDRESS = re.compile(r"0x[0-9a-fA-F]{6,}")
 WIRE = re.compile(r"""['"]type['"]\s*:\s*['"]([a-z0-9_]+)['"]""")
 CLIENT_CALL = re.compile(r"self\._c\.([a-z0-9_]+)\(")
 HELPER_CALL = re.compile(r"self\.(_[a-z0-9_]+)\(")
@@ -111,10 +161,7 @@ def collect(ns, client, prefix, out):
         if callable(attr):
             for wire in resolve(ns, client, attr):
                 doc = inspect.getdoc(attr) or ""
-                try:
-                    signature = str(inspect.signature(attr))
-                except Exception:
-                    signature = "()"
+                signature = render_signature(attr)
                 example = [
                     line.strip()[4:]
                     for line in doc.splitlines()

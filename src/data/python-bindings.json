@@ -917,7 +917,7 @@
   },
   "json.set": {
     "call": "db.json.set",
-    "signature": "(key: 'str', path: 'Any' = <object object at 0x71e3704c0ed0>, value: 'Any' = <object object at 0x71e3704c0ed0>) -> 'Any'",
+    "signature": "(key: 'str', path: 'Any' = _UNSET, value: 'Any' = _UNSET) -> 'Any'",
     "summary": "Sets ``value`` at ``path`` in document ``key``. Returns a write result.",
     "example": [
       "_ = db.json.set(\"user\", \"$\", {\"name\": \"alice\", \"age\": 30})",
