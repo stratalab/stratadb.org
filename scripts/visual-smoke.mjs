@@ -387,7 +387,10 @@ async function assertHomepageSectionBreaks(page, viewport) {
     ],
     ['time-travel', 'time-travel', 'Read any past version of your data.', 'pinned', 'Time travel'],
     ['inference', 'native-inference', 'AI is built-in', 'pinned', 'Inference'],
-    ['hub', 'strata-hub', 'Clone the dataset your experiment needs.', 'static', 'Strata Hub'],
+    // Hub was the one content section declared static: it went past at scroll
+    // speed while 02-05 held still and let you read. Pinned now, so this
+    // asserts it stays docked like its peers rather than releasing.
+    ['hub', 'strata-hub', 'Clone the dataset your experiment needs.', 'pinned', 'Strata Hub'],
   ];
 
   for (const [sectionId, ruleId, title, mode, feature] of sections) {

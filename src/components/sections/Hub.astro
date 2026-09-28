@@ -36,16 +36,26 @@ const categories = ['rag', 'agents', 'benchmarks', 'events', 'reference'];
 const cloneFacts = ['schema', 'examples', 'branches', 'history'];
 ---
 
-<section id="hub" class="relative min-h-[100svh] scroll-mt-16 overflow-hidden" data-hub-section>
-  <SectionRule label="STRATA HUB" index="06" />
-  <div class="hub-backdrop pointer-events-none absolute inset-0" aria-hidden="true">
+<!-- Pinned while you scroll past it, like sections 02-05. Hub was the only
+     one of the content sections that was not: one screen tall, nothing
+     sticky, so it went by at scroll speed while every section before it
+     held still and let you read. -->
+<section id="hub" class="relative min-h-[100svh] scroll-mt-16 lg:h-[180svh]" data-hub-section>
+  <SectionRule label="STRATA HUB" index="06" sticky />
+  <!-- The clip lives here, not on the section. `overflow: hidden` on an
+       ancestor makes it the scroll container for any sticky descendant,
+       and a container that never scrolls gives the sticky child nowhere
+       to stick - the pin above was inert until this moved. The lights
+       still need clipping; this is an absolutely positioned layer, so
+       clipping it contains them without trapping the content. -->
+  <div class="hub-backdrop pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
     <div class="hub-light hub-light-ember"></div>
     <div class="hub-light hub-light-cool"></div>
     <div class="hub-grid-lines"></div>
   </div>
 
   <div
-    class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:grid-cols-[minmax(20rem,0.36fr)_minmax(0,1fr)] lg:items-start lg:gap-14 xl:gap-16"
+    class="relative mx-auto grid min-h-[calc(100svh-1.625rem)] w-full max-w-[88rem] overflow-x-clip px-6 py-20 max-[480px]:px-4 lg:sticky lg:top-[calc(4rem+1.625rem)] lg:h-[calc(100svh-5.625rem)] lg:min-h-0 lg:grid-cols-[minmax(20rem,0.36fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:py-0 xl:gap-16"
   >
     <div class="reveal max-w-[43rem] lg:max-w-none">
       <Eyebrow
