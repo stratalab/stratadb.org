@@ -1,49 +1,49 @@
 {
-  "version": "1.2.5",
-  "source": "GitHub release v1.2.5",
-  "fetched_at": "2026-09-25",
+  "version": "1.2.6",
+  "source": "GitHub release v1.2.6",
+  "fetched_at": "2026-09-29",
   "targets": [
     {
       "target": "aarch64-apple-darwin",
-      "asset": "strata-v1.2.5-aarch64-apple-darwin.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.5/strata-v1.2.5-aarch64-apple-darwin.tar.gz",
-      "size": 11510819,
-      "sha256": "4299f3b6fab9c6c611d9466e1f2a7da0f6cf0c9d3d46b90e09b60c58c6e22a2d"
+      "asset": "strata-v1.2.6-aarch64-apple-darwin.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.6/strata-v1.2.6-aarch64-apple-darwin.tar.gz",
+      "size": 11665429,
+      "sha256": "e84909bad7b30bfacd63702d4c58d34712297f90f2317b6bc522cbeec24cc0d2"
     },
     {
       "target": "aarch64-apple-darwin-local",
-      "asset": "strata-v1.2.5-aarch64-apple-darwin-local.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.5/strata-v1.2.5-aarch64-apple-darwin-local.tar.gz",
-      "size": 13574473,
-      "sha256": "98eef3d7ee93151651b2c111d216759cf687037e7b563e7dc774bce8350d6418"
+      "asset": "strata-v1.2.6-aarch64-apple-darwin-local.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.6/strata-v1.2.6-aarch64-apple-darwin-local.tar.gz",
+      "size": 13730414,
+      "sha256": "5d601f078ad40c441eb7058adba626e6f0fc645993009a62fc972405665c68ef"
     },
     {
       "target": "aarch64-unknown-linux-gnu",
-      "asset": "strata-v1.2.5-aarch64-unknown-linux-gnu.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.5/strata-v1.2.5-aarch64-unknown-linux-gnu.tar.gz",
-      "size": 12054900,
-      "sha256": "33dc84e3416fdc98a68d908047e3af2d08b812562229f2df826fbd5819dbb226"
+      "asset": "strata-v1.2.6-aarch64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.6/strata-v1.2.6-aarch64-unknown-linux-gnu.tar.gz",
+      "size": 12212858,
+      "sha256": "c88f92757ba932b2a407a8e9ea807ddc55fbf9634f441d0fd48556f6acb056d2"
     },
     {
       "target": "aarch64-unknown-linux-gnu-local",
-      "asset": "strata-v1.2.5-aarch64-unknown-linux-gnu-local.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.5/strata-v1.2.5-aarch64-unknown-linux-gnu-local.tar.gz",
-      "size": 13993157,
-      "sha256": "06ac008f697bed26571b529405d5ad1a9e042d2d3972d8317befde7d803bb52b"
+      "asset": "strata-v1.2.6-aarch64-unknown-linux-gnu-local.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.6/strata-v1.2.6-aarch64-unknown-linux-gnu-local.tar.gz",
+      "size": 14154518,
+      "sha256": "800c6d3605683e6d7e987179216e3e688c35e4e46fb431b2e1b6e7b7da6980e4"
     },
     {
       "target": "x86_64-unknown-linux-gnu",
-      "asset": "strata-v1.2.5-x86_64-unknown-linux-gnu.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.5/strata-v1.2.5-x86_64-unknown-linux-gnu.tar.gz",
-      "size": 13036567,
-      "sha256": "8b12013da0859ed44cb703f2728e600decf13a4d47ca26c57fc6cfc6dd6856cc"
+      "asset": "strata-v1.2.6-x86_64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.6/strata-v1.2.6-x86_64-unknown-linux-gnu.tar.gz",
+      "size": 13207632,
+      "sha256": "02caaa8292b71ee2d6d0de604d43ae1ed2d4071757800a935445bdd21e379053"
     },
     {
       "target": "x86_64-unknown-linux-gnu-local",
-      "asset": "strata-v1.2.5-x86_64-unknown-linux-gnu-local.tar.gz",
-      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.5/strata-v1.2.5-x86_64-unknown-linux-gnu-local.tar.gz",
-      "size": 15100274,
-      "sha256": "701f3ca4a8ced7fb5caf91081d271f14939c3834896dad50f0b150688dbdae50"
+      "asset": "strata-v1.2.6-x86_64-unknown-linux-gnu-local.tar.gz",
+      "url": "https://github.com/stratalab/strata-core/releases/download/v1.2.6/strata-v1.2.6-x86_64-unknown-linux-gnu-local.tar.gz",
+      "size": 15273583,
+      "sha256": "00c64eeea573fcbaa3bbbd44f618743d33ded5903aa4901b36f836cafcc5e526"
     }
   ]
 }

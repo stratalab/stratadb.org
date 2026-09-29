@@ -2,7 +2,7 @@
 title: 'Inspect database health'
 description: 'Five commands that answer different questions, and which one to reach for.'
 section: 'Guides'
-source: 'strata-core@v1.2.5'
+source: 'strata-core@v1.2.6'
 ---
 
 **Goal.** Find out whether a database is sound, and what it contains. About two
@@ -99,18 +99,49 @@ That is the stable contract.
 [Global options](/docs/reference/global-options) covers the formats, and
 `--raw` if you want tab-separated fields instead.
 
-## What none of them tell you
+## What it is costing you on disk
 
-There is no command that reports the size of a database, how much history it is
-retaining, or whether that history is growing faster than the live data. Those
-are filesystem questions today:
+`admin storage` reports the footprint: live tables, snapshots, timeline
+segments, the WAL, and the reclaim ledger. Durable databases only: a cache
+database has no disk to account for.
 
 ```console
-du -sh ./mydb
+strata ./mydb admin storage --audit
 ```
 
+```
+audit                              true
+live_table_objects                 0
+live_table_bytes                   0 B
+unreferenced_objects               0
+unreferenced_bytes                 0 B
+quarantined_objects                0
+quarantined_bytes                  0 B
+snapshot_objects                   1
+snapshot_bytes                     6.3 kB
+superseded_snapshots               0
+superseded_snapshot_bytes          0 B
+timeline_segment_objects           2
+timeline_segment_bytes             1.1 kB
+wal_retention_watermark            42
+wal_reclaimable_bytes              0 B
+wal_tail_bytes                     36 B
+total_bytes                        7.4 kB
+```
+
+Without `--audit` the command answers only what it already knows and prints
+`-` for the rest. The audit is what walks the store to stat unreferenced and
+quarantined objects, the superseded snapshot set, and the WAL's
+reclaimable-versus-tail split. Run the plain form for a quick total; run
+`--audit` when you want to know what the reclaim runners would actually be able
+to free.
+
+`du -sh ./mydb` still tells you what the directory weighs. What it cannot tell
+you is how much of that is live data and how much is history waiting to be
+reclaimed, which is the number you usually want.
+
 [Databases and storage](/docs/learn/databases-and-storage) has what history
-costs and why there is no way to prune it.
+costs.
 
 ## Failure modes
 

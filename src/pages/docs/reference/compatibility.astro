@@ -13,8 +13,12 @@
 // the docs said 1.2.2.
 //
 // The on-disk format facts are from the source rather than observation:
-// DATABASE_FORMAT_VERSION in crates/storage/src/format/mod.rs, and the refusal
-// arms in format/manifest.rs.
+// DATABASE_MANIFEST_FORMAT_VERSION in crates/storage/src/format/manifest.rs,
+// and the refusal arms in the same file. Read the manifest constant, not
+// DATABASE_FORMAT_VERSION in format/mod.rs: until 1.2.6 the manifest was
+// stamped with the latter and the two numbers were the same, so citing either
+// worked. 1.2.6 split them - mod.rs still says 1, the manifest now says 3 -
+// and this page went on claiming every 1.x wrote the same format.
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import release from '../../../data/release.json';
 import pythonSdk from '../../../data/python-sdk.json';
@@ -108,9 +112,25 @@ const clients = [
   <h2>Can this binary open this database?</h2>
 
   <p>
-    The on-disk format has its own version, currently <strong>1</strong>, and it is not the same
-    number as the binary. Every 1.x release so far reads and writes format 1, so upgrading the
-    binary does not migrate anything.
+    The on-disk format has its own version, and it is not the same number as the binary. The
+    database format is <strong>1</strong>. The manifest that describes it has its own version,
+    raised to <strong>3</strong> in 1.2.6.
+  </p>
+
+  <p>
+    <strong>1.2.6 upgrades the manifest the first time it opens a database for writing.</strong> It reads
+    both the old manifest and the new one, so your existing databases open without a migration step. But
+    it writes the new one, and 1.2.5 only accepts the old one, so once 1.2.6 has written to a database,
+    <strong>1.2.5 will not open it again</strong>. The upgrade is one-way and it happens on first
+    writable open, not on a command you run deliberately. A read-only open does not trigger it.
+  </p>
+
+  <p>
+    If you need to keep a database readable by 1.2.5, copy it before letting 1.2.6 write to it. A
+    1.2.5 binary meeting an upgraded database reports{' '}
+    <a href="/e/failed_precondition.engine.format_version">
+      <code>failed_precondition.engine.format_version</code></a
+    >, which is the same refusal any binary gives a format from the future.
   </p>
 
   <p>

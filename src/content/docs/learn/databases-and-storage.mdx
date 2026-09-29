@@ -2,7 +2,7 @@
 title: 'Databases and storage'
 description: 'What a Strata database is on disk: the directory, what each part of it does, what is safe to copy, and what history costs you.'
 section: 'Learn'
-source: 'strata-core@v1.2.5'
+source: 'strata-core@v1.2.6'
 ---
 
 A Strata database is a directory. Not a file with a directory beside it, and not
@@ -137,28 +137,48 @@ Every version of every value is retained. That is the point of the database, and
 it is not free.
 
 A key rewritten a thousand times keeps a thousand versions, all readable with
-`--as-of`, and the directory grows to match. Measured on a single small key:
+`--as-of`, and the directory grows to match. Measured on 1.2.6, rewriting a
+single small key, one process per write:
 
-| versions | on disk |
-| -------- | ------- |
-| 101      | 68 KB   |
-| 201      | 84 KB   |
-| 301      | 96 KB   |
-| 401      | 112 KB  |
+| versions | data  | on disk |
+| -------- | ----- | ------- |
+| 101      | 14 KB | 476 KB  |
+| 201      | 24 KB | 896 KB  |
+| 301      | 35 KB | 1.3 MB  |
+| 401      | 45 KB | 1.7 MB  |
 
-That is roughly 140 bytes per version for a short value, growing linearly. The
-write-ahead log and the snapshot count stayed at one file each throughout, so
-this is history accumulating rather than files proliferating.
+The two columns are different questions. **Data** is what the versions weigh,
+about 105 bytes each for a short value, and it is the number `admin storage`
+reports. **On disk** is what the filesystem hands to `du`, and for this
+workload it is roughly forty times larger.
 
-Two things follow. A workload that rewrites the same keys in a tight loop will
-grow faster than the size of its live data suggests, and there is **no CLI
-command to prune history**. There is no `vacuum`, no `compact`, no retention
-window you can set from the command line.
+The difference is one directory per commit under `timeline/`, nearly all of
+them empty. An empty directory still costs a block, so 400 commits cost about
+1.6 MB of filesystem overhead against 45 KB of actual history. This is
+[strata-core#3692](https://github.com/stratalab/strata-core/issues/3692) and it
+is not intended behaviour; check it before assuming your own numbers.
 
-If that matters for your workload, the ways to bound it today are to fork a
-branch and keep the short one, or to write a fresh database and copy forward
-what you need. Neither is a retention policy, and it is worth knowing that
-before you point a high-churn workload at a directory you expect to stay small.
+What 1.2.6 does reclaim, it reclaims by itself. A clean close drains the
+session's debt under a bounded budget (unreferenced table objects, quarantined
+objects and superseded snapshots), then checkpoints and truncates the
+write-ahead log it covered. Reopening finishes what a previous session left, including
+after a crash, and a database that goes quiet gets one reclaim pass per quiet
+period. You do not run anything to make this happen.
+
+What it does **not** reclaim is history. Every version is still kept, and there
+is **no CLI command to prune it**: no `vacuum`, no `compact`, no retention
+window. Reclamation is about debt: copies and logs the database no longer
+needs, not the versions you wrote.
+
+If bounding history matters for your workload, the ways to do it today are to
+fork a branch and keep the short one, or to write a fresh database and copy
+forward what you need. Neither is a retention policy, and it is worth knowing
+that before you point a high-churn workload at a directory you expect to stay
+small.
+
+`strata ./mydb admin storage --audit` breaks the footprint down by family and
+tells you what the reclaim runners could still free. See
+[Inspect database health](/docs/guides/operations/inspect-database-health).
 
 ## Where to look next
 

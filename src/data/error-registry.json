@@ -1,5 +1,5 @@
 {
-  "count": 241,
+  "count": 240,
   "errors": [
     {
       "class": "access_denied",
@@ -583,6 +583,16 @@
     },
     {
       "class": "failed_precondition",
+      "code": "failed_precondition.engine.format_version",
+      "commit_outcome": "not_applicable",
+      "hint": "Open the database with the Strata version that wrote it or a newer one; downgrades are not supported.",
+      "message": "The stored layout is incompatible with this runtime.",
+      "ref": "https://stratadb.org/e/failed_precondition.engine.format_version",
+      "retry_policy": "never",
+      "origin": "engine"
+    },
+    {
+      "class": "failed_precondition",
       "code": "failed_precondition.engine.graph_negative_weight",
       "commit_outcome": "not_started",
       "hint": "Use valid graph, node, edge, and binding identifiers and keep graph properties within limits.",
@@ -1157,16 +1167,6 @@
     },
     {
       "class": "invalid_argument",
-      "code": "invalid_argument.engine.event_metadata",
-      "commit_outcome": "not_started",
-      "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
-      "message": "The event request is invalid.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.event_metadata",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
       "code": "invalid_argument.engine.event_payload",
       "commit_outcome": "not_started",
       "hint": "Use a valid event type, payload, and metadata within the documented event limits.",
@@ -1602,16 +1602,6 @@
       "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
       "message": "The requested space operation cannot be completed.",
       "ref": "https://stratadb.org/e/invalid_argument.engine.space_delete_default",
-      "retry_policy": "never",
-      "origin": "engine"
-    },
-    {
-      "class": "invalid_argument",
-      "code": "invalid_argument.engine.space_delete_too_large",
-      "commit_outcome": "not_started",
-      "hint": "Use an existing non-reserved space, or delete/move contained data before deleting the space.",
-      "message": "The requested space operation cannot be completed.",
-      "ref": "https://stratadb.org/e/invalid_argument.engine.space_delete_too_large",
       "retry_policy": "never",
       "origin": "engine"
     },
