@@ -126,6 +126,14 @@ const clients = [
   </p>
 
   <p>
+    1.2.7 changes no format: it and 1.2.6 read each other's databases, and upgrading between them is
+    not a one-way step. What 1.2.7 does do on its first open of a 1.2.6 database is clean up storage
+    1.2.6 left behind (<a href="https://github.com/stratalab/strata-core/issues/3692"
+      >strata-core issue 3692</a
+    >), which changes the directory's size but not what it holds.
+  </p>
+
+  <p>
     If you need to keep a database readable by 1.2.5, copy it before letting 1.2.6 write to it. A
     1.2.5 binary meeting an upgraded database reports{' '}
     <a href="/e/failed_precondition.engine.format_version">

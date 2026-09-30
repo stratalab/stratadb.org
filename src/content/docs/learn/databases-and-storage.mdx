@@ -2,7 +2,7 @@
 title: 'Databases and storage'
 description: 'What a Strata database is on disk: the directory, what each part of it does, what is safe to copy, and what history costs you.'
 section: 'Learn'
-source: 'strata-core@v1.2.6'
+source: 'strata-core@v1.2.7'
 ---
 
 A Strata database is a directory. Not a file with a directory beside it, and not
@@ -137,28 +137,31 @@ Every version of every value is retained. That is the point of the database, and
 it is not free.
 
 A key rewritten a thousand times keeps a thousand versions, all readable with
-`--as-of`, and the directory grows to match. Measured on 1.2.6, rewriting a
+`--as-of`, and the directory grows to match. Measured on 1.2.7, rewriting a
 single small key, one process per write:
 
 | versions | data  | on disk |
 | -------- | ----- | ------- |
-| 101      | 14 KB | 476 KB  |
-| 201      | 24 KB | 896 KB  |
-| 301      | 35 KB | 1.3 MB  |
-| 401      | 45 KB | 1.7 MB  |
+| 101      | 14 KB | 76 KB   |
+| 201      | 24 KB | 88 KB   |
+| 301      | 35 KB | 96 KB   |
+| 401      | 45 KB | 108 KB  |
 
 The two columns are different questions. **Data** is what the versions weigh,
 about 105 bytes each for a short value, and it is the number `admin storage`
-reports. **On disk** is what the filesystem hands to `du`, and for this
-workload it is roughly forty times larger.
+reports. **On disk** is what the filesystem hands to `du`: the same history
+plus what the files holding it cost, which here is a flat overhead rather than
+something that grows with the history.
 
-The difference is one directory per commit under `timeline/`, nearly all of
-them empty. An empty directory still costs a block, so 400 commits cost about
-1.6 MB of filesystem overhead against 45 KB of actual history. This is
-[strata-core#3692](https://github.com/stratalab/strata-core/issues/3692) and it
-is not intended behaviour; check it before assuming your own numbers.
+Coming from 1.2.6, expect this to look very different. 1.2.6 left one directory
+per commit under `timeline/` and nearly all of them were empty, so the same 401
+versions took 1.7 MB instead of 108 KB
+([strata-core#3692](https://github.com/stratalab/strata-core/issues/3692),
+fixed in 1.2.7). A database written by 1.2.6 is cleaned up the first time 1.2.7
+opens it, with nothing to run and no migration step: in that measurement it
+went from 1.7 MB to 128 KB on the first open, with every version still there.
 
-What 1.2.6 does reclaim, it reclaims by itself. A clean close drains the
+What Strata does reclaim, it reclaims by itself. A clean close drains the
 session's debt under a bounded budget (unreferenced table objects, quarantined
 objects and superseded snapshots), then checkpoints and truncates the
 write-ahead log it covered. Reopening finishes what a previous session left, including
