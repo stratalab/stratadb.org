@@ -30,7 +30,7 @@ const doors = [
     key: 'playground',
     name: 'Playground',
     line: 'Runs in this tab',
-    body: 'A real Strata engine compiled to WebAssembly. Type a command, get an answer — no install, no server.',
+    body: 'A real Strata engine compiled to WebAssembly. Type a command, get an answer: no install, no server.',
     action: 'Open the playground',
     href: '/playground',
   },
@@ -109,7 +109,7 @@ const doors = [
             data-door-toggle
             aria-expanded={i === 0 ? 'true' : 'false'}
             aria-controls={`door-panel-${d.key}`}
-            aria-label={`${d.name} — ${d.line}`}
+            aria-label={`${d.name}: ${d.line}`}
           />
 
           <div class="door-foot">
