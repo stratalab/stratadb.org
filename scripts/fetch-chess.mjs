@@ -25,7 +25,7 @@ const ASSET = 'strata-chess-web.tar.gz';
 const REPO = 'https://github.com/stratalab/strata-apps';
 // Pinned, not "latest": the demo the site ships is one somebody ran, and a
 // floating tag would change what is deployed without a commit here.
-const TAG = 'strata-chess-v0.1.0';
+const TAG = 'strata-chess-v0.2.0';
 const FILES = [
   'index.html',
   'app.js',
