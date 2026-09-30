@@ -62,12 +62,12 @@ const doors = [
     runsOn: true,
   },
   {
-    key: 'hub',
-    name: 'Strata Hub',
-    line: 'Clone a dataset',
-    body: 'Prepared databases for retrieval, agents and benchmarks. One command clones one to disk.',
-    action: 'Browse Strata Hub',
-    href: '/hub',
+    key: 'chess',
+    name: 'Five positions',
+    line: 'Every line is kept',
+    body: 'Solve a position, or generate one. Play it wrong and rewind: the line you left keeps its moves.',
+    action: 'Open Five positions',
+    href: '/demos/chess/',
     runsOn: true,
   },
 ];
@@ -151,6 +151,8 @@ const doors = [
     --mini-ink: var(--color-ink-hi);
     --mini-dim: var(--color-ink-low);
     --mini-line: var(--color-line-hover);
+    --mini-wood: color-mix(in srgb, var(--color-terracotta-500) 26%, var(--color-panel));
+    --mini-wood-dark: color-mix(in srgb, var(--color-terracotta-800) 34%, var(--color-panel));
   }
 
   /* Flex, not a fr grid: the wide slot has to follow whichever door is open.
@@ -525,6 +527,8 @@ const doors = [
   let INK = '';
   let DIM = '';
   let LINE = '';
+  let WOOD = '';
+  let WOOD_DARK = '';
   let MONO = 'monospace';
 
   function readPalette(root: HTMLElement) {
@@ -537,6 +541,8 @@ const doors = [
       read('--mini-dim'),
       read('--mini-line'),
     ];
+    WOOD = read('--mini-wood');
+    WOOD_DARK = read('--mini-wood-dark');
     MONO = read('--font-mono') || 'monospace';
     // An empty value leaves canvas silently holding its previous colour, which
     // reads as a drawing bug rather than a missing token. Say so.
@@ -928,88 +934,75 @@ const doors = [
     };
   }
 
-  /* ── hub: a catalog that fills, then one dataset cloned at a time ── */
-  function hub(s: Surface): Mini {
-    const ROWS = [
-      'movielens-100k',
-      'stackoverflow',
-      'github-events',
-      'agent-memory',
-      'wikipedia-sm',
-    ];
-    const ARRIVE = 380;
-    const CLONE = 1900;
+  /* ── chess: one line, and the line it was not ─────────────────────── */
+  function chess(s: Surface): Mini {
     let clock = 0;
+    const SPAN = 5200;
+    /** Where the two lines part, as a fraction of the way across. */
+    const FORK = 0.4;
 
     return {
-      // The clock does not wrap. The first cut looped the whole animation, so
-      // once every cycle the door emptied to a single half-arrived row - which
-      // is the frame the hero happened to be caught in. The list arrives once
-      // and stays; only which dataset is being cloned moves.
       step: (dt) => {
-        clock += dt;
+        clock = (clock + dt) % SPAN;
       },
       draw: () => {
         const { ctx, w, h } = s;
         ctx.clearRect(0, 0, w, h);
-        const pad = clamp(w * 0.055, 9, 16);
-        const fs = clamp(h * 0.052, 7.5, 10.5);
-        const gap = clamp(h * 0.125, 13, 21);
-        const barH = gap * 0.62;
-        ctx.font = `${fs}px ${MONO}`;
-        ctx.textBaseline = 'middle';
+        const top = stage(h);
+        const pad = clamp(w * 0.05, 8, 20);
 
-        const settled = ROWS.length * ARRIVE + 500;
-        const cloning = clock > settled ? Math.floor((clock - settled) / CLONE) % ROWS.length : -1;
-        const done = cloning < 0 ? 0 : clamp(((clock - settled) % CLONE) / (CLONE * 0.7), 0, 1);
+        // A corner of a board on the left, then the moves running out of it
+        // across the whole frame. Centring the board instead left it a small
+        // patch of texture with the caption beside it, reading as neither.
+        const cell = clamp(top / 4.4, 9, 22);
+        const oy = top * 0.06;
+        for (let r = 0; r < 4; r++) {
+          for (let c = 0; c < 4; c++) {
+            ctx.fillStyle = (r + c) % 2 === 0 ? WOOD : WOOD_DARK;
+            ctx.fillRect(pad + c * cell, oy + r * cell, cell, cell);
+          }
+        }
 
-        ROWS.forEach((name, i) => {
-          const appear = clamp(clock / ARRIVE - i, 0, 1);
-          if (appear <= 0) return;
-          const ease = 1 - Math.pow(1 - appear, 3);
-          const y = pad + i * gap;
-          if (y + barH > stage(h)) return;
-          const x = pad - (1 - ease) * w * 0.3;
-          const chosen = i === cloning;
+        const x0 = pad + cell * 4 + pad * 0.6;
+        const span = w - pad - x0;
+        const y0 = oy + cell * 2;
+        const p = clamp(clock / (SPAN * 0.6), 0, 1);
 
-          // A track the width of the door, so the list reads as a catalog
-          // rather than a column of words in the corner.
-          const track = w - x - pad;
-          ctx.globalAlpha = ease * (chosen ? 0.55 : 0.28);
-          ctx.fillStyle = LINE;
+        const path = (upto: number, lift: number, colour: string, dashed: boolean) => {
+          if (upto <= 0) return;
+          ctx.strokeStyle = colour;
+          ctx.lineWidth = Math.max(1.6, w * 0.006);
+          ctx.lineCap = 'round';
+          ctx.setLineDash(dashed ? [4, 3] : []);
           ctx.beginPath();
-          ctx.roundRect(x, y, track, barH, barH * 0.3);
-          ctx.fill();
-
-          ctx.globalAlpha = ease * (chosen ? 1 : 0.8);
-          ctx.fillStyle = chosen ? EMBER : DIM;
-          ctx.beginPath();
-          ctx.roundRect(x, y, Math.max(2, barH * 0.22), barH, barH * 0.3);
-          ctx.fill();
-
-          ctx.fillStyle = chosen ? INK : DIM;
-          ctx.fillText(
-            clipText(ctx, name, track - barH * 1.2),
-            x + barH * 0.62,
-            y + barH / 2 + 0.5,
-          );
-        });
-
-        // strata clone, landing on disk.
-        if (cloning >= 0) {
-          const y = stage(h) + gap * 0.5;
-          ctx.lineWidth = 2;
-          ctx.strokeStyle = LINE;
-          ctx.beginPath();
-          ctx.moveTo(pad, y);
-          ctx.lineTo(w - pad, y);
+          for (let i = 0; i <= 48; i++) {
+            const t = (i / 48) * upto;
+            const bend = t <= FORK ? 0 : (t - FORK) / (1 - FORK);
+            const x = x0 + t * span;
+            const y = y0 - bend * lift * cell * 1.5;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
           ctx.stroke();
+          ctx.setLineDash([]);
+        };
 
-          ctx.strokeStyle = EMBER;
+        // The line you left stays drawn: dim, dashed, and still there.
+        if (p > FORK) path(p, -1, DIM, true);
+        path(p, 1, EMBER, false);
+
+        // A mark per move, brighter where the lines part.
+        for (let i = 0; i <= 6; i++) {
+          const t = i / 6;
+          if (t > p) break;
+          const fork = Math.abs(t - FORK) < 0.09;
+          const bend = t <= FORK ? 0 : (t - FORK) / (1 - FORK);
+          ctx.fillStyle = fork ? EMBER : INK;
+          ctx.globalAlpha = fork ? 1 : 0.5;
           ctx.beginPath();
-          ctx.moveTo(pad, y);
-          ctx.lineTo(pad + (w - pad * 2) * done, y);
-          ctx.stroke();
+          ctx.arc(x0 + t * span, y0 - bend * cell * 1.5, fork ? 3.2 : 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
         }
       },
     };
@@ -1023,7 +1016,7 @@ const doors = [
     colonies: 1200,
     ksp: 2950,
     paint: 2400,
-    hub: 3600,
+    chess: 1800,
   };
 
   const BUILDERS: Record<string, (s: Surface) => Mini> = {
@@ -1031,7 +1024,7 @@ const doors = [
     colonies,
     ksp,
     paint,
-    hub,
+    chess,
   };
 
   function boot() {

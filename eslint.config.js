@@ -16,6 +16,7 @@ export default tseslint.config(
       // Its app.js is linted in strata-apps, where it is source.
       'public/demos/ksp/**',
       'public/demos/paint/**',
+      'public/demos/chess/**',
       'src/content/docs/reference/**',
       'src/content-archive/**',
       'src/docs-ui-archive/**',

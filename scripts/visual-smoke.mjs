@@ -110,7 +110,7 @@ async function assertHomepageDoors(page, viewport) {
   // not a richness test: Colonies is two colours by design, and an earlier
   // "at least four colours" rule failed it for being exactly what it should be.
   // Measured floors across both viewports are 5 colours and 0.85% coverage.
-  for (const key of ['playground', 'colonies', 'ksp', 'paint', 'hub']) {
+  for (const key of ['playground', 'colonies', 'ksp', 'paint', 'chess']) {
     const { colours, coverage } = await paintedInk(page, key);
     if (colours < 2 || coverage < 0.0015) {
       throw new Error(

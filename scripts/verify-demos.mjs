@@ -48,12 +48,12 @@ const REQUIRED = [
       "key: 'colonies'",
       "key: 'ksp'",
       "key: 'paint'",
-      "key: 'hub'",
+      "key: 'chess'",
       "href: '/playground'",
       "href: '/demos/colonies/'",
       "href: '/demos/ksp/'",
       "href: '/demos/paint/'",
-      "href: '/hub'",
+      "href: '/demos/chess/'",
       // The mark for the engine inside. It is on the three things built on
       // Strata and deliberately not on the playground, which is the engine.
       'Runs on Strata',
