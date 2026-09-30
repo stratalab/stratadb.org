@@ -47,43 +47,148 @@ async function waitForServer(proc) {
   throw new Error(`preview did not become ready at ${BASE_URL}: ${lastError}`);
 }
 
-// The hero tiles run the real engine in the browser. This is the check that
-// the whole path still works: the wasm module loads, a session opens, and the
-// JSON script produces the value the engine actually computed. A canned
-// transcript would pass a text assertion, so this waits for a value that only
-// appears if the commands really ran, and confirms the version badge is the
-// engine reporting itself.
-async function assertHomepageLiveDemo(page, viewport) {
-  await page.locator('[data-demo="json"]').click();
+// The hero's four doors. Each one is a live miniature of the thing it opens -
+// Conway's Life really iterating, a trajectory really integrating - so a blank
+// canvas is the failure this catches: a throw in one builder leaves that door
+// an empty box and nothing else on the page would say so. Counting distinct
+// colours is the cheap proof that something was painted rather than cleared.
+//
+// (The five data-model tiles and the in-tab wasm console this replaces came out
+// 2026-09-28. That console was the page's only live engine, but it sat behind a
+// click and spoke the engine's vocabulary rather than the visitor's.)
+async function paintedInk(page, key) {
+  return page.locator(`[data-door-canvas="${key}"]`).evaluate((canvas) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx || !canvas.width || !canvas.height) return { colours: 0, coverage: 0 };
+    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // Every pixel, not every fourth: a 4px stride aliased against Colonies'
+    // 4px cells and sampled only the gaps between them, reporting a blank
+    // canvas for a grid that was painting perfectly.
+    const seen = new Set();
+    let inked = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] === 0) continue;
+      inked++;
+      seen.add(`${data[i]},${data[i + 1]},${data[i + 2]}`);
+    }
+    return { colours: seen.size, coverage: inked / (canvas.width * canvas.height) };
+  });
+}
 
-  await page
-    .waitForFunction(
-      () => {
-        const out = document.getElementById('hero-demo-out')?.textContent ?? '';
-        return /"engineer"/.test(out) && /"director"/.test(out);
-      },
-      undefined,
-      { timeout: 60_000 },
-    )
-    .catch(() => {
-      throw new Error(`${viewport.name} /: JSON hero tile did not run against the wasm engine`);
-    });
-
-  const badge = (await page.locator('[data-demo-status]').textContent()) ?? '';
-  if (!/^strata \d+\.\d+\.\d+$/.test(badge.trim())) {
-    throw new Error(
-      `${viewport.name} /: demo badge should carry the engine's own version, got "${badge.trim()}"`,
-    );
+async function assertHomepageDoors(page, viewport) {
+  const doors = page.locator('[data-doors] .door');
+  const count = await doors.count();
+  if (count !== 5) {
+    throw new Error(`${viewport.name} /: hero should offer five doors, found ${count}`);
   }
 
-  await page.locator('[data-demo="json"][aria-selected="true"]').waitFor({
+  // The strip walks itself, so which door is open depends on when we looked.
+  // What has to hold is that exactly one is, and that it moves on by itself -
+  // the hero shows all four without anyone clicking.
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  // The strip holds while the pointer is over it, and the pointer is wherever
+  // the last assertion left it. Park it in the corner or this waits out its
+  // whole timeout on a strip that is correctly refusing to move.
+  await page.mouse.move(4, 4);
+  const first = await page.locator('[data-doors] .door[data-open]').getAttribute('data-door');
+  if (!first) {
+    throw new Error(`${viewport.name} /: no door is open`);
+  }
+  await page
+    .waitForFunction(
+      (was) =>
+        document.querySelector('[data-doors] .door[data-open]')?.getAttribute('data-door') !== was,
+      first,
+      { timeout: 20_000 },
+    )
+    .catch(() => {
+      throw new Error(`${viewport.name} /: the strip never advanced past ${first} on its own`);
+    });
+
+  // What this catches is a blank canvas - a throw in one builder leaves that
+  // door an empty box and nothing else on the page says so. It is deliberately
+  // not a richness test: Colonies is two colours by design, and an earlier
+  // "at least four colours" rule failed it for being exactly what it should be.
+  // Measured floors across both viewports are 5 colours and 0.85% coverage.
+  for (const key of ['playground', 'colonies', 'ksp', 'paint', 'hub']) {
+    const { colours, coverage } = await paintedInk(page, key);
+    if (colours < 2 || coverage < 0.0015) {
+      throw new Error(
+        `${viewport.name} /: the ${key} miniature is not painting (${colours} colour(s), ${(coverage * 100).toFixed(2)}% of its canvas)`,
+      );
+    }
+  }
+
+  // Opening a door widens it and narrows the rest to spines, so the strip is
+  // meant to hold its height. If it grows, the sections below it jump.
+  const strip = page.locator('[data-doors]');
+  const heightBefore = (await strip.boundingBox())?.height ?? 0;
+
+  await page.locator('.door[data-door="ksp"] [data-door-toggle]').click();
+  await page.locator('.door[data-door="ksp"][data-open]').waitFor({
     state: 'visible',
     timeout: 5_000,
   });
 
+  // A click is someone choosing, so the strip has to stop walking. If it kept
+  // its timer the reader would be moved off the door they just picked.
+  await page.waitForTimeout(6_500);
+  const held = await page.locator('[data-doors] .door[data-open]').getAttribute('data-door');
+  if (held !== 'ksp') {
+    throw new Error(
+      `${viewport.name} /: the strip kept rotating after a click; open door is "${held}", not ksp`,
+    );
+  }
+
+  const open = await page.locator('[data-doors] .door[data-open]').count();
+  if (open !== 1) {
+    throw new Error(`${viewport.name} /: exactly one door should be open at a time, found ${open}`);
+  }
+
+  const expanded = await page
+    .locator('.door[data-door="ksp"] [data-door-toggle]')
+    .getAttribute('aria-expanded');
+  if (expanded !== 'true') {
+    throw new Error(
+      `${viewport.name} /: the open door should report aria-expanded="true", got "${expanded}"`,
+    );
+  }
+
+  // The card has to explain the thing before it offers to open it.
+  const panel = page.locator('.door[data-door="ksp"] [data-door-panel]');
+  const body = (await panel.innerText()).trim();
+  if (body.length < 40) {
+    throw new Error(
+      `${viewport.name} /: the open door's card should explain what it is, got "${body}"`,
+    );
+  }
+  const href = await panel.locator('a').getAttribute('href');
+  if (href !== '/demos/ksp/') {
+    throw new Error(`${viewport.name} /: the KSP door should lead to /demos/ksp/, got "${href}"`);
+  }
+
+  // The Strata mark goes on the things built on the engine, not on the engine
+  // itself: the playground IS Strata compiled to wasm, so it does not wear a
+  // sticker for what it is.
+  const marked = await page.locator('[data-doors] .door-mark').count();
+  if (marked !== 4) {
+    throw new Error(`${viewport.name} /: expected the Strata mark on four doors, found ${marked}`);
+  }
+  if ((await page.locator('.door[data-door="playground"] .door-mark').count()) !== 0) {
+    throw new Error(`${viewport.name} /: the playground should not carry "Runs on Strata"`);
+  }
+
+  if (viewport.width >= 900) {
+    const heightAfter = (await strip.boundingBox())?.height ?? 0;
+    if (Math.abs(heightAfter - heightBefore) > 8) {
+      throw new Error(
+        `${viewport.name} /: opening a door moved the strip's height ${heightBefore}px -> ${heightAfter}px; the row should hold its height`,
+      );
+    }
+  }
+
   // The primitives section is still on the page and still has to hold up; the
-  // hero tiles just no longer scroll to it, so go there the way the reader
-  // does rather than as a side effect of pressing a tile.
+  // hero no longer scrolls to it, so go there the way the reader does.
   await scrollSectionToNav(page, 'primitives');
   await assertSectionRuleDocked(page, viewport, 'primitives');
   await assertSectionTitleVisible(
@@ -590,7 +695,7 @@ async function assertPage(browser, route, viewport) {
     if (route.path === '/') {
       await assertHomepageSectionBreaks(page, viewport);
       await assertHomepageInferenceWorkbench(page, viewport);
-      await assertHomepageLiveDemo(page, viewport);
+      await assertHomepageDoors(page, viewport);
       await assertHomepageHubSection(page, viewport);
     }
     if (consoleErrors.length > 0 || pageErrors.length > 0) {

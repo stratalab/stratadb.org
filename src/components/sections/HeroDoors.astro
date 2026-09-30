@@ -1,0 +1,1163 @@
+---
+// The four doors.
+//
+// Every one of these is a real database doing real work in a browser, which is
+// the claim the whole page is making. So a door is not an icon and not a
+// screenshot: it is the thing itself, small and running. Colonies really steps
+// Life, KSP really integrates an arc that forks, Hub really streams rows in,
+// the playground really types a command and answers it.
+//
+// They sit as one strip rather than four cards. Opening one widens it and the
+// rest hold their spines, so the strip keeps a fixed height and the hero never
+// jumps - and it reads as one instrument with a selected channel rather than a
+// grid of identical rounded rectangles.
+//
+// The miniature fills its door edge to edge and the words sit over it behind a
+// scrim. The first cut letterboxed each canvas above a caption, which left the
+// closed doors mostly empty and made four live things look like four thumbnails.
+//
+// `runsOn` puts the Strata mark on a door, the way a laptop carries the sticker
+// for the chip inside it. It is not on the playground: that door IS the engine,
+// compiled to wasm and running in the tab, so marking it "Runs on Strata" would
+// be the chip wearing its own sticker.
+//
+// `key` addresses the app and route behind a door, not the words on it, so
+// colonies/ksp stay as keys while the labels read "Game of Life" and "Orbital
+// Rocketry" (renamed 2026-09-28, Ani). The destinations still introduce
+// themselves by their old names - see the note in verify-demos.
+const doors = [
+  {
+    key: 'playground',
+    name: 'Playground',
+    line: 'Runs in this tab',
+    body: 'A real Strata engine compiled to WebAssembly. Type a command, get an answer — no install, no server.',
+    action: 'Open the playground',
+    href: '/playground',
+  },
+  {
+    key: 'colonies',
+    name: 'Game of Life',
+    line: 'Fork a future',
+    body: 'Cells live out their generations. Rewind to any one, fork it, and let both futures run side by side.',
+    action: 'Play the Game of Life',
+    href: '/demos/colonies/',
+    runsOn: true,
+  },
+  {
+    key: 'ksp',
+    name: 'Orbital Rocketry',
+    line: 'Build, fly, revert',
+    body: 'Build a rocket and fly it. Every attempt is kept, so reverting to the pad costs nothing.',
+    action: 'Open Orbital Rocketry',
+    href: '/demos/ksp/',
+    runsOn: true,
+  },
+  {
+    key: 'paint',
+    name: 'Paint',
+    line: 'Undo has no bottom',
+    body: 'Every stroke is a commit. Drag the timeline back and the strokes come off; draw there and it forks.',
+    action: 'Open Paint',
+    href: '/demos/paint/',
+    runsOn: true,
+  },
+  {
+    key: 'hub',
+    name: 'Strata Hub',
+    line: 'Clone a dataset',
+    body: 'Prepared databases for retrieval, agents and benchmarks. One command clones one to disk.',
+    action: 'Browse Strata Hub',
+    href: '/hub',
+    runsOn: true,
+  },
+];
+---
+
+<div class="doors" data-doors>
+  <ul class="doors-strip">
+    {
+      doors.map((d, i) => (
+        <li class="door" data-door={d.key} data-open={i === 0 ? '' : undefined}>
+          <canvas class="door-canvas" data-door-canvas={d.key} aria-hidden="true" />
+          <span class="door-scrim" aria-hidden="true" />
+          <span class="door-tick" aria-hidden="true" />
+
+          {d.runsOn && (
+            <span class="door-mark">
+              <svg
+                class="door-mark-glyph"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 12l10 5 10-5" />
+                <path d="M2 17l10 5 10-5" />
+              </svg>
+              <span class="door-mark-text">Runs on Strata</span>
+            </span>
+          )}
+
+          {/* The face covers the whole door, so the miniature is the target.
+              The caption sits above it and is spoken through aria-label rather
+              than nested inside, which keeps the CTA clickable. */}
+          <button
+            class="door-face"
+            type="button"
+            data-door-toggle
+            aria-expanded={i === 0 ? 'true' : 'false'}
+            aria-controls={`door-panel-${d.key}`}
+            aria-label={`${d.name} — ${d.line}`}
+          />
+
+          <div class="door-foot">
+            <span class="door-caption">
+              <span class="door-name">{d.name}</span>
+              <span class="door-line">{d.line}</span>
+            </span>
+            <div class="door-panel" id={`door-panel-${d.key}`} data-door-panel>
+              {/* One child, so the 0fr row collapses the body and the CTA
+                  together. Two children put the CTA in an implicit auto row
+                  that kept its height on every closed door. */}
+              <div class="door-panel-inner">
+                <p class="door-body">{d.body}</p>
+                <a class="door-go" href={d.href}>
+                  {d.action}
+                </a>
+              </div>
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .doors {
+    margin: 2.25rem auto 0;
+    width: 100%;
+    max-width: 66rem;
+
+    /* The palette the miniatures paint with. Canvas cannot read a stylesheet,
+       so the colours are published here as custom properties and resolved once
+       in script. Keeping them token-derived is what lets the light theme reach
+       the canvases; the cool is mixed down towards the panel because terminal
+       cyan at full strength outshouts the ember accent at this size. */
+    --mini-ember: var(--color-terracotta-500);
+    --mini-cool: color-mix(in srgb, var(--color-term-cyan) 52%, var(--color-panel));
+    --mini-ink: var(--color-ink-hi);
+    --mini-dim: var(--color-ink-low);
+    --mini-line: var(--color-line-hover);
+  }
+
+  /* Flex, not a fr grid: the wide slot has to follow whichever door is open.
+     With fixed columns the first one kept the width and an opened Hub had its
+     card crushed into a spine. */
+  .doors-strip {
+    display: flex;
+    gap: 0.5rem;
+    height: clamp(13.5rem, 24vh, 16.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .door {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-frame);
+    background: var(--color-panel);
+    transition:
+      flex-grow 380ms cubic-bezier(0.22, 0.8, 0.3, 1),
+      border-color 220ms ease;
+  }
+
+  .door[data-open] {
+    flex-grow: 2.7;
+    border-color: color-mix(in srgb, var(--color-terracotta-400) 55%, var(--color-line));
+  }
+
+  .door:not([data-open]):hover {
+    border-color: var(--color-line-hover);
+  }
+
+  .door-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* A closed door shows its miniature dimmed: alive, but not competing with
+     the one you opened. */
+  .door:not([data-open]) .door-canvas {
+    opacity: 0.5;
+    filter: saturate(0.6);
+  }
+
+  .door:not([data-open]):hover .door-canvas {
+    opacity: 0.8;
+    filter: saturate(0.85);
+  }
+
+  .door-canvas {
+    transition:
+      opacity 240ms ease,
+      filter 240ms ease;
+  }
+
+  /* The words need a floor to stand on; the miniature keeps its top half. */
+  .door-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      var(--color-panel) 0%,
+      color-mix(in srgb, var(--color-panel) 92%, transparent) 38%,
+      transparent 72%
+    );
+  }
+
+  /* An open door carries body copy, so it needs a firmer floor than a spine
+     that only has to hold a name. Colonies runs cells edge to edge and they
+     were legible straight through the paragraph without this. */
+  .door[data-open] .door-scrim {
+    background: linear-gradient(
+      to top,
+      var(--color-panel) 0%,
+      var(--color-panel) 46%,
+      color-mix(in srgb, var(--color-panel) 72%, transparent) 64%,
+      transparent 88%
+    );
+  }
+
+  /* The mark a thing carries for the engine inside it. A spine has no room
+     for the words, so it keeps the glyph alone and the words come back when
+     the door opens. */
+  .door-mark {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.65rem;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.45rem 0.2rem 0.35rem;
+    border: 1px solid color-mix(in srgb, var(--color-terracotta-500) 28%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-panel) 72%, transparent);
+    backdrop-filter: blur(6px);
+    color: var(--color-terracotta-400);
+    pointer-events: none;
+  }
+
+  .door-mark-glyph {
+    width: 0.8rem;
+    height: 0.8rem;
+    flex: none;
+  }
+
+  .door-mark-text {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--color-terracotta-300) 88%, var(--color-ink-hi));
+  }
+
+  .door:not([data-open]) .door-mark-text {
+    display: none;
+  }
+
+  .door:not([data-open]) .door-mark {
+    padding: 0.25rem;
+    opacity: 0.7;
+  }
+
+  /* How long the open door has left before the strip moves on. It is the only
+     reason the eye is asked to accept the change, so it disappears the moment
+     someone takes control by clicking. */
+  .door-tick {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 2px;
+    transform: scaleX(var(--auto, 0));
+    transform-origin: left;
+    background: var(--color-terracotta-400);
+    opacity: 0;
+  }
+
+  .door[data-open] .door-tick {
+    opacity: 0.5;
+  }
+
+  .doors[data-auto='off'] .door-tick,
+  .doors[data-auto='paused'] .door-tick {
+    opacity: 0;
+  }
+
+  .door-face {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .door-face:focus-visible {
+    outline: 2px solid var(--color-terracotta-400);
+    outline-offset: -3px;
+  }
+
+  .door-foot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 0 0.9rem 0.9rem;
+    pointer-events: none;
+  }
+
+  .door-caption {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .door-name {
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--color-ink-mid);
+    white-space: nowrap;
+    transition: color 220ms ease;
+  }
+
+  .door[data-open] .door-name {
+    color: var(--color-ink-hi);
+  }
+
+  .door-line {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--color-ink-low);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* A spine has no room for the strapline; it drops rather than truncating to
+     an ellipsis that says nothing. */
+  .door:not([data-open]) .door-line {
+    display: none;
+  }
+
+  /* A spine is a fifth of the strip now that Paint is in it, and "Orbital
+     Rocketry" at full size was being clipped by the door's own overflow. */
+  .door:not([data-open]) .door-name {
+    font-size: 0.82rem;
+  }
+
+  .door-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 320ms cubic-bezier(0.22, 0.8, 0.3, 1);
+  }
+
+  .door[data-open] .door-panel {
+    grid-template-rows: 1fr;
+  }
+
+  .door-panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .door-body {
+    margin: 0;
+    padding-top: 0.3rem;
+    max-width: 44ch;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--color-ink-mid);
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+
+  .door[data-open] .door-body {
+    opacity: 1;
+    transition-delay: 110ms;
+  }
+
+  .door-go {
+    display: inline-flex;
+    align-items: center;
+    align-self: start;
+    justify-self: start;
+    margin-top: 0.7rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: var(--color-terracotta-400);
+    color: var(--color-void);
+    font-size: 0.79rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 180ms ease,
+      filter 160ms ease;
+  }
+
+  .door[data-open] .door-go {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 150ms;
+  }
+
+  .door-go:hover {
+    filter: brightness(1.08);
+  }
+
+  .door-go:focus-visible {
+    outline: 2px solid var(--color-ink-hi);
+    outline-offset: 2px;
+  }
+
+  /* Under a phone the strip becomes a stack: closed doors keep a living band
+     behind their name, the open one opens to full height. A four-column
+     accordion at 390px is neither a strip nor a stack. */
+  @media (max-width: 900px) {
+    .doors {
+      margin-top: 1.75rem;
+    }
+
+    .doors-strip {
+      flex-direction: column;
+      height: auto;
+      gap: 0.4rem;
+    }
+
+    .door {
+      flex: none;
+      height: 2.9rem;
+      transition: height 320ms cubic-bezier(0.22, 0.8, 0.3, 1);
+    }
+
+    .door[data-open] {
+      height: 15rem;
+    }
+
+    .door:not([data-open]) .door-canvas {
+      opacity: 0.3;
+    }
+
+    .door:not([data-open]) .door-line {
+      display: block;
+    }
+
+    .door-foot {
+      padding: 0 0.85rem 0.8rem;
+    }
+
+    /* A 2.9rem bar has no corner to put a sticker in without it sitting on
+       the name, so the mark rides with the open door only. */
+    .door:not([data-open]) .door-mark {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .door,
+    .door-panel,
+    .door-body,
+    .door-go,
+    .door-canvas,
+    .door-name {
+      transition: none;
+    }
+
+    /* Nothing advances on its own under reduced motion, so there is no
+       countdown to show. */
+    .door-tick {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  /* Four miniatures, one clock.
+   *
+   * Each door draws the thing it opens, actually running: Colonies steps real
+   * Life, KSP integrates an arc that forks, Hub streams rows, the playground
+   * types a command and answers it. Only the open door advances; the others
+   * hold a frame, which is also what everyone gets under reduced motion.
+   *
+   * Every builder draws to the door's real pixel box rather than a fixed
+   * 240x132, because a door is a spine one moment and half the strip the next.
+   */
+  type Surface = {
+    ctx: CanvasRenderingContext2D;
+    w: number;
+    h: number;
+  };
+  type Mini = { step: (dt: number) => void; draw: () => void };
+
+  // Resolved from the --mini-* properties on .doors before any miniature is
+  // built. Held in bindings the builders close over rather than threaded
+  // through every signature, because every builder wants all of them.
+  let EMBER = '';
+  let COOL = '';
+  let INK = '';
+  let DIM = '';
+  let LINE = '';
+  let MONO = 'monospace';
+
+  function readPalette(root: HTMLElement) {
+    const style = getComputedStyle(root);
+    const read = (name: string) => style.getPropertyValue(name).trim();
+    [EMBER, COOL, INK, DIM, LINE] = [
+      read('--mini-ember'),
+      read('--mini-cool'),
+      read('--mini-ink'),
+      read('--mini-dim'),
+      read('--mini-line'),
+    ];
+    MONO = read('--font-mono') || 'monospace';
+    // An empty value leaves canvas silently holding its previous colour, which
+    // reads as a drawing bug rather than a missing token. Say so.
+    if (!EMBER || !COOL || !INK || !DIM || !LINE) {
+      console.error('hero doors: the --mini-* palette did not resolve; check tokens.css');
+    }
+  }
+
+  /** Keeps the backing store matched to the CSS box. Returns true on a change. */
+  function measure(canvas: HTMLCanvasElement, s: Surface) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(canvas.clientWidth));
+    const h = Math.max(1, Math.round(canvas.clientHeight));
+    if (w === s.w && h === s.h) return false;
+    s.w = w;
+    s.h = h;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    s.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return true;
+  }
+
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+  /* The scrim fades the bottom of a door to solid panel so the caption can be
+     read, which means anything that has to be seen whole - KSP's horizon, the
+     last row of Hub's list - belongs above this line. Colonies ignores it on
+     purpose: a grid running on under the words reads as texture, not as a
+     clipped diagram. */
+  const stage = (h: number) => h * 0.5;
+
+  /** A fixed-seed generator, so a reload shows the same colony rather than a
+      lucky one that lives and an unlucky one that dies in four steps. */
+  function rng(seed: number) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function clipText(ctx: CanvasRenderingContext2D, text: string, max: number) {
+    if (ctx.measureText(text).width <= max) return text;
+    let cut = text;
+    while (cut.length > 1 && ctx.measureText(cut + '…').width > max) cut = cut.slice(0, -1);
+    return cut + '…';
+  }
+
+  /* ── playground: a command typed, and the engine's answer ────────── */
+  function playground(s: Surface): Mini {
+    const SCRIPT = [
+      { cmd: 'kv put greeting hello', out: 'OK' },
+      { cmd: 'kv get greeting', out: 'hello' },
+      { cmd: 'branch fork default try', out: 'forked try from default' },
+    ];
+    let clock = 0;
+
+    return {
+      step: (dt) => {
+        clock += dt;
+        // One pass, then a beat on the finished session before it starts over.
+        const span = SCRIPT.reduce((t, l) => t + l.cmd.length * 55 + 900, 0) + 1800;
+        if (clock > span) clock = 0;
+      },
+      draw: () => {
+        const { ctx, w, h } = s;
+        ctx.clearRect(0, 0, w, h);
+        const fs = clamp(h * 0.062, 8.5, 12.5);
+        const pad = clamp(w * 0.055, 10, 18);
+        const lh = fs * 1.75;
+        ctx.font = `${fs}px ${MONO}`;
+        ctx.textBaseline = 'alphabetic';
+
+        let t = clock;
+        let y = pad + fs;
+        for (const line of SCRIPT) {
+          if (t <= 0) break;
+          const typing = Math.min(line.cmd.length, Math.floor(t / 55));
+          const typed = line.cmd.slice(0, typing);
+
+          ctx.fillStyle = EMBER;
+          const prompt = 'strata ›';
+          ctx.fillText(prompt, pad, y);
+          const px = pad + ctx.measureText(prompt).width + fs * 0.5;
+
+          ctx.fillStyle = INK;
+          ctx.fillText(clipText(ctx, typed, w - px - pad), px, y);
+
+          // The caret rides the end of whatever has been typed so far.
+          if (typing < line.cmd.length && Math.floor(t / 420) % 2 === 0) {
+            ctx.fillStyle = INK;
+            ctx.fillRect(px + ctx.measureText(typed).width + 1, y - fs * 0.85, fs * 0.5, fs);
+          }
+          t -= line.cmd.length * 55;
+          y += lh;
+
+          if (t > 400) {
+            ctx.fillStyle = COOL;
+            ctx.fillText(clipText(ctx, line.out, w - pad * 2), pad, y);
+            y += lh * 0.95;
+          }
+          t -= 900;
+          if (y > h - pad) break;
+        }
+      },
+    };
+  }
+
+  /* ── colonies: real Life, and the right of the grid is a fork ────── */
+  function colonies(s: Surface): Mini {
+    let cols = 0;
+    let rows = 0;
+    let cell = 0;
+    let grid: Uint8Array = new Uint8Array(0);
+    let clock = 0;
+
+    // Advanced on every reseed, so a restarted colony is a new one rather than
+    // the same opening played again.
+    let generation = 0x5eed;
+    let recent: number[] = [];
+
+    const seed = () => {
+      const rand = rng((generation = (generation * 48271) >>> 0));
+      grid = new Uint8Array(cols * rows);
+      for (let i = 0; i < grid.length; i++) grid[i] = rand() < 0.38 ? 1 : 0;
+      recent = [];
+    };
+
+    const shape = () => {
+      // Small cells, because the scrim keeps only the top of the door and a
+      // 13px cell put seven rows in that band - a handful of blocks reading as
+      // an empty grid rather than a colony.
+      const next = clamp(Math.round(s.w / 40), 4, 9);
+      if (next === cell && cols > 0) return;
+      cell = next;
+      cols = Math.max(4, Math.floor(s.w / cell) + 1);
+      rows = Math.max(4, Math.floor(s.h / cell) + 1);
+      seed();
+    };
+
+    const stepLife = () => {
+      const next = new Uint8Array(grid.length);
+      let alive = 0;
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          let n = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (!dx && !dy) continue;
+              // A torus, so gliders come back rather than draining off an edge.
+              const nx = (x + dx + cols) % cols;
+              const ny = (y + dy + rows) % rows;
+              n += grid[ny * cols + nx];
+            }
+          }
+          const on = grid[y * cols + x];
+          const live = on ? n === 2 || n === 3 : n === 3;
+          next[y * cols + x] = live ? 1 : 0;
+          alive += live ? 1 : 0;
+        }
+      }
+      grid = next;
+
+      // Life settles: after a few hundred generations what is left is still
+      // lifes and short oscillators, which is correct and looks dead. A door
+      // that has been open a while was thinning to a handful of blocks, so a
+      // colony that has stopped going anywhere starts over.
+      recent.push(alive);
+      if (recent.length > 12) recent.shift();
+      const settled =
+        recent.length === 12 && Math.max(...recent) - Math.min(...recent) <= grid.length * 0.004;
+      if (alive < grid.length * 0.08 || settled) seed();
+    };
+
+    return {
+      step: (dt) => {
+        shape();
+        clock += dt;
+        while (clock > 230) {
+          clock -= 230;
+          stepLife();
+        }
+      },
+      draw: () => {
+        const { ctx, w, h } = s;
+        shape();
+        ctx.clearRect(0, 0, w, h);
+        // The right third is the fork: the same colony, running on a branch.
+        const split = Math.max(2, Math.round(cols * 0.36));
+        const fx = (cols - split) * cell;
+        const r = Math.max(1, cell * 0.32);
+
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            if (!grid[y * cols + x]) continue;
+            const forked = x >= cols - split;
+            ctx.fillStyle = forked ? EMBER : COOL;
+            ctx.globalAlpha = forked ? 0.92 : 0.7;
+            ctx.beginPath();
+            ctx.roundRect(x * cell + 1, y * cell + 1, cell - 2, cell - 2, r);
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.strokeStyle = EMBER;
+        ctx.globalAlpha = 0.55;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(fx, 0);
+        ctx.lineTo(fx, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      },
+    };
+  }
+
+  /* ── ksp: one ascent, and the attempt that reverted and flew higher ── */
+  function ksp(s: Surface): Mini {
+    let clock = 0;
+    const SPAN = 3600;
+
+    // A lobbed ascent across the frame. `lift` raises the apex, which is the
+    // only difference between the flight that was kept and the one reverted to.
+    const path = (t: number, lift: number, w: number, h: number, ground: number) => ({
+      x: t * w,
+      y: ground - Math.sin(Math.min(1, t) * Math.PI) * (h * lift),
+    });
+
+    const trace = (
+      ctx: CanvasRenderingContext2D,
+      to: number,
+      from: number,
+      lift: number,
+      w: number,
+      h: number,
+      ground: number,
+    ) => {
+      ctx.beginPath();
+      for (let i = 0; i <= 64; i++) {
+        const t = from + ((to - from) * i) / 64;
+        const p = path(t, lift, w, h, ground);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    };
+
+    return {
+      step: (dt) => {
+        clock = (clock + dt) % (SPAN + 1100);
+      },
+      draw: () => {
+        const { ctx, w, h } = s;
+        ctx.clearRect(0, 0, w, h);
+        const ground = stage(h);
+        const p = clamp(clock / SPAN, 0, 1);
+        const FORK = 0.4;
+
+        // The horizon it launches from.
+        ctx.strokeStyle = LINE;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, ground);
+        ctx.lineTo(w, ground);
+        ctx.stroke();
+
+        ctx.lineWidth = Math.max(1.4, w * 0.005);
+        ctx.lineCap = 'round';
+
+        // The first attempt, kept in full because reverting never deletes it.
+        ctx.strokeStyle = COOL;
+        ctx.globalAlpha = 0.75;
+        trace(ctx, Math.min(p, 1), 0, 0.42, w, ground, ground);
+        ctx.globalAlpha = 1;
+
+        // The revert: back to the pad at the fork, and up on more thrust.
+        if (p > FORK) {
+          ctx.strokeStyle = EMBER;
+          ctx.setLineDash([5, 4]);
+          trace(ctx, p, FORK, 0.74, w, ground, ground);
+          ctx.setLineDash([]);
+
+          const head = path(p, 0.74, w, ground, ground);
+          ctx.fillStyle = EMBER;
+          ctx.beginPath();
+          ctx.arc(head.x, head.y, Math.max(2.2, w * 0.008), 0, Math.PI * 2);
+          ctx.fill();
+
+          // The mark on the timeline you reverted to.
+          const f = path(FORK, 0.42, w, ground, ground);
+          ctx.strokeStyle = EMBER;
+          ctx.globalAlpha = 0.8;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, Math.max(2.8, w * 0.011), 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        } else {
+          const head = path(p, 0.42, w, ground, ground);
+          ctx.fillStyle = COOL;
+          ctx.beginPath();
+          ctx.arc(head.x, head.y, Math.max(2.2, w * 0.008), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      },
+    };
+  }
+
+  /* ── paint: strokes laid down, then taken back off ──────────────── */
+  function paint(s: Surface): Mini {
+    // Four strokes, drawn as a fraction of the frame so they read at a spine's
+    // width and at half the strip.
+    // Spread across the band and kept shallow: at a tenth of the frame apart
+    // with a deep wave they tangled into one thick smear.
+    const STROKES = [
+      { at: 0.1, amp: 0.045, colour: () => INK },
+      { at: 0.24, amp: -0.04, colour: () => EMBER },
+      { at: 0.38, amp: 0.04, colour: () => COOL },
+      { at: 0.52, amp: -0.035, colour: () => DIM },
+    ];
+    const DRAW = 620;
+    const HOLD = 700;
+    const REWIND = 1500;
+    const span = STROKES.length * DRAW + HOLD + REWIND;
+    let clock = 0;
+
+    return {
+      step: (dt) => {
+        clock = (clock + dt) % span;
+      },
+      draw: () => {
+        const { ctx, w, h } = s;
+        ctx.clearRect(0, 0, w, h);
+        const top = stage(h);
+        const pad = clamp(w * 0.07, 10, 26);
+
+        // Laying down, then the scrubber pulling them back off in reverse.
+        const laid = clock / DRAW;
+        const rewinding = clock > STROKES.length * DRAW + HOLD;
+        const back = rewinding ? 1 - (clock - STROKES.length * DRAW - HOLD) / REWIND : 1;
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        STROKES.forEach((stroke, i) => {
+          const drawn = rewinding ? clamp(back * STROKES.length - i, 0, 1) : clamp(laid - i, 0, 1);
+          if (drawn <= 0) return;
+          ctx.strokeStyle = stroke.colour();
+          ctx.lineWidth = Math.max(1.8, h * 0.026);
+          ctx.globalAlpha = 0.92;
+          ctx.beginPath();
+          for (let k = 0; k <= 40; k++) {
+            const t = (k / 40) * drawn;
+            const x = pad + (w - pad * 2) * t;
+            const y = top * stroke.at + Math.sin(t * Math.PI * 1.6) * top * stroke.amp;
+            if (k === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        });
+        ctx.globalAlpha = 1;
+
+        // The timeline the strokes are being pulled back along. It sits under
+        // the strokes and clear of the caption: at the band's edge it was drawn
+        // straight through the door's own title, and below `top` the scrim is
+        // already solid panel and nobody could see it at all.
+        const y = top * 0.66;
+        const head = rewinding ? back : clamp(laid / STROKES.length, 0, 1);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = LINE;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(w - pad, y);
+        ctx.stroke();
+
+        ctx.strokeStyle = EMBER;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(pad + (w - pad * 2) * head, y);
+        ctx.stroke();
+
+        ctx.fillStyle = EMBER;
+        ctx.beginPath();
+        ctx.arc(pad + (w - pad * 2) * head, y, Math.max(2.5, w * 0.009), 0, Math.PI * 2);
+        ctx.fill();
+      },
+    };
+  }
+
+  /* ── hub: a catalog that fills, then one dataset cloned at a time ── */
+  function hub(s: Surface): Mini {
+    const ROWS = [
+      'movielens-100k',
+      'stackoverflow',
+      'github-events',
+      'agent-memory',
+      'wikipedia-sm',
+    ];
+    const ARRIVE = 380;
+    const CLONE = 1900;
+    let clock = 0;
+
+    return {
+      // The clock does not wrap. The first cut looped the whole animation, so
+      // once every cycle the door emptied to a single half-arrived row - which
+      // is the frame the hero happened to be caught in. The list arrives once
+      // and stays; only which dataset is being cloned moves.
+      step: (dt) => {
+        clock += dt;
+      },
+      draw: () => {
+        const { ctx, w, h } = s;
+        ctx.clearRect(0, 0, w, h);
+        const pad = clamp(w * 0.055, 9, 16);
+        const fs = clamp(h * 0.052, 7.5, 10.5);
+        const gap = clamp(h * 0.125, 13, 21);
+        const barH = gap * 0.62;
+        ctx.font = `${fs}px ${MONO}`;
+        ctx.textBaseline = 'middle';
+
+        const settled = ROWS.length * ARRIVE + 500;
+        const cloning = clock > settled ? Math.floor((clock - settled) / CLONE) % ROWS.length : -1;
+        const done = cloning < 0 ? 0 : clamp(((clock - settled) % CLONE) / (CLONE * 0.7), 0, 1);
+
+        ROWS.forEach((name, i) => {
+          const appear = clamp(clock / ARRIVE - i, 0, 1);
+          if (appear <= 0) return;
+          const ease = 1 - Math.pow(1 - appear, 3);
+          const y = pad + i * gap;
+          if (y + barH > stage(h)) return;
+          const x = pad - (1 - ease) * w * 0.3;
+          const chosen = i === cloning;
+
+          // A track the width of the door, so the list reads as a catalog
+          // rather than a column of words in the corner.
+          const track = w - x - pad;
+          ctx.globalAlpha = ease * (chosen ? 0.55 : 0.28);
+          ctx.fillStyle = LINE;
+          ctx.beginPath();
+          ctx.roundRect(x, y, track, barH, barH * 0.3);
+          ctx.fill();
+
+          ctx.globalAlpha = ease * (chosen ? 1 : 0.8);
+          ctx.fillStyle = chosen ? EMBER : DIM;
+          ctx.beginPath();
+          ctx.roundRect(x, y, Math.max(2, barH * 0.22), barH, barH * 0.3);
+          ctx.fill();
+
+          ctx.fillStyle = chosen ? INK : DIM;
+          ctx.fillText(
+            clipText(ctx, name, track - barH * 1.2),
+            x + barH * 0.62,
+            y + barH / 2 + 0.5,
+          );
+        });
+
+        // strata clone, landing on disk.
+        if (cloning >= 0) {
+          const y = stage(h) + gap * 0.5;
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = LINE;
+          ctx.beginPath();
+          ctx.moveTo(pad, y);
+          ctx.lineTo(w - pad, y);
+          ctx.stroke();
+
+          ctx.strokeStyle = EMBER;
+          ctx.beginPath();
+          ctx.moveTo(pad, y);
+          ctx.lineTo(pad + (w - pad * 2) * done, y);
+          ctx.stroke();
+        }
+      },
+    };
+  }
+
+  /* A closed door holds one frame, so that frame has to be the one that says
+     what the thing is: KSP at 960ms was a stub of an arc below the fork, which
+     read as an empty box. Each is wound to the moment it explains itself. */
+  const POSTER: Record<string, number> = {
+    playground: 2600,
+    colonies: 1200,
+    ksp: 2950,
+    paint: 2400,
+    hub: 3600,
+  };
+
+  const BUILDERS: Record<string, (s: Surface) => Mini> = {
+    playground,
+    colonies,
+    ksp,
+    paint,
+    hub,
+  };
+
+  function boot() {
+    const root = document.querySelector<HTMLElement>('[data-doors]');
+    if (!root) return;
+    readPalette(root);
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    type Panel = { canvas: HTMLCanvasElement; surface: Surface; mini: Mini };
+    const panels = new Map<string, Panel>();
+
+    for (const canvas of root.querySelectorAll<HTMLCanvasElement>('[data-door-canvas]')) {
+      const key = canvas.dataset.doorCanvas!;
+      const build = BUILDERS[key];
+      const ctx = canvas.getContext('2d');
+      if (!build || !ctx) continue;
+      const surface: Surface = { ctx, w: 0, h: 0 };
+      measure(canvas, surface);
+      const mini = build(surface);
+      // Wind each one forward to its poster frame so a closed door shows a
+      // living moment rather than an empty box, then let only the open one
+      // keep moving.
+      for (let t = 0; t < (POSTER[key] ?? 960); t += 16) mini.step(16);
+      mini.draw();
+      panels.set(key, { canvas, surface, mini });
+    }
+
+    const all = Array.from(root.querySelectorAll<HTMLElement>('.door'));
+    const openKey = () => root.querySelector<HTMLElement>('.door[data-open]')?.dataset.door ?? null;
+
+    const openDoor = (door: HTMLElement) => {
+      if (door.hasAttribute('data-open')) return;
+      for (const other of all) {
+        other.removeAttribute('data-open');
+        other.querySelector('[data-door-toggle]')?.setAttribute('aria-expanded', 'false');
+      }
+      door.setAttribute('data-open', '');
+      door.querySelector('[data-door-toggle]')?.setAttribute('aria-expanded', 'true');
+      panels.get(door.dataset.door ?? '')?.mini.draw();
+    };
+
+    /* The strip walks itself, so all four get seen without anyone clicking.
+     *
+     * It gives up the moment someone takes control, rather than fighting them
+     * for the selection: a carousel that keeps moving under a reader is the
+     * reason carousels are disliked. It also holds while the pointer is over
+     * the strip, while focus is inside it, while the hero is off screen, and
+     * it never starts at all under reduced motion. */
+    const AUTO_MS = 5200;
+    let elapsed = 0;
+    let held = false;
+    let onScreen = true;
+    let stopped = reduced;
+
+    const setAutoState = () => {
+      root.dataset.auto = stopped ? 'off' : held || !onScreen ? 'paused' : 'on';
+    };
+
+    const hold = (on: boolean) => {
+      held = on;
+      setAutoState();
+    };
+    root.addEventListener('pointerenter', () => hold(true));
+    root.addEventListener('pointerleave', () => hold(false));
+    root.addEventListener('focusin', () => hold(true));
+    root.addEventListener('focusout', () => hold(false));
+
+    const advance = () => {
+      const at = all.findIndex((d) => d.hasAttribute('data-open'));
+      openDoor(all[(Math.max(0, at) + 1) % all.length]);
+    };
+
+    let last = performance.now();
+    setAutoState();
+    const frame = (now: number) => {
+      const dt = Math.min(64, now - last);
+      last = now;
+
+      if (!stopped && onScreen && !held) {
+        elapsed += dt;
+        if (elapsed >= AUTO_MS) {
+          elapsed = 0;
+          advance();
+        }
+        root.style.setProperty('--auto', String(elapsed / AUTO_MS));
+      }
+
+      // A door is a spine one moment and half the strip the next, so the
+      // backing store is checked every frame; a resized one is redrawn even
+      // when it is not the door advancing.
+      for (const panel of panels.values()) {
+        if (measure(panel.canvas, panel.surface)) panel.mini.draw();
+      }
+
+      if (onScreen && !reduced) {
+        const key = openKey();
+        const panel = key ? panels.get(key) : null;
+        if (panel) {
+          panel.mini.step(dt);
+          panel.mini.draw();
+        }
+      }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+
+    // Off-screen the hero keeps no clock running.
+    new IntersectionObserver(
+      (entries) => {
+        onScreen = entries.some((e) => e.isIntersecting);
+        setAutoState();
+      },
+      { threshold: 0 },
+    ).observe(root);
+
+    root.addEventListener('click', (event) => {
+      const toggle = (event.target as HTMLElement).closest<HTMLElement>('[data-door-toggle]');
+      if (!toggle) return;
+      // A click is someone choosing. The strip stops walking for good.
+      stopped = true;
+      root.style.setProperty('--auto', '0');
+      setAutoState();
+      const door = toggle.closest<HTMLElement>('.door');
+      if (door) openDoor(door);
+    });
+  }
+
+  boot();
+</script>

@@ -24,25 +24,40 @@ const REQUIRED = [
       'data-install-mode',
       "jumpToSection('install')",
       'strata:install-mode-request',
-      // The hero tiles run the real engine. Each of the five must still carry
-      // a script, the panel they write into must exist, and the wasm bundle
-      // must still be loaded from the path fetch-wasm.mjs stages it to. If any
-      // of these drifts the tiles go quiet with nothing to say so.
-      'data-demo',
-      'data-script',
-      'hero-demo-out',
-      '/playground/pkg/strata_wasm.js',
-      'executeCli',
-      // The prompt shares the tiles' session, which is the point: a reader can
-      // carry on from wherever a script left the database.
-      'data-demo-input',
-      'data-demo-form',
-      'href="/playground"',
-      "key: 'kv'",
-      "key: 'event'",
-      "key: 'json'",
-      "key: 'vector'",
-      "key: 'graph'",
+      // The hero's set-piece is HeroDoors, not a console. The five data-model
+      // tiles and the in-tab wasm terminal came out 2026-09-28 (Ani): the
+      // terminal was the page's only live proof but it sat behind a click and
+      // spoke the engine's vocabulary. The doors each open something a visitor
+      // can actually use, so the proof moved to the four destinations.
+      '<HeroDoors />',
+    ],
+  },
+  {
+    // Each door is a live miniature of the thing it opens, so two things must
+    // hold: the door exists, and its href still points at a real destination.
+    // The canvas ids are what the script animates - lose one and that door
+    // goes dark with nothing to say so.
+    file: 'src/components/sections/HeroDoors.astro',
+    strings: [
+      'data-doors',
+      'data-door-toggle',
+      'data-door-panel',
+      'data-door-canvas',
+      'aria-expanded',
+      "key: 'playground'",
+      "key: 'colonies'",
+      "key: 'ksp'",
+      "key: 'paint'",
+      "key: 'hub'",
+      "href: '/playground'",
+      "href: '/demos/colonies/'",
+      "href: '/demos/ksp/'",
+      "href: '/demos/paint/'",
+      "href: '/hub'",
+      // The mark for the engine inside. It is on the three things built on
+      // Strata and deliberately not on the playground, which is the engine.
+      'Runs on Strata',
+      'runsOn: true',
     ],
   },
   {
